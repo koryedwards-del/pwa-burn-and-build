@@ -273,51 +273,232 @@ button {
 }
 
 .meal-body {
-  padding: 0 18px 16px;
+  padding: 12px 14px 16px;
   border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.category-block {
-  margin-top: 14px;
+.meal-card.meal-complete {
+  border-left-color: var(--green);
 }
 
-.category-block .cat-title {
-  font-size: 11px;
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meal-check {
+  color: var(--green);
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+}
+
+.meal-progress {
+  font-size: 11px;
   color: var(--muted);
-  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.cat-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0d0d0d;
+}
+
+.cat-section.has-logged {
+  border-color: rgba(232, 114, 42, 0.35);
+}
+
+.cat-section.fats-section {
+  border-color: rgba(232, 114, 42, 0.25);
+}
+
+.cat-header {
+  width: 100%;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.cat-header-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cyan);
+  flex: 1;
+}
+
+.cat-header-servings {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.cat-chevron {
+  font-size: 10px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+.cat-header-logged {
+  font-size: 13px;
+  color: var(--flame);
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+.cat-header-hint {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.fat-pts-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--flame);
+}
+
+.cat-body {
+  padding: 0 12px 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.cat-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 10px 0 8px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.cat-tabs button {
+  flex: 1;
+  padding: 7px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.cat-tabs button.active {
+  background: rgba(94, 196, 232, 0.2);
+  color: var(--text);
+}
+
+.food-search {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #000;
+  font-size: 14px;
   margin-bottom: 6px;
 }
 
-.category-block .servings {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--green);
-  margin-bottom: 8px;
+.food-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
 }
 
-.category-block select {
+.top-picks-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--flame);
+  margin: 6px 0 4px;
+}
+
+.food-divider {
+  height: 1px;
+  background: rgba(232, 114, 42, 0.2);
+  margin: 6px 0;
+}
+
+.food-list {
+  max-height: 220px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.food-row {
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: #0a0a0a;
-  font-size: 14px;
-}
-
-.category-block .picked {
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--text);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 8px;
+  padding: 9px 4px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
 }
 
-.category-block .picked button {
-  color: #ff6464;
+.food-row:last-child {
+  border-bottom: none;
+}
+
+.food-row-plus {
+  width: 22px;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+}
+
+.food-row.logged .food-row-plus {
+  color: var(--flame);
+}
+
+.food-row-name {
+  flex: 1;
+  font-size: 14px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.food-row.logged .food-row-name {
+  color: var(--flame);
+}
+
+.food-row-label {
   font-size: 12px;
+  color: var(--muted);
+  flex-shrink: 0;
+  max-width: 45%;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.food-empty {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 12px 4px;
+  text-align: center;
+}
+
+.none-btn,
+.remove-fat-btn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 4px;
+  font-size: 13px;
+  color: #ff6464;
+}
+
+.remove-fat-btn {
+  color: rgba(232, 114, 42, 0.85);
 }
 
 .home-footer {

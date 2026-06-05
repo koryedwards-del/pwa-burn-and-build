@@ -4,8 +4,12 @@ const store = {
   profile: null,
   entries: [],
   foods: [],
+  pickCounts: {},
   screen: 'loading',
   expandedMeal: null,
+  expandedSections: {},
+  sectionTabs: {},
+  foodSearch: {},
 };
 
 const INTENSITY_OPTS = [
@@ -22,12 +26,18 @@ function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function sectionKey(slotLabel, sectionId) {
+  return `${slotLabel}|${sectionId}`;
+}
+
 function load() {
   try {
     const p = localStorage.getItem('hardkor_profile');
     if (p) store.profile = JSON.parse(p);
     const e = localStorage.getItem('hardkor_entries');
     if (e) store.entries = JSON.parse(e);
+    const c = localStorage.getItem('hardkor_pick_counts');
+    if (c) store.pickCounts = JSON.parse(c);
   } catch (err) {
     console.error(err);
   }
@@ -39,6 +49,15 @@ function saveProfile() {
 
 function saveEntries() {
   localStorage.setItem('hardkor_entries', JSON.stringify(store.entries));
+}
+
+function savePickCounts() {
+  localStorage.setItem('hardkor_pick_counts', JSON.stringify(store.pickCounts));
+}
+
+function bumpPickCount(foodName) {
+  store.pickCounts[foodName] = (store.pickCounts[foodName] || 0) + 1;
+  savePickCounts();
 }
 
 function fmtServings(n) {
@@ -56,6 +75,13 @@ function scaledLabel(food, servings) {
 
 function foodsForCategories(cats) {
   return store.foods.filter((f) => cats.includes(f.category));
+}
+
+function topPicks(foods, limit = 5) {
+  return foods
+    .filter((f) => (store.pickCounts[f.name] || 0) > 0)
+    .sort((a, b) => (store.pickCounts[b.name] || 0) - (store.pickCounts[a.name] || 0))
+    .slice(0, limit);
 }
 
 function todayEntries() {
@@ -81,7 +107,7 @@ function fatPointsConsumed() {
     .reduce((s, e) => s + (e.fatPoints || 1), 0);
 }
 
-function logFood(slotLabel, category, food, servings) {
+function logFood(slotLabel, category, food, servings, { collapseSection } = {}) {
   const key = todayKey();
   if (category !== 'Fats') {
     store.entries = store.entries.filter(
@@ -94,11 +120,15 @@ function logFood(slotLabel, category, food, servings) {
     mealSlotLabel: slotLabel,
     category,
     foodName: food.name,
-    servingLabel: scaledLabel(food, servings),
+    servingLabel: category === 'Fats' ? food.servingDescription : scaledLabel(food, servings),
     fatPoints: category === 'Fats' ? 1 : 0,
     loggedAt: Date.now(),
   });
+  bumpPickCount(food.name);
   saveEntries();
+  if (collapseSection) {
+    store.expandedSections[collapseSection] = false;
+  }
   render();
 }
 
@@ -106,6 +136,27 @@ function removeEntry(id) {
   store.entries = store.entries.filter((e) => e.id !== id);
   saveEntries();
   render();
+}
+
+function removeCategoryEntry(slotLabel, category) {
+  const key = todayKey();
+  store.entries = store.entries.filter(
+    (e) => !(e.date === key && e.mealSlotLabel === slotLabel && e.category === category)
+  );
+  saveEntries();
+  render();
+}
+
+function removeOneFat(slotLabel, foodName) {
+  const key = todayKey();
+  const idx = store.entries.findIndex(
+    (e) => e.date === key && e.mealSlotLabel === slotLabel && e.category === 'Fats' && e.foodName === foodName
+  );
+  if (idx >= 0) {
+    store.entries.splice(idx, 1);
+    saveEntries();
+    render();
+  }
 }
 
 function entryFor(slotLabel, category) {
@@ -116,24 +167,236 @@ function entriesFor(slotLabel, category) {
   return todayEntries().filter((e) => e.mealSlotLabel === slotLabel && e.category === category);
 }
 
-function renderFoodSelect(slotLabel, category, servings, foodCats, label) {
+function isSectionOpen(slotLabel, sectionId) {
+  return !!store.expandedSections[sectionKey(slotLabel, sectionId)];
+}
+
+function filterFoods(foods, searchKey) {
+  const q = (store.foodSearch[searchKey] || '').trim().toLowerCase();
+  if (!q) return foods;
+  return foods.filter((f) => f.name.toLowerCase().includes(q));
+}
+
+function renderFoodRows(slotLabel, category, servings, foods, loggedName, sk) {
+  const picks = topPicks(foods);
+  const pickNames = new Set(picks.map((f) => f.name));
+  const rest = foods.filter((f) => !pickNames.has(f.name));
+  const filteredPicks = filterFoods(picks, sk);
+  const filteredRest = filterFoods(rest, sk);
+
+  const row = (food) => {
+    const logged = food.name === loggedName;
+    const label = category === 'Fats' ? food.servingDescription : scaledLabel(food, servings || 1);
+    return `
+      <button type="button" class="food-row ${logged ? 'logged' : ''}"
+        data-log-slot="${slotLabel}" data-log-category="${category}" data-log-servings="${servings || 1}"
+        data-log-food="${encodeURIComponent(food.name)}" data-collapse="${sk}">
+        <span class="food-row-plus">${logged ? '✓' : '+'}</span>
+        <span class="food-row-name">${food.name}</span>
+        <span class="food-row-label">${label}</span>
+      </button>`;
+  };
+
+  let html = '';
+  if (filteredPicks.length) {
+    html += `<div class="top-picks-label">★ Your Top Picks</div>`;
+    html += filteredPicks.map(row).join('');
+    if (filteredRest.length) html += `<div class="food-divider"></div>`;
+  }
+  html += filteredRest.map(row).join('');
+  if (!filteredPicks.length && !filteredRest.length) {
+    html += `<div class="food-empty">No foods match your search</div>`;
+  }
+  return html;
+}
+
+function renderCategorySection(slotLabel, sectionId, title, category, servings, foodCats) {
+  const sk = sectionKey(slotLabel, sectionId);
+  const open = isSectionOpen(slotLabel, sectionId);
+  const logged = entryFor(slotLabel, category);
   const foods = foodsForCategories(foodCats).sort((a, b) => a.name.localeCompare(b.name));
-  const picked = category === 'Fats' ? entriesFor(slotLabel, category) : [entryFor(slotLabel, category)].filter(Boolean);
 
   return `
-    <div class="category-block">
-      <div class="cat-title">${label}</div>
-      ${servings > 0 ? `<div class="servings">${fmtServings(servings)} servings</div>` : ''}
-      <select data-pick="${slotLabel}|${category}|${servings}">
-        <option value="">Select food…</option>
-        ${foods.map((f) => `<option value="${f.name}">${f.name} — ${scaledLabel(f, servings || 1)}</option>`).join('')}
-      </select>
-      ${picked.map((e) => `
-        <div class="picked">
-          <span>${e.foodName} · ${e.servingLabel}</span>
-          <button type="button" data-remove="${e.id}">Remove</button>
-        </div>`).join('')}
+    <div class="cat-section ${logged ? 'has-logged' : ''}">
+      <button type="button" class="cat-header" data-toggle-section="${sk}">
+        <div class="cat-header-main">
+          <span class="cat-header-title">${title}</span>
+          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
+          <span class="cat-chevron">${open ? '▲' : '▼'}</span>
+        </div>
+        ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
+      </button>
+      ${open ? `
+      <div class="cat-body">
+        ${logged ? `
+          <button type="button" class="none-btn" data-clear-slot="${slotLabel}" data-clear-category="${category}" data-collapse="${sk}">None — clear selection</button>
+          <div class="food-divider"></div>` : ''}
+        <input type="search" class="food-search" placeholder="Search foods…" data-search="${sk}" value="${store.foodSearch[sk] || ''}" />
+        <div class="food-hint">Tap a food to log it</div>
+        <div class="food-list">${renderFoodRows(slotLabel, category, servings, foods, logged?.foodName, sk)}</div>
+      </div>` : ''}
     </div>`;
+}
+
+function renderProteinSection(slotLabel, servings) {
+  const sectionId = 'Protein';
+  const sk = sectionKey(slotLabel, sectionId);
+  const open = isSectionOpen(slotLabel, sectionId);
+  const tab = store.sectionTabs[sk] || 'protein';
+  const logged = entryFor(slotLabel, 'Protein');
+  const proteins = foodsForCategories(['protein']).sort((a, b) => a.name.localeCompare(b.name));
+  const dairy = foodsForCategories(['dairy']).sort((a, b) => a.name.localeCompare(b.name));
+  const activeFoods = tab === 'protein' ? proteins : dairy;
+
+  return `
+    <div class="cat-section ${logged ? 'has-logged' : ''}">
+      <button type="button" class="cat-header" data-toggle-section="${sk}">
+        <div class="cat-header-main">
+          <span class="cat-header-title">Protein</span>
+          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
+          <span class="cat-chevron">${open ? '▲' : '▼'}</span>
+        </div>
+        ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
+      </button>
+      ${open ? `
+      <div class="cat-body">
+        ${logged ? `
+          <button type="button" class="none-btn" data-clear-slot="${slotLabel}" data-clear-category="Protein" data-collapse="${sk}">None — clear selection</button>
+          <div class="food-divider"></div>` : ''}
+        <div class="cat-tabs">
+          <button type="button" class="${tab === 'protein' ? 'active' : ''}" data-tab-key="${sk}" data-tab-val="protein">Protein</button>
+          <button type="button" class="${tab === 'dairy' ? 'active' : ''}" data-tab-key="${sk}" data-tab-val="dairy">Dairy</button>
+        </div>
+        <input type="search" class="food-search" placeholder="Search ${tab === 'protein' ? 'proteins' : 'dairy'}…" data-search="${sk}" value="${store.foodSearch[sk] || ''}" />
+        <div class="food-hint">Tap a food to log it</div>
+        <div class="food-list">${renderFoodRows(slotLabel, 'Protein', servings, activeFoods, logged?.foodName, sk)}</div>
+      </div>` : ''}
+    </div>`;
+}
+
+function renderGrainSection(slotLabel, servings) {
+  const sectionId = 'Grains';
+  const sk = sectionKey(slotLabel, sectionId);
+  const open = isSectionOpen(slotLabel, sectionId);
+  const tab = store.sectionTabs[sk] || 'starch';
+  const logged = entryFor(slotLabel, 'Grains / Starches');
+  const starches = foodsForCategories(['starch']).sort((a, b) => a.name.localeCompare(b.name));
+  const grains = foodsForCategories(['grain']).sort((a, b) => a.name.localeCompare(b.name));
+  const activeFoods = tab === 'starch' ? starches : grains;
+
+  return `
+    <div class="cat-section ${logged ? 'has-logged' : ''}">
+      <button type="button" class="cat-header" data-toggle-section="${sk}">
+        <div class="cat-header-main">
+          <span class="cat-header-title">Grains / Starches</span>
+          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
+          <span class="cat-chevron">${open ? '▲' : '▼'}</span>
+        </div>
+        ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
+      </button>
+      ${open ? `
+      <div class="cat-body">
+        ${logged ? `
+          <button type="button" class="none-btn" data-clear-slot="${slotLabel}" data-clear-category="Grains / Starches" data-collapse="${sk}">None — clear selection</button>
+          <div class="food-divider"></div>` : ''}
+        <div class="cat-tabs">
+          <button type="button" class="${tab === 'starch' ? 'active' : ''}" data-tab-key="${sk}" data-tab-val="starch">Starches</button>
+          <button type="button" class="${tab === 'grain' ? 'active' : ''}" data-tab-key="${sk}" data-tab-val="grain">Grains</button>
+        </div>
+        <input type="search" class="food-search" placeholder="Search ${tab === 'starch' ? 'starches' : 'grains'}…" data-search="${sk}" value="${store.foodSearch[sk] || ''}" />
+        <div class="food-hint">Tap a food to log it</div>
+        <div class="food-list">${renderFoodRows(slotLabel, 'Grains / Starches', servings, activeFoods, logged?.foodName, sk)}</div>
+      </div>` : ''}
+    </div>`;
+}
+
+function groupedFatEntries(slotLabel) {
+  const entries = entriesFor(slotLabel, 'Fats');
+  const map = {};
+  for (const e of entries) {
+    if (map[e.foodName]) map[e.foodName].count += 1;
+    else map[e.foodName] = { serving: e.servingLabel, count: 1 };
+  }
+  return Object.entries(map)
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function renderExtraFatsSection(slotLabel) {
+  const sectionId = 'Fats';
+  const sk = sectionKey(slotLabel, sectionId);
+  const open = isSectionOpen(slotLabel, sectionId);
+  const grouped = groupedFatEntries(slotLabel);
+  const totalPts = grouped.reduce((s, g) => s + g.count, 0);
+  const foods = foodsForCategories(['fat']).sort((a, b) => a.name.localeCompare(b.name));
+
+  return `
+    <div class="cat-section fats-section ${grouped.length ? 'has-logged' : ''}">
+      <button type="button" class="cat-header" data-toggle-section="${sk}">
+        <div class="cat-header-main">
+          <span class="cat-header-title">Extra fats</span>
+          ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} pts</span>` : ''}
+          <span class="cat-chevron">${open ? '▲' : '▼'}</span>
+        </div>
+        ${grouped.length
+          ? grouped.map((g) => `<div class="cat-header-logged">${g.name} · ${g.serving}${g.count > 1 ? ` ×${g.count}` : ''}</div>`).join('')
+          : `<div class="cat-header-hint">slows your fat loss</div>`}
+      </button>
+      ${open ? `
+      <div class="cat-body">
+        ${grouped.map((g) => `
+          <button type="button" class="remove-fat-btn" data-remove-fat-slot="${slotLabel}" data-remove-fat-name="${encodeURIComponent(g.name)}">
+            − Remove one ${g.name}${g.count > 1 ? ` (×${g.count})` : ''}
+          </button>`).join('')}
+        ${grouped.length ? `<div class="food-divider"></div>` : ''}
+        <input type="search" class="food-search" placeholder="Search fats…" data-search="${sk}" value="${store.foodSearch[sk] || ''}" />
+        <div class="food-hint">Tap to add a fat point</div>
+        <div class="food-list">${renderFatRows(slotLabel, foods, grouped, sk)}</div>
+      </div>` : ''}
+    </div>`;
+}
+
+function renderFatRows(slotLabel, foods, grouped, sk) {
+  const counts = Object.fromEntries(grouped.map((g) => [g.name, g.count]));
+  const picks = topPicks(foods);
+  const pickNames = new Set(picks.map((f) => f.name));
+  const rest = foods.filter((f) => !pickNames.has(f.name));
+  const filteredPicks = filterFoods(picks, sk);
+  const filteredRest = filterFoods(rest, sk);
+
+  const row = (food) => {
+    const count = counts[food.name] || 0;
+    return `
+      <button type="button" class="food-row ${count ? 'logged' : ''}"
+        data-log-slot="${slotLabel}" data-log-category="Fats" data-log-servings="1"
+        data-log-food="${encodeURIComponent(food.name)}">
+        <span class="food-row-plus">${count ? `×${count}` : '+'}</span>
+        <span class="food-row-name">${food.name}</span>
+        <span class="food-row-label">${food.servingDescription}</span>
+      </button>`;
+  };
+
+  let html = '';
+  if (filteredPicks.length) {
+    html += `<div class="top-picks-label">★ Your Top Picks</div>`;
+    html += filteredPicks.map(row).join('');
+    if (filteredRest.length) html += `<div class="food-divider"></div>`;
+  }
+  html += filteredRest.map(row).join('');
+  if (!filteredPicks.length && !filteredRest.length) {
+    html += `<div class="food-empty">No foods match your search</div>`;
+  }
+  return html;
+}
+
+function mealProgress(slot) {
+  const required = [];
+  if (slot.proteinServings > 0) required.push('Protein');
+  if (slot.grainStarchServings > 0) required.push('Grains / Starches');
+  if (slot.vegetableServings > 0) required.push('Vegetables');
+  if (slot.fruitServings > 0) required.push('Fruits');
+  const logged = required.filter((cat) => entryFor(slot.label, cat));
+  return { required: required.length, logged: logged.length };
 }
 
 function renderOnboarding() {
@@ -245,15 +508,21 @@ function renderPlan() {
 
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
+        const progress = mealProgress(slot);
+        const complete = progress.required > 0 && progress.logged === progress.required;
         const logged = todayEntries()
           .filter((e) => e.mealSlotLabel === slot.label)
           .map((e) => `${e.foodName} ${e.servingLabel}`);
         return `
-        <div class="meal-card">
+        <div class="meal-card ${complete ? 'meal-complete' : ''}">
           <button type="button" class="meal-card-header" data-toggle="${slot.label}">
             <div>
-              <div class="label">${slot.label}</div>
+              <div class="label-row">
+                <span class="label">${slot.label}</span>
+                ${complete ? '<span class="meal-check">✓</span>' : ''}
+              </div>
               ${!expanded && logged.length ? logged.map((l) => `<div class="logged">${l}</div>`).join('') : ''}
+              ${!expanded && progress.required ? `<div class="meal-progress">${progress.logged}/${progress.required} logged</div>` : ''}
             </div>
             <div class="meta">
               <div>${slot.time}</div>
@@ -262,11 +531,11 @@ function renderPlan() {
           </button>
           ${expanded ? `
           <div class="meal-body">
-            ${slot.proteinServings > 0 ? renderFoodSelect(slot.label, 'Protein', slot.proteinServings, ['protein', 'dairy'], 'Protein') : ''}
-            ${slot.grainStarchServings > 0 ? renderFoodSelect(slot.label, 'Grains / Starches', slot.grainStarchServings, ['starch', 'grain'], 'Grains / Starches') : ''}
-            ${slot.vegetableServings > 0 ? renderFoodSelect(slot.label, 'Vegetables', slot.vegetableServings, ['vegetable'], 'Vegetables') : ''}
-            ${slot.fruitServings > 0 ? renderFoodSelect(slot.label, 'Fruits', slot.fruitServings, ['fruit'], 'Fruits') : ''}
-            ${renderFoodSelect(slot.label, 'Fats', 1, ['fat'], 'Extra fats')}
+            ${slot.proteinServings > 0 ? renderProteinSection(slot.label, slot.proteinServings) : ''}
+            ${slot.grainStarchServings > 0 ? renderGrainSection(slot.label, slot.grainStarchServings) : ''}
+            ${slot.vegetableServings > 0 ? renderCategorySection(slot.label, 'Vegetables', 'Vegetables', 'Vegetables', slot.vegetableServings, ['vegetable']) : ''}
+            ${slot.fruitServings > 0 ? renderCategorySection(slot.label, 'Fruits', 'Fruits', 'Fruits', slot.fruitServings, ['fruit']) : ''}
+            ${renderExtraFatsSection(slot.label)}
           </div>` : ''}
         </div>`;
       }).join('')}
@@ -338,19 +607,59 @@ function bindEvents() {
     });
   });
 
-  document.querySelectorAll('select[data-pick]').forEach((sel) => {
-    sel.addEventListener('change', () => {
-      if (!sel.value) return;
-      const [slotLabel, category, servingsStr] = sel.dataset.pick.split('|');
-      const servings = Number(servingsStr) || 1;
-      const food = store.foods.find((f) => f.name === sel.value);
-      if (food) logFood(slotLabel, category, food, servings);
-      sel.value = '';
+  document.querySelectorAll('[data-toggle-section]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const sk = btn.dataset.toggleSection;
+      store.expandedSections[sk] = !store.expandedSections[sk];
+      render();
     });
   });
 
-  document.querySelectorAll('[data-remove]').forEach((btn) => {
-    btn.addEventListener('click', () => removeEntry(btn.dataset.remove));
+  document.querySelectorAll('[data-tab-key]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      store.sectionTabs[btn.dataset.tabKey] = btn.dataset.tabVal;
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-search]').forEach((input) => {
+    input.addEventListener('input', () => {
+      store.foodSearch[input.dataset.search] = input.value;
+      render();
+      const next = document.querySelector(`[data-search="${input.dataset.search}"]`);
+      if (next) {
+        next.focus();
+        next.setSelectionRange(next.value.length, next.value.length);
+      }
+    });
+    input.addEventListener('click', (e) => e.stopPropagation());
+  });
+
+  document.querySelectorAll('[data-log-food]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const slotLabel = btn.dataset.logSlot;
+      const category = btn.dataset.logCategory;
+      const servings = Number(btn.dataset.logServings) || 1;
+      const food = store.foods.find((f) => f.name === decodeURIComponent(btn.dataset.logFood));
+      if (!food) return;
+      logFood(slotLabel, category, food, servings, {
+        collapseSection: btn.dataset.collapse || null,
+      });
+    });
+  });
+
+  document.querySelectorAll('[data-clear-slot]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      store.expandedSections[btn.dataset.collapse] = false;
+      removeCategoryEntry(btn.dataset.clearSlot, btn.dataset.clearCategory);
+    });
+  });
+
+  document.querySelectorAll('[data-remove-fat-slot]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      removeOneFat(btn.dataset.removeFatSlot, decodeURIComponent(btn.dataset.removeFatName));
+    });
   });
 }
 
