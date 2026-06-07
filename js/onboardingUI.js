@@ -309,8 +309,8 @@ export function bindOnboardingEvents(store, { render, onComplete }) {
 
     if (phase.kind === 'confirm') {
       store.profile = profileFromForm(form);
-      localStorage.setItem('hardkor_profile', JSON.stringify(store.profile));
-      localStorage.setItem('hardkor_onboarding_complete', 'true');
+      localStorage.setItem('bnb_profile', JSON.stringify(store.profile));
+      localStorage.setItem('bnb_onboarding_complete', 'true');
       store.onboardingPage += 1;
       render();
       return;

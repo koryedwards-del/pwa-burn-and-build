@@ -37,7 +37,7 @@ const store = {
 };
 
 function hasCompletedOnboarding() {
-  return localStorage.getItem('hardkor_onboarding_complete') === 'true';
+  return localStorage.getItem('bnb_onboarding_complete') === 'true';
 }
 
 function todayKey() {
@@ -50,13 +50,13 @@ function sectionKey(slotLabel, sectionId) {
 
 function load() {
   try {
-    const p = localStorage.getItem('hardkor_profile');
+    const p = localStorage.getItem('bnb_profile');
     if (p) store.profile = JSON.parse(p);
-    const e = localStorage.getItem('hardkor_entries');
+    const e = localStorage.getItem('bnb_entries');
     if (e) store.entries = JSON.parse(e);
-    const c = localStorage.getItem('hardkor_pick_counts');
+    const c = localStorage.getItem('bnb_pick_counts');
     if (c) store.pickCounts = JSON.parse(c);
-    const cp = localStorage.getItem('hardkor_coach_progress');
+    const cp = localStorage.getItem('bnb_coach_progress');
     if (cp) store.coachProgress = JSON.parse(cp);
   } catch (err) {
     console.error(err);
@@ -64,19 +64,19 @@ function load() {
 }
 
 function saveProfile() {
-  localStorage.setItem('hardkor_profile', JSON.stringify(store.profile));
+  localStorage.setItem('bnb_profile', JSON.stringify(store.profile));
 }
 
 function saveEntries() {
-  localStorage.setItem('hardkor_entries', JSON.stringify(store.entries));
+  localStorage.setItem('bnb_entries', JSON.stringify(store.entries));
 }
 
 function savePickCounts() {
-  localStorage.setItem('hardkor_pick_counts', JSON.stringify(store.pickCounts));
+  localStorage.setItem('bnb_pick_counts', JSON.stringify(store.pickCounts));
 }
 
 function saveCoachProgress() {
-  localStorage.setItem('hardkor_coach_progress', JSON.stringify(store.coachProgress));
+  localStorage.setItem('bnb_coach_progress', JSON.stringify(store.coachProgress));
 }
 
 function showCoachBanner() {
@@ -479,7 +479,7 @@ function renderHome() {
   return `
     <div class="screen">
       <div class="logo-block">
-        <div class="brand">HARDKOR</div>
+        <div class="brand">BURN &amp; BUILD</div>
         <div class="tagline">Your effort defines you</div>
       </div>
       <div class="btn-stack">
@@ -747,7 +747,7 @@ function renderGrocery() {
 function render() {
   const root = document.getElementById('app');
   if (store.screen === 'loading') {
-    root.innerHTML = '<div class="screen"><div class="logo-block"><div class="brand">HARDKOR</div></div></div>';
+    root.innerHTML = '<div class="screen"><div class="logo-block"><div class="brand">BURN &amp; BUILD</div></div></div>';
     return;
   }
   if (store.screen === 'onboarding') root.innerHTML = renderOnboarding(store);
@@ -978,7 +978,7 @@ async function init() {
     console.error('Food database failed to load', err);
   }
   if (store.profile?.leanBodyMass > 0 && !hasCompletedOnboarding()) {
-    localStorage.setItem('hardkor_onboarding_complete', 'true');
+    localStorage.setItem('bnb_onboarding_complete', 'true');
   }
   store.screen = store.profile?.leanBodyMass > 0 && hasCompletedOnboarding() ? 'home' : 'onboarding';
   if (store.screen === 'onboarding') {

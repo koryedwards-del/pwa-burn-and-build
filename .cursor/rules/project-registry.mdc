@@ -6,9 +6,8 @@ alwaysApply: true
 # Project context
 
 - Full map: `~/operatingmanual/PROJECTS.md`
-- This repo: **Hardkor Diet** PWA — vanilla HTML/JS, localStorage
-- Host: GitHub Pages → https://koryedwards-del.github.io/hardkor-pwa/
-- Landing (separate repo, Render): thehardkordiet.com
-- No backend, no Render, no Resend
+- This repo: **Burn & Build** diet PWA — vanilla HTML/JS, localStorage
+- Host: GitHub Pages → https://koryedwards-del.github.io/pwa-burn-and-build/
+- Landing pages (unchanged for now): gettheburnandbuildapp.com, thehardkordiet.com
 
 Push to `main` deploys via GitHub Pages.

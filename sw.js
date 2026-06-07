@@ -1,4 +1,4 @@
-const CACHE = 'hardkor-v5';
+const CACHE = 'bnb-v1';
 const ASSETS = [
   './',
   './index.html',

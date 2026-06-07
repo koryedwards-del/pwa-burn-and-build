@@ -1,4 +1,4 @@
-/** 🔒 HARDKOR BurnEngine — port of BurnEngine.swift (PHP-validated) */
+/** Burn & Build BurnEngine — port of BurnEngine.swift (PHP-validated) */
 
 function nf1(x) {
   return Math.round(x * 10) / 10;
