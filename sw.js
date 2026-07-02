@@ -1,14 +1,18 @@
-const CACHE = 'bnb-v1';
+const CACHE = 'bnb-v2';
 const ASSETS = [
   './',
   './index.html',
   './css/styles.css',
+  './css/start.css',
   './js/app.js',
   './js/burnEngine.js',
   './js/coachEngine.js',
   './js/groceryEngine.js',
   './js/onboardingEngine.js',
   './js/onboardingUI.js',
+  './js/programPackage.js',
+  './js/startSite.js',
+  './start/index.html',
   './data/foods.json',
   './manifest.json',
   './img/coach/card-1.png',

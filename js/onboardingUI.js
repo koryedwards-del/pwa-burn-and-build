@@ -293,7 +293,7 @@ export function initOnboardingForm(store) {
 
 export { profileFromForm, onboardingPhase, WELCOME_COUNT };
 
-export function bindOnboardingEvents(store, { render, onComplete }) {
+export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
   const form = store.onboardingForm;
 
   document.querySelector('[data-ob-back]')?.addEventListener('click', () => {
@@ -308,6 +308,10 @@ export function bindOnboardingEvents(store, { render, onComplete }) {
     if (!canProceed(phase, form)) return;
 
     if (phase.kind === 'confirm') {
+      if (onConfirm) {
+        onConfirm(form);
+        return;
+      }
       store.profile = profileFromForm(form);
       localStorage.setItem('bnb_profile', JSON.stringify(store.profile));
       localStorage.setItem('bnb_onboarding_complete', 'true');

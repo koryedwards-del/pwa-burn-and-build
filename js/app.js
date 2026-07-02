@@ -1,5 +1,5 @@
 import { computePlan, generateMealSlots } from './burnEngine.js';
-import { getCoachDay, getProgramDay } from './coachEngine.js';
+import { getCoachDay } from './coachEngine.js';
 import {
   buildGroceryFromEntries,
   createManualGroceryItem,
@@ -9,11 +9,20 @@ import {
   groceryDisplayName,
   groupGroceryItems,
 } from './groceryEngine.js';
-import { QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js';
 import { bindOnboardingEvents, initOnboardingForm, renderOnboarding } from './onboardingUI.js';
+import {
+  getProgramDay,
+  importProgramPackage,
+  mealSlotsFromProgram,
+  parseImportFromUrl,
+  parseProgramPackageJson,
+  planFromPackage,
+} from './programPackage.js';
 
 const store = {
   profile: null,
+  program: null,
+  settings: null,
   entries: [],
   foods: [],
   pickCounts: {},
@@ -34,10 +43,15 @@ const store = {
   onboardingPage: 0,
   onboardingEditMode: false,
   onboardingForm: null,
+  importError: null,
 };
 
+function hasActiveProgram() {
+  return !!store.program?.plan?.servings;
+}
+
 function hasCompletedOnboarding() {
-  return localStorage.getItem('bnb_onboarding_complete') === 'true';
+  return hasActiveProgram() || localStorage.getItem('bnb_onboarding_complete') === 'true';
 }
 
 function todayKey() {
@@ -50,6 +64,10 @@ function sectionKey(slotLabel, sectionId) {
 
 function load() {
   try {
+    const prog = localStorage.getItem('bnb_program');
+    if (prog) store.program = JSON.parse(prog);
+    const settings = localStorage.getItem('bnb_settings');
+    if (settings) store.settings = JSON.parse(settings);
     const p = localStorage.getItem('bnb_profile');
     if (p) store.profile = JSON.parse(p);
     const e = localStorage.getItem('bnb_entries');
@@ -61,6 +79,18 @@ function load() {
   } catch (err) {
     console.error(err);
   }
+}
+
+function saveProgram() {
+  if (store.program) localStorage.setItem('bnb_program', JSON.stringify(store.program));
+}
+
+function saveSettings() {
+  if (store.settings) localStorage.setItem('bnb_settings', JSON.stringify(store.settings));
+}
+
+function displayName() {
+  return store.program?.intake?.preferredName || store.profile?.preferredName || '';
 }
 
 function saveProfile() {
@@ -80,8 +110,13 @@ function saveCoachProgress() {
 }
 
 function showCoachBanner() {
-  const day = getCoachDay(getProgramDay());
+  const day = getCoachDay(currentProgramDay());
   return day && !store.coachProgress.day1Complete;
+}
+
+function currentProgramDay() {
+  if (store.program) return getProgramDay(store.program);
+  return 1;
 }
 
 function markCoachDayComplete(dayNumber) {
@@ -165,6 +200,7 @@ function todayEntries() {
 }
 
 function getPlan() {
+  if (store.program) return planFromPackage(store.program);
   if (!store.profile?.leanBodyMass) return null;
   const p = store.profile;
   return computePlan({
@@ -174,6 +210,25 @@ function getPlan() {
     cardioHours: p.cardioHours,
     fatBurningHours: p.fatBurningHours,
   });
+}
+
+function getMealSlots(plan) {
+  if (store.program) return mealSlotsFromProgram(store.program, store.settings);
+  const wake = store.settings?.wakeTime || store.profile?.wakeTime || '08:00';
+  const [wh, wm] = wake.split(':').map(Number);
+  return generateMealSlots(wh, wm, plan.servings);
+}
+
+function applyImportedProgram(pkg) {
+  const result = importProgramPackage(pkg);
+  if (!result.ok) {
+    store.importError = result.errors.join(' ');
+    return false;
+  }
+  store.program = result.program;
+  store.settings = JSON.parse(localStorage.getItem('bnb_settings') || '{}');
+  store.importError = null;
+  return true;
 }
 
 function fatPointsConsumed() {
@@ -475,26 +530,53 @@ function mealProgress(slot) {
 }
 
 function renderHome() {
-  const name = store.profile?.preferredName || '';
+  const name = displayName();
+  const programDay = store.program ? currentProgramDay() : null;
   return `
     <div class="screen">
       <div class="logo-block">
         <div class="brand">BURN &amp; BUILD</div>
         <div class="tagline">Your effort defines you</div>
       </div>
+      ${programDay ? `<p class="home-program-day">Day ${programDay} of ${store.program.program.durationDays}</p>` : ''}
       <div class="btn-stack">
         <button type="button" class="btn-primary" data-nav="plan">Your Custom Food Plan</button>
         <button type="button" class="btn-primary" data-nav="grocery">Grocery List</button>
         <button type="button" class="btn-primary" data-nav="coach">Coaching</button>
-        <button type="button" class="btn-secondary" data-nav="setup">Edit Your Custom Food Plan</button>
+        <button type="button" class="btn-secondary" data-nav="import">${hasActiveProgram() ? 'Import New Program' : 'Import Program'}</button>
+        ${hasActiveProgram() ? '' : '<a href="start/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Start on Website →</a>'}
       </div>
       <p class="home-footer">Stay consistent. Eat on time.${name ? ` — ${name}` : ''}</p>
+    </div>`;
+}
+
+function renderImport() {
+  return `
+    <div class="screen">
+      <div class="plan-header">
+        <button type="button" class="back-btn" data-nav="home">← Home</button>
+        <h1>Import Program</h1>
+      </div>
+      <div class="import-block">
+        <p class="import-lead">Load a program package created on the Burn & Build website.</p>
+        ${store.importError ? `<div class="import-error">${store.importError}</div>` : ''}
+        <label class="import-label">Program file (.bnbprogram.json)</label>
+        <input type="file" accept=".json,.bnbprogram.json,application/json" data-import-file />
+        <div class="import-divider">or paste JSON</div>
+        <textarea class="import-paste" data-import-paste placeholder='{"schemaVersion":"1.0.0","packageType":"burn-and-build-program",...}'></textarea>
+        <button type="button" class="btn-primary" data-import-submit style="margin-top:16px">IMPORT PROGRAM</button>
+        <p class="import-note">Need a new program? <a href="start/">Build one on the website →</a></p>
+      </div>
     </div>`;
 }
 
 function renderPlan() {
   const plan = getPlan();
   if (!plan) {
+    if (hasActiveProgram()) {
+      store.screen = 'import';
+      return renderImport();
+    }
     store.screen = 'onboarding';
     initOnboardingForm(store);
     store.onboardingPage = 0;
@@ -502,8 +584,7 @@ function renderPlan() {
     return renderOnboarding(store);
   }
 
-  const [wh, wm] = (store.profile.wakeTime || '08:00').split(':').map(Number);
-  const slots = generateMealSlots(wh, wm, plan.servings);
+  const slots = getMealSlots(plan);
   const fatTarget = plan.servings.fatMaintain;
   const fatUsed = fatPointsConsumed();
   const fatPct = fatTarget ? Math.min(fatUsed / fatTarget, 1) : 0;
@@ -587,7 +668,7 @@ function formatCoachParagraphs(text) {
 }
 
 function renderCoach() {
-  const day = getCoachDay(getProgramDay());
+  const day = getCoachDay(currentProgramDay());
   if (!day) {
     return `
       <div class="screen coach-screen">
@@ -751,6 +832,7 @@ function render() {
     return;
   }
   if (store.screen === 'onboarding') root.innerHTML = renderOnboarding(store);
+  else if (store.screen === 'import') root.innerHTML = renderImport();
   else if (store.screen === 'plan') root.innerHTML = renderPlan();
   else if (store.screen === 'coach') root.innerHTML = renderCoach();
   else if (store.screen === 'grocery') root.innerHTML = renderGrocery();
@@ -783,7 +865,7 @@ function bindCoachCarousel() {
   const carousel = document.getElementById('coachCarousel');
   if (!carousel) return;
 
-  const day = getCoachDay(getProgramDay());
+  const day = getCoachDay(currentProgramDay());
   if (!day) return;
 
   const total = day.cards.length;
@@ -828,15 +910,7 @@ function bindEvents() {
         refreshGroceryList();
         store.showGroceryAdd = false;
       }
-      if (nav === 'setup') {
-        initOnboardingForm(store);
-        store.onboardingEditMode = true;
-        store.onboardingPage = WELCOME_COUNT + QUESTION_COUNT;
-        store.screen = 'onboarding';
-        store.expandedMeal = null;
-        render();
-        return;
-      }
+      if (nav === 'import') store.importError = null;
       store.screen = nav;
       store.expandedMeal = null;
       render();
@@ -965,6 +1039,38 @@ function bindEvents() {
   });
 
   document.querySelector('[data-grocery-uncheck-all]')?.addEventListener('click', uncheckAllGrocery);
+
+  document.querySelector('[data-import-submit]')?.addEventListener('click', async () => {
+    const fileInput = document.querySelector('[data-import-file]');
+    const pasteEl = document.querySelector('[data-import-paste]');
+    let text = pasteEl?.value.trim() || '';
+    if (fileInput?.files?.[0]) {
+      try {
+        text = await fileInput.files[0].text();
+      } catch {
+        store.importError = 'Could not read the selected file.';
+        render();
+        return;
+      }
+    }
+    if (!text) {
+      store.importError = 'Choose a program file or paste the JSON.';
+      render();
+      return;
+    }
+    const parsed = parseProgramPackageJson(text);
+    if (!parsed.ok) {
+      store.importError = parsed.errors.join(' ');
+      render();
+      return;
+    }
+    if (!applyImportedProgram(parsed.pkg)) {
+      render();
+      return;
+    }
+    store.screen = 'home';
+    render();
+  });
 }
 
 async function init() {
@@ -977,17 +1083,29 @@ async function init() {
   } catch (err) {
     console.error('Food database failed to load', err);
   }
-  if (store.profile?.leanBodyMass > 0 && !hasCompletedOnboarding()) {
+
+  const urlImport = parseImportFromUrl(window.location.search);
+  if (urlImport) {
+    if (applyImportedProgram(urlImport)) {
+      window.history.replaceState({}, '', window.location.pathname);
+    } else {
+      store.screen = 'import';
+      render();
+      registerServiceWorker();
+      return;
+    }
+  }
+
+  const hasLegacyPlan = store.profile?.leanBodyMass > 0 && localStorage.getItem('bnb_onboarding_complete') === 'true';
+  if (hasLegacyPlan && !hasActiveProgram()) {
     localStorage.setItem('bnb_onboarding_complete', 'true');
   }
-  store.screen = store.profile?.leanBodyMass > 0 && hasCompletedOnboarding() ? 'home' : 'onboarding';
-  if (store.screen === 'onboarding') {
-    initOnboardingForm(store);
-    store.onboardingPage = 0;
-    store.onboardingEditMode = false;
-  }
+  store.screen = hasActiveProgram() || hasLegacyPlan ? 'home' : 'home';
   render();
+  registerServiceWorker();
+}
 
+function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }

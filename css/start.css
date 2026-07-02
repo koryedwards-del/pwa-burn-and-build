@@ -1,0 +1,282 @@
+/** Website start flow — wider layout, teaching modules */
+
+.start-site {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.start-site .screen {
+  max-width: 720px;
+}
+
+.start-hero {
+  text-align: center;
+  padding: 56px 24px 32px;
+}
+
+.start-hero .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--flame);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.start-hero h1 {
+  font-size: clamp(32px, 6vw, 48px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+}
+
+.start-hero h1 span {
+  color: var(--flame);
+}
+
+.start-hero p {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 540px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.start-split {
+  display: grid;
+  gap: 24px;
+  padding: 0 24px 32px;
+}
+
+@media (min-width: 640px) {
+  .start-split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.start-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.start-card h3 {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--flame);
+  margin-bottom: 8px;
+}
+
+.start-card p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #ccc;
+}
+
+.start-card ul {
+  margin-top: 12px;
+  padding-left: 18px;
+  font-size: 14px;
+  color: #bbb;
+  line-height: 1.6;
+}
+
+.teach-module {
+  padding: 8px 0 24px;
+}
+
+.teach-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--flame);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.teach-module h2 {
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.teach-module p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: #ccc;
+  margin-bottom: 14px;
+}
+
+.teach-quote {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-left: 3px solid var(--flame);
+  background: var(--flame-dim);
+  border-radius: 0 12px 12px 0;
+}
+
+.teach-quote p {
+  font-style: italic;
+  margin-bottom: 8px;
+}
+
+.teach-quote cite {
+  font-size: 13px;
+  color: var(--muted);
+  font-style: normal;
+}
+
+.teach-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.teach-stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.teach-stat .val {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--flame);
+}
+
+.teach-stat .lbl {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.plan-preview {
+  padding: 0 0 24px;
+}
+
+.plan-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 16px 0 20px;
+}
+
+.plan-preview-cell {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.plan-preview-cell span {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.plan-preview-cell strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 22px;
+  color: var(--flame);
+}
+
+.export-panel {
+  padding: 0 0 32px;
+}
+
+.export-panel textarea {
+  width: 100%;
+  min-height: 120px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #0a0a0a;
+  color: #aaa;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  resize: vertical;
+}
+
+.export-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.export-note {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  margin-top: 16px;
+}
+
+.export-note a {
+  color: var(--cyan);
+}
+
+.start-date-field {
+  margin: 20px 0;
+}
+
+.start-date-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.start-date-field input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.start-footer-link {
+  text-align: center;
+  padding: 24px;
+  font-size: 14px;
+}
+
+.start-footer-link a {
+  color: var(--cyan);
+}
+
+.start-success {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.start-success .check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--flame);
+  color: #000;
+  font-size: 32px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+}

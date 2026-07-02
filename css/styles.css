@@ -1535,3 +1535,83 @@ button {
   color: #bfbfbf;
   line-height: 1.45;
 }
+
+.home-program-day {
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--flame);
+  margin: -16px 0 8px;
+}
+
+.import-block {
+  padding: 0 24px 32px;
+}
+
+.import-lead {
+  font-size: 15px;
+  color: #ccc;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+.import-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.import-block input[type="file"] {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  background: var(--card);
+  font-size: 14px;
+}
+
+.import-divider {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin: 20px 0;
+}
+
+.import-paste {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #0a0a0a;
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.import-error {
+  background: rgba(232, 114, 42, 0.15);
+  border: 1px solid var(--flame);
+  color: var(--flame);
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.import-note {
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.import-note a {
+  color: var(--cyan);
+}

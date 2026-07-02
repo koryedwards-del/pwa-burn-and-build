@@ -1,0 +1,206 @@
+/** Burn & Build program package — build, validate, import (website → app) */
+
+import { computePlan, generateMealSlots } from './burnEngine.js';
+import { heartRates, profileFromForm } from './onboardingEngine.js';
+
+export const SCHEMA_VERSION = '1.0.0';
+export const FOODS_CATALOG_VERSION = '2026.07.01';
+export const PROGRAM_DURATION_DAYS = 56;
+
+export function buildProgramPackage(form, { startDate, programId, label, meta } = {}) {
+  const intake = profileFromForm(form);
+  const plan = computePlan({
+    lbm: intake.leanBodyMass,
+    intensity: intake.workIntensity,
+    weightTrainingHours: intake.weightTrainingHours,
+    cardioHours: intake.cardioHours,
+    fatBurningHours: intake.fatBurningHours,
+  });
+  const [wh, wm] = (intake.wakeTime || '06:00').split(':').map(Number);
+  const mealSlots = generateMealSlots(wh, wm, plan.servings);
+
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    packageType: 'burn-and-build-program',
+    program: {
+      id: programId || crypto.randomUUID(),
+      issuedAt: new Date().toISOString(),
+      startDate: startDate || todayDateKey(),
+      durationDays: PROGRAM_DURATION_DAYS,
+      status: 'active',
+      label: label || '8-Week Burn & Build Program',
+    },
+    intake: {
+      ...intake,
+      defaultWakeTime: intake.wakeTime || '06:00',
+    },
+    plan: {
+      servings: plan.servings,
+      summary: {
+        maintainTotalCals: plan.maintainTotalCals,
+        reduceTotalCals: plan.reduceTotalCals,
+        maintainProteinGrams: plan.maintainProteinGrams,
+        reduceFatGrams: plan.reduceFatGrams,
+        weeklyFatLossPounds: plan.weeklyFatLossPounds,
+      },
+      formula: plan.formula,
+      mealSlots,
+    },
+    schedule: {
+      heartRates: heartRates(intake.age),
+      activityTargets: {
+        weightTrainingHoursPerWeek: intake.weightTrainingHours,
+        cardioHoursPerWeek: intake.cardioHours,
+        fatBurningHoursPerWeek: intake.fatBurningHours,
+      },
+    },
+    reference: {
+      engineVersion: '1.0.0',
+      engineSource: 'burnEngine.js',
+      foodsCatalogVersion: FOODS_CATALOG_VERSION,
+      generatedBy: 'burn-engine-web',
+      websiteUrl: 'https://gettheburnandbuildapp.com',
+    },
+    meta: {
+      customerRef: null,
+      purchaseRef: null,
+      allowRegenerate: false,
+      expiresAt: null,
+      supersedesProgramId: null,
+      ...meta,
+    },
+    signature: null,
+  };
+}
+
+export function validateProgramPackage(pkg) {
+  const errors = [];
+  if (!pkg || typeof pkg !== 'object') {
+    return { ok: false, errors: ['Package must be a JSON object.'] };
+  }
+  if (pkg.packageType !== 'burn-and-build-program') {
+    errors.push('Invalid packageType.');
+  }
+  if (!pkg.schemaVersion?.startsWith('1.')) {
+    errors.push(`Unsupported schemaVersion: ${pkg.schemaVersion}`);
+  }
+  if (!pkg.program?.id) errors.push('Missing program.id.');
+  if (!pkg.program?.startDate || !/^\d{4}-\d{2}-\d{2}$/.test(pkg.program.startDate)) {
+    errors.push('Invalid program.startDate (expected YYYY-MM-DD).');
+  }
+  if (pkg.program?.status !== 'active') {
+    errors.push(`Program status is "${pkg.program?.status}" — only active programs can be imported.`);
+  }
+  const s = pkg.plan?.servings;
+  if (!s) {
+    errors.push('Missing plan.servings.');
+  } else {
+    for (const key of ['protein', 'grainsStarches', 'vegetables', 'fruits', 'fatReduce', 'fatMaintain']) {
+      if (typeof s[key] !== 'number' || s[key] < 0) errors.push(`Invalid plan.servings.${key}.`);
+    }
+  }
+  if (!pkg.intake?.leanBodyMass || pkg.intake.leanBodyMass <= 0) {
+    errors.push('Missing intake.leanBodyMass.');
+  }
+  if (pkg.meta?.expiresAt && new Date(pkg.meta.expiresAt) < new Date()) {
+    errors.push('Program has expired.');
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+export function planFromPackage(pkg) {
+  if (!pkg?.plan) return null;
+  return {
+    servings: pkg.plan.servings,
+    maintainTotalCals: pkg.plan.summary.maintainTotalCals,
+    reduceTotalCals: pkg.plan.summary.reduceTotalCals,
+    maintainProteinGrams: pkg.plan.summary.maintainProteinGrams,
+    reduceFatGrams: pkg.plan.summary.reduceFatGrams,
+    weeklyFatLossPounds: pkg.plan.summary.weeklyFatLossPounds,
+    formula: pkg.plan.formula,
+  };
+}
+
+export function getProgramDay(pkg, now = new Date()) {
+  if (!pkg?.program?.startDate) return 1;
+  const start = parseDateKey(pkg.program.startDate);
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const diff = Math.floor((today - start) / 86400000) + 1;
+  const max = pkg.program.durationDays || PROGRAM_DURATION_DAYS;
+  return Math.max(1, Math.min(diff, max));
+}
+
+export function wakeTimeFromProgram(pkg, settings) {
+  return settings?.wakeTime || pkg?.intake?.defaultWakeTime || '06:00';
+}
+
+export function mealSlotsFromProgram(pkg, settings) {
+  const wake = wakeTimeFromProgram(pkg, settings);
+  const [wh, wm] = wake.split(':').map(Number);
+  const plan = planFromPackage(pkg);
+  if (!plan) return [];
+  if (settings?.wakeTime && settings.wakeTime !== pkg.intake?.defaultWakeTime) {
+    return generateMealSlots(wh, wm, plan.servings);
+  }
+  return pkg.plan.mealSlots?.length ? pkg.plan.mealSlots : generateMealSlots(wh, wm, plan.servings);
+}
+
+export function importProgramPackage(pkg) {
+  const result = validateProgramPackage(pkg);
+  if (!result.ok) return result;
+  localStorage.setItem('bnb_program', JSON.stringify(pkg));
+  localStorage.setItem('bnb_onboarding_complete', 'true');
+  const settings = {
+    wakeTime: pkg.intake.defaultWakeTime || '06:00',
+    remindersEnabled: pkg.intake.remindersEnabled !== false,
+  };
+  localStorage.setItem('bnb_settings', JSON.stringify(settings));
+  return { ok: true, program: pkg };
+}
+
+export function parseProgramPackageJson(text) {
+  try {
+    return { ok: true, pkg: JSON.parse(text) };
+  } catch (err) {
+    return { ok: false, errors: ['Invalid JSON — could not parse file.'] };
+  }
+}
+
+export function downloadProgramPackage(pkg, filename) {
+  const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || `burn-and-build-program-${pkg.program.startDate}.bnbprogram.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+export function packageToImportUrl(pkg, appBase = '../') {
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(pkg))));
+  const base = appBase.endsWith('/') ? appBase : `${appBase}/`;
+  return `${base}?import=${encodeURIComponent(encoded)}`;
+}
+
+export function parseImportFromUrl(search) {
+  const params = new URLSearchParams(search);
+  const raw = params.get('import');
+  if (!raw) return null;
+  try {
+    const json = decodeURIComponent(escape(atob(decodeURIComponent(raw))));
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function todayDateKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function parseDateKey(key) {
+  const d = new Date(`${key}T00:00:00`);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
