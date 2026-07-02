@@ -135,15 +135,33 @@ function renderTeaching() {
           ${mod.quote ? `<div class="teach-quote"><p>${mod.quote.text}</p><cite>— ${mod.quote.by}</cite></div>` : ''}
         </div>
         <div class="ob-footer">
-          <button type="button" class="ob-next" data-teach-next>${isLast ? 'SEE YOUR PLAN →' : 'NEXT →'}</button>
+          <button type="button" class="ob-next" data-teach-next>${isLast ? 'PREVIEW YOUR TARGETS →' : 'NEXT →'}</button>
         </div>
       </div>
     </div>`;
 }
 
+function ensurePreviewPackage() {
+  if (!store.onboardingForm) return null;
+  store.builtPackage = buildProgramPackage(store.onboardingForm, {
+    startDate: store.startDate,
+    label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
+  });
+  return store.builtPackage;
+}
+
 function renderPreview() {
-  const plan = planFromPackage(store.builtPackage);
-  const intake = store.builtPackage.intake;
+  const pkg = store.builtPackage || ensurePreviewPackage();
+  const plan = planFromPackage(pkg);
+  if (!plan || !pkg?.intake) {
+    return `
+      <div class="start-site">
+        <div class="screen">
+          <p style="padding:24px;color:#ccc;">Could not load plan preview. <button type="button" data-teach-back>Go back</button></p>
+        </div>
+      </div>`;
+  }
+  const intake = pkg.intake;
   const s = plan.servings;
   return `
     <div class="start-site">
@@ -165,7 +183,7 @@ function renderPreview() {
             <div class="plan-preview-cell"><span>Est. weekly loss</span><strong>${plan.weeklyFatLossPounds.toFixed(1)} lbs</strong></div>
           </div>
           <p>Reduce calories: <strong>${Math.round(plan.reduceTotalCals)}</strong> · Maintain: <strong>${Math.round(plan.maintainTotalCals)}</strong></p>
-          <div class="ob-info" style="margin-top:20px;"><span class="ob-info-icon">📱</span><p>These numbers are locked into your program package. The app will use them exactly — no recalculation on the phone.</p></div>
+          <div class="ob-info" style="margin-top:20px;"><span class="ob-info-icon">📱</span><p>These are your daily targets — locked into your program package. Your full custom food plan with gram weights, meal logging, and coaching lives in the app after you open your program.</p></div>
         </div>
         <div class="ob-footer">
           <button type="button" class="ob-next" data-preview-next>CHOOSE START DATE →</button>
@@ -297,8 +315,12 @@ function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-teach-next]')) {
-      if (store.teachIndex < TEACHING.length - 1) store.teachIndex += 1;
-      else store.phase = 'preview';
+      if (store.teachIndex < TEACHING.length - 1) {
+        store.teachIndex += 1;
+      } else {
+        ensurePreviewPackage();
+        store.phase = 'preview';
+      }
       render();
       return;
     }
