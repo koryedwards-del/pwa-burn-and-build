@@ -395,14 +395,16 @@ export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
       if (e.key === 'Enter') e.preventDefault();
     });
 
+    if (input.type === 'time') {
+      input.addEventListener('change', () => {
+        form[input.name] = input.value;
+      });
+      return;
+    }
+
     const update = () => {
       if (input.type === 'range' || input.type === 'number') {
         form[input.name] = Number(input.value);
-        render();
-        return;
-      }
-      if (input.type === 'time') {
-        form[input.name] = input.value;
         render();
         return;
       }
@@ -411,6 +413,5 @@ export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
     };
 
     input.addEventListener('input', update);
-    if (input.type === 'time') input.addEventListener('change', update);
   });
 }
