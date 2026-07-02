@@ -543,8 +543,8 @@ function renderHome() {
         <button type="button" class="btn-primary" data-nav="plan">Your Custom Food Plan</button>
         <button type="button" class="btn-primary" data-nav="grocery">Grocery List</button>
         <button type="button" class="btn-primary" data-nav="coach">Coaching</button>
-        <button type="button" class="btn-secondary" data-nav="import">${hasActiveProgram() ? 'Import New Program' : 'Import Program'}</button>
-        ${hasActiveProgram() ? '' : '<a href="start/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Start on Website →</a>'}
+        <button type="button" class="btn-secondary" data-nav="import">${hasActiveProgram() ? 'Open New Program' : 'Open Program'}</button>
+        ${hasActiveProgram() ? '' : '<a href="start/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Build Your Program →</a>'}
       </div>
       <p class="home-footer">Stay consistent. Eat on time.${name ? ` — ${name}` : ''}</p>
     </div>`;
@@ -555,16 +555,16 @@ function renderImport() {
     <div class="screen">
       <div class="plan-header">
         <button type="button" class="back-btn" data-nav="home">← Home</button>
-        <h1>Import Program</h1>
+        <h1>Open Program</h1>
       </div>
       <div class="import-block">
-        <p class="import-lead">Load a program package created on the Burn & Build website.</p>
+        <p class="import-lead">Build your program on the website — it opens here. Or load a saved program file.</p>
         ${store.importError ? `<div class="import-error">${store.importError}</div>` : ''}
         <label class="import-label">Program file (.bnbprogram.json)</label>
         <input type="file" accept=".json,.bnbprogram.json,application/json" data-import-file />
         <div class="import-divider">or paste JSON</div>
         <textarea class="import-paste" data-import-paste placeholder='{"schemaVersion":"1.0.0","packageType":"burn-and-build-program",...}'></textarea>
-        <button type="button" class="btn-primary" data-import-submit style="margin-top:16px">IMPORT PROGRAM</button>
+        <button type="button" class="btn-primary" data-import-submit style="margin-top:16px">OPEN PROGRAM</button>
         <p class="import-note">Need a new program? <a href="start/">Build one on the website →</a></p>
       </div>
     </div>`;

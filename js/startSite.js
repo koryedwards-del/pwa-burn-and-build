@@ -52,7 +52,7 @@ const TEACHING = [
     title: 'Two parts. One system.',
     body: [
       'This website is where your personalized program is created — the same role the live seminar played for decades. Teaching, intake, and the Burn Engine all happen here.',
-      'The Burn & Build app is your daily companion: food plan, logging, grocery list, and coaching messages. It executes the program you download here.',
+      'The Burn & Build app is your daily coach: food plan, logging, grocery list, and messages from Coach Kory. It executes the program you build here.',
       'You can revisit this site anytime for deeper teaching. The app stays focused on doing the work every day.',
     ],
   },
@@ -82,22 +82,22 @@ function renderLanding() {
         <div class="start-hero">
           <div class="eyebrow">Start your program</div>
           <h1>BURN <span>&amp; BUILD</span></h1>
-          <p>Build your personalized 8-week food plan here. Download it to the app and execute it every day — with coaching, logging, and grocery lists.</p>
+          <p>Build your program here. Open it in the Burn & Build app — your daily coach for food logging, groceries, and staying on plan.</p>
         </div>
         <div class="start-split">
           <div class="start-card">
             <h3>On this website</h3>
-            <p>Teaching, intake questionnaire, and the Burn Engine.</p>
+            <p>The program factory — teaching, intake, and the Burn Engine.</p>
             <ul>
               <li>Seminar-style coaching content</li>
               <li>Body composition & lifestyle intake</li>
               <li>Personalized serving targets</li>
-              <li>Program package download</li>
+              <li>Program ready for the app</li>
             </ul>
           </div>
           <div class="start-card">
             <h3>In the app</h3>
-            <p>Your daily companion for executing the plan.</p>
+            <p>Your daily coach — execute the plan every day.</p>
             <ul>
               <li>Custom food plan with gram weights</li>
               <li>Meal logging & fat point tracking</li>
@@ -210,14 +210,14 @@ function renderExport() {
           <div class="ob-welcome-line2">READY.</div>
         </div>
         <div class="export-panel" style="padding:0 24px;">
-          <p style="color:#ccc;line-height:1.6;">Your personalized 8-week program is packaged and ready. Import it into the Burn & Build app to begin.</p>
+          <p style="color:#ccc;line-height:1.6;">Your 8-week program is ready. It will be waiting for you in the Burn & Build app.</p>
           <div class="export-actions">
-            <button type="button" class="btn-primary" data-download-package>DOWNLOAD PROGRAM FILE</button>
-            <button type="button" class="btn-secondary" data-copy-import-link>COPY APP IMPORT LINK</button>
             <a href="${store.importUrl}" class="btn-primary" style="display:block;text-align:center;text-decoration:none;">OPEN IN APP →</a>
+            <button type="button" class="btn-secondary" data-copy-import-link>COPY APP LINK</button>
+            <button type="button" class="btn-secondary" data-download-package>SAVE PROGRAM FILE</button>
           </div>
           <div class="export-note">
-            <strong>In the app:</strong> tap <em>Import Program</em> on the home screen, then select the downloaded <code>.bnbprogram.json</code> file — or use the import link above on the same device.
+            <strong>On the same device?</strong> Tap <em>Open in App</em>. On another device, use <em>Save Program File</em> and then <em>Open Program</em> in the app.
           </div>
           <textarea readonly aria-label="Program JSON">${json}</textarea>
         </div>
@@ -338,7 +338,7 @@ function bind() {
       btn.textContent = 'COPIED!';
       setTimeout(() => { btn.textContent = prev; }, 2000);
     } catch {
-      alert('Copy failed — use Download or Open in App instead.');
+      alert('Copy failed — use Open in App or Save Program File instead.');
     }
   });
 }
