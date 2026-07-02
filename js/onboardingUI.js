@@ -85,8 +85,8 @@ function renderQuestion(index, form) {
     case 1:
       return `
         ${stepHeader(2, 'HEIGHT', 'Used to determine your fat burn and cardiovascular training heart rate targets.')}
-        <div class="ob-big-value">${heightDisplay(form.heightInches)}</div>
-        <div class="ob-big-sub">${Math.round(form.heightInches)} inches</div>
+        <div class="ob-big-value" data-bind="heightInches" data-format="height">${heightDisplay(form.heightInches)}</div>
+        <div class="ob-big-sub" data-bind-sub="heightInches">${Math.round(form.heightInches)} inches</div>
         <input type="range" class="ob-range" name="heightInches" min="48" max="84" step="1" value="${form.heightInches}" />
         <div class="ob-range-labels"><span>4'0"</span><span>7'0"</span></div>
         ${infoBox('💡', 'Your lean body mass is your fat burner. More muscle burns more fat.')}`;
@@ -94,7 +94,7 @@ function renderQuestion(index, form) {
     case 2:
       return `
         ${stepHeader(3, 'YEARS OF EXPERIENCE.', '')}
-        <div class="ob-big-value ob-big-age">${form.age}</div>
+        <div class="ob-big-value ob-big-age" data-bind="age">${form.age}</div>
         <input type="range" class="ob-range" name="age" min="13" max="99" step="1" value="${form.age}" />
         <div class="ob-range-labels"><span>13</span><span>99</span></div>
         ${infoBox('❤️', 'Your age is used to calculate your personal fat burning (60–70%) and cardio training (70–85%) heart rate zones.')}`;
@@ -113,11 +113,11 @@ function renderQuestion(index, form) {
       return `
         ${stepHeader(5, 'BODY FAT', 'How do you know your body fat percentage?')}
         ${radioCard('fatSource', 'dexa', form.fatSource === 'dexa', 'DEXA Scan', 'Gold standard. The more recent the better.')}
-        ${form.fatSource === 'dexa' ? renderFatInput(form) : ''}
+        ${renderFatInput(form, 'dexa')}
         ${radioCard('fatSource', 'recent', form.fatSource === 'recent', 'Other method', 'Calipers, ultrasound, or BodPod. The more recent the better.')}
-        ${form.fatSource === 'recent' ? renderFatInput(form) : ''}
+        ${renderFatInput(form, 'recent')}
         ${radioCard('fatSource', 'guess', form.fatSource === 'guess', "I'm guessing", "If you guess right, you're golden. If you guess wrong, your plan is wrong.")}
-        ${form.fatSource === 'guess' ? renderFatInput(form) : ''}`;
+        ${renderFatInput(form, 'guess')}`;
 
     case 5:
       return `
@@ -136,12 +136,12 @@ function renderQuestion(index, form) {
         ${stepHeader(8, 'EXERCISE', 'What do you plan to do exercise wise in the next 8 weeks? Be realistic — conservative is better. You can always update your plan.')}
         <div class="ob-section-label">WEIGHT TRAINING, RACQUET SPORTS</div>
         <p class="ob-exercise-desc">Weight training, racquet sports type activity. Count only the time with weight in your hand or actually moving — not the rest between sets.</p>
-        <div class="ob-slider-label">Total hours per week: <strong>${form.weightTrainingHours}</strong></div>
+        <div class="ob-slider-label">Total hours per week: <strong data-bind="weightTrainingHours">${form.weightTrainingHours}</strong></div>
         <input type="range" class="ob-range" name="weightTrainingHours" min="0" max="15" step="1" value="${form.weightTrainingHours}" />
         <div class="ob-divider"></div>
         <div class="ob-section-label">CARDIOVASCULAR TRAINING</div>
         <div class="ob-hr-label">HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM</div>
-        <div class="ob-slider-label">Total hours per week: <strong>${form.cardioHours}</strong></div>
+        <div class="ob-slider-label">Total hours per week: <strong data-bind="cardioHours">${form.cardioHours}</strong></div>
         <input type="range" class="ob-range" name="cardioHours" min="0" max="15" step="1" value="${form.cardioHours}" />
         <div class="ob-divider"></div>
         <div class="ob-section-label">FAT BURNING</div>
@@ -152,7 +152,7 @@ function renderQuestion(index, form) {
             <span>${a.icon}</span>
             <span>${a.label}</span>
           </label>`).join('')}
-        <div class="ob-slider-label">Total hours per week: <strong>${form.fatBurningHours}</strong></div>
+        <div class="ob-slider-label">Total hours per week: <strong data-bind="fatBurningHours">${form.fatBurningHours}</strong></div>
         <input type="range" class="ob-range" name="fatBurningHours" min="0" max="20" step="1" value="${form.fatBurningHours}" />
         ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}`;
 
@@ -216,9 +216,10 @@ function updateReminderToggle(enabled) {
   }
 }
 
-function renderFatInput(form) {
+function renderFatInput(form, source) {
+  const hidden = form.fatSource !== source ? ' hidden' : '';
   return `
-    <div class="ob-fat-input">
+    <div class="ob-fat-input${hidden}" data-fat-for="${source}">
       <div class="ob-fat-label">Enter your body fat percentage:</div>
       <div class="ob-weight-row">
         <input class="ob-input ob-weight-input" name="fatPercentText" inputmode="decimal" value="${form.fatPercentText}" placeholder="00" />
@@ -337,7 +338,7 @@ export function initOnboardingForm(store) {
 export { profileFromForm, onboardingPhase, WELCOME_COUNT };
 
 function syncNextButton(store, form) {
-  const btn = document.querySelector('[data-ob-next]');
+  const btn = document.querySelector('.ob-flow [data-ob-next]');
   if (!btn) return;
   const phase = onboardingPhase(store.onboardingPage, store.onboardingEditMode);
   const proceed = canProceed(phase, form);
@@ -345,115 +346,174 @@ function syncNextButton(store, form) {
   btn.classList.toggle('disabled', !proceed);
 }
 
-export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
+function updateBoundDisplays(name, value) {
+  const num = Number(value);
+  document.querySelectorAll(`.ob-flow [data-bind="${name}"]`).forEach((el) => {
+    if (el.dataset.format === 'height') el.textContent = heightDisplay(num);
+    else el.textContent = value;
+  });
+  document.querySelectorAll(`.ob-flow [data-bind-sub="${name}"]`).forEach((el) => {
+    if (name === 'heightInches') el.textContent = `${Math.round(num)} inches`;
+  });
+}
+
+const obCtx = { store: null, render: null, onComplete: null, onConfirm: null };
+
+function handleObNext() {
+  const store = obCtx.store;
   const form = store.onboardingForm;
+  const phase = onboardingPhase(store.onboardingPage, store.onboardingEditMode);
+  if (!canProceed(phase, form)) return;
 
-  document.querySelector('[data-ob-back]')?.addEventListener('click', () => {
-    if (store.onboardingPage > 0) {
-      store.onboardingPage -= 1;
-      render();
-    }
-  });
-
-  document.querySelector('[data-ob-next]')?.addEventListener('click', () => {
-    const phase = onboardingPhase(store.onboardingPage, store.onboardingEditMode);
-    if (!canProceed(phase, form)) return;
-
-    if (phase.kind === 'confirm') {
-      if (onConfirm) {
-        onConfirm(form);
-        return;
-      }
-      store.profile = profileFromForm(form);
-      localStorage.setItem('bnb_profile', JSON.stringify(store.profile));
-      localStorage.setItem('bnb_onboarding_complete', 'true');
-      store.onboardingPage += 1;
-      render();
+  if (phase.kind === 'confirm') {
+    if (obCtx.onConfirm) {
+      obCtx.onConfirm(form);
       return;
     }
-
-    if (phase.kind === 'done') {
-      onComplete();
-      return;
-    }
-
+    store.profile = profileFromForm(form);
+    localStorage.setItem('bnb_profile', JSON.stringify(store.profile));
+    localStorage.setItem('bnb_onboarding_complete', 'true');
     store.onboardingPage += 1;
-    render();
+    obCtx.render();
+    return;
+  }
+
+  if (phase.kind === 'done') {
+    obCtx.onComplete?.();
+    return;
+  }
+
+  store.onboardingPage += 1;
+  obCtx.render();
+}
+
+function ensureObDelegation() {
+  if (ensureObDelegation.done) return;
+  ensureObDelegation.done = true;
+
+  document.addEventListener('click', (e) => {
+    if (!obCtx.store || !e.target.closest('.ob-flow')) return;
+
+    const target = e.target;
+    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check')) return;
+
+    const store = obCtx.store;
+    const form = store.onboardingForm;
+    const flow = e.target.closest('.ob-flow');
+
+    if (e.target.closest('[data-ob-back]')) {
+      if (store.onboardingPage > 0) {
+        store.onboardingPage -= 1;
+        obCtx.render();
+      }
+      return;
+    }
+
+    const nextBtn = e.target.closest('[data-ob-next]');
+    if (nextBtn) {
+      if (nextBtn.disabled || nextBtn.classList.contains('disabled')) return;
+      handleObNext();
+      return;
+    }
+
+    const gotoBtn = e.target.closest('[data-ob-goto]');
+    if (gotoBtn) {
+      store.onboardingPage = Number(gotoBtn.dataset.obGoto);
+      obCtx.render();
+      return;
+    }
+
+    const sexBtn = e.target.closest('[data-ob-sex]');
+    if (sexBtn) {
+      form.sex = sexBtn.dataset.obSex;
+      flow.querySelectorAll('[data-ob-sex]').forEach((b) => b.classList.toggle('active', b === sexBtn));
+      syncNextButton(store, form);
+      return;
+    }
+
+    if (e.target.closest('[data-ob-reminders]')) {
+      form.remindersEnabled = !form.remindersEnabled;
+      updateReminderToggle(form.remindersEnabled);
+    }
   });
 
-  document.querySelectorAll('[data-ob-goto]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      store.onboardingPage = Number(btn.dataset.obGoto);
-      render();
-    });
+  document.addEventListener('input', (e) => {
+    if (!obCtx.store) return;
+    const input = e.target;
+    if (!input.closest('.ob-flow') || !input.name) return;
+    const form = obCtx.store.onboardingForm;
+
+    if (input.type === 'range') {
+      form[input.name] = Number(input.value);
+      updateBoundDisplays(input.name, input.value);
+      return;
+    }
+
+    form[input.name] = input.value;
+    syncNextButton(obCtx.store, form);
   });
 
-  document.querySelectorAll('[data-ob-sex]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      form.sex = btn.dataset.obSex;
-      render();
-    });
-  });
+  document.addEventListener('change', (e) => {
+    if (!obCtx.store) return;
+    const input = e.target;
+    if (!input.closest('.ob-flow')) return;
+    const form = obCtx.store.onboardingForm;
+    const flow = input.closest('.ob-flow');
 
-  document.querySelector('[data-ob-reminders]')?.addEventListener('click', () => {
-    form.remindersEnabled = !form.remindersEnabled;
-    updateReminderToggle(form.remindersEnabled);
-  });
-
-  document.querySelectorAll('[data-wake-part]').forEach((select) => {
-    select.addEventListener('change', () => syncWakeTimeFromPicker(form));
-  });
-
-  document.querySelectorAll('input[name="fatSource"]').forEach((input) => {
-    input.addEventListener('change', () => {
+    if (input.name === 'fatSource') {
       form.fatSource = input.value;
-      render();
-    });
-  });
+      flow.querySelectorAll('[data-fat-for]').forEach((el) => {
+        el.classList.toggle('hidden', el.dataset.fatFor !== input.value);
+      });
+      flow.querySelectorAll('input[name="fatSource"]').forEach((r) => {
+        r.closest('.ob-radio')?.classList.toggle('selected', r.checked);
+      });
+      syncNextButton(obCtx.store, form);
+      return;
+    }
 
-  document.querySelectorAll('input[name="workPhysical"]').forEach((input) => {
-    input.addEventListener('change', () => {
-      form.workPhysical = input.value;
-      render();
-    });
-  });
+    if (input.name === 'workPhysical' || input.name === 'workStress') {
+      form[input.name] = input.value;
+      flow.querySelectorAll(`input[name="${input.name}"]`).forEach((r) => {
+        r.closest('.ob-radio')?.classList.toggle('selected', r.checked);
+      });
+      syncNextButton(obCtx.store, form);
+      return;
+    }
 
-  document.querySelectorAll('input[name="workStress"]').forEach((input) => {
-    input.addEventListener('change', () => {
-      form.workStress = input.value;
-      render();
-    });
-  });
-
-  document.querySelectorAll('input[name="lowActivity"]').forEach((input) => {
-    input.addEventListener('change', () => {
+    if (input.name === 'lowActivity') {
       const set = new Set(form.lowActivities);
       if (input.checked) set.add(input.value);
       else set.delete(input.value);
       form.lowActivities = [...set];
-      render();
-    });
+      flow.querySelectorAll('input[name="lowActivity"]').forEach((c) => {
+        c.closest('.ob-check')?.classList.toggle('selected', c.checked);
+      });
+      return;
+    }
+
+    if (input.dataset.wakePart) {
+      syncWakeTimeFromPicker(form);
+    }
   });
 
-  document.querySelectorAll('.ob-flow input, .ob-flow textarea').forEach((input) => {
-    if (!input.name) return;
-
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') e.preventDefault();
-    });
-
-    if (input.type === 'time') return;
-
-    const update = () => {
-      if (input.type === 'range' || input.type === 'number') {
-        form[input.name] = Number(input.value);
-        render();
-        return;
-      }
-      form[input.name] = input.value;
-      syncNextButton(store, form);
-    };
-
-    input.addEventListener('input', update);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.closest('.ob-flow input, .ob-flow textarea')) {
+      e.preventDefault();
+    }
   });
+}
+
+export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
+  obCtx.store = store;
+  obCtx.render = render;
+  obCtx.onComplete = onComplete;
+  obCtx.onConfirm = onConfirm;
+  ensureObDelegation();
+}
+
+export function syncObToStore(target) {
+  if (!obCtx.store) return;
+  target.onboardingPage = obCtx.store.onboardingPage;
+  target.onboardingForm = obCtx.store.onboardingForm;
 }

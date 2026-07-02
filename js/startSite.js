@@ -2,6 +2,7 @@ import {
   bindOnboardingEvents,
   initOnboardingForm,
   renderOnboarding,
+  syncObToStore,
 } from './onboardingUI.js';
 import {
   buildProgramPackage,
@@ -259,21 +260,25 @@ function onboardingStore() {
   };
 }
 
-function bindOnboardingOnly() {
-  const fakeStore = onboardingStore();
-  bindOnboardingEvents(fakeStore, {
-    render: () => {
-      store.onboardingPage = fakeStore.onboardingPage;
-      store.onboardingForm = fakeStore.onboardingForm;
-      document.getElementById('app').innerHTML = renderOnboardingWrapper();
-      bindOnboardingOnly();
-    },
+function onboardingCallbacks() {
+  return {
+    render: renderOnboardingStep,
     onConfirm: (form) => {
       store.onboardingForm = form;
       finishIntake();
     },
     onComplete: () => {},
-  });
+  };
+}
+
+function renderOnboardingStep() {
+  syncObToStore(store);
+  document.getElementById('app').innerHTML = renderOnboardingWrapper();
+  bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
+}
+
+function bindOnboardingOnly() {
+  bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
 }
 
 function bindGlobal() {

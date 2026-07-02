@@ -1,18 +1,9 @@
-const CACHE = 'bnb-v5';
+const CACHE = 'bnb-v6';
 const ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './css/start.css',
-  './js/app.js',
-  './js/burnEngine.js',
-  './js/coachEngine.js',
-  './js/groceryEngine.js',
-  './js/onboardingEngine.js',
-  './js/onboardingUI.js',
-  './js/programPackage.js',
-  './js/startSite.js',
-  './start/index.html',
   './data/foods.json',
   './manifest.json',
   './img/coach/card-1.png',
@@ -22,7 +13,10 @@ const ASSETS = [
   './img/coach/card-5.png',
   './img/coach/card-6.png',
   './img/coach/card-7.png',
+  './start/index.html',
 ];
+
+const NETWORK_FIRST = ['/js/', '/css/'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
@@ -36,5 +30,14 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  const url = e.request.url;
+  if (NETWORK_FIRST.some((part) => url.includes(part))) {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => res)
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(caches.match(e.request).then((c) => c || fetch(e.request)));
 });
