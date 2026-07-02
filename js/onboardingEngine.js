@@ -78,13 +78,28 @@ export function heightDisplay(inches) {
 
 export function formatWakeDisplay(wakeTime) {
   if (!wakeTime) return '—';
-  const [hStr, mStr] = wakeTime.split(':');
-  let h = Number(hStr);
-  const m = Number(mStr);
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  if (h > 12) h -= 12;
-  if (h === 0) h = 12;
-  return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
+  const { hour12, minute, ampm } = parseWakeTime(wakeTime);
+  return `${hour12}:${minute} ${ampm}`;
+}
+
+export function parseWakeTime(wakeTime) {
+  const [hStr, mStr] = (wakeTime || '06:00').split(':');
+  let h24 = Number(hStr);
+  const minute = String(Number(mStr)).padStart(2, '0');
+  const ampm = h24 >= 12 ? 'PM' : 'AM';
+  let hour12 = h24 % 12;
+  if (hour12 === 0) hour12 = 12;
+  return { hour12, minute, ampm };
+}
+
+export function wakeTimeFromParts(hour12, minute, ampm) {
+  let h = Number(hour12);
+  if (ampm === 'AM') {
+    if (h === 12) h = 0;
+  } else if (h !== 12) {
+    h += 12;
+  }
+  return `${String(h).padStart(2, '0')}:${minute}`;
 }
 
 export function defaultOnboardingForm(profile) {

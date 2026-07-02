@@ -240,12 +240,109 @@ function renderOnboardingWrapper() {
 function render() {
   const root = document.getElementById('app');
   if (store.phase === 'landing') root.innerHTML = renderLanding();
-  else if (store.phase === 'onboarding') root.innerHTML = renderOnboardingWrapper();
-  else if (store.phase === 'teach') root.innerHTML = renderTeaching();
+  else if (store.phase === 'onboarding') {
+    root.innerHTML = renderOnboardingWrapper();
+    bindOnboardingOnly();
+    return;
+  } else if (store.phase === 'teach') root.innerHTML = renderTeaching();
   else if (store.phase === 'preview') root.innerHTML = renderPreview();
   else if (store.phase === 'schedule') root.innerHTML = renderSchedule();
   else if (store.phase === 'export') root.innerHTML = renderExport();
-  bind();
+}
+
+function onboardingStore() {
+  return {
+    onboardingForm: store.onboardingForm,
+    onboardingPage: store.onboardingPage,
+    onboardingEditMode: false,
+    profile: null,
+  };
+}
+
+function bindOnboardingOnly() {
+  const fakeStore = onboardingStore();
+  bindOnboardingEvents(fakeStore, {
+    render: () => {
+      store.onboardingPage = fakeStore.onboardingPage;
+      store.onboardingForm = fakeStore.onboardingForm;
+      document.getElementById('app').innerHTML = renderOnboardingWrapper();
+      bindOnboardingOnly();
+    },
+    onConfirm: (form) => {
+      store.onboardingForm = form;
+      finishIntake();
+    },
+    onComplete: () => {},
+  });
+}
+
+function bindGlobal() {
+  if (bindGlobal.done) return;
+  bindGlobal.done = true;
+
+  document.getElementById('app').addEventListener('click', (e) => {
+    if (e.target.closest('[data-start-begin]')) {
+      beginOnboarding();
+      return;
+    }
+    if (e.target.closest('[data-teach-back]')) {
+      if (store.teachIndex > 0) store.teachIndex -= 1;
+      else store.phase = 'onboarding';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-teach-next]')) {
+      if (store.teachIndex < TEACHING.length - 1) store.teachIndex += 1;
+      else store.phase = 'preview';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-preview-back]')) {
+      store.phase = 'teach';
+      store.teachIndex = TEACHING.length - 1;
+      render();
+      return;
+    }
+    if (e.target.closest('[data-preview-next]')) {
+      store.phase = 'schedule';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-schedule-back]')) {
+      store.phase = 'preview';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-schedule-next]')) {
+      buildPackage();
+      return;
+    }
+    if (e.target.closest('[data-download-package]')) {
+      downloadProgramPackage(store.builtPackage);
+      return;
+    }
+    if (e.target.closest('[data-copy-import-link]')) {
+      copyImportLink();
+    }
+  });
+
+  document.getElementById('app').addEventListener('change', (e) => {
+    if (e.target.matches('input[name="startDate"]')) {
+      store.startDate = e.target.value;
+    }
+  });
+}
+
+async function copyImportLink() {
+  try {
+    await navigator.clipboard.writeText(store.importUrl);
+    const btn = document.querySelector('[data-copy-import-link]');
+    const prev = btn.textContent;
+    btn.textContent = 'COPIED!';
+    setTimeout(() => { btn.textContent = prev; }, 2000);
+  } catch {
+    alert('Copy failed — use Open in App or Save Program File instead.');
+  }
 }
 
 function beginOnboarding() {
@@ -273,74 +370,5 @@ function buildPackage() {
   render();
 }
 
-function bind() {
-  document.querySelector('[data-start-begin]')?.addEventListener('click', beginOnboarding);
-
-  if (store.phase === 'onboarding') {
-    const fakeStore = {
-      onboardingForm: store.onboardingForm,
-      onboardingPage: store.onboardingPage,
-      onboardingEditMode: false,
-      profile: null,
-    };
-    bindOnboardingEvents(fakeStore, {
-      render: () => {
-        store.onboardingPage = fakeStore.onboardingPage;
-        store.onboardingForm = fakeStore.onboardingForm;
-        render();
-      },
-      onConfirm: (form) => {
-        store.onboardingForm = form;
-        finishIntake();
-      },
-      onComplete: () => {},
-    });
-  }
-
-  document.querySelector('[data-teach-back]')?.addEventListener('click', () => {
-    if (store.teachIndex > 0) store.teachIndex -= 1;
-    else store.phase = 'onboarding';
-    render();
-  });
-  document.querySelector('[data-teach-next]')?.addEventListener('click', () => {
-    if (store.teachIndex < TEACHING.length - 1) store.teachIndex += 1;
-    else store.phase = 'preview';
-    render();
-  });
-
-  document.querySelector('[data-preview-back]')?.addEventListener('click', () => {
-    store.phase = 'teach';
-    store.teachIndex = TEACHING.length - 1;
-    render();
-  });
-  document.querySelector('[data-preview-next]')?.addEventListener('click', () => {
-    store.phase = 'schedule';
-    render();
-  });
-
-  document.querySelector('[data-schedule-back]')?.addEventListener('click', () => {
-    store.phase = 'preview';
-    render();
-  });
-  document.querySelector('input[name="startDate"]')?.addEventListener('change', (e) => {
-    store.startDate = e.target.value;
-  });
-  document.querySelector('[data-schedule-next]')?.addEventListener('click', buildPackage);
-
-  document.querySelector('[data-download-package]')?.addEventListener('click', () => {
-    downloadProgramPackage(store.builtPackage);
-  });
-  document.querySelector('[data-copy-import-link]')?.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(store.importUrl);
-      const btn = document.querySelector('[data-copy-import-link]');
-      const prev = btn.textContent;
-      btn.textContent = 'COPIED!';
-      setTimeout(() => { btn.textContent = prev; }, 2000);
-    } catch {
-      alert('Copy failed — use Open in App or Save Program File instead.');
-    }
-  });
-}
-
+bindGlobal();
 render();

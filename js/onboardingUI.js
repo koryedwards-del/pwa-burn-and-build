@@ -11,8 +11,10 @@ import {
   heightDisplay,
   nextLabel,
   onboardingPhase,
+  parseWakeTime,
   profileFromForm,
   totalOnboardingPages,
+  wakeTimeFromParts,
   welcomeScreens,
 } from './onboardingEngine.js';
 
@@ -157,7 +159,7 @@ function renderQuestion(index, form) {
     case 8:
       return `
         ${stepHeader(9, 'WAKE TIME', 'Eating every 2–3 hours keeps your fat burners (muscles) burning.')}
-        <input type="time" class="ob-input ob-time-input" name="wakeTime" value="${form.wakeTime}" />
+        ${renderWakePicker(form)}
         <div class="ob-divider"></div>
         <div class="ob-section-label">MEAL REMINDERS</div>
         <button type="button" class="ob-reminder-toggle ${form.remindersEnabled ? 'on' : ''}" data-ob-reminders>
@@ -170,6 +172,47 @@ function renderQuestion(index, form) {
 
     default:
       return '';
+  }
+}
+
+function renderWakePicker(form) {
+  const { hour12, minute, ampm } = parseWakeTime(form.wakeTime);
+  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+  const hourOpts = hours.map((h) => `<option value="${h}" ${h === hour12 ? 'selected' : ''}>${h}</option>`).join('');
+  const minOpts = minutes.map((m) => `<option value="${m}" ${m === minute ? 'selected' : ''}>${m}</option>`).join('');
+  return `
+    <div class="ob-wake-picker">
+      <select class="ob-select" data-wake-part="hour" aria-label="Wake hour">${hourOpts}</select>
+      <span class="ob-wake-colon">:</span>
+      <select class="ob-select" data-wake-part="minute" aria-label="Wake minute">${minOpts}</select>
+      <select class="ob-select" data-wake-part="ampm" aria-label="AM or PM">
+        <option value="AM" ${ampm === 'AM' ? 'selected' : ''}>AM</option>
+        <option value="PM" ${ampm === 'PM' ? 'selected' : ''}>PM</option>
+      </select>
+    </div>
+    <div class="ob-wake-display">${formatWakeDisplay(form.wakeTime)}</div>`;
+}
+
+function syncWakeTimeFromPicker(form) {
+  const hour = document.querySelector('[data-wake-part="hour"]')?.value;
+  const minute = document.querySelector('[data-wake-part="minute"]')?.value;
+  const ampm = document.querySelector('[data-wake-part="ampm"]')?.value;
+  if (!hour || !minute || !ampm) return;
+  form.wakeTime = wakeTimeFromParts(hour, minute, ampm);
+  const display = document.querySelector('.ob-wake-display');
+  if (display) display.textContent = formatWakeDisplay(form.wakeTime);
+}
+
+function updateReminderToggle(enabled) {
+  const btn = document.querySelector('[data-ob-reminders]');
+  if (!btn) return;
+  btn.classList.toggle('on', enabled);
+  const sub = btn.querySelector('.ob-reminder-sub');
+  if (sub) {
+    sub.textContent = enabled
+      ? 'Burn & Build will notify you when it\'s time to eat each meal and fruit snack.'
+      : 'No reminders set.';
   }
 }
 
@@ -354,7 +397,11 @@ export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
 
   document.querySelector('[data-ob-reminders]')?.addEventListener('click', () => {
     form.remindersEnabled = !form.remindersEnabled;
-    render();
+    updateReminderToggle(form.remindersEnabled);
+  });
+
+  document.querySelectorAll('[data-wake-part]').forEach((select) => {
+    select.addEventListener('change', () => syncWakeTimeFromPicker(form));
   });
 
   document.querySelectorAll('input[name="fatSource"]').forEach((input) => {
@@ -395,12 +442,7 @@ export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
       if (e.key === 'Enter') e.preventDefault();
     });
 
-    if (input.type === 'time') {
-      input.addEventListener('change', () => {
-        form[input.name] = input.value;
-      });
-      return;
-    }
+    if (input.type === 'time') return;
 
     const update = () => {
       if (input.type === 'range' || input.type === 'number') {
