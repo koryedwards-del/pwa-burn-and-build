@@ -293,6 +293,15 @@ export function initOnboardingForm(store) {
 
 export { profileFromForm, onboardingPhase, WELCOME_COUNT };
 
+function syncNextButton(store, form) {
+  const btn = document.querySelector('[data-ob-next]');
+  if (!btn) return;
+  const phase = onboardingPhase(store.onboardingPage, store.onboardingEditMode);
+  const proceed = canProceed(phase, form);
+  btn.disabled = !proceed;
+  btn.classList.toggle('disabled', !proceed);
+}
+
 export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
   const form = store.onboardingForm;
 
@@ -381,12 +390,27 @@ export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
 
   document.querySelectorAll('.ob-flow input, .ob-flow textarea').forEach((input) => {
     if (!input.name) return;
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') e.preventDefault();
+    });
+
     const update = () => {
-      if (input.type === 'range' || input.type === 'number') form[input.name] = Number(input.value);
-      else form[input.name] = input.value;
-      render();
+      if (input.type === 'range' || input.type === 'number') {
+        form[input.name] = Number(input.value);
+        render();
+        return;
+      }
+      if (input.type === 'time') {
+        form[input.name] = input.value;
+        render();
+        return;
+      }
+      form[input.name] = input.value;
+      syncNextButton(store, form);
     };
+
     input.addEventListener('input', update);
-    input.addEventListener('change', update);
+    if (input.type === 'time') input.addEventListener('change', update);
   });
 }
