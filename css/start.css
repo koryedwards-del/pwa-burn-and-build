@@ -243,6 +243,23 @@
   color: var(--cyan);
 }
 
+.start-combined-intro {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.start-combined-intro .start-hero {
+  padding: 40px 24px 24px;
+}
+
+.start-combined-intro .start-split {
+  padding-bottom: 24px;
+}
+
+.start-site .ob-flow.start-combined-flow {
+  min-height: auto;
+}
+
 .start-success {
   text-align: center;
   padding: 24px 0;

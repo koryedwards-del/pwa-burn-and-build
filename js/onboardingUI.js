@@ -297,12 +297,12 @@ function renderDone(isEditMode) {
     </div>`;
 }
 
-export function renderOnboarding(store) {
+export function renderOnboarding(store, options = {}) {
   const form = store.onboardingForm;
   const page = store.onboardingPage;
   const isEditMode = store.onboardingEditMode;
   const phase = onboardingPhase(page, isEditMode);
-  const start = isEditMode ? WELCOME_COUNT : 0;
+  const start = isEditMode ? WELCOME_COUNT : (options.progressStart ?? 0);
   const progressTotal = totalOnboardingPages() - 1 - start;
   const progressCurrent = page - start;
   const screens = welcomeScreens();
@@ -316,9 +316,13 @@ export function renderOnboarding(store) {
 
   const showBar = phase.kind !== 'done';
   const showBack = page > start;
+  const nextText = options.firstStepLabel && page === start
+    ? options.firstStepLabel
+    : nextLabel(phase, isEditMode);
+  const flowClass = options.flowClass || '';
 
   return `
-    <div class="ob-flow">
+    <div class="ob-flow${flowClass}">
       ${showBar ? `
       <div class="ob-top">
         ${showBack ? '<button type="button" class="ob-back" data-ob-back>←</button>' : (isEditMode ? '<button type="button" class="ob-back" data-nav="home">×</button>' : '<span class="ob-back-spacer"></span>')}
@@ -326,7 +330,7 @@ export function renderOnboarding(store) {
       </div>` : ''}
       <div class="ob-content">${content}</div>
       <div class="ob-footer">
-        <button type="button" class="ob-next ${proceed ? '' : 'disabled'}" data-ob-next ${proceed ? '' : 'disabled'}>${nextLabel(phase, isEditMode)}</button>
+        <button type="button" class="ob-next ${proceed ? '' : 'disabled'}" data-ob-next ${proceed ? '' : 'disabled'}>${nextText}</button>
       </div>
     </div>`;
 }
