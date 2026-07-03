@@ -1,4 +1,4 @@
-const CACHE = 'bnb-v10';
+const CACHE = 'bnb-v11';
 const ASSETS = [
   './',
   './index.html',

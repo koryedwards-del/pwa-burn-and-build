@@ -11,6 +11,30 @@
   --cyan: #5ec4e8;
   --green: #6ecf8a;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --layout-max: 480px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --layout-max: 720px;
+  }
+
+  .ob-top,
+  .ob-content {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  .ob-footer {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --layout-max: 960px;
+  }
 }
 
 html, body {
@@ -38,7 +62,7 @@ button {
 }
 
 .screen {
-  max-width: 480px;
+  max-width: var(--layout-max);
   margin: 0 auto;
   min-height: 100vh;
 }
@@ -956,7 +980,7 @@ button {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  max-width: 480px;
+  max-width: var(--layout-max);
   margin: 0 auto;
 }
 
@@ -1014,9 +1038,7 @@ button {
   padding: 16px 24px calc(16px + var(--safe-bottom));
   background: #000;
   border-top: 1px solid var(--border);
-  max-width: 480px;
   width: 100%;
-  margin: 0 auto;
 }
 
 .ob-next {

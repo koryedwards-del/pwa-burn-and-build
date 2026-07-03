@@ -7,7 +7,7 @@
 }
 
 .start-site .screen {
-  max-width: 720px;
+  max-width: var(--layout-max);
 }
 
 .start-hero {
@@ -40,7 +40,7 @@
   color: var(--muted);
   font-size: 16px;
   line-height: 1.55;
-  max-width: 540px;
+  max-width: min(640px, 100%);
   margin-left: auto;
   margin-right: auto;
 }
@@ -54,6 +54,20 @@
 @media (min-width: 640px) {
   .start-split {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 768px) {
+  .start-hero {
+    padding: 72px 40px 40px;
+  }
+
+  .start-split,
+  .btn-stack,
+  .unlock-panel,
+  .start-footer-link {
+    padding-left: 40px;
+    padding-right: 40px;
   }
 }
 
@@ -254,7 +268,7 @@
 
 .unlock-panel {
   padding: 0 24px 32px;
-  max-width: 480px;
+  max-width: var(--layout-max);
   margin: 0 auto;
 }
 
