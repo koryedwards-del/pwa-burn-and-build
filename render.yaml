@@ -1,19 +1,21 @@
-# Burn & Build — program creator (Web Service)
-# Connect repo in Render → New Blueprint → deploy
-# App PWA can stay on GitHub Pages until you move it separately.
+# Burn & Build — program creator (Render Web Service)
+# Render Dashboard → New → Blueprint → connect pwa-burn-and-build repo
 
 services:
   - type: web
     name: burn-and-build-program-creator
     runtime: node
-    plan: starter
+    region: oregon
+    plan: free
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: WEBPAGE_URL
-        sync: false
+        value: https://gettheburnandbuildapp.com
       - key: CREATOR_BASE_URL
         sync: false
