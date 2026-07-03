@@ -123,10 +123,6 @@ function renderLanding() {
         </div>
         <div class="btn-stack">
           <button type="button" class="btn-primary" data-start-begin>BEGIN YOUR 8-WEEK PROGRAM →</button>
-          <a href="../" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Already own Burn & Build? Open the app →</a>
-        </div>
-        <div class="start-footer-link">
-          <a href="../">Burn & Build App</a>
         </div>
       </div>
     </div>`;
