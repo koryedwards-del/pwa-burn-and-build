@@ -9,6 +9,12 @@ import {
   downloadProgramPackage,
   packageToImportUrl,
 } from './programPackage.js';
+import {
+  bindHomeEvents,
+  createHomeState,
+  renderWebsiteHome,
+} from './websiteHome.js';
+import { totalOnboardingPages } from './onboardingEngine.js';
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
@@ -68,7 +74,8 @@ const TEACHING = [
 ];
 
 const store = {
-  phase: 'onboarding',
+  phase: 'home',
+  home: createHomeState(),
   onboardingPage: 1,
   onboardingForm: null,
   onboardingEditMode: false,
@@ -90,37 +97,11 @@ function programName() {
   return store.onboardingForm?.preferredName || store.builtPackage?.intake?.preferredName || '';
 }
 
-function renderLandingIntro() {
-  return `
-    <div class="start-combined-intro">
-      <div class="start-hero">
-        <div class="eyebrow">Start your program</div>
-        <h1>BURN <span>&amp; BUILD</span></h1>
-        <p>Build your program here. Own Burn & Build for life — your daily coach for food logging, groceries, and staying on plan.</p>
-      </div>
-      <div class="start-split">
-        <div class="start-card">
-          <h3>On this website</h3>
-          <p>The program factory — teaching, intake, and the Burn Engine.</p>
-          <ul>
-            <li>Seminar-style coaching content</li>
-            <li>Body composition & lifestyle intake</li>
-            <li>Personalized serving targets</li>
-            <li>Your program, built for you</li>
-          </ul>
-        </div>
-        <div class="start-card">
-          <h3>In the app</h3>
-          <p>Your daily coach — execute the plan every day.</p>
-          <ul>
-            <li>Custom food plan with gram weights</li>
-            <li>Meal logging & fat point tracking</li>
-            <li>Grocery list</li>
-            <li>Coach Kory messages</li>
-          </ul>
-        </div>
-      </div>
-    </div>`;
+function beginProgramCreation() {
+  store.phase = 'onboarding';
+  store.onboardingPage = 1;
+  window.scrollTo(0, 0);
+  render();
 }
 
 function renderTeaching() {
@@ -313,22 +294,24 @@ function magicLinkUrl() {
 }
 
 function renderOnboardingWrapper() {
-  const showIntro = store.onboardingPage === 1;
   const fakeStore = {
     onboardingForm: store.onboardingForm,
     onboardingPage: store.onboardingPage,
     onboardingEditMode: false,
   };
-  return `<div class="start-site">${showIntro ? renderLandingIntro() : ''}${renderOnboarding(fakeStore, {
+  return `<div class="start-site">${renderOnboarding(fakeStore, {
     progressStart: 1,
     firstStepLabel: 'GET STARTED  →',
-    flowClass: showIntro ? ' start-combined-flow' : '',
   })}</div>`;
 }
 
 function render() {
   const root = document.getElementById('app');
-  if (store.phase === 'onboarding') {
+  if (store.phase === 'home') {
+    root.innerHTML = renderWebsiteHome(store.home);
+    bindHomeEvents(root, store.home, { onCreateProgram: beginProgramCreation });
+    return;
+  } else if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
     bindOnboardingOnly();
     return;
@@ -422,7 +405,10 @@ function bindGlobal() {
   document.getElementById('app').addEventListener('click', (e) => {
     if (e.target.closest('[data-teach-back]')) {
       if (store.teachIndex > 0) store.teachIndex -= 1;
-      else store.phase = 'onboarding';
+      else {
+        store.phase = 'onboarding';
+        store.onboardingPage = totalOnboardingPages() - 1;
+      }
       render();
       return;
     }
