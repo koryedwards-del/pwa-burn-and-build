@@ -11,6 +11,15 @@ import {
   planFromPackage,
 } from './programPackage.js';
 
+const OWNERSHIP_INCLUDES = [
+  'Your personalized 8-week program',
+  'Coaching from Coach Kory',
+  'Meal logging',
+  'Grocery lists',
+  'Progress tracking',
+  'Own Burn & Build for life',
+];
+
 const TEACHING = [
   {
     kicker: 'Coach Kory',
@@ -68,12 +77,18 @@ const store = {
   builtPackage: null,
   startDate: defaultStartDate(),
   importUrl: '',
+  email: '',
+  showAdvanced: false,
 };
 
 function defaultStartDate() {
   const d = new Date();
   d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
   return d.toISOString().slice(0, 10);
+}
+
+function programName() {
+  return store.onboardingForm?.preferredName || store.builtPackage?.intake?.preferredName || '';
 }
 
 function renderLanding() {
@@ -83,7 +98,7 @@ function renderLanding() {
         <div class="start-hero">
           <div class="eyebrow">Start your program</div>
           <h1>BURN <span>&amp; BUILD</span></h1>
-          <p>Build your program here. Open it in the Burn & Build app — your daily coach for food logging, groceries, and staying on plan.</p>
+          <p>Build your program here. Own Burn & Build for life — your daily coach for food logging, groceries, and staying on plan.</p>
         </div>
         <div class="start-split">
           <div class="start-card">
@@ -93,7 +108,7 @@ function renderLanding() {
               <li>Seminar-style coaching content</li>
               <li>Body composition & lifestyle intake</li>
               <li>Personalized serving targets</li>
-              <li>Program ready for the app</li>
+              <li>Your program, built for you</li>
             </ul>
           </div>
           <div class="start-card">
@@ -109,7 +124,7 @@ function renderLanding() {
         </div>
         <div class="btn-stack">
           <button type="button" class="btn-primary" data-start-begin>BEGIN YOUR 8-WEEK PROGRAM →</button>
-          <a href="../" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Already have a program? Open the app →</a>
+          <a href="../" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Already own Burn & Build? Open the app →</a>
         </div>
         <div class="start-footer-link">
           <a href="../">Burn & Build App</a>
@@ -147,6 +162,7 @@ function ensurePreviewPackage() {
     startDate: store.startDate,
     label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
   });
+  store.importUrl = packageToImportUrl(store.builtPackage, '../');
   return store.builtPackage;
 }
 
@@ -183,7 +199,7 @@ function renderPreview() {
             <div class="plan-preview-cell"><span>Est. weekly loss</span><strong>${plan.weeklyFatLossPounds.toFixed(1)} lbs</strong></div>
           </div>
           <p>Reduce calories: <strong>${Math.round(plan.reduceTotalCals)}</strong> · Maintain: <strong>${Math.round(plan.maintainTotalCals)}</strong></p>
-          <div class="ob-info" style="margin-top:20px;"><span class="ob-info-icon">📱</span><p>These are your daily targets — locked into your program package. Your full custom food plan with gram weights, meal logging, and coaching lives in the app after you open your program.</p></div>
+          <div class="ob-info" style="margin-top:20px;"><span class="ob-info-icon">📱</span><p>These are your daily targets. Unlock ownership to open your full custom food plan in the app — with gram weights, meal logging, and coaching.</p></div>
         </div>
         <div class="ob-footer">
           <button type="button" class="ob-next" data-preview-next>CHOOSE START DATE →</button>
@@ -211,40 +227,145 @@ function renderSchedule() {
           <div class="ob-info"><span class="ob-info-icon">💡</span><p>Most people start on a Monday. Pick a date you can commit to — grocery shopping done, kitchen ready, mindset set.</p></div>
         </div>
         <div class="ob-footer">
-          <button type="button" class="ob-next" data-schedule-next>GENERATE PROGRAM PACKAGE →</button>
+          <button type="button" class="ob-next" data-schedule-next>BUILD MY PROGRAM →</button>
         </div>
       </div>
     </div>`;
 }
 
-function renderExport() {
-  const pkg = store.builtPackage;
-  const json = JSON.stringify(pkg, null, 2);
+function renderOwnershipList() {
+  return `<ul class="unlock-includes">${OWNERSHIP_INCLUDES.map((item) => `<li>${item}</li>`).join('')}</ul>`;
+}
+
+function renderReady() {
+  const name = programName();
   return `
     <div class="start-site">
-      <div class="screen">
+      <div class="screen unlock-screen">
         <div class="start-success">
           <div class="check">✓</div>
-          <div class="ob-welcome-line1">PROGRAM</div>
-          <div class="ob-welcome-line2">READY.</div>
+          <div class="ob-welcome-line1">YOUR PROGRAM</div>
+          <div class="ob-welcome-line2">IS READY.</div>
         </div>
-        <div class="export-panel" style="padding:0 24px;">
-          <p style="color:#ccc;line-height:1.6;">Your 8-week program is ready. It will be waiting for you in the Burn & Build app.</p>
-          <div class="export-actions">
-            <a href="${store.importUrl}" class="btn-primary" style="display:block;text-align:center;text-decoration:none;">OPEN IN APP →</a>
-            <button type="button" class="btn-secondary" data-copy-import-link>COPY APP LINK</button>
-            <button type="button" class="btn-secondary" data-download-package>SAVE PROGRAM FILE</button>
+        <div class="unlock-panel">
+          <p class="unlock-lead">Your personalized 8-week Burn &amp; Build program has been created${name ? ` for ${name}` : ''}. It will be waiting for you in the Burn &amp; Build app.</p>
+          <div class="unlock-box">
+            <h3>Own Burn &amp; Build for Life</h3>
+            ${renderOwnershipList()}
           </div>
-          <div class="export-note">
-            <strong>On the same device?</strong> Tap <em>Open in App</em>. On another device, use <em>Save Program File</em> and then <em>Open Program</em> in the app.
-          </div>
-          <textarea readonly aria-label="Program JSON">${json}</textarea>
-        </div>
-        <div class="start-footer-link">
-          <a href="../">← Back to Burn & Build App</a>
+          <p class="unlock-tagline">My coach built my program. Now I'm opening it.</p>
+          <button type="button" class="btn-primary unlock-cta" data-unlock-begin>UNLOCK MY PROGRAM →</button>
+          <button type="button" class="unlock-back-link" data-ready-back>← Back to start date</button>
         </div>
       </div>
     </div>`;
+}
+
+function renderUnlockEmail() {
+  return `
+    <div class="start-site">
+      <div class="screen unlock-screen">
+        <div class="unlock-panel">
+          <div class="teach-kicker">Step 1 of 3</div>
+          <h2 class="unlock-title">Own Burn &amp; Build for life</h2>
+          <p class="unlock-lead">Enter your email. We'll send you a secure link to unlock your program and open it in the app.</p>
+          ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
+          <label class="unlock-label" for="unlock-email">Email address</label>
+          <input id="unlock-email" class="ob-input ob-input-lg" type="email" name="unlockEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
+          <button type="button" class="btn-primary unlock-cta" data-unlock-send>SEND MY LINK →</button>
+          <button type="button" class="unlock-back-link" data-unlock-back-ready>← Back</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderUnlockSent() {
+  const verifyUrl = magicLinkUrl();
+  return `
+    <div class="start-site">
+      <div class="screen unlock-screen">
+        <div class="unlock-panel">
+          <div class="teach-kicker">Step 2 of 3</div>
+          <h2 class="unlock-title">Check your email</h2>
+          <p class="unlock-lead">We sent a secure link to <strong>${store.email}</strong>. Open it on this device to continue.</p>
+          <div class="ob-info"><span class="ob-info-icon">✉️</span><p>Your personalized program is already built and waiting. The link unlocks ownership and opens your plan in the app.</p></div>
+          <p class="unlock-hint">Didn't get it? Check spam or wait a minute, then try again.</p>
+          <button type="button" class="btn-secondary" data-unlock-resend>RESEND LINK</button>
+          <button type="button" class="unlock-back-link" data-unlock-back-email>← Change email</button>
+          ${isTestMode() ? `
+          <details class="unlock-advanced">
+            <summary>Testing tools</summary>
+            <p>Simulates clicking the magic link (remove when Signal+ email is live).</p>
+            <a href="${verifyUrl}" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;margin-top:8px;">Simulate magic link →</a>
+          </details>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderUnlockPay() {
+  return `
+    <div class="start-site">
+      <div class="screen unlock-screen">
+        <div class="unlock-panel">
+          <div class="teach-kicker">Step 3 of 3</div>
+          <h2 class="unlock-title">Complete your ownership</h2>
+          <p class="unlock-lead">One-time purchase. Own Burn &amp; Build for life — your program, coaching, and daily tools in the app.</p>
+          <div class="unlock-box">
+            <h3>Lifetime ownership includes</h3>
+            ${renderOwnershipList()}
+          </div>
+          <div class="unlock-price-card">
+            <span class="unlock-price-label">One-time</span>
+            <span class="unlock-price-note">Payment connects to Stripe soon</span>
+          </div>
+          <button type="button" class="btn-primary unlock-cta" data-unlock-purchase>COMPLETE OWNERSHIP →</button>
+          <p class="unlock-hint">Secure checkout · No subscription · Yours for life</p>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderOpen() {
+  return `
+    <div class="start-site">
+      <div class="screen unlock-screen">
+        <div class="start-success">
+          <div class="check">✓</div>
+          <div class="ob-welcome-line1">YOU'RE</div>
+          <div class="ob-welcome-line2">IN.</div>
+        </div>
+        <div class="unlock-panel">
+          <p class="unlock-lead">Your program is waiting in the Burn &amp; Build app. Tap below to open it — no files, no transfer, just your coach and your plan.</p>
+          <a href="${store.importUrl}" class="btn-primary unlock-cta" style="display:block;text-align:center;text-decoration:none;">OPEN MY PROGRAM →</a>
+          <p class="unlock-tagline">Eat the food. Trust the plan.</p>
+          ${renderAdvancedFallback()}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderAdvancedFallback() {
+  return `
+    <details class="unlock-advanced">
+      <summary>Having trouble opening your program?</summary>
+      <p>For support staff or edge cases only — most users should tap Open My Program above.</p>
+      <div class="export-actions">
+        <button type="button" class="btn-secondary" data-download-package>Save program file</button>
+        <button type="button" class="btn-secondary" data-copy-import-link>Copy app link</button>
+      </div>
+    </details>`;
+}
+
+function isTestMode() {
+  return location.hostname.includes('github.io') || location.hostname === 'localhost' || location.search.includes('test=1');
+}
+
+function magicLinkUrl() {
+  const url = new URL(location.href);
+  url.searchParams.set('unlock', 'verified');
+  url.searchParams.delete('phase');
+  return url.toString();
 }
 
 function renderOnboardingWrapper() {
@@ -266,7 +387,11 @@ function render() {
   } else if (store.phase === 'teach') root.innerHTML = renderTeaching();
   else if (store.phase === 'preview') root.innerHTML = renderPreview();
   else if (store.phase === 'schedule') root.innerHTML = renderSchedule();
-  else if (store.phase === 'export') root.innerHTML = renderExport();
+  else if (store.phase === 'ready') root.innerHTML = renderReady();
+  else if (store.phase === 'unlock-email') root.innerHTML = renderUnlockEmail();
+  else if (store.phase === 'unlock-sent') root.innerHTML = renderUnlockSent();
+  else if (store.phase === 'unlock-pay') root.innerHTML = renderUnlockPay();
+  else if (store.phase === 'open') root.innerHTML = renderOpen();
 }
 
 function onboardingStore() {
@@ -297,6 +422,50 @@ function renderOnboardingStep() {
 
 function bindOnboardingOnly() {
   bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
+}
+
+function validEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function sendMagicLink() {
+  const input = document.querySelector('[name="unlockEmail"]');
+  const email = (input?.value || store.email || '').trim();
+  if (!validEmail(email)) {
+    store.emailError = 'Enter a valid email address.';
+    store.email = email;
+    render();
+    input?.focus();
+    return;
+  }
+  store.email = email;
+  store.emailError = '';
+  sessionStorage.setItem('bnb_unlock_email', email);
+  // TODO: Signal+ magic link API — POST email, send link with ?unlock=verified&token=...
+  store.phase = 'unlock-sent';
+  render();
+}
+
+function handleUnlockVerified() {
+  store.email = sessionStorage.getItem('bnb_unlock_email') || store.email;
+  store.phase = 'unlock-pay';
+  const url = new URL(location.href);
+  url.searchParams.delete('unlock');
+  history.replaceState({}, '', url.pathname + url.search);
+  render();
+}
+
+function completePurchase() {
+  // TODO: Stripe checkout — webhook grants ownership, server attaches program to account
+  sessionStorage.setItem('bnb_ownership', 'true');
+  store.phase = 'open';
+  render();
+}
+
+function buildProgramReady() {
+  ensurePreviewPackage();
+  store.phase = 'ready';
+  render();
 }
 
 function bindGlobal() {
@@ -341,7 +510,39 @@ function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-schedule-next]')) {
-      buildPackage();
+      buildProgramReady();
+      return;
+    }
+    if (e.target.closest('[data-ready-back]')) {
+      store.phase = 'schedule';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-unlock-begin]')) {
+      store.phase = 'unlock-email';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-unlock-back-ready]')) {
+      store.phase = 'ready';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-unlock-send]')) {
+      sendMagicLink();
+      return;
+    }
+    if (e.target.closest('[data-unlock-back-email]')) {
+      store.phase = 'unlock-email';
+      render();
+      return;
+    }
+    if (e.target.closest('[data-unlock-resend]')) {
+      sendMagicLink();
+      return;
+    }
+    if (e.target.closest('[data-unlock-purchase]')) {
+      completePurchase();
       return;
     }
     if (e.target.closest('[data-download-package]')) {
@@ -356,6 +557,14 @@ function bindGlobal() {
   document.getElementById('app').addEventListener('change', (e) => {
     if (e.target.matches('input[name="startDate"]')) {
       store.startDate = e.target.value;
+      if (store.builtPackage) ensurePreviewPackage();
+    }
+  });
+
+  document.getElementById('app').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('[name="unlockEmail"]')) {
+      e.preventDefault();
+      sendMagicLink();
     }
   });
 }
@@ -364,11 +573,12 @@ async function copyImportLink() {
   try {
     await navigator.clipboard.writeText(store.importUrl);
     const btn = document.querySelector('[data-copy-import-link]');
+    if (!btn) return;
     const prev = btn.textContent;
     btn.textContent = 'COPIED!';
     setTimeout(() => { btn.textContent = prev; }, 2000);
   } catch {
-    alert('Copy failed — use Open in App or Save Program File instead.');
+    alert('Could not copy link. Use Open My Program instead.');
   }
 }
 
@@ -387,15 +597,19 @@ function finishIntake() {
   render();
 }
 
-function buildPackage() {
-  store.builtPackage = buildProgramPackage(store.onboardingForm, {
-    startDate: store.startDate,
-    label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
-  });
-  store.importUrl = packageToImportUrl(store.builtPackage, '../');
-  store.phase = 'export';
-  render();
+function initFromUrl() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('unlock') === 'verified') {
+    handleUnlockVerified();
+    return;
+  }
+  if (params.get('unlock') === 'open' && sessionStorage.getItem('bnb_ownership') === 'true') {
+    store.email = sessionStorage.getItem('bnb_unlock_email') || '';
+    ensurePreviewPackage();
+    store.phase = 'open';
+  }
 }
 
 bindGlobal();
+initFromUrl();
 render();
