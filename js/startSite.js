@@ -263,10 +263,6 @@ function renderUnlockPay() {
             <h3>Lifetime ownership includes</h3>
             ${renderOwnershipList()}
           </div>
-          <div class="unlock-price-card">
-            <span class="unlock-price-label">One-time</span>
-            <span class="unlock-price-note">Payment connects to Stripe soon</span>
-          </div>
           <button type="button" class="btn-primary unlock-cta" data-unlock-purchase>COMPLETE OWNERSHIP →</button>
           <p class="unlock-hint">Secure checkout · No subscription · Yours for life</p>
         </div>
