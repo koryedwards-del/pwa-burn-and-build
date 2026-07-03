@@ -12,3 +12,7 @@ alwaysApply: true
 - **Not connected to Hardkor Diet** (`hardkordietlandingpage` / thehardkordiet.com)
 
 Push to `main` deploys via GitHub Pages.
+
+## Reminders
+
+- **~Jul 5–6, 2026:** Check **Enforce HTTPS** for Hardkor (`thehardkordiet.com`) in GitHub Pages settings — DNS is green; cert may be ready by then.
