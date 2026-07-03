@@ -1,0 +1,16 @@
+{
+  "name": "burn-and-build-program-creator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server/index.js",
+    "start": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
