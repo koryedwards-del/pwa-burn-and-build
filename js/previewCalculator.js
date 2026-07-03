@@ -1,50 +1,122 @@
-import { computePlan } from './burnEngine.js';
+/** "What's Possible" timeline — constant lean body mass, ~3% BF/month (6% per 8 weeks). */
 
-/** Moderate defaults for "what's possible" preview — not a personalized program. */
-const PREVIEW_DEFAULTS = {
-  intensity: 2.0,
-  weightTrainingHours: 2,
-  cardioHours: 1,
-  fatBurningHours: 3,
-};
+const TARGET_BF = { male: 4.68, female: 8.95 };
+const DROP_PER_CYCLE = 6;
+const WEEKS_PER_CYCLE = 8;
 
-export function computePreview({ weightLbs, bodyFatPercent, targetBodyFatPercent }) {
+function aceBadge(bf, gender, isFloor) {
+  if (isFloor) return { label: 'Showtime', cls: 'showtime' };
+  if (gender === 'male' && bf <= 24 && bf > 13) return { label: 'Average', cls: 'average' };
+  if (gender === 'female' && bf <= 31 && bf > 20) return { label: 'Average', cls: 'average' };
+  return null;
+}
+
+export function computeWhatsPossible({ gender, weightLbs, bodyFatPercent }) {
   const weight = Number(weightLbs);
   const bf = Number(bodyFatPercent);
-  const targetBf = Number(targetBodyFatPercent);
+  const g = gender === 'female' ? 'female' : 'male';
+  const targetBf = TARGET_BF[g];
 
-  if (!weight || weight < 80 || !bf || bf < 5 || bf > 60) {
-    return { valid: false, error: 'Enter a realistic weight and body fat percentage.' };
+  if (!weight || weight <= 0 || !bf || bf <= targetBf || bf > 70) {
+    return {
+      valid: false,
+      error: `Enter a valid weight and body fat % above ${targetBf}%.`,
+    };
   }
 
   const lbm = weight * (1 - bf / 100);
-  const plan = computePlan({
-    lbm,
-    ...PREVIEW_DEFAULTS,
+  const finalWeight = lbm / (1 - targetBf / 100);
+
+  const fullCycles = Math.floor((bf - targetBf) / DROP_PER_CYCLE);
+  const remainder = (bf - targetBf) % DROP_PER_CYCLE;
+  const partialWeeks = remainder > 0 ? (remainder / DROP_PER_CYCLE) * WEEKS_PER_CYCLE : 0;
+  const totalWeeks = fullCycles * WEEKS_PER_CYCLE + partialWeeks;
+  const wholeWeeks = Math.round(totalWeeks);
+  const timeStr = `${wholeWeeks} weeks`;
+
+  const narrative = `<strong>Pro Tip:</strong> Transforming your body is a balance of lean body mass (muscle shape) and how much body fat is covering it up. Based on your current weight and body fat, Burn &amp; Build can take you from <strong>${weight.toFixed(0)} lbs at ${bf.toFixed(0)}%</strong> to <strong>${finalWeight.toFixed(1)} lbs at ${targetBf}%</strong> in <strong>${timeStr}</strong> — while increasing your strength and energy. If the projected body weight at your desired body fat seems too low, it means you need more muscle. Participate in weight training and follow your personalized Burn &amp; Build program for fastest results.`;
+
+  const rows = [];
+  const shownBadges = {};
+  let curBf = bf;
+  let cycleWeeks = 0;
+
+  rows.push({
+    timeline: 'Current',
+    bodyFat: bf,
+    bodyFatDisplay: `${bf.toFixed(0)}%`,
+    weight: weight,
+    weightDisplay: `${weight.toFixed(0)} lbs`,
+    isCurrent: true,
+    badge: null,
   });
 
-  const weeklyLoss = Math.max(plan.weeklyFatLossPounds, 0);
-  const fatToLose = Math.max((weight * (bf - targetBf)) / 100, 0);
-  const weeksToTarget = weeklyLoss > 0 ? Math.ceil(fatToLose / weeklyLoss) : null;
-  const eightWeekLoss = weeklyLoss * 8;
+  while (curBf > targetBf) {
+    let newBf = curBf - DROP_PER_CYCLE;
+    let isFloor = false;
+    let isPartial = false;
+    if (newBf <= targetBf) {
+      newBf = targetBf;
+      isFloor = true;
+    }
+    if (isFloor && remainder > 0) isPartial = true;
+
+    const newWeight = lbm / (1 - newBf / 100);
+    const badge = aceBadge(newBf, g, isFloor);
+    let badgeLabel = null;
+    if (badge && !shownBadges[badge.label]) {
+      shownBadges[badge.label] = true;
+      badgeLabel = badge.label;
+    }
+
+    if (isPartial) {
+      cycleWeeks += partialWeeks;
+      rows.push({
+        timeline: `${Math.round(cycleWeeks)} weeks`,
+        bodyFat: targetBf,
+        bodyFatDisplay: `${targetBf}%`,
+        weight: newWeight,
+        weightDisplay: `${newWeight.toFixed(1)} lbs`,
+        isCurrent: false,
+        badge: badgeLabel,
+      });
+    } else {
+      cycleWeeks += WEEKS_PER_CYCLE;
+      rows.push({
+        timeline: `${cycleWeeks} weeks`,
+        bodyFat: newBf,
+        bodyFatDisplay: `${newBf.toFixed(0)}%`,
+        weight: newWeight,
+        weightDisplay: `${newWeight.toFixed(1)} lbs`,
+        isCurrent: false,
+        badge: badgeLabel,
+      });
+    }
+
+    curBf = newBf;
+  }
 
   return {
     valid: true,
-    lbm: Math.round(lbm),
-    weeklyFatLossLbs: Math.round(weeklyLoss * 10) / 10,
-    fatServingsPerDay: plan.servings.fatMaintain,
-    proteinServingsPerDay: plan.servings.protein,
-    eightWeekLossLbs: Math.round(eightWeekLoss * 10) / 10,
-    weeksToTarget,
-    targetBodyFatPercent: targetBf,
-    projectedWeight8wk: Math.round((weight - eightWeekLoss) * 10) / 10,
-    projectedBf8wk: weeklyLoss > 0
-      ? Math.round(((weight - eightWeekLoss - (weight - eightWeekLoss) * (1 - bf / 100)) / (weight - eightWeekLoss)) * 1000) / 10
-      : bf,
+    gender: g,
+    lbm: Math.round(lbm * 10) / 10,
+    targetBf,
+    finalWeight: Math.round(finalWeight * 10) / 10,
+    totalWeeks: wholeWeeks,
+    narrative,
+    rows,
   };
 }
 
-export function defaultTargetBf(currentBf) {
-  const target = currentBf - 5;
-  return Math.max(Math.round(target), 12);
+/** @deprecated Use computeWhatsPossible */
+export function computePreview({ weightLbs, bodyFatPercent, targetBodyFatPercent, gender = 'male' }) {
+  return computeWhatsPossible({
+    gender,
+    weightLbs,
+    bodyFatPercent: bodyFatPercent ?? targetBodyFatPercent,
+  });
+}
+
+export function defaultTargetBf(currentBf, gender = 'male') {
+  return gender === 'female' ? TARGET_BF.female : TARGET_BF.male;
 }

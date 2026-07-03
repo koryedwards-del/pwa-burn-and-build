@@ -4,7 +4,7 @@ import {
   renderArticleQuote,
   searchArticles,
 } from './knowledgeBase.js';
-import { computePreview, defaultTargetBf } from './previewCalculator.js';
+import { computeWhatsPossible } from './previewCalculator.js';
 import {
   TRANSFORMATIONS,
   renderBeforeAfterCard,
@@ -34,9 +34,9 @@ const APP_FEATURES = [
 
 export function createHomeState() {
   return {
+    calcGender: 'male',
     calcWeight: '180',
     calcBf: '25',
-    calcTargetBf: '20',
     calcResult: null,
     kbQuery: '',
     kbOpenId: null,
@@ -70,49 +70,53 @@ function renderHero() {
 
 function renderCalculator(state) {
   const r = state.calcResult;
+  const maleActive = state.calcGender === 'male';
   return `
     <section class="site-section" id="calculator">
-      <div class="site-section-inner">
+      <div class="site-section-inner calc-inner">
         <div class="section-label">Interactive Tools</div>
-        <h2>Visualize what's possible</h2>
-        <p class="section-lead">Enter your weight and body fat percentage to see an estimated timeline. Your actual program will be far more precise — this preview uses moderate defaults.</p>
+        <h2 class="calc-heading">What can Burn &amp; Build do for you?</h2>
+        <p class="calc-intro">A precision program built to maximize fat loss and preserve every ounce of muscle. Based on thousands of clients over 40 years, the average person loses approximately 3% body fat per month — while increasing strength and energy.</p>
         <div class="calc-panel">
-          <div class="calc-inputs">
-            <div class="calc-field">
-              <label for="calc-weight">Weight (lbs)</label>
-              <input id="calc-weight" type="number" name="calcWeight" min="80" max="400" value="${state.calcWeight}" />
+          <div class="calc-row">
+            <div class="calc-col">
+              <div class="calc-label">Gender</div>
+              <div class="gender-tabs">
+                <button type="button" class="gender-tab ${maleActive ? 'active' : ''}" data-calc-gender="male">Male</button>
+                <button type="button" class="gender-tab ${!maleActive ? 'active' : ''}" data-calc-gender="female">Female</button>
+              </div>
             </div>
-            <div class="calc-field">
-              <label for="calc-bf">Body fat %</label>
-              <input id="calc-bf" type="number" name="calcBf" min="5" max="60" step="0.1" value="${state.calcBf}" />
+            <div class="calc-col">
+              <label class="calc-label" for="calc-weight">Current Bodyweight (lbs)</label>
+              <input class="calc-input" id="calc-weight" type="number" name="calcWeight" min="1" placeholder="Enter weight" value="${state.calcWeight}" />
             </div>
-            <div class="calc-field">
-              <label for="calc-target">Target body fat %</label>
-              <input id="calc-target" type="number" name="calcTargetBf" min="5" max="50" step="0.1" value="${state.calcTargetBf}" />
+            <div class="calc-col">
+              <label class="calc-label" for="calc-bf">Current Body Fat %</label>
+              <input class="calc-input" id="calc-bf" type="number" name="calcBf" min="1" max="70" step="0.1" placeholder="Enter body fat %" value="${state.calcBf}" />
             </div>
           </div>
-          <button type="button" class="btn-primary calc-run" data-action="run-calculator">Calculate Timeline</button>
+          <button type="button" class="calc-btn" data-action="run-calculator">Show Me What's Possible →</button>
           ${r ? (r.valid ? `
-            <div class="calc-results">
-              <div class="calc-stat-grid">
-                <div class="calc-stat">
-                  <div class="calc-stat-val">${r.lbm} lbs</div>
-                  <div class="calc-stat-lbl">Lean body mass</div>
-                </div>
-                <div class="calc-stat">
-                  <div class="calc-stat-val">${r.weeklyFatLossLbs}</div>
-                  <div class="calc-stat-lbl">Est. lbs / week</div>
-                </div>
-                <div class="calc-stat">
-                  <div class="calc-stat-val">${r.eightWeekLossLbs}</div>
-                  <div class="calc-stat-lbl">Est. loss in 8 wks</div>
-                </div>
-                <div class="calc-stat">
-                  <div class="calc-stat-val">${r.weeksToTarget ?? '—'}</div>
-                  <div class="calc-stat-lbl">Weeks to ${r.targetBodyFatPercent}% BF</div>
-                </div>
-              </div>
-              <p class="calc-note">Preview only — your personalized program accounts for your job, stress, exercise schedule, and exact body composition.</p>
+            <div class="calc-results visible">
+              <p class="calc-narrative">${r.narrative}</p>
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Timeline</th>
+                    <th>Body Fat %</th>
+                    <th>Bodyweight</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${r.rows.map((row) => `
+                    <tr class="${row.isCurrent ? 'row-current' : ''}">
+                      <td>${row.timeline}</td>
+                      <td>${row.bodyFatDisplay}${row.badge ? `<span class="ace-badge">${row.badge}</span>` : ''}</td>
+                      <td>${row.weightDisplay}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+              <p class="calc-disclaimer">Results may vary. This tool is for informational purposes only and does not constitute medical or nutritional advice. Individual results depend on starting body composition, program adherence, diet, exercise, and other factors. Consult a qualified healthcare professional before beginning any diet or exercise program.</p>
               <button type="button" class="btn-primary" data-action="create-program">Create My Personalized Program →</button>
             </div>` : `<div class="calc-error">${r.error}</div>`) : ''}
         </div>
@@ -267,20 +271,18 @@ export function renderWebsiteHome(state) {
 }
 
 export function runCalculator(state) {
-  state.calcResult = computePreview({
+  state.calcResult = computeWhatsPossible({
+    gender: state.calcGender,
     weightLbs: state.calcWeight,
     bodyFatPercent: state.calcBf,
-    targetBodyFatPercent: state.calcTargetBf,
   });
 }
 
 function syncInputs(state, root) {
   const w = root.querySelector('[name="calcWeight"]');
   const bf = root.querySelector('[name="calcBf"]');
-  const target = root.querySelector('[name="calcTargetBf"]');
   if (w) state.calcWeight = w.value;
   if (bf) state.calcBf = bf.value;
-  if (target) state.calcTargetBf = target.value;
 }
 
 function rerenderHome(root, state, callbacks) {
@@ -332,12 +334,14 @@ export function bindHomeEvents(root, state, { onCreateProgram }) {
     });
   }
 
-  root.querySelectorAll('.calc-field input').forEach((input) => {
-    input.addEventListener('change', () => {
-      syncInputs(state, root);
-      if (input.name === 'calcBf') {
-        state.calcTargetBf = String(defaultTargetBf(Number(state.calcBf)));
-      }
+  root.querySelectorAll('[data-calc-gender]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.calcGender = btn.dataset.calcGender;
+      rerenderHome(root, state, { onCreateProgram });
     });
+  });
+
+  root.querySelectorAll('.calc-input').forEach((input) => {
+    input.addEventListener('change', () => syncInputs(state, root));
   });
 }

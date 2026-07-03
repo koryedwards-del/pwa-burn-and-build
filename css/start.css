@@ -554,85 +554,199 @@
   padding: 24px;
 }
 
-.calc-inputs {
-  display: grid;
-  gap: 16px;
-  margin-bottom: 20px;
+.calc-inner {
+  max-width: 680px;
 }
 
-@media (min-width: 640px) {
-  .calc-inputs {
-    grid-template-columns: repeat(3, 1fr);
+.calc-heading {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #aaa;
+  margin-bottom: 16px;
+}
+
+.calc-intro {
+  color: #ccc;
+  font-size: 16px;
+  line-height: 1.65;
+  margin-bottom: 28px;
+}
+
+.calc-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+  align-items: end;
+}
+
+@media (max-width: 640px) {
+  .calc-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .gender-tabs {
+    max-width: 220px;
   }
 }
 
-.calc-field label {
-  display: block;
+.calc-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.calc-label {
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--muted);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  color: var(--muted);
   margin-bottom: 8px;
 }
 
-.calc-field input {
-  width: 100%;
-  padding: 14px 16px;
+.gender-tabs {
+  display: flex;
+  height: 50px;
+  border: 1.5px solid var(--border);
   border-radius: 12px;
-  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.gender-tab {
+  flex: 1;
+  padding: 0;
+  height: 100%;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
   background: #0a0a0a;
+  color: var(--muted);
+  transition: color 0.15s, background 0.15s;
 }
 
-.calc-run {
-  margin-bottom: 0;
-}
-
-.calc-results {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border);
-}
-
-.calc-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-@media (min-width: 640px) {
-  .calc-stat-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.calc-stat {
-  background: #0a0a0a;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-}
-
-.calc-stat-val {
-  font-size: 22px;
-  font-weight: 800;
+.gender-tab.active {
+  background: var(--flame-dim);
   color: var(--flame);
 }
 
-.calc-stat-lbl {
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 4px;
+.calc-input {
+  display: block;
+  width: 100%;
+  height: 50px;
+  background: #0a0a0a;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 16px;
+  padding: 0 16px;
+  outline: none;
+  box-sizing: border-box;
 }
 
-.calc-note {
-  font-size: 13px;
+.calc-input:focus {
+  border-color: var(--flame);
+}
+
+.calc-input::-webkit-outer-spin-button,
+.calc-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.calc-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  color: var(--flame);
+  border: none;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 16px 0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-top: 8px;
+}
+
+.calc-btn:hover {
+  opacity: 0.75;
+}
+
+.calc-results {
+  display: none;
+  margin-top: 32px;
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+}
+
+.calc-results.visible {
+  display: block;
+}
+
+.calc-narrative {
+  font-size: 16px;
+  color: #ccc;
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+
+.calc-narrative strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.calc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.calc-table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--muted);
-  line-height: 1.55;
+  padding: 0 0 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.calc-table td {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 15px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.calc-table tr.row-current td {
+  font-weight: 700;
+  color: #aaa;
+}
+
+.ace-badge {
+  display: inline-block;
+  color: var(--flame);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.calc-disclaimer {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
   margin-bottom: 20px;
 }
 
