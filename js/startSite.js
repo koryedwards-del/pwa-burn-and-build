@@ -149,13 +149,13 @@ function renderTeaching() {
           ${mod.quote ? `<div class="teach-quote"><p>${mod.quote.text}</p><cite>— ${mod.quote.by}</cite></div>` : ''}
         </div>
         <div class="ob-footer">
-          <button type="button" class="ob-next" data-teach-next>${isLast ? 'PREVIEW YOUR TARGETS →' : 'NEXT →'}</button>
+          <button type="button" class="ob-next" data-teach-next>${isLast ? 'CHOOSE START DATE →' : 'NEXT →'}</button>
         </div>
       </div>
     </div>`;
 }
 
-function ensurePreviewPackage() {
+function ensureBuiltPackage() {
   if (!store.onboardingForm) return null;
   store.builtPackage = buildProgramPackage(store.onboardingForm, {
     startDate: store.startDate,
@@ -165,55 +165,13 @@ function ensurePreviewPackage() {
   return store.builtPackage;
 }
 
-function renderPreview() {
-  const pkg = store.builtPackage || ensurePreviewPackage();
-  const plan = planFromPackage(pkg);
-  if (!plan || !pkg?.intake) {
-    return `
-      <div class="start-site">
-        <div class="screen">
-          <p style="padding:24px;color:#ccc;">Could not load plan preview. <button type="button" data-teach-back>Go back</button></p>
-        </div>
-      </div>`;
-  }
-  const intake = pkg.intake;
-  const s = plan.servings;
-  return `
-    <div class="start-site">
-      <div class="screen ob-flow">
-        <div class="ob-top">
-          <button type="button" class="ob-back" data-preview-back>←</button>
-          <div class="ob-progress"><span class="filled"></span><span class="filled"></span><span></span></div>
-        </div>
-        <div class="ob-content plan-preview">
-          <div class="teach-kicker">${intake.preferredName}'s program</div>
-          <h2 class="ob-step-title" style="font-size:32px;margin-bottom:8px;">YOUR DAILY TARGETS</h2>
-          <p style="color:var(--muted);margin-bottom:8px;">Built from ${intake.leanBodyMass.toFixed(1)} lbs lean body mass</p>
-          <div class="plan-preview-grid">
-            <div class="plan-preview-cell"><span>Protein</span><strong>${s.protein}</strong></div>
-            <div class="plan-preview-cell"><span>Grains & starches</span><strong>${s.grainsStarches}</strong></div>
-            <div class="plan-preview-cell"><span>Fruit</span><strong>${s.fruits}</strong></div>
-            <div class="plan-preview-cell"><span>Vegetables</span><strong>${s.vegetables}</strong></div>
-            <div class="plan-preview-cell"><span>Fat servings</span><strong>${s.fatMaintain}</strong></div>
-            <div class="plan-preview-cell"><span>Est. weekly loss</span><strong>${plan.weeklyFatLossPounds.toFixed(1)} lbs</strong></div>
-          </div>
-          <p>Reduce calories: <strong>${Math.round(plan.reduceTotalCals)}</strong> · Maintain: <strong>${Math.round(plan.maintainTotalCals)}</strong></p>
-          <div class="ob-info" style="margin-top:20px;"><span class="ob-info-icon">📱</span><p>These are your daily targets. Unlock ownership to open your full custom food plan in the app — with gram weights, meal logging, and coaching.</p></div>
-        </div>
-        <div class="ob-footer">
-          <button type="button" class="ob-next" data-preview-next>CHOOSE START DATE →</button>
-        </div>
-      </div>
-    </div>`;
-}
-
 function renderSchedule() {
   return `
     <div class="start-site">
       <div class="screen ob-flow">
         <div class="ob-top">
           <button type="button" class="ob-back" data-schedule-back>←</button>
-          <div class="ob-progress"><span class="filled"></span><span class="filled"></span><span class="filled"></span></div>
+          <div class="ob-progress"><span class="filled"></span><span class="filled"></span></div>
         </div>
         <div class="ob-content">
           <div class="teach-kicker">Program calendar</div>
@@ -384,7 +342,6 @@ function render() {
     bindOnboardingOnly();
     return;
   } else if (store.phase === 'teach') root.innerHTML = renderTeaching();
-  else if (store.phase === 'preview') root.innerHTML = renderPreview();
   else if (store.phase === 'schedule') root.innerHTML = renderSchedule();
   else if (store.phase === 'ready') root.innerHTML = renderReady();
   else if (store.phase === 'unlock-email') root.innerHTML = renderUnlockEmail();
@@ -462,7 +419,7 @@ function completePurchase() {
 }
 
 function buildProgramReady() {
-  ensurePreviewPackage();
+  ensureBuiltPackage();
   store.phase = 'ready';
   render();
 }
@@ -486,25 +443,14 @@ function bindGlobal() {
       if (store.teachIndex < TEACHING.length - 1) {
         store.teachIndex += 1;
       } else {
-        ensurePreviewPackage();
-        store.phase = 'preview';
+        store.phase = 'schedule';
       }
       render();
       return;
     }
-    if (e.target.closest('[data-preview-back]')) {
+    if (e.target.closest('[data-schedule-back]')) {
       store.phase = 'teach';
       store.teachIndex = TEACHING.length - 1;
-      render();
-      return;
-    }
-    if (e.target.closest('[data-preview-next]')) {
-      store.phase = 'schedule';
-      render();
-      return;
-    }
-    if (e.target.closest('[data-schedule-back]')) {
-      store.phase = 'preview';
       render();
       return;
     }
@@ -556,7 +502,7 @@ function bindGlobal() {
   document.getElementById('app').addEventListener('change', (e) => {
     if (e.target.matches('input[name="startDate"]')) {
       store.startDate = e.target.value;
-      if (store.builtPackage) ensurePreviewPackage();
+      if (store.builtPackage) ensureBuiltPackage();
     }
   });
 
@@ -604,7 +550,7 @@ function initFromUrl() {
   }
   if (params.get('unlock') === 'open' && sessionStorage.getItem('bnb_ownership') === 'true') {
     store.email = sessionStorage.getItem('bnb_unlock_email') || '';
-    ensurePreviewPackage();
+    ensureBuiltPackage();
     store.phase = 'open';
   }
 }
