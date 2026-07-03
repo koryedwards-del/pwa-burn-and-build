@@ -1,18 +1,15 @@
-import { getArticle, searchArticles } from './knowledgeBase.js';
+import {
+  getArticle,
+  renderArticleBody,
+  renderArticleQuote,
+  searchArticles,
+} from './knowledgeBase.js';
 import { computePreview, defaultTargetBf } from './previewCalculator.js';
-
-const RESULTS = [
-  {
-    name: 'Dave McAftery',
-    since: 'Client since 1990',
-    quote: 'If you want to see real results like you never thought possible, this is the plan to be on because it dials everything in for each person.',
-  },
-  {
-    name: 'Linda Kay',
-    since: 'Client since 1992',
-    quote: 'I learned this program in 1992 and it has been invaluable. At 67, I am confident I can maintain and even build muscle and lose fat.',
-  },
-];
+import {
+  TRANSFORMATIONS,
+  renderBeforeAfterCard,
+  renderStoryCard,
+} from './resultsStories.js';
 
 const APP_FEATURES = [
   {
@@ -192,7 +189,8 @@ function renderKnowledgeBase(state) {
             <button type="button" class="kb-back" data-action="kb-close">← All topics</button>
             <div class="kb-article-meta">${open.category}</div>
             <h3>${open.title}</h3>
-            ${open.body.map((p) => `<p>${p}</p>`).join('')}
+            ${renderArticleBody(open)}
+            ${renderArticleQuote(open)}
           </article>` : `
           <div class="kb-grid">
             ${articles.map((a) => `
@@ -208,19 +206,22 @@ function renderKnowledgeBase(state) {
 }
 
 function renderResults() {
+  const featured = TRANSFORMATIONS.find((t) => t.type === 'before-after');
+  const stories = TRANSFORMATIONS.filter((t) => t.type === 'story');
   return `
     <section class="site-section" id="results">
       <div class="site-section-inner">
         <div class="section-label">Results</div>
         <h2>Real people. Real programs.</h2>
-        <p class="section-lead">Burn &amp; Build has been dialing in personalized programs since 1982. These clients are still on the plan decades later.</p>
+        <p class="section-lead">Burn &amp; Build has been dialing in personalized programs since 1982 — more than 30,000 clients from 500 pounds to 100 pounds.</p>
+        ${featured ? `
+          <div class="results-featured">
+            <h3 class="results-featured-title">${featured.name}</h3>
+            <p class="results-featured-sub">${featured.subtitle}</p>
+            ${renderBeforeAfterCard(featured)}
+          </div>` : ''}
         <div class="results-grid">
-          ${RESULTS.map((r) => `
-            <div class="result-card">
-              <div class="result-quote">"${r.quote}"</div>
-              <div class="result-name">${r.name}</div>
-              <div class="result-since">${r.since}</div>
-            </div>`).join('')}
+          ${stories.map((t) => renderStoryCard(t)).join('')}
         </div>
       </div>
     </section>`;
