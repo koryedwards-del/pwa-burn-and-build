@@ -3,7 +3,7 @@
 
 services:
   - type: web
-    name: burn-and-build-program-creator
+    name: program-creator
     runtime: node
     region: oregon
     plan: free
