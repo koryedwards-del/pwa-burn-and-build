@@ -265,7 +265,7 @@ export function canProceed(phase, form) {
 export function nextLabel(phase, isEditMode) {
   if (phase.kind === 'welcome' && phase.index === 0) return 'START BUILDING';
   if (phase.kind === 'welcome') return 'NEXT  →';
-  if (phase.kind === 'confirm') return isEditMode ? 'UPDATE MY PLAN  →' : "LET'S GO  →";
+  if (phase.kind === 'confirm') return isEditMode ? 'UPDATE MY PLAN  →' : 'Build my Food Plan';
   if (phase.kind === 'done') return isEditMode ? 'DONE  →' : 'SEE YOUR FOOD PLAN  →';
   return 'NEXT  →';
 }
