@@ -1192,6 +1192,7 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-height: 0;
 }
 
 .start-site .ob-flow-step .ob-content {
@@ -1199,7 +1200,7 @@ button {
 }
 
 .start-site .ob-flow-intro .ob-content {
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 @media (min-width: 768px) {

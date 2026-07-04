@@ -53,6 +53,140 @@
   z-index: 1;
 }
 
+/* Onboarding — lock to visible viewport so footer stays above mobile browser chrome */
+html:has(.start-site .ob-flow),
+html:has(.start-site .ob-flow) body {
+  height: 100%;
+  overflow: hidden;
+}
+
+html:has(.start-site .ob-flow) #app {
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+.start-site:has(.ob-flow) {
+  min-height: 100svh;
+  min-height: -webkit-fill-available;
+  height: 100svh;
+  height: -webkit-fill-available;
+  max-height: 100svh;
+  max-height: -webkit-fill-available;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.start-site > .ob-flow {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.start-site .ob-top {
+  flex-shrink: 0;
+  padding: 4px 20px 8px;
+}
+
+.start-site .ob-footer {
+  flex-shrink: 0;
+  padding: 12px 20px calc(12px + var(--safe-bottom));
+}
+
+.start-site .ob-flow .ob-content {
+  padding: 0 20px 12px;
+  min-height: 0;
+}
+
+.start-site .ob-intro {
+  padding-top: 0;
+}
+
+.start-site .ob-intro-headline {
+  margin-bottom: 16px;
+}
+
+.start-site .ob-intro-body {
+  margin-bottom: 18px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.start-site .ob-intro-quote {
+  padding: 14px 16px;
+}
+
+.start-site .ob-intro-quote p {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.start-site .ob-flow-step .ob-content {
+  padding-top: 0;
+}
+
+.start-site .ob-question,
+.start-site .ob-confirm {
+  padding-top: 4px;
+}
+
+.start-site .ob-step-header {
+  margin-bottom: 18px;
+}
+
+.start-site .ob-step-sub {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.start-site .ob-field-label,
+.start-site .ob-section-label {
+  margin-top: 18px;
+}
+
+.start-site .ob-info {
+  margin-top: 14px;
+  padding: 12px 14px;
+}
+
+@media (max-width: 767px) {
+  .start-site .ob-welcome-line1,
+  .start-site .ob-welcome-line2 {
+    font-size: clamp(32px, 9vw, 44px);
+  }
+
+  .start-site .ob-step-headline .ob-welcome-line1,
+  .start-site .ob-step-headline .ob-welcome-line2 {
+    font-size: clamp(32px, 9vw, 44px);
+  }
+}
+
+@media (min-width: 768px) {
+  .start-site .ob-top {
+    padding: 8px 24px;
+  }
+
+  .start-site .ob-footer {
+    padding: 16px 24px calc(16px + var(--safe-bottom));
+  }
+
+  .start-site .ob-flow .ob-content {
+    padding: 0 24px 24px;
+  }
+
+  .start-site .ob-intro {
+    padding-top: 16px;
+  }
+
+  .start-site .ob-question,
+  .start-site .ob-confirm {
+    padding-top: 16px;
+  }
+}
+
 .start-site .screen {
   max-width: var(--layout-max);
 }
