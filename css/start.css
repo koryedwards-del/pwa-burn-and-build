@@ -2,55 +2,8 @@
 
 .start-site {
   min-height: 100vh;
+  background: var(--bg);
   color: var(--text);
-}
-
-.start-site:not(:has(.ob-flow)) {
-  background-color: var(--bnb-charcoal-deep);
-  background-image:
-    linear-gradient(180deg, var(--bnb-charcoal-mid) 0%, var(--bnb-charcoal-deep) 50%, #0a0a0a 100%);
-}
-
-.start-site:has(.ob-flow) {
-  position: relative;
-  isolation: isolate;
-  background-color: var(--bnb-charcoal-deep);
-  background-image: linear-gradient(180deg, #111111 0%, #080808 42%, #0a0a0a 100%);
-}
-
-.start-site:has(.ob-flow)::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      to top,
-      rgba(255, 122, 26, 0.16) 0%,
-      rgba(255, 122, 26, 0.09) 22%,
-      rgba(255, 140, 43, 0.05) 38%,
-      rgba(255, 122, 26, 0.025) 52%,
-      transparent 68%
-    ),
-    radial-gradient(ellipse 130% 90% at 50% 100%, rgba(255, 122, 26, 0.1) 0%, transparent 52%);
-}
-
-.start-site:has(.ob-flow)::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.035;
-  background-image: var(--bnb-noise);
-  background-repeat: repeat;
-  background-size: 180px 180px;
-}
-
-.start-site:has(.ob-flow) > * {
-  position: relative;
-  z-index: 1;
 }
 
 /* Onboarding — lock to visible viewport so footer stays above mobile browser chrome */
