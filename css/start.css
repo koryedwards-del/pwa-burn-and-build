@@ -93,7 +93,7 @@ html:has(.start-site .ob-flow) #app {
 
 .start-site .ob-footer {
   flex-shrink: 0;
-  padding: 12px 20px calc(12px + var(--safe-bottom));
+  padding: 12px 20px calc(12px + var(--safe-bottom) + var(--start-mobile-ui-lift));
 }
 
 .start-site .ob-flow .ob-content {
@@ -161,6 +161,14 @@ html:has(.start-site .ob-flow) #app {
   .start-site .ob-step-headline .ob-welcome-line1,
   .start-site .ob-step-headline .ob-welcome-line2 {
     font-size: clamp(32px, 9vw, 44px);
+  }
+
+  .start-site .unlock-screen {
+    padding-bottom: calc(24px + var(--start-mobile-ui-lift) + var(--safe-bottom));
+  }
+
+  .start-site .unlock-panel {
+    padding-bottom: calc(32px + var(--start-mobile-ui-lift) + var(--safe-bottom));
   }
 }
 

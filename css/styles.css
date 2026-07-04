@@ -18,7 +18,15 @@
   --cyan: #5ec4e8;
   --green: #6ecf8a;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --start-mobile-ui-lift: 0px;
   --layout-max: 480px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    /* 200% of 56px footer button — clears Safari bottom browser chrome */
+    --start-mobile-ui-lift: 112px;
+  }
 }
 
 @media (min-width: 768px) {
