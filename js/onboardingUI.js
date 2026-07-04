@@ -170,9 +170,11 @@ function renderQuestion(index, form) {
         <div class="ob-section-label">CARDIOVASCULAR TRAINING</div>
         <div class="ob-hr-label">HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM</div>
         <div class="ob-slider-label">Total hours per week: <strong data-bind="cardioHours">${form.cardioHours}</strong></div>
-        <input type="range" class="ob-range" name="cardioHours" min="0" max="15" step="1" value="${form.cardioHours}" />
-        <div class="ob-divider"></div>
-        <div class="ob-section-label">FAT BURNING</div>
+        <input type="range" class="ob-range" name="cardioHours" min="0" max="15" step="1" value="${form.cardioHours}" />`;
+
+    case 8:
+      return `
+        ${stepHeader(9, 'FAT BURNING', 'Select your activities and weekly hours.', 'YOUR')}
         <div class="ob-hr-label">HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM</div>
         ${LOW_ACTIVITIES.map((a) => `
           <label class="ob-check ${form.lowActivities.includes(a.id) ? 'selected' : ''}">
@@ -184,9 +186,9 @@ function renderQuestion(index, form) {
         <input type="range" class="ob-range" name="fatBurningHours" min="0" max="20" step="1" value="${form.fatBurningHours}" />
         ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}`;
 
-    case 8:
+    case 9:
       return `
-        ${stepHeader(9, 'WAKE TIME', 'Eating every 2–3 hours keeps your fat burners (muscles) burning.')}
+        ${stepHeader(10, 'WAKE TIME', 'Eating every 2–3 hours keeps your fat burners (muscles) burning.')}
         ${renderWakePicker(form)}
         <div class="ob-divider"></div>
         <div class="ob-section-label">MEAL REMINDERS</div>

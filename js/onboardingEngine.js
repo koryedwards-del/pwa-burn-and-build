@@ -1,5 +1,5 @@
 export const WELCOME_COUNT = 1;
-export const QUESTION_COUNT = 9;
+export const QUESTION_COUNT = 10;
 
 export const WORK_PHYSICAL = [
   { id: 'sitting', label: 'Mostly sitting', sub: 'Desk, computer, driving, reception.' },
