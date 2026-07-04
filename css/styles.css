@@ -4,6 +4,10 @@
   --flame: #e8722a;
   --flame-dim: rgba(232, 114, 42, 0.15);
   --bg: #000;
+  --bnb-charcoal: #0c0c0e;
+  --bnb-glow-core: rgba(255, 122, 26, 0.2);
+  --bnb-glow-warm: rgba(255, 140, 43, 0.08);
+  --bnb-glow-ember: rgba(255, 122, 26, 0.04);
   --card: #141414;
   --border: #2a2a2a;
   --text: #f5f5f5;
@@ -1134,6 +1138,16 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.ob-flow-intro .ob-top,
+.ob-flow-intro .ob-footer {
+  background: transparent;
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+.ob-flow-intro .ob-progress span.filled {
+  background: linear-gradient(90deg, #ff8c2b, #ff7a1a);
 }
 
 @media (min-width: 768px) {
