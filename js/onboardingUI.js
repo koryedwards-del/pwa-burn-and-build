@@ -17,6 +17,7 @@ import {
   wakeTimeFromParts,
   welcomeScreens,
 } from './onboardingEngine.js';
+import { renderTestimonyBlock } from './testimonyBlock.js';
 
 function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
@@ -54,11 +55,11 @@ function renderWelcome(screen, index) {
           <div class="ob-welcome-line2">${screen.line2}</div>
         </div>
         <p class="ob-intro-body">${screen.body}</p>
-        <div class="ob-intro-quote">
-          <p>&ldquo;${screen.quote}&rdquo;</p>
-          <div class="ob-intro-quote-name">${screen.quoteName}</div>
-          <div class="ob-intro-quote-meta">${screen.quoteMeta}</div>
-        </div>
+        ${renderTestimonyBlock({
+          quote: screen.quote,
+          name: screen.quoteName,
+          meta: screen.quoteMeta,
+        })}
       </div>`;
   }
   if (screen.type === 'brand') {

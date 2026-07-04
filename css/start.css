@@ -68,13 +68,13 @@ html:has(.start-site .ob-flow) #app {
   line-height: 1.5;
 }
 
-.start-site .ob-intro-quote {
-  padding: 14px 16px;
+.start-site .ob-intro .testimony-block {
+  padding: 20px 18px 16px;
 }
 
-.start-site .ob-intro-quote p {
-  font-size: 14px;
-  line-height: 1.45;
+.start-site .ob-intro .testimony-text {
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .start-site .ob-flow-step .ob-content {
@@ -269,23 +269,9 @@ html:has(.start-site .ob-flow) #app {
   margin-bottom: 14px;
 }
 
-.teach-quote {
+.teach-quote.testimony-block,
+.kb-article-quote.testimony-block {
   margin-top: 20px;
-  padding: 16px 18px;
-  border-left: 3px solid var(--flame);
-  background: var(--flame-dim);
-  border-radius: 0 12px 12px 0;
-}
-
-.teach-quote p {
-  font-style: italic;
-  margin-bottom: 8px;
-}
-
-.teach-quote cite {
-  font-size: 13px;
-  color: var(--muted);
-  font-style: normal;
 }
 
 .teach-stats {
@@ -1140,7 +1126,7 @@ html:has(.start-site .ob-flow) #app {
   margin-bottom: 8px;
 }
 
-.kb-article-quote {
+.kb-article-quote.testimony-block {
   margin-top: 24px;
 }
 
@@ -1279,12 +1265,8 @@ html:has(.start-site .ob-flow) #app {
   border: 1px solid rgba(232, 114, 42, 0.3);
 }
 
-.result-transform .result-quote {
+.result-transform .testimony-block {
   margin-top: 20px;
-  font-style: italic;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #ccc;
 }
 
 .result-note {
@@ -1295,11 +1277,10 @@ html:has(.start-site .ob-flow) #app {
 }
 
 .result-story {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--flame);
-  border-radius: 0 16px 16px 0;
-  padding: 24px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1311,34 +1292,19 @@ html:has(.start-site .ob-flow) #app {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--flame);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+}
+
+.result-story-quote.testimony-block {
+  margin-top: 0;
+  flex: 1;
 }
 
 .result-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--flame);
-  border-radius: 0 16px 16px 0;
+  border-radius: 16px;
   padding: 24px;
-}
-
-.result-quote {
-  font-style: italic;
-  font-size: 15px;
-  line-height: 1.6;
-  color: #ddd;
-  margin-bottom: 16px;
-}
-
-.result-name {
-  font-weight: 700;
-  font-size: 15px;
-}
-
-.result-since {
-  font-size: 13px;
-  color: var(--muted);
-  margin-top: 4px;
 }
 
 .site-final-cta {

@@ -1,5 +1,7 @@
 /** Client results and representative transformation stories. */
 
+import { renderTestimonyBlock } from './testimonyBlock.js';
+
 export const TRANSFORMATIONS = [
   {
     id: 'eight-week-example',
@@ -84,8 +86,10 @@ export function renderBeforeAfterCard(t) {
         </div>
       </div>
       ${t.stats ? `<ul class="result-stats">${t.stats.map((s) => `<li>${s}</li>`).join('')}</ul>` : ''}
-      ${t.quote ? `<div class="result-quote">"${t.quote}"</div>` : ''}
-      ${t.attribution ? `<div class="result-since">${t.attribution}</div>` : ''}
+      ${t.quote ? renderTestimonyBlock({
+        quote: t.quote,
+        meta: (t.attribution || '').replace(/^—\s*/, ''),
+      }) : ''}
       ${t.note ? `<p class="result-note">${t.note}</p>` : ''}
     </div>`;
 }
@@ -94,8 +98,11 @@ export function renderStoryCard(t) {
   return `
     <div class="result-story">
       <div class="result-story-highlight">${t.highlight}</div>
-      <div class="result-quote">"${t.quote}"</div>
-      <div class="result-name">${t.name}</div>
-      <div class="result-since">${t.subtitle}</div>
+      ${renderTestimonyBlock({
+        quote: t.quote,
+        name: t.name,
+        meta: t.subtitle,
+        className: 'result-story-quote',
+      })}
     </div>`;
 }

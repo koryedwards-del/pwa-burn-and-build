@@ -1109,33 +1109,57 @@ button {
   margin-bottom: 32px;
 }
 
-.ob-intro-quote {
-  padding: 20px;
+/* Testimony / quote cards — orange top glow, left-aligned attribution */
+.testimony-block {
+  position: relative;
+  margin-top: 20px;
+  padding: 22px 20px 18px;
   border-radius: 12px;
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 1px solid rgba(82, 72, 62, 0.55);
+  text-align: left;
 }
 
-.ob-intro-quote p {
+.testimony-block::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 122, 26, 0.9) 20%, rgba(255, 140, 43, 0.65) 50%, rgba(255, 122, 26, 0.9) 80%, transparent);
+  box-shadow: 0 0 14px rgba(255, 122, 26, 0.45);
+}
+
+.testimony-text {
+  margin: 0;
   font-size: 16px;
   font-style: italic;
-  color: #ccc;
   line-height: 1.55;
-  margin: 0;
+  color: #ccc;
 }
 
-.ob-intro-quote-name {
-  margin-top: 16px;
+.testimony-name {
+  margin-top: 14px;
   font-size: 15px;
   font-weight: 700;
-  color: var(--cyan);
+  font-style: normal;
+  line-height: 1.3;
+  color: #ff8c2b;
 }
 
-.ob-intro-quote-meta {
-  margin-top: 4px;
+.testimony-meta {
+  margin-top: 2px;
   font-size: 13px;
-  color: var(--muted);
-  letter-spacing: 0.04em;
+  font-style: normal;
+  line-height: 1.35;
+  color: #888;
+  letter-spacing: 0.02em;
+}
+
+.ob-intro .testimony-block {
+  margin-top: 0;
 }
 
 .start-site .ob-flow .ob-content {

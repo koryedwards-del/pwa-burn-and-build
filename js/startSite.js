@@ -15,6 +15,7 @@ import {
   renderWebsiteHome,
 } from './websiteHome.js';
 import { totalOnboardingPages } from './onboardingEngine.js';
+import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
@@ -118,7 +119,15 @@ function renderTeaching() {
           <div class="teach-kicker">${mod.kicker}</div>
           <h2>${mod.title}</h2>
           ${mod.body.map((p) => `<p>${p}</p>`).join('')}
-          ${mod.quote ? `<div class="teach-quote"><p>${mod.quote.text}</p><cite>— ${mod.quote.by}</cite></div>` : ''}
+          ${mod.quote ? (() => {
+            const { name, meta } = parseQuoteBy(mod.quote.by);
+            return renderTestimonyBlock({
+              quote: mod.quote.text,
+              name,
+              meta,
+              className: 'teach-quote',
+            });
+          })() : ''}
         </div>
         <div class="ob-footer">
           <button type="button" class="ob-next" data-teach-next>${isLast ? 'CHOOSE START DATE →' : 'NEXT →'}</button>

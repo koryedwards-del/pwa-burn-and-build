@@ -1,5 +1,7 @@
 /** Knowledge base — expanded from Eat to Lose Fat teaching, Coach Kory cards, and seminar content. */
 
+import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
+
 export const KB_ARTICLES = [
   {
     id: 'lean-body-mass',
@@ -364,9 +366,11 @@ export function renderArticleBody(article) {
 
 export function renderArticleQuote(article) {
   if (!article.quote) return '';
-  return `
-    <div class="teach-quote kb-article-quote">
-      <p>${article.quote.text}</p>
-      <cite>— ${article.quote.by}</cite>
-    </div>`;
+  const { name, meta } = parseQuoteBy(article.quote.by);
+  return renderTestimonyBlock({
+    quote: article.quote.text,
+    name,
+    meta,
+    className: 'kb-article-quote',
+  });
 }
