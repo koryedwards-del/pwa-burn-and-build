@@ -17,7 +17,8 @@ import {
   wakeTimeFromParts,
   welcomeScreens,
   ageFromBirthDate,
-  birthDateFieldBounds,
+  formatBirthDateDigits,
+  parseBirthDateText,
 } from './onboardingEngine.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -116,17 +117,15 @@ function renderQuestion(index, form) {
         <div class="ob-range-labels"><span>4'0"</span><span>7'0"</span></div>
         ${infoBox('💡', 'Your lean body mass is your fat burner. More muscle burns more fat.')}`;
 
-    case 2: {
-      const { min: birthMin, max: birthMax } = birthDateFieldBounds();
+    case 2:
       return `
         ${stepHeader(3, 'AGE', 'Used to determine your fat burn and cardiovascular training heart rate targets.', 'YOUR')}
         <div class="ob-field-label">DATE OF BIRTH</div>
-        <input class="ob-input ob-input-birth" type="date" name="birthDate" value="${form.birthDate}" min="${birthMin}" max="${birthMax}" autocomplete="bday" />
+        <input class="ob-input ob-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${form.birthDateText}" placeholder="MM/DD/YYYY" autocomplete="bday" />
         <div class="ob-big-value ob-big-age" data-bind="age">${form.age}</div>
         <input type="range" class="ob-range ob-range-readonly" name="age" min="13" max="99" step="1" value="${form.age}" tabindex="-1" aria-hidden="true" />
         <div class="ob-range-labels"><span>13</span><span>99</span></div>
         ${infoBox('❤️', 'Your age is used to calculate your personal fat burning (60–70%) and cardio training (70–85%) heart rate zones.')}`;
-    }
 
     case 3:
       return `
@@ -385,7 +384,10 @@ function syncNextButton(store, form) {
 }
 
 function syncAgeFromBirthDate(form, flow) {
-  const age = ageFromBirthDate(form.birthDate);
+  const iso = parseBirthDateText(form.birthDateText);
+  form.birthDate = iso || '';
+  if (!iso) return;
+  const age = ageFromBirthDate(iso);
   if (age == null) return;
   form.age = Math.min(99, Math.max(13, age));
   updateBoundDisplays('age', form.age);
@@ -497,8 +499,10 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'birthDate') {
-      form.birthDate = input.value;
+    if (input.name === 'birthDateText') {
+      const formatted = formatBirthDateDigits(input.value);
+      form.birthDateText = formatted;
+      input.value = formatted;
       syncAgeFromBirthDate(form, input.closest('.ob-flow'));
       syncNextButton(obCtx.store, form);
       return;
@@ -514,13 +518,6 @@ function ensureObDelegation() {
     if (!input.closest('.ob-flow')) return;
     const form = obCtx.store.onboardingForm;
     const flow = input.closest('.ob-flow');
-
-    if (input.name === 'birthDate') {
-      form.birthDate = input.value;
-      syncAgeFromBirthDate(form, input.closest('.ob-flow'));
-      syncNextButton(obCtx.store, form);
-      return;
-    }
 
     if (input.name === 'fatSource') {
       form.fatSource = input.value;

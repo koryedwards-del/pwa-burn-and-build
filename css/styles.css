@@ -1409,7 +1409,10 @@ button {
 
 .ob-input-birth {
   text-align: center;
-  color-scheme: dark;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
 }
 
 .ob-range-readonly {

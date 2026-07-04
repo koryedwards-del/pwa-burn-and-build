@@ -81,6 +81,34 @@ export function ageFromBirthDate(birthDate) {
   return age;
 }
 
+export function formatBirthDateText(isoDate) {
+  if (!isoDate) return '';
+  const m = isoDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return '';
+  return `${m[2]}/${m[3]}/${m[1]}`;
+}
+
+export function formatBirthDateDigits(digits) {
+  const d = String(digits || '').replace(/\D/g, '').slice(0, 8);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
+
+export function parseBirthDateText(text) {
+  const m = String(text || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return null;
+  const month = Number(m[1]);
+  const day = Number(m[2]);
+  const year = Number(m[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900) return null;
+  const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const born = new Date(`${iso}T12:00:00`);
+  if (Number.isNaN(born.getTime())) return null;
+  if (born.getMonth() + 1 !== month || born.getDate() !== day) return null;
+  return iso;
+}
+
 export function defaultBirthDateFromAge(age) {
   const today = new Date();
   const born = new Date(today.getFullYear() - age, today.getMonth(), today.getDate());
@@ -88,6 +116,10 @@ export function defaultBirthDateFromAge(age) {
   const m = String(born.getMonth() + 1).padStart(2, '0');
   const d = String(born.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
+}
+
+export function defaultBirthDateTextFromAge(age) {
+  return formatBirthDateText(defaultBirthDateFromAge(age));
 }
 
 export function birthDateFieldBounds() {
@@ -133,12 +165,14 @@ export function defaultOnboardingForm(profile) {
   const p = profile || {};
   const work = reverseWorkIntensity(p.workIntensity ?? 2);
   const age = p.age ?? 35;
+  const birthDate = p.birthDate || defaultBirthDateFromAge(age);
   return {
     preferredName: p.preferredName || '',
     sex: p.sex || 'Male',
     heightInches: p.heightInches ?? 68,
     age,
-    birthDate: p.birthDate || defaultBirthDateFromAge(age),
+    birthDate,
+    birthDateText: p.birthDateText || formatBirthDateText(birthDate),
     weightText: p.totalWeight > 0 ? String(Math.round(p.totalWeight)) : '',
     fatPercentText: p.fatPercent > 0 ? String(p.fatPercent) : '',
     fatSource: p.fatPercent > 0 ? 'recent' : '',
@@ -213,7 +247,8 @@ export function canProceed(phase, form) {
       switch (phase.index) {
         case 0: return form.preferredName.trim().length > 0;
         case 2: {
-          const age = ageFromBirthDate(form.birthDate);
+          const iso = parseBirthDateText(form.birthDateText);
+          const age = iso ? ageFromBirthDate(iso) : null;
           return age != null && age >= 13 && age <= 99;
         }
         case 3: return Number(form.weightText) > 0;
