@@ -1316,6 +1316,10 @@ button {
   color: #b3b3b3;
 }
 
+.start-site .ob-step-sub-spacer {
+  min-height: 3.2em;
+}
+
 .start-site .ob-field-label,
 .start-site .ob-section-label {
   margin-top: 28px;

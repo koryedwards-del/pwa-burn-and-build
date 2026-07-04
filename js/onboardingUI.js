@@ -23,7 +23,12 @@ function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
 }
 
-function stepHeader(step, title, subtitle, prefix = 'YOUR') {
+function stepHeader(step, title, subtitle, prefix = 'YOUR', reserveSubtitleSpace = false) {
+  const subBlock = subtitle
+    ? `<p class="ob-step-sub">${subtitle}</p>`
+    : reserveSubtitleSpace
+      ? '<p class="ob-step-sub ob-step-sub-spacer" aria-hidden="true"></p>'
+      : '';
   return `
     <div class="ob-step-header">
       <div class="ob-step-num">STEP ${step} OF ${QUESTION_COUNT}</div>
@@ -31,7 +36,7 @@ function stepHeader(step, title, subtitle, prefix = 'YOUR') {
         <div class="ob-welcome-line1">${prefix}</div>
         <div class="ob-welcome-line2">${title}</div>
       </div>
-      ${subtitle ? `<p class="ob-step-sub">${subtitle}</p>` : ''}
+      ${subBlock}
     </div>`;
 }
 
