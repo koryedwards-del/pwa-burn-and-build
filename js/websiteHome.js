@@ -48,7 +48,7 @@ function renderHeader() {
     <header class="site-header">
       <div class="site-header-inner">
         <div class="site-logo">BURN <span>&amp; BUILD</span></div>
-        <button type="button" class="btn-primary site-header-cta" data-action="create-program">Create My Program</button>
+        <button type="button" class="btn-primary site-header-cta" data-action="create-program">Create Food Plan</button>
       </div>
     </header>`;
 }
@@ -61,7 +61,7 @@ function renderHero() {
         <h1>BURN <span>&amp; BUILD</span></h1>
         <p class="site-hero-lead">A personalized food program built for your body — your lean mass, your job, your lifestyle, and your exercise. Not a generic diet. A system designed for you.</p>
         <div class="site-hero-actions">
-          <button type="button" class="btn-primary" data-action="create-program">Create My Program</button>
+          <button type="button" class="btn-primary" data-action="create-program">Create Food Plan</button>
           <button type="button" class="btn-secondary" data-action="scroll-calculator">See What's Possible</button>
         </div>
       </div>
@@ -117,7 +117,7 @@ function renderCalculator(state) {
                 </tbody>
               </table>
               <p class="calc-disclaimer">Results may vary. This tool is for informational purposes only and does not constitute medical or nutritional advice. Individual results depend on starting body composition, program adherence, diet, exercise, and other factors. Consult a qualified healthcare professional before beginning any diet or exercise program.</p>
-              <button type="button" class="btn-primary" data-action="create-program">Create My Personalized Program →</button>
+              <button type="button" class="btn-primary" data-action="create-program">Create Food Plan →</button>
             </div>` : `<div class="calc-error">${r.error}</div>`) : ''}
         </div>
       </div>
@@ -237,7 +237,7 @@ function renderFinalCta() {
       <div class="site-section-inner">
         <h2>Create Your Burn &amp; Build Program</h2>
         <p class="section-lead">You've explored what's possible. Now let the Burn Engine build a program designed for your body.</p>
-        <button type="button" class="btn-primary site-final-btn" data-action="create-program">Create My Program →</button>
+        <button type="button" class="btn-primary site-final-btn" data-action="create-program">Create Food Plan →</button>
         <p class="site-footer-note">Already have a program? <a href="../">Open the Burn &amp; Build app →</a></p>
       </div>
     </section>`;

@@ -99,7 +99,7 @@ function programName() {
 
 function beginProgramCreation() {
   store.phase = 'onboarding';
-  store.onboardingPage = 1;
+  store.onboardingPage = 0;
   window.scrollTo(0, 0);
   render();
 }
@@ -300,7 +300,6 @@ function renderOnboardingWrapper() {
     onboardingEditMode: false,
   };
   return `<div class="start-site">${renderOnboarding(fakeStore, {
-    progressStart: 1,
     firstStepLabel: 'GET STARTED  →',
   })}</div>`;
 }

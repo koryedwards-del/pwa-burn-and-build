@@ -1,4 +1,4 @@
-export const WELCOME_COUNT = 7;
+export const WELCOME_COUNT = 1;
 export const QUESTION_COUNT = 9;
 
 export const WORK_PHYSICAL = [
@@ -150,45 +150,7 @@ export function profileFromForm(form) {
 }
 
 export function welcomeScreens() {
-  const yrs = yearsInBusiness();
   return [
-    {
-      type: 'brand',
-      tag: 'EAT TO LOSE FAT',
-      line1: 'BURN',
-      line2: '& BUILD.',
-      line2Accent: true,
-      sub: 'Burn fat. Build muscle.\nAt the same time.',
-    },
-    {
-      line1: 'PUZZLED',
-      line2: "WHY YOU CAN'T LOSE FAT?",
-      body: "What to eat. How much to eat. When to eat. It shouldn't be this hard. We'll show you exactly how much to eat for what you do.",
-    },
-    {
-      line1: 'YOUR',
-      line2: 'PERFECT MATCH.',
-      body: "Not by chance. Not by guessing. Built from your lean body mass, job, lifestyle, and activities. A food plan custom-fit to your body's particular demands.",
-      quote: '"If you want to see real results like you never thought possible, this is the plan to be on because it dials everything in for each person. It\'s not a cookie-cutter diet."',
-      attribution: '— Dave McAftery., client since 1990',
-    },
-    {
-      line1: `${yrs} YEARS.`,
-      line2: 'PROVEN.',
-      body: 'More than 30,000 people — athletes, homemakers, teenagers, seniors. From 500 pounds to 100 pounds. One system. Every body.',
-      quote: '"The exception to the \'too good to be true\' cliché."',
-      attribution: '— Trudy, client since 1998',
-    },
-    {
-      line1: 'ACCURACY',
-      line2: 'MATTERS.',
-      body: 'The Burn & Build Burn Engine uses your LBM, job, lifestyle and three categories of activities to customize your food plan to maximize fat loss and muscle gain.',
-    },
-    {
-      line1: 'WHY',
-      line2: "YOU'RE HERE.",
-      body: "In my many years of doing seminars I found the three biggest motivators are weddings, cruises and class reunions. What's your motivator?",
-    },
     {
       line1: 'READY?',
       line2: "LET'S BUILD.",
