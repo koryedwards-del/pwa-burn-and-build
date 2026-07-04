@@ -407,6 +407,50 @@ html:has(.start-site .ob-flow) #app {
   margin: 0 auto 20px;
 }
 
+.start-success.compact {
+  padding: 24px 24px 8px;
+  text-align: center;
+}
+
+.start-success.compact .check {
+  width: 52px;
+  height: 52px;
+  font-size: 26px;
+  margin-bottom: 16px;
+}
+
+.creating-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+.creating-panel {
+  text-align: center;
+  width: 100%;
+}
+
+.creating-bar {
+  height: 3px;
+  border-radius: 2px;
+  background: #262626;
+  overflow: hidden;
+  margin-top: 28px;
+}
+
+.creating-bar span {
+  display: block;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--flame), transparent);
+  animation: creating-slide 1s ease-in-out infinite;
+}
+
+@keyframes creating-slide {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(320%); }
+}
+
 .unlock-screen {
   padding-bottom: 40px;
 }

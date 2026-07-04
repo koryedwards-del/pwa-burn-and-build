@@ -98,6 +98,26 @@ function programName() {
   return store.onboardingForm?.preferredName || store.builtPackage?.intake?.preferredName || '';
 }
 
+function confirmOnboardingPage() {
+  return totalOnboardingPages() - 2;
+}
+
+function persistBuiltPackage() {
+  if (!store.builtPackage) return;
+  sessionStorage.setItem('bnb_built_package', JSON.stringify(store.builtPackage));
+}
+
+function restoreBuiltPackage() {
+  const raw = sessionStorage.getItem('bnb_built_package');
+  if (!raw) return;
+  try {
+    store.builtPackage = JSON.parse(raw);
+    store.importUrl = packageToImportUrl(store.builtPackage, '../');
+  } catch {
+    sessionStorage.removeItem('bnb_built_package');
+  }
+}
+
 function beginProgramCreation() {
   store.phase = 'onboarding';
   store.onboardingPage = 0;
@@ -139,11 +159,26 @@ function renderTeaching() {
 function ensureBuiltPackage() {
   if (!store.onboardingForm) return null;
   store.builtPackage = buildProgramPackage(store.onboardingForm, {
-    startDate: store.startDate,
     label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
   });
   store.importUrl = packageToImportUrl(store.builtPackage, '../');
+  persistBuiltPackage();
   return store.builtPackage;
+}
+
+function renderCreating() {
+  const name = programName();
+  return `
+    <div class="start-site">
+      <div class="screen unlock-screen creating-screen">
+        <div class="unlock-panel creating-panel">
+          <div class="ob-welcome-line1">BUILDING</div>
+          <div class="ob-welcome-line2">YOUR PLAN</div>
+          <p class="unlock-lead">${name ? `Creating a personalized food plan for ${name}…` : 'Creating your personalized food plan…'}</p>
+          <div class="creating-bar" aria-hidden="true"><span></span></div>
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderSchedule() {
@@ -200,18 +235,25 @@ function renderReady() {
 }
 
 function renderUnlockEmail() {
+  const name = programName();
+  const lbm = store.builtPackage?.intake?.leanBodyMass;
   return `
     <div class="start-site">
       <div class="screen unlock-screen">
+        <div class="start-success compact">
+          <div class="check">✓</div>
+          <div class="ob-welcome-line1">YOUR FOOD PLAN</div>
+          <div class="ob-welcome-line2">IS READY.</div>
+        </div>
         <div class="unlock-panel">
-          <div class="teach-kicker">Step 1 of 3</div>
-          <h2 class="unlock-title">Own Burn &amp; Build for life</h2>
-          <p class="unlock-lead">Enter your email. We'll send you a secure link to unlock your program and open it in the app.</p>
+          <div class="teach-kicker">Step 1 of 3 · Unlock</div>
+          <h2 class="unlock-title">Get your custom food plan</h2>
+          <p class="unlock-lead">Your 8-week Burn &amp; Build program has been created${name ? ` for ${name}` : ''}${lbm ? ` from ${lbm.toFixed(1)} lbs of lean body mass` : ''}. Enter your email to save it and continue.</p>
           ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
           <label class="unlock-label" for="unlock-email">Email address</label>
           <input id="unlock-email" class="ob-input ob-input-lg" type="email" name="unlockEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
           <button type="button" class="btn-primary unlock-cta" data-unlock-send>SEND MY LINK →</button>
-          <button type="button" class="unlock-back-link" data-unlock-back-ready>← Back</button>
+          <button type="button" class="unlock-back-link" data-unlock-back-confirm>← Back to review</button>
         </div>
       </div>
     </div>`;
@@ -321,7 +363,8 @@ function render() {
     root.innerHTML = renderOnboardingWrapper();
     bindOnboardingOnly();
     return;
-  } else if (store.phase === 'teach') root.innerHTML = renderTeaching();
+  } else if (store.phase === 'creating') root.innerHTML = renderCreating();
+  else if (store.phase === 'teach') root.innerHTML = renderTeaching();
   else if (store.phase === 'schedule') root.innerHTML = renderSchedule();
   else if (store.phase === 'ready') root.innerHTML = renderReady();
   else if (store.phase === 'unlock-email') root.innerHTML = renderUnlockEmail();
@@ -452,6 +495,12 @@ function bindGlobal() {
       render();
       return;
     }
+    if (e.target.closest('[data-unlock-back-confirm]')) {
+      store.phase = 'onboarding';
+      store.onboardingPage = confirmOnboardingPage();
+      render();
+      return;
+    }
     if (e.target.closest('[data-unlock-send]')) {
       sendMagicLink();
       return;
@@ -507,6 +556,7 @@ async function copyImportLink() {
 }
 
 function initStartSite() {
+  restoreBuiltPackage();
   if (store.onboardingForm) return;
   const temp = { profile: null };
   initOnboardingForm(temp);
@@ -514,20 +564,26 @@ function initStartSite() {
 }
 
 function finishIntake() {
-  store.phase = 'teach';
-  store.teachIndex = 0;
+  store.phase = 'creating';
   render();
+  window.setTimeout(() => {
+    ensureBuiltPackage();
+    store.phase = 'unlock-email';
+    render();
+  }, 900);
 }
 
 function initFromUrl() {
+  restoreBuiltPackage();
   const params = new URLSearchParams(location.search);
   if (params.get('unlock') === 'verified') {
+    if (!store.builtPackage && store.onboardingForm) ensureBuiltPackage();
     handleUnlockVerified();
     return;
   }
   if (params.get('unlock') === 'open' && sessionStorage.getItem('bnb_ownership') === 'true') {
     store.email = sessionStorage.getItem('bnb_unlock_email') || '';
-    ensureBuiltPackage();
+    if (!store.builtPackage && store.onboardingForm) ensureBuiltPackage();
     store.phase = 'open';
   }
 }
