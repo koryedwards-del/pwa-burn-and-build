@@ -1078,9 +1078,20 @@ button {
 
 .ob-next.disabled,
 .ob-next:disabled {
+  pointer-events: none;
+}
+
+.start-site .ob-next.disabled,
+.start-site .ob-next:disabled {
+  background: rgba(255, 122, 26, 0.28);
+  color: rgba(0, 0, 0, 0.4);
+  box-shadow: none;
+}
+
+.ob-next.disabled,
+.ob-next:disabled {
   background: #333;
   color: #666;
-  pointer-events: none;
 }
 
 .hidden {
@@ -1261,6 +1272,74 @@ button {
 
 .ob-question {
   padding-top: 16px;
+}
+
+.start-site .ob-flow-step .ob-content {
+  padding-top: 8px;
+}
+
+.start-site .ob-question,
+.start-site .ob-confirm {
+  max-width: 520px;
+  margin: 0 auto;
+  padding-top: 24px;
+  width: 100%;
+}
+
+.start-site .ob-step-header {
+  margin-bottom: 28px;
+}
+
+.start-site .ob-step-num {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.start-site .ob-step-prefix {
+  font-size: clamp(32px, 9vw, 48px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  color: #fff;
+}
+
+.start-site .ob-step-title {
+  font-size: clamp(36px, 10vw, 52px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--flame);
+  margin-top: 0;
+}
+
+.start-site .ob-step-sub {
+  margin-top: 16px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: #b3b3b3;
+}
+
+.start-site .ob-field-label,
+.start-site .ob-section-label {
+  margin-top: 28px;
+  color: #aaa;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+}
+
+.start-site .ob-input,
+.start-site .ob-seg,
+.start-site .ob-radio {
+  background: rgba(14, 14, 14, 0.85);
+}
+
+.start-site .ob-next {
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .ob-step-num {

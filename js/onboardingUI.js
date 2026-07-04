@@ -95,7 +95,7 @@ function renderQuestion(index, form) {
           <button type="button" class="${form.sex === 'Male' ? 'active' : ''}" data-ob-sex="Male">Male</button>
           <button type="button" class="${form.sex === 'Female' ? 'active' : ''}" data-ob-sex="Female">Female</button>
         </div>
-        ${infoBox('👋', 'We use your name to personalize your experience throughout the app.')}`;
+        ${infoBox('👋', "We'll use your first name throughout your program.")}`;
 
     case 1:
       return `
@@ -334,7 +334,11 @@ export function renderOnboarding(store, options = {}) {
   const nextText = options.firstStepLabel && page === start
     ? options.firstStepLabel
     : nextLabel(phase, isEditMode);
-  const flowClass = `${options.flowClass || ''}${phase.kind === 'welcome' && screens[phase.index]?.type === 'intro' ? ' ob-flow-intro' : ''}`.trim();
+  const flowClass = [
+    options.flowClass || '',
+    phase.kind === 'welcome' && screens[phase.index]?.type === 'intro' ? 'ob-flow-intro' : '',
+    phase.kind === 'question' || phase.kind === 'confirm' ? 'ob-flow-step' : '',
+  ].filter(Boolean).join(' ');
   const flowClassAttr = flowClass ? ` ${flowClass}` : '';
 
   return `
