@@ -299,9 +299,7 @@ function renderOnboardingWrapper() {
     onboardingPage: store.onboardingPage,
     onboardingEditMode: false,
   };
-  return `<div class="start-site">${renderOnboarding(fakeStore, {
-    firstStepLabel: 'GET STARTED  →',
-  })}</div>`;
+  return `<div class="start-site">${renderOnboarding(fakeStore)}</div>`;
 }
 
 function render() {

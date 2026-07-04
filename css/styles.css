@@ -1083,6 +1083,70 @@ button {
   padding-top: 48px;
 }
 
+.ob-intro {
+  max-width: 520px;
+  margin: 0 auto;
+  padding-top: 40px;
+  text-align: left;
+}
+
+.ob-intro-headline {
+  margin-bottom: 24px;
+}
+
+.ob-intro-body {
+  font-size: 17px;
+  line-height: 1.6;
+  color: #b3b3b3;
+  margin-bottom: 32px;
+}
+
+.ob-intro-quote {
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.ob-intro-quote p {
+  font-size: 16px;
+  font-style: italic;
+  color: #ccc;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.ob-intro-quote-name {
+  margin-top: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.ob-intro-quote-meta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.ob-flow-intro .ob-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .ob-intro {
+    padding-top: 56px;
+  }
+
+  .ob-intro-headline .ob-welcome-line1,
+  .ob-intro-headline .ob-welcome-line2 {
+    font-size: clamp(40px, 6vw, 56px);
+  }
+}
+
 .ob-welcome-headline {
   min-height: 120px;
 }

@@ -152,11 +152,13 @@ export function profileFromForm(form) {
 export function welcomeScreens() {
   return [
     {
+      type: 'intro',
       line1: 'READY?',
       line2: "LET'S BUILD.",
-      body: "This takes a few minutes. It's worth it. When we're done, you'll have a food plan no other app can give you.",
-      quote: '"I learned this program in 1992 and it has been invaluable. At 67, I am confident I can maintain and even build muscle and lose fat. Let\'s go!"',
-      attribution: '— Linda Kay, client since 1992',
+      body: "This takes a few minutes. It's worth it. We'll use your answers to build a food plan that's yours — not a generic template.",
+      quote: "I learned this program in 1992 and it has been invaluable. At 67, I am confident I can maintain and even build muscle and lose fat. Let's go!",
+      quoteName: 'Linda Kay',
+      quoteMeta: 'Client since 1992',
     },
   ];
 }
@@ -193,7 +195,7 @@ export function canProceed(phase, form) {
 }
 
 export function nextLabel(phase, isEditMode) {
-  if (phase.kind === 'welcome' && phase.index === 0) return 'GET STARTED  →';
+  if (phase.kind === 'welcome' && phase.index === 0) return 'START BUILDING';
   if (phase.kind === 'welcome') return 'NEXT  →';
   if (phase.kind === 'confirm') return isEditMode ? 'UPDATE MY PLAN  →' : "LET'S GO  →";
   if (phase.kind === 'done') return isEditMode ? 'DONE  →' : 'SEE YOUR FOOD PLAN  →';

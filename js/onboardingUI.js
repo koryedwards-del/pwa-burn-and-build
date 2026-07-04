@@ -44,6 +44,21 @@ function radioCard(name, value, selected, label, sub) {
 }
 
 function renderWelcome(screen, index) {
+  if (screen.type === 'intro') {
+    return `
+      <div class="ob-intro">
+        <div class="ob-intro-headline">
+          <div class="ob-welcome-line1">${screen.line1}</div>
+          <div class="ob-welcome-line2">${screen.line2}</div>
+        </div>
+        <p class="ob-intro-body">${screen.body}</p>
+        <div class="ob-intro-quote">
+          <p>&ldquo;${screen.quote}&rdquo;</p>
+          <div class="ob-intro-quote-name">${screen.quoteName}</div>
+          <div class="ob-intro-quote-meta">${screen.quoteMeta}</div>
+        </div>
+      </div>`;
+  }
   if (screen.type === 'brand') {
     return `
       <div class="ob-welcome ob-welcome-brand">
@@ -319,10 +334,11 @@ export function renderOnboarding(store, options = {}) {
   const nextText = options.firstStepLabel && page === start
     ? options.firstStepLabel
     : nextLabel(phase, isEditMode);
-  const flowClass = options.flowClass || '';
+  const flowClass = `${options.flowClass || ''}${phase.kind === 'welcome' && screens[phase.index]?.type === 'intro' ? ' ob-flow-intro' : ''}`.trim();
+  const flowClassAttr = flowClass ? ` ${flowClass}` : '';
 
   return `
-    <div class="ob-flow${flowClass}">
+    <div class="ob-flow${flowClassAttr}">
       ${showBar ? `
       <div class="ob-top">
         ${showBack ? '<button type="button" class="ob-back" data-ob-back>←</button>' : (isEditMode ? '<button type="button" class="ob-back" data-nav="home">×</button>' : '<span class="ob-back-spacer"></span>')}
