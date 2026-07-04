@@ -1339,22 +1339,6 @@ button {
   pointer-events: none;
 }
 
-.start-site .ob-seg {
-  border-color: rgba(255, 122, 26, 0.35);
-  background: rgba(255, 122, 26, 0.08);
-}
-
-.start-site .ob-seg button {
-  background: #a85828;
-  color: rgba(0, 0, 0, 0.55);
-  font-weight: 700;
-}
-
-.start-site .ob-seg button.active {
-  background: var(--flame);
-  color: #000;
-}
-
 .start-site .ob-radio {
   border-color: rgba(255, 122, 26, 0.3);
   background: #a85828;
