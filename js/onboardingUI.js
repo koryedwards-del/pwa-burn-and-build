@@ -16,6 +16,8 @@ import {
   totalOnboardingPages,
   wakeTimeFromParts,
   welcomeScreens,
+  ageFromBirthDate,
+  birthDateFieldBounds,
 } from './onboardingEngine.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -107,20 +109,24 @@ function renderQuestion(index, form) {
 
     case 1:
       return `
-        ${stepHeader(2, 'HEIGHT', 'Used to determine your fat burn and cardiovascular training heart rate targets.')}
+        ${stepHeader(2, 'HEIGHT', '', 'YOUR', true)}
         <div class="ob-big-value" data-bind="heightInches" data-format="height">${heightDisplay(form.heightInches)}</div>
         <div class="ob-big-sub" data-bind-sub="heightInches">${Math.round(form.heightInches)} inches</div>
         <input type="range" class="ob-range" name="heightInches" min="48" max="84" step="1" value="${form.heightInches}" />
         <div class="ob-range-labels"><span>4'0"</span><span>7'0"</span></div>
         ${infoBox('💡', 'Your lean body mass is your fat burner. More muscle burns more fat.')}`;
 
-    case 2:
+    case 2: {
+      const { min: birthMin, max: birthMax } = birthDateFieldBounds();
       return `
-        ${stepHeader(3, 'YEARS OF EXPERIENCE.', '')}
+        ${stepHeader(3, 'AGE', 'Used to determine your fat burn and cardiovascular training heart rate targets.', 'YOUR')}
+        <div class="ob-field-label">DATE OF BIRTH</div>
+        <input class="ob-input ob-input-birth" type="date" name="birthDate" value="${form.birthDate}" min="${birthMin}" max="${birthMax}" autocomplete="bday" />
         <div class="ob-big-value ob-big-age" data-bind="age">${form.age}</div>
-        <input type="range" class="ob-range" name="age" min="13" max="99" step="1" value="${form.age}" />
+        <input type="range" class="ob-range ob-range-readonly" name="age" min="13" max="99" step="1" value="${form.age}" tabindex="-1" aria-hidden="true" />
         <div class="ob-range-labels"><span>13</span><span>99</span></div>
         ${infoBox('❤️', 'Your age is used to calculate your personal fat burning (60–70%) and cardio training (70–85%) heart rate zones.')}`;
+    }
 
     case 3:
       return `
@@ -378,6 +384,15 @@ function syncNextButton(store, form) {
   btn.classList.toggle('disabled', !proceed);
 }
 
+function syncAgeFromBirthDate(form, flow) {
+  const age = ageFromBirthDate(form.birthDate);
+  if (age == null) return;
+  form.age = Math.min(99, Math.max(13, age));
+  updateBoundDisplays('age', form.age);
+  const range = flow?.querySelector('input[name="age"]');
+  if (range) range.value = form.age;
+}
+
 function updateBoundDisplays(name, value) {
   const num = Number(value);
   document.querySelectorAll(`.ob-flow [data-bind="${name}"]`).forEach((el) => {
@@ -476,8 +491,16 @@ function ensureObDelegation() {
     const form = obCtx.store.onboardingForm;
 
     if (input.type === 'range') {
+      if (input.name === 'age') return;
       form[input.name] = Number(input.value);
       updateBoundDisplays(input.name, input.value);
+      return;
+    }
+
+    if (input.name === 'birthDate') {
+      form.birthDate = input.value;
+      syncAgeFromBirthDate(form, input.closest('.ob-flow'));
+      syncNextButton(obCtx.store, form);
       return;
     }
 
@@ -491,6 +514,13 @@ function ensureObDelegation() {
     if (!input.closest('.ob-flow')) return;
     const form = obCtx.store.onboardingForm;
     const flow = input.closest('.ob-flow');
+
+    if (input.name === 'birthDate') {
+      form.birthDate = input.value;
+      syncAgeFromBirthDate(form, input.closest('.ob-flow'));
+      syncNextButton(obCtx.store, form);
+      return;
+    }
 
     if (input.name === 'fatSource') {
       form.fatSource = input.value;

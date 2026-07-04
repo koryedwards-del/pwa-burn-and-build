@@ -70,6 +70,33 @@ export function heartRates(age) {
   };
 }
 
+export function ageFromBirthDate(birthDate) {
+  if (!birthDate) return null;
+  const born = new Date(`${birthDate}T12:00:00`);
+  if (Number.isNaN(born.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - born.getFullYear();
+  const monthDiff = today.getMonth() - born.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < born.getDate())) age -= 1;
+  return age;
+}
+
+export function defaultBirthDateFromAge(age) {
+  const today = new Date();
+  const born = new Date(today.getFullYear() - age, today.getMonth(), today.getDate());
+  const y = born.getFullYear();
+  const m = String(born.getMonth() + 1).padStart(2, '0');
+  const d = String(born.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export function birthDateFieldBounds() {
+  const today = new Date();
+  const max = defaultBirthDateFromAge(13);
+  const min = defaultBirthDateFromAge(99);
+  return { min, max };
+}
+
 export function heightDisplay(inches) {
   const ft = Math.floor(inches / 12);
   const rem = Math.round(inches % 12);
@@ -105,11 +132,13 @@ export function wakeTimeFromParts(hour12, minute, ampm) {
 export function defaultOnboardingForm(profile) {
   const p = profile || {};
   const work = reverseWorkIntensity(p.workIntensity ?? 2);
+  const age = p.age ?? 35;
   return {
     preferredName: p.preferredName || '',
     sex: p.sex || 'Male',
     heightInches: p.heightInches ?? 68,
-    age: p.age ?? 35,
+    age,
+    birthDate: p.birthDate || defaultBirthDateFromAge(age),
     weightText: p.totalWeight > 0 ? String(Math.round(p.totalWeight)) : '',
     fatPercentText: p.fatPercent > 0 ? String(p.fatPercent) : '',
     fatSource: p.fatPercent > 0 ? 'recent' : '',
@@ -183,6 +212,10 @@ export function canProceed(phase, form) {
     case 'question':
       switch (phase.index) {
         case 0: return form.preferredName.trim().length > 0;
+        case 2: {
+          const age = ageFromBirthDate(form.birthDate);
+          return age != null && age >= 13 && age <= 99;
+        }
         case 3: return Number(form.weightText) > 0;
         case 4: return Number(form.fatPercentText) > 0 && form.fatSource;
         case 5: return !!form.workPhysical;

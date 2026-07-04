@@ -1407,6 +1407,15 @@ button {
   font-weight: 700;
 }
 
+.ob-input-birth {
+  text-align: center;
+  color-scheme: dark;
+}
+
+.ob-range-readonly {
+  pointer-events: none;
+}
+
 .ob-field-label,
 .ob-section-label {
   margin-top: 24px;
