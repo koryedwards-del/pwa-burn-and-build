@@ -24,9 +24,9 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 72% 52% at 50% 30%, rgba(255, 122, 26, 0.34) 0%, transparent 62%),
-    radial-gradient(ellipse 100% 68% at 50% 16%, rgba(255, 140, 43, 0.13) 0%, transparent 68%),
-    radial-gradient(ellipse 110% 60% at 50% 94%, rgba(255, 122, 26, 0.16) 0%, transparent 58%);
+    radial-gradient(ellipse 48% 38% at 50% 28%, rgba(255, 122, 26, 0.38) 0%, transparent 68%),
+    radial-gradient(ellipse 62% 42% at 50% 22%, rgba(255, 140, 43, 0.12) 0%, transparent 72%),
+    radial-gradient(ellipse 110% 60% at 50% 94%, rgba(255, 122, 26, 0.14) 0%, transparent 58%);
 }
 
 .start-site:has(.ob-flow-intro)::after {
