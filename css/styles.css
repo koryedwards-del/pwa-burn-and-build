@@ -1328,6 +1328,54 @@ button {
   font-size: 15px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  background: var(--flame);
+  color: #000;
+}
+
+.start-site .ob-next.disabled,
+.start-site .ob-next:disabled {
+  background: #a85828;
+  color: rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.start-site .ob-seg {
+  border-color: rgba(255, 122, 26, 0.35);
+  background: rgba(255, 122, 26, 0.08);
+}
+
+.start-site .ob-seg button {
+  background: #a85828;
+  color: rgba(0, 0, 0, 0.55);
+  font-weight: 700;
+}
+
+.start-site .ob-seg button.active {
+  background: var(--flame);
+  color: #000;
+}
+
+.start-site .ob-radio {
+  border-color: rgba(255, 122, 26, 0.3);
+  background: #a85828;
+}
+
+.start-site .ob-radio .ob-radio-label {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.start-site .ob-radio .ob-radio-sub {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.start-site .ob-radio.selected {
+  border-color: var(--flame);
+  background: var(--flame);
+}
+
+.start-site .ob-radio.selected .ob-radio-label,
+.start-site .ob-radio.selected .ob-radio-sub {
+  color: #000;
 }
 
 .ob-step-num {
