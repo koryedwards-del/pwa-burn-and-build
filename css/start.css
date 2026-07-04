@@ -10,14 +10,14 @@
   color: var(--text);
 }
 
-.start-site:has(.ob-flow-intro) {
+.start-site:has(.ob-flow) {
   position: relative;
   isolation: isolate;
   background-color: var(--bnb-charcoal-deep);
   background-image: linear-gradient(180deg, #111111 0%, #080808 42%, #0a0a0a 100%);
 }
 
-.start-site:has(.ob-flow-intro)::before {
+.start-site:has(.ob-flow)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -35,7 +35,7 @@
     radial-gradient(ellipse 130% 90% at 50% 100%, rgba(255, 122, 26, 0.1) 0%, transparent 52%);
 }
 
-.start-site:has(.ob-flow-intro)::after {
+.start-site:has(.ob-flow)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -47,7 +47,7 @@
   background-size: 180px 180px;
 }
 
-.start-site:has(.ob-flow-intro) > * {
+.start-site:has(.ob-flow) > * {
   position: relative;
   z-index: 1;
 }
