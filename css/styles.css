@@ -1146,6 +1146,7 @@ button {
     0 0 48px rgba(255, 122, 26, 0.06),
     0 12px 40px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 140, 43, 0.08);
+  text-align: left;
 }
 
 .ob-intro-quote::before {
@@ -1187,9 +1188,17 @@ button {
   border-top-color: rgba(255, 255, 255, 0.06);
 }
 
-.ob-flow-intro .ob-content {
+.start-site .ob-flow .ob-content {
   display: flex;
   flex-direction: column;
+  align-items: center;
+}
+
+.start-site .ob-flow-step .ob-content {
+  justify-content: flex-start;
+}
+
+.start-site .ob-flow-intro .ob-content {
   justify-content: center;
 }
 
@@ -1284,10 +1293,16 @@ button {
   margin: 0 auto;
   padding-top: 24px;
   width: 100%;
+  text-align: center;
 }
 
 .start-site .ob-step-header {
   margin-bottom: 28px;
+  text-align: center;
+}
+
+.start-site .ob-info {
+  text-align: left;
 }
 
 .start-site .ob-step-num {
