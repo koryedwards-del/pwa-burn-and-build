@@ -295,13 +295,9 @@ function renderConfirm(form, isEditMode) {
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6)}
         ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', base + 7)}
         ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, base + 7)}
-        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 7)}
-        ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 8)}
-        ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 8)}
-      </div>
-      <div class="ob-ready-box">
-        <div class="ob-ready-kicker">${isEditMode ? '⚡ YOUR PLAN WILL BE UPDATED' : '⚡ YOUR PLAN IS READY'}</div>
-        <p>Based on ${lbm.toFixed(1)} lbs of lean body mass, your custom food plan will show you exactly how many servings of protein, carbs, and fat you need each day to lose fat as fast as possible.</p>
+        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8)}
+        ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9)}
+        ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 9)}
       </div>
     </div>`;
 }
