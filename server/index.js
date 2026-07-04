@@ -58,6 +58,17 @@ app.get('/', (_req, res) => {
   res.redirect('/start/');
 });
 
+app.use((req, res, next) => {
+  const isHtml = req.path.endsWith('.html') || req.path.endsWith('/');
+  const isAsset = /\.(css|js|mjs)$/i.test(req.path);
+  if (isHtml) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  } else if (isAsset) {
+    res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
+  }
+  next();
+});
+
 app.use(express.static(root, {
   dotfiles: 'deny',
   index: ['index.html'],

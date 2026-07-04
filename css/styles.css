@@ -1301,6 +1301,10 @@ button {
   text-align: center;
 }
 
+.start-site .ob-step-headline {
+  margin-bottom: 0;
+}
+
 .start-site .ob-info {
   text-align: left;
 }

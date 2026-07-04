@@ -26,8 +26,10 @@ function stepHeader(step, title, subtitle, prefix = 'YOUR') {
   return `
     <div class="ob-step-header">
       <div class="ob-step-num">STEP ${step} OF ${QUESTION_COUNT}</div>
-      <div class="ob-step-prefix">${prefix}</div>
-      <h2 class="ob-step-title">${title}</h2>
+      <div class="ob-step-headline">
+        <div class="ob-welcome-line1">${prefix}</div>
+        <div class="ob-welcome-line2">${title}</div>
+      </div>
       ${subtitle ? `<p class="ob-step-sub">${subtitle}</p>` : ''}
     </div>`;
 }
