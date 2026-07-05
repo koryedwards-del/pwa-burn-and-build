@@ -196,6 +196,7 @@ app.get('/config.js', (_req, res) => {
   res.send(`window.BNB_CONFIG=${JSON.stringify({
     creatorBaseUrl: process.env.CREATOR_BASE_URL || '',
     webpageUrl: process.env.WEBPAGE_URL || '',
+    paywallEnabled: process.env.PAYWALL_ENABLED === 'true',
   })};`);
 });
 

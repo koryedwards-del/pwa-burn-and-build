@@ -139,7 +139,7 @@ function restoreFlowState() {
     store.onboardingPage = Number(page) || 0;
   }
   const phase = sessionStorage.getItem('bnb_creator_phase');
-  const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
+  const flowPhases = ['email-login', 'onboarding', 'creating', 'paywall', 'plan-ready'];
   if (phase && flowPhases.includes(phase)) {
     store.phase = phase;
   }
@@ -378,19 +378,28 @@ function renderUnlockSent() {
     </div>`;
 }
 
-function renderUnlockPay() {
+function isPaywallEnabled() {
+  return window.BNB_CONFIG?.paywallEnabled === true;
+}
+
+function advanceAfterProgramSave() {
+  store.phase = isPaywallEnabled() ? 'paywall' : 'plan-ready';
+  render();
+}
+
+function renderPaywall() {
   return `
     <div class="start-site">
       <div class="screen unlock-screen">
         <div class="unlock-panel">
-          <div class="teach-kicker">Step 3 of 3</div>
+          <div class="teach-kicker">Final step</div>
           <h2 class="unlock-title">Complete your ownership</h2>
           <p class="unlock-lead">One-time purchase. Own Burn &amp; Build for life — your program, coaching, and daily tools in the app.</p>
           <div class="unlock-box">
             <h3>Lifetime ownership includes</h3>
             ${renderOwnershipList()}
           </div>
-          <button type="button" class="btn-primary unlock-cta" data-unlock-purchase>COMPLETE OWNERSHIP →</button>
+          <button type="button" class="btn-primary unlock-cta" data-complete-ownership>COMPLETE OWNERSHIP →</button>
           <p class="unlock-hint">Secure checkout · No subscription · Yours for life</p>
         </div>
       </div>
@@ -462,6 +471,7 @@ function render() {
     persistFlowState();
     return;
   } else if (store.phase === 'creating') root.innerHTML = renderCreating();
+  else if (store.phase === 'paywall') root.innerHTML = renderPaywall();
   else if (store.phase === 'plan-ready') root.innerHTML = renderPlanReady();
   persistFlowState();
 }
@@ -545,11 +555,15 @@ function handleUnlockVerified() {
   render();
 }
 
-function completePurchase() {
-  // TODO: Stripe checkout — webhook grants ownership, server attaches program to account
+function completeOwnership() {
+  // TODO: Stripe checkout — webhook grants ownership before plan-ready
   sessionStorage.setItem('bnb_ownership', 'true');
-  store.phase = 'open';
+  store.phase = 'plan-ready';
   render();
+}
+
+function completePurchase() {
+  completeOwnership();
 }
 
 function buildProgramReady() {
@@ -571,6 +585,10 @@ function bindGlobal() {
       store.phase = 'home';
       store.emailError = '';
       render();
+      return;
+    }
+    if (e.target.closest('[data-complete-ownership]')) {
+      completeOwnership();
       return;
     }
     if (e.target.closest('[data-download-package]')) {
@@ -628,8 +646,10 @@ function finishIntake() {
     const saved = await saveProgramToServer(store.email, store.builtPackage);
     if (!saved.ok) {
       store.saveError = saved.message || 'Could not save your plan.';
+      store.phase = 'plan-ready';
+    } else {
+      advanceAfterProgramSave();
     }
-    store.phase = 'plan-ready';
     render();
   }, 900);
 }
