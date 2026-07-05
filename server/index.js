@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
-import { dbPathForHealth, getProgram, normalizeEmail, saveProgram } from './db.js';
+import { countPrograms, dbPathForHealth, getLatestProgram, normalizeEmail, saveProgram } from './db.js';
 import { validateProgramPackage } from '../js/programPackage.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,8 +69,8 @@ app.post('/api/programs', (req, res) => {
     return;
   }
 
-  saveProgram(email, pkg);
-  res.json({ ok: true, email });
+  const programId = saveProgram(email, pkg);
+  res.json({ ok: true, email, programId, programCount: countPrograms(email) });
 });
 
 app.get('/api/programs', (req, res) => {
@@ -80,13 +80,18 @@ app.get('/api/programs', (req, res) => {
     return;
   }
 
-  const pkg = getProgram(email);
+  const pkg = getLatestProgram(email);
   if (!pkg) {
     res.status(404).json({ ok: false, message: 'No food plan found for this email yet.' });
     return;
   }
 
-  res.json({ ok: true, email, package: pkg });
+  res.json({
+    ok: true,
+    email,
+    package: pkg,
+    programCount: countPrograms(email),
+  });
 });
 
 /** Public config for client — never put secrets here. */
