@@ -638,6 +638,43 @@ html:has(.start-site .ob-flow) #app {
   color: var(--flame);
 }
 
+.app-preview {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.app-preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--flame);
+  margin-bottom: 12px;
+}
+
+.app-preview-phone {
+  display: inline-block;
+  padding: 10px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, #1f1f1f, #0a0a0a);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.app-preview-phone img {
+  display: block;
+  width: 200px;
+  height: auto;
+  border-radius: 20px;
+}
+
+.app-preview-caption {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 /* ── Website home (marketing front door) ── */
 
 .website-home {

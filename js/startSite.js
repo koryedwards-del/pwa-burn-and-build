@@ -186,6 +186,13 @@ function renderPlanReady() {
         </div>
         <div class="unlock-panel">
           <p class="unlock-lead">Your personalized food plan has been created${name ? ` for ${name}` : ''} and is ready to install on the Burn &amp; Build app.</p>
+          <div class="app-preview">
+            <div class="app-preview-label">Burn &amp; Build app</div>
+            <div class="app-preview-phone">
+              <img src="../img/shell/dashboard-placeholder.svg" alt="Burn &amp; Build app dashboard preview" width="200" height="400" loading="lazy" />
+            </div>
+            <p class="app-preview-caption">Look for this on your home screen after you install.</p>
+          </div>
           <div class="install-box">
             <h3>Install on your home screen</h3>
             <p class="install-lead">If you don't have Burn &amp; Build on your home screen yet, install it now:</p>
