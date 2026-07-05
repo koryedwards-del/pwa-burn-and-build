@@ -191,7 +191,7 @@ function renderPlanReady() {
             <div class="app-preview-phone">
               <img src="../img/shell/dashboard-placeholder.svg" alt="Burn &amp; Build app dashboard preview" width="200" height="400" loading="lazy" />
             </div>
-            <p class="app-preview-caption">Look for this on your home screen after you install.</p>
+            <p class="app-preview-caption">Your food plan and grocery list — tap a meal to log foods by gram weight.</p>
           </div>
           <div class="install-box">
             <h3>Install on your home screen</h3>
