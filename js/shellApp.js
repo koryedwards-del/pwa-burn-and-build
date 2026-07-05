@@ -629,7 +629,7 @@ function renderNoPlan() {
 
 function renderMealFatPoints(fatTarget, fatUsed, fatPct) {
   return `
-    <div class="fat-bar-wrap meal-fat-points">
+    <div class="fat-bar-wrap plan-fat-points">
       <div class="fat-bar"><div class="fat-bar-fill ${fatUsed >= fatTarget ? 'over' : ''}" style="width:${fatPct * 100}%"></div></div>
       <div class="fat-bar-meta">
         <span>Fat points</span>
@@ -656,6 +656,8 @@ function renderPlan() {
         <h1>Custom Food Plan</h1>
       </div>
 
+      ${renderMealFatPoints(fatTarget, fatUsed, fatPct)}
+
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
         const progress = mealProgress(slot);
@@ -681,7 +683,6 @@ function renderPlan() {
           </button>
           ${expanded ? `
           <div class="meal-body">
-            ${renderMealFatPoints(fatTarget, fatUsed, fatPct)}
             ${slot.proteinServings > 0 ? renderProteinSection(slot.label, slot.proteinServings) : ''}
             ${slot.grainStarchServings > 0 ? renderGrainSection(slot.label, slot.grainStarchServings) : ''}
             ${slot.vegetableServings > 0 ? renderCategorySection(slot.label, 'Vegetables', 'Vegetables', 'Vegetables', slot.vegetableServings, ['vegetable']) : ''}

@@ -35,16 +35,16 @@
   margin-bottom: 24px;
 }
 
-.food-plan-screen .meal-fat-points {
-  margin: 0 0 4px;
+.food-plan-screen .plan-fat-points {
+  margin: 8px 20px 16px;
   border-color: rgba(255, 214, 74, 0.35);
 }
 
-.food-plan-screen .meal-fat-points .fat-bar-fill {
+.food-plan-screen .plan-fat-points .fat-bar-fill {
   background: #ffd54a;
 }
 
-.food-plan-screen .meal-fat-points .fat-bar-meta {
+.food-plan-screen .plan-fat-points .fat-bar-meta {
   color: #ffd54a;
 }
 
