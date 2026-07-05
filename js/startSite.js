@@ -107,6 +107,36 @@ function persistBuiltPackage() {
   sessionStorage.setItem('bnb_built_package', JSON.stringify(store.builtPackage));
 }
 
+function persistFlowState() {
+  sessionStorage.setItem('bnb_creator_phase', store.phase);
+  if (store.onboardingForm) {
+    sessionStorage.setItem('bnb_onboarding_form', JSON.stringify(store.onboardingForm));
+  }
+  sessionStorage.setItem('bnb_onboarding_page', String(store.onboardingPage));
+}
+
+function restoreFlowState() {
+  restoreBuiltPackage();
+  store.email = sessionStorage.getItem('bnb_unlock_email') || '';
+  const formRaw = sessionStorage.getItem('bnb_onboarding_form');
+  if (formRaw) {
+    try {
+      store.onboardingForm = JSON.parse(formRaw);
+    } catch {
+      sessionStorage.removeItem('bnb_onboarding_form');
+    }
+  }
+  const page = sessionStorage.getItem('bnb_onboarding_page');
+  if (page != null && page !== '') {
+    store.onboardingPage = Number(page) || 0;
+  }
+  const phase = sessionStorage.getItem('bnb_creator_phase');
+  const unlockPhases = ['creating', 'unlock-email', 'unlock-sent', 'unlock-pay', 'open'];
+  if (phase && unlockPhases.includes(phase)) {
+    store.phase = phase;
+  }
+}
+
 function restoreBuiltPackage() {
   const raw = sessionStorage.getItem('bnb_built_package');
   if (!raw) return;
@@ -270,8 +300,10 @@ function renderUnlockSent() {
           <p class="unlock-lead">We sent a secure link to <strong>${store.email}</strong>. Open it on this device to continue.</p>
           <div class="ob-info"><span class="ob-info-icon">✉️</span><p>Your personalized program is already built and waiting. The link unlocks ownership and opens your plan in the app.</p></div>
           <p class="unlock-hint">Didn't get it? Check spam or wait a minute, then try again.</p>
+          <button type="button" class="btn-primary unlock-cta" data-unlock-continue>CONTINUE TO PAYMENT →</button>
           <button type="button" class="btn-secondary" data-unlock-resend>RESEND LINK</button>
           <button type="button" class="unlock-back-link" data-unlock-back-email>← Change email</button>
+          <p class="unlock-hint">Email delivery is being connected. Continue above to preview the rest of your flow.</p>
           ${isTestMode() ? `
           <details class="unlock-advanced">
             <summary>Testing tools</summary>
@@ -362,6 +394,7 @@ function render() {
   } else if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
     bindOnboardingOnly();
+    persistFlowState();
     return;
   } else if (store.phase === 'creating') root.innerHTML = renderCreating();
   else if (store.phase === 'teach') root.innerHTML = renderTeaching();
@@ -371,6 +404,7 @@ function render() {
   else if (store.phase === 'unlock-sent') root.innerHTML = renderUnlockSent();
   else if (store.phase === 'unlock-pay') root.innerHTML = renderUnlockPay();
   else if (store.phase === 'open') root.innerHTML = renderOpen();
+  persistFlowState();
 }
 
 function onboardingStore() {
@@ -514,6 +548,10 @@ function bindGlobal() {
       sendMagicLink();
       return;
     }
+    if (e.target.closest('[data-unlock-continue]')) {
+      handleUnlockVerified();
+      return;
+    }
     if (e.target.closest('[data-unlock-purchase]')) {
       completePurchase();
       return;
@@ -556,7 +594,7 @@ async function copyImportLink() {
 }
 
 function initStartSite() {
-  restoreBuiltPackage();
+  restoreFlowState();
   if (store.onboardingForm) return;
   const temp = { profile: null };
   initOnboardingForm(temp);
@@ -574,7 +612,7 @@ function finishIntake() {
 }
 
 function initFromUrl() {
-  restoreBuiltPackage();
+  restoreFlowState();
   const params = new URLSearchParams(location.search);
   if (params.get('unlock') === 'verified') {
     if (!store.builtPackage && store.onboardingForm) ensureBuiltPackage();
