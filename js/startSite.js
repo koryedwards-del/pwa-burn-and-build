@@ -182,7 +182,6 @@ function renderEmailLogin() {
 }
 
 function renderPlanReady() {
-  const name = programName();
   return `
     <div class="start-site">
       <div class="screen unlock-screen">
@@ -192,18 +191,9 @@ function renderPlanReady() {
           <div class="ob-welcome-line2">IS READY</div>
         </div>
         <div class="unlock-panel">
-          <p class="unlock-lead">Your personalized food plan has been created${name ? ` for ${name}` : ''} and is ready to install on the Burn &amp; Build app.</p>
-          ${store.email ? `<p class="unlock-hint">Saved to <strong>${store.email}</strong> — use this email when you open the app.</p>` : ''}
-          <div class="app-preview">
-            <div class="app-preview-label">Burn &amp; Build app</div>
-            <div class="app-preview-phone">
-              <img src="../img/shell/dashboard-placeholder.svg" alt="Burn &amp; Build app dashboard preview" width="200" height="400" loading="lazy" />
-            </div>
-            <p class="app-preview-caption">Your food plan and grocery list — tap a meal to log foods by gram weight.</p>
-          </div>
+          <p class="unlock-lead">Your personalized food plan is ready to be installed on the Burn &amp; Build app. If you don't have the app on your phone home screen, install it now. Follow the instructions below.</p>
           <div class="install-box">
             <h3>Install on your home screen</h3>
-            <p class="install-lead">If you don't have Burn &amp; Build on your home screen yet, install it now:</p>
             <ul class="install-steps">
               <li><strong>iPhone:</strong> Tap Share → <strong>Add to Home Screen</strong></li>
               <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
