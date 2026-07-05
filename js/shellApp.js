@@ -468,7 +468,7 @@ function renderExtraFatsSection(slotLabel) {
     <div class="cat-section fats-section ${grouped.length ? 'has-logged' : ''}">
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
-          <span class="cat-header-title">Extra fats</span>
+          <span class="cat-header-title">Extra Fats</span>
           ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} pts</span>` : ''}
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
@@ -560,8 +560,8 @@ function renderStubScreen(title, lead) {
     </div>`;
 }
 
-function renderLeanBody() {
-  return renderStubScreen('Lean Body Analysis', 'Coming next in the rebuild.');
+function renderProjections() {
+  return renderStubScreen('Projections', 'Coming next in the rebuild.');
 }
 
 function renderProTips() {
@@ -605,18 +605,35 @@ function renderImport() {
     </div>`;
 }
 
+function renderNoPlan() {
+  return `
+    <div class="screen food-plan-screen">
+      <div class="plan-header">
+        <button type="button" class="back-btn plan-back" data-nav="home">←</button>
+        <h1>Custom Food Plan</h1>
+      </div>
+      <div class="food-plan-empty">
+        <p>Create your food plan on the website first — then it loads here automatically.</p>
+        <a href="../start/" class="btn-primary">Create your food plan →</a>
+      </div>
+    </div>`;
+}
+
+function renderMealFatPoints(fatTarget, fatUsed, fatPct) {
+  return `
+    <div class="fat-bar-wrap meal-fat-points">
+      <div class="fat-bar"><div class="fat-bar-fill ${fatUsed >= fatTarget ? 'over' : ''}" style="width:${fatPct * 100}%"></div></div>
+      <div class="fat-bar-meta">
+        <span>Fat points</span>
+        <span>${fatUsed.toFixed(1)} / ${fatTarget} pts</span>
+      </div>
+    </div>`;
+}
+
 function renderPlan() {
   const plan = getPlan();
   if (!plan) {
-    if (hasActiveProgram()) {
-      store.screen = 'import';
-      return renderImport();
-    }
-    store.screen = 'onboarding';
-    initOnboardingForm(store);
-    store.onboardingPage = 0;
-    store.onboardingEditMode = false;
-    return renderOnboarding(store);
+    return renderNoPlan();
   }
 
   const slots = getMealSlots(plan);
@@ -625,9 +642,9 @@ function renderPlan() {
   const fatPct = fatTarget ? Math.min(fatUsed / fatTarget, 1) : 0;
 
   return `
-    <div class="screen">
+    <div class="screen food-plan-screen">
       <div class="plan-header">
-        <button type="button" class="back-btn" data-nav="home">← Home</button>
+        <button type="button" class="back-btn plan-back" data-nav="home">←</button>
         <h1>Custom Food Plan</h1>
       </div>
 
@@ -637,26 +654,6 @@ function renderPlan() {
         <span class="coach-banner-text">New message from Coach Kory</span>
         <span class="coach-banner-chevron">›</span>
       </button>` : ''}
-
-      <div class="summary-card">
-        <h2>Daily targets</h2>
-        <div class="summary-grid">
-          <span>Protein servings</span><span>${plan.servings.protein}</span>
-          <span>Grains & starches</span><span>${plan.servings.grainsStarches}</span>
-          <span>Fruit servings</span><span>${plan.servings.fruits}</span>
-          <span>Vegetable servings</span><span>${plan.servings.vegetables}</span>
-          <span>Maintain calories</span><span>${Math.round(plan.maintainTotalCals)}</span>
-          <span>Reduce calories</span><span>${Math.round(plan.reduceTotalCals)}</span>
-        </div>
-      </div>
-
-      <div class="fat-bar-wrap">
-        <div class="fat-bar"><div class="fat-bar-fill ${fatUsed >= fatTarget ? 'over' : ''}" style="width:${fatPct * 100}%"></div></div>
-        <div class="fat-bar-meta">
-          <span>Fat points</span>
-          <span>${fatUsed.toFixed(1)} / ${fatTarget} pts</span>
-        </div>
-      </div>
 
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
@@ -683,6 +680,7 @@ function renderPlan() {
           </button>
           ${expanded ? `
           <div class="meal-body">
+            ${renderMealFatPoints(fatTarget, fatUsed, fatPct)}
             ${slot.proteinServings > 0 ? renderProteinSection(slot.label, slot.proteinServings) : ''}
             ${slot.grainStarchServings > 0 ? renderGrainSection(slot.label, slot.grainStarchServings) : ''}
             ${slot.vegetableServings > 0 ? renderCategorySection(slot.label, 'Vegetables', 'Vegetables', 'Vegetables', slot.vegetableServings, ['vegetable']) : ''}
@@ -871,7 +869,7 @@ function render() {
   else if (store.screen === 'plan') root.innerHTML = renderPlan();
   else if (store.screen === 'coach') root.innerHTML = renderCoach();
   else if (store.screen === 'grocery') root.innerHTML = renderGrocery();
-  else if (store.screen === 'lean-body') root.innerHTML = renderLeanBody();
+  else if (store.screen === 'projections') root.innerHTML = renderProjections();
   else if (store.screen === 'pro-tips') root.innerHTML = renderProTips();
   else if (store.screen === 'previous-plans') root.innerHTML = renderPreviousPlans();
   else root.innerHTML = renderHome();
@@ -947,6 +945,7 @@ function bindEvents() {
         openEditPlan();
         return;
       }
+      if (nav === 'plan') store.expandedMeal = null;
       if (nav === 'coach') store.coachCardIndex = 0;
       if (nav === 'grocery') {
         refreshGroceryList();

@@ -1,0 +1,61 @@
+/** Custom Food Plan screen — rebuilt styling */
+
+.food-plan-screen .plan-header {
+  position: relative;
+  justify-content: center;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+}
+
+.food-plan-screen .plan-header h1 {
+  flex: 1;
+  text-align: center;
+  color: var(--cyan);
+  font-size: 20px;
+  margin-right: 36px;
+}
+
+.food-plan-screen .plan-back {
+  position: absolute;
+  left: 16px;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 400;
+  padding: 4px 8px;
+}
+
+.food-plan-empty {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.food-plan-empty p {
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.food-plan-screen .meal-fat-points {
+  margin: 0 0 4px;
+  border-color: rgba(255, 214, 74, 0.35);
+}
+
+.food-plan-screen .meal-fat-points .fat-bar-fill {
+  background: #ffd54a;
+}
+
+.food-plan-screen .meal-fat-points .fat-bar-meta {
+  color: #ffd54a;
+}
+
+.food-plan-screen .fats-section .cat-header-title {
+  color: var(--cyan);
+}
+
+.food-plan-screen .cat-header-title {
+  color: #fff;
+}
+
+.food-plan-screen .cat-header-servings {
+  color: var(--cyan);
+}
