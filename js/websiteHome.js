@@ -5,11 +5,6 @@ import {
   searchArticles,
 } from './knowledgeBase.js';
 import { computeWhatsPossible } from './previewCalculator.js';
-import {
-  TRANSFORMATIONS,
-  renderBeforeAfterCard,
-  renderStoryCard,
-} from './resultsStories.js';
 
 const APP_FEATURES = [
   {
@@ -209,28 +204,6 @@ function renderKnowledgeBase(state) {
     </section>`;
 }
 
-function renderResults() {
-  const featured = TRANSFORMATIONS.find((t) => t.type === 'before-after');
-  const stories = TRANSFORMATIONS.filter((t) => t.type === 'story');
-  return `
-    <section class="site-section" id="results">
-      <div class="site-section-inner">
-        <div class="section-label">Results</div>
-        <h2>Real people. Real programs.</h2>
-        <p class="section-lead">Burn &amp; Build has been dialing in personalized programs since 1982 — more than 30,000 clients from 500 pounds to 100 pounds.</p>
-        ${featured ? `
-          <div class="results-featured">
-            <h3 class="results-featured-title">${featured.name}</h3>
-            <p class="results-featured-sub">${featured.subtitle}</p>
-            ${renderBeforeAfterCard(featured)}
-          </div>` : ''}
-        <div class="results-grid">
-          ${stories.map((t) => renderStoryCard(t)).join('')}
-        </div>
-      </div>
-    </section>`;
-}
-
 function renderFinalCta() {
   return `
     <section class="site-section site-final-cta">
@@ -263,7 +236,6 @@ export function renderWebsiteHome(state) {
         ${renderHowItWorks()}
         ${renderAppPreview()}
         ${renderKnowledgeBase(state)}
-        ${renderResults()}
         ${renderFinalCta()}
       </main>
       ${renderFooter()}
