@@ -3,6 +3,7 @@
 :root {
   --flame: #e8722a;
   --flame-dim: rgba(232, 114, 42, 0.15);
+  --btn-on-flame: #fff;
   --bg: #000;
   --card: #141414;
   --border: #2a2a2a;
@@ -102,7 +103,7 @@ button {
   padding: 14px 20px;
   border-radius: 14px;
   background: var(--flame);
-  color: #000;
+  color: var(--btn-on-flame);
   font-size: 17px;
   font-weight: 600;
   text-align: center;
@@ -113,17 +114,23 @@ button {
   cursor: not-allowed;
 }
 
+a.btn-primary,
+a.btn-secondary {
+  color: var(--btn-on-flame);
+  text-decoration: none;
+}
+
 .btn-secondary {
   display: block;
   width: 100%;
   padding: 10px 20px;
   border-radius: 14px;
   border: 1.5px solid var(--flame);
-  color: var(--flame);
+  color: var(--btn-on-flame);
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
-  background: transparent;
+  background: var(--flame);
 }
 
 .btn-stack {
@@ -939,7 +946,7 @@ button {
 
 .grocery-add-tabs button.active {
   background: var(--flame);
-  color: #000;
+  color: var(--btn-on-flame);
 }
 
 .sheet-panel .food-search {
@@ -1058,7 +1065,7 @@ button {
   height: 56px;
   border-radius: 14px;
   background: var(--flame);
-  color: #000;
+  color: var(--btn-on-flame);
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -1337,13 +1344,13 @@ button {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   background: var(--flame);
-  color: #000;
+  color: var(--btn-on-flame);
 }
 
 .start-site .ob-next.disabled,
 .start-site .ob-next:disabled {
   background: #a85828;
-  color: rgba(0, 0, 0, 0.55);
+  color: rgba(255, 255, 255, 0.55);
   pointer-events: none;
 }
 

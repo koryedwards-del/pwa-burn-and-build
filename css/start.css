@@ -398,7 +398,7 @@ html:has(.start-site .ob-flow) #app {
   height: 64px;
   border-radius: 50%;
   background: var(--flame);
-  color: #000;
+  color: var(--btn-on-flame);
   font-size: 32px;
   font-weight: 800;
   display: flex;
@@ -1075,7 +1075,7 @@ html:has(.start-site .ob-flow) #app {
   height: 36px;
   border-radius: 50%;
   background: var(--flame);
-  color: #000;
+  color: var(--btn-on-flame);
   font-weight: 800;
   display: flex;
   align-items: center;

@@ -98,7 +98,7 @@ html:has(.plan-support) #app {
 }
 
 .ps-tab.active {
-  color: #000;
+  color: var(--btn-on-flame);
   background: var(--flame);
   border-color: var(--flame);
 }

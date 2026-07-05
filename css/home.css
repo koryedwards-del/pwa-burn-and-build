@@ -60,7 +60,7 @@
   border-radius: 16px;
   border: none;
   background: var(--flame);
-  color: #fff;
+  color: var(--btn-on-flame);
   font-size: 17px;
   font-weight: 600;
   text-align: center;
