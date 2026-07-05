@@ -472,11 +472,14 @@ function mealProgress(slot) {
 
 function renderWaiting() {
   return `
-    <div class="ps-waiting">
-      <h2>Your plan<br>isn't here yet.</h2>
+    <div class="ps-empty">
+      <div class="logo-block ps-empty-logo">
+        <div class="brand">BURN &amp; BUILD</div>
+      </div>
+      <h2 class="ps-empty-title">Get your food plan</h2>
       ${store.importError ? `<div class="import-error">${store.importError}</div>` : ''}
-      <p>Build your program on the website. After checkout, your servings load here automatically.</p>
-      <a href="../start/" class="btn-primary" style="display:block;text-align:center;text-decoration:none;">Build My Program →</a>
+      <p class="ps-empty-lead">Create your personalized plan on the website — then open it here.</p>
+      <a href="../start/" class="btn-primary ps-empty-cta">Create your program →</a>
     </div>`;
 }
 
@@ -663,7 +666,7 @@ function screenTitle() {
   return 'Food Plan';
 }
 
-function renderShell(content, { showTabs = true } = {}) {
+function renderShell(content, { showTabs = true, empty = false } = {}) {
   const name = displayName();
   const programDay = hasActiveProgram() ? currentProgramDay() : null;
   const dayLabel = programDay
@@ -671,14 +674,15 @@ function renderShell(content, { showTabs = true } = {}) {
     : '';
 
   return `
-    <div class="plan-support">
+    <div class="plan-support ${empty ? 'plan-support-empty' : ''}">
+      ${empty ? '' : `
       <header class="ps-header">
         <div class="ps-brand">Burn &amp; Build</div>
         <div class="ps-title-row">
           <h1 class="ps-title">${screenTitle()}</h1>
           ${dayLabel ? `<span class="ps-day">${dayLabel}</span>` : ''}
         </div>
-      </header>
+      </header>`}
       <div class="ps-main">${content}</div>
       ${showTabs && hasActiveProgram() ? `
       <nav class="ps-tabs" aria-label="Plan support">
@@ -696,7 +700,7 @@ function render() {
   }
 
   if (!hasActiveProgram()) {
-    root.innerHTML = renderShell(renderWaiting(), { showTabs: false });
+    root.innerHTML = renderShell(renderWaiting(), { showTabs: false, empty: true });
     bindEvents();
     return;
   }

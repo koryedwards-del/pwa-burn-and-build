@@ -108,6 +108,54 @@ html:has(.plan-support) #app {
   text-align: center;
 }
 
+.plan-support-empty .ps-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ps-empty {
+  width: 100%;
+  max-width: 360px;
+  padding: 24px;
+  text-align: center;
+}
+
+.ps-empty-logo {
+  padding: 0 0 32px;
+}
+
+.ps-empty-title {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  letter-spacing: 0.02em;
+}
+
+.ps-empty-lead {
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 28px;
+  font-size: 16px;
+}
+
+.ps-empty-cta {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.ps-empty .import-error {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 80, 80, 0.12);
+  color: #ff8a8a;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .ps-waiting h2 {
   font-size: 28px;
   line-height: 1.15;
