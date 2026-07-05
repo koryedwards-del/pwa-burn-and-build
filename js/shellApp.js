@@ -686,7 +686,6 @@ async function loadProgramHistory() {
   if (!email) {
     store.programHistoryLoading = false;
     store.programHistory = [];
-    store.programHistoryError = 'Enter your email in the app to load food plan history.';
     render();
     return;
   }
@@ -695,7 +694,6 @@ async function loadProgramHistory() {
   store.programHistoryLoading = false;
   if (!result.ok) {
     store.programHistory = [];
-    store.programHistoryError = result.message;
   } else {
     store.programHistory = result.programs || [];
   }
@@ -740,10 +738,11 @@ function renderPreviousPlans() {
     return `
       <div class="screen previous-plans-screen">
         ${renderPreviousPlansHeader()}
-        ${store.programHistoryError ? `<div class="history-error">${store.programHistoryError}</div>` : ''}
         <div class="history-empty">
           <p>No previous food plans yet.</p>
-          <a href="../start/" class="btn-primary">Create your food plan →</a>
+          <div class="history-btn-stack">
+            <a href="../start/" class="btn-home">Create your food plan</a>
+          </div>
         </div>
       </div>`;
   }

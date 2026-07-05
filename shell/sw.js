@@ -1,6 +1,6 @@
 /** Shell PWA — v2 clone service worker */
 
-const CACHE = 'bnb-shell-v2-clone-10';
+const CACHE = 'bnb-shell-v2-clone-11';
 const ASSETS = [
   './',
   './index.html',

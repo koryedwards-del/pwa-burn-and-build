@@ -52,6 +52,34 @@
   line-height: 1.6;
 }
 
+.history-empty p {
+  margin-bottom: 24px;
+}
+
+.history-btn-stack {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.history-btn-stack .btn-home {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: none;
+  background: var(--flame);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+}
+
+.history-btn-stack .btn-home:active {
+  opacity: 0.88;
+}
+
 .history-error {
   margin: 0 20px 12px;
   padding: 12px 14px;
