@@ -584,6 +584,60 @@ html:has(.start-site .ob-flow) #app {
   line-height: 1.5;
 }
 
+.email-login-panel {
+  padding-top: 48px;
+}
+
+.email-login-panel .ob-welcome-line1,
+.email-login-panel .ob-welcome-line2 {
+  text-align: center;
+}
+
+.install-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.install-box h3 {
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--flame);
+  margin-bottom: 10px;
+}
+
+.install-lead {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #ccc;
+  margin-bottom: 14px;
+}
+
+.install-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.install-steps li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: #ddd;
+}
+
+.install-steps li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--flame);
+}
+
 /* ── Website home (marketing front door) ── */
 
 .website-home {

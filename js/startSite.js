@@ -85,6 +85,7 @@ const store = {
   startDate: defaultStartDate(),
   importUrl: '',
   email: '',
+  emailError: '',
   showAdvanced: false,
 };
 
@@ -117,7 +118,7 @@ function persistFlowState() {
 
 function restoreFlowState() {
   restoreBuiltPackage();
-  store.email = sessionStorage.getItem('bnb_unlock_email') || '';
+  store.email = sessionStorage.getItem('bnb_app_email') || sessionStorage.getItem('bnb_unlock_email') || '';
   const formRaw = sessionStorage.getItem('bnb_onboarding_form');
   if (formRaw) {
     try {
@@ -131,8 +132,8 @@ function restoreFlowState() {
     store.onboardingPage = Number(page) || 0;
   }
   const phase = sessionStorage.getItem('bnb_creator_phase');
-  const unlockPhases = ['creating', 'unlock-email', 'unlock-sent', 'unlock-pay', 'open'];
-  if (phase && unlockPhases.includes(phase)) {
+  const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
+  if (phase && flowPhases.includes(phase)) {
     store.phase = phase;
   }
 }
@@ -149,10 +150,56 @@ function restoreBuiltPackage() {
 }
 
 function beginProgramCreation() {
-  store.phase = 'onboarding';
-  store.onboardingPage = 0;
+  store.phase = 'email-login';
+  store.emailError = '';
   window.scrollTo(0, 0);
   render();
+}
+
+function renderEmailLogin() {
+  return `
+    <div class="start-site">
+      <div class="screen unlock-screen">
+        <div class="unlock-panel email-login-panel">
+          <div class="ob-welcome-line1">YOUR EMAIL</div>
+          <div class="ob-welcome-line2">IS YOUR LOGIN</div>
+          <p class="unlock-lead">This is how you open your food plan in the Burn &amp; Build app on your phone. Same email every time — your plan and your app stay with you.</p>
+          ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
+          <label class="unlock-label" for="creator-email">Email address</label>
+          <input id="creator-email" class="ob-input ob-input-lg" type="email" name="creatorEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
+          <button type="button" class="btn-primary unlock-cta" data-email-continue>CONTINUE →</button>
+          <button type="button" class="unlock-back-link" data-email-back>← Back to website</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderPlanReady() {
+  const name = programName();
+  return `
+    <div class="start-site">
+      <div class="screen unlock-screen">
+        <div class="start-success">
+          <div class="check">✓</div>
+          <div class="ob-welcome-line1">YOUR FOOD PLAN</div>
+          <div class="ob-welcome-line2">IS READY</div>
+        </div>
+        <div class="unlock-panel">
+          <p class="unlock-lead">Your personalized food plan has been created${name ? ` for ${name}` : ''} and is ready to install on the Burn &amp; Build app.</p>
+          <div class="install-box">
+            <h3>Install on your home screen</h3>
+            <p class="install-lead">If you don't have Burn &amp; Build on your home screen yet, install it now:</p>
+            <ul class="install-steps">
+              <li><strong>iPhone:</strong> Tap Share → <strong>Add to Home Screen</strong></li>
+              <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
+            </ul>
+          </div>
+          <a href="${store.importUrl}" class="btn-primary unlock-cta" style="display:block;text-align:center;text-decoration:none;">OPEN BURN &amp; BUILD →</a>
+          <p class="unlock-hint">Already installed? Tap Open above — your servings load in the app.</p>
+          ${renderAdvancedFallback()}
+        </div>
+      </div>
+    </div>`;
 }
 
 function renderTeaching() {
@@ -391,19 +438,15 @@ function render() {
     root.innerHTML = renderWebsiteHome(store.home);
     bindHomeEvents(root, store.home, { onCreateProgram: beginProgramCreation });
     return;
-  } else if (store.phase === 'onboarding') {
+  }
+  if (store.phase === 'email-login') root.innerHTML = renderEmailLogin();
+  else if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
     bindOnboardingOnly();
     persistFlowState();
     return;
   } else if (store.phase === 'creating') root.innerHTML = renderCreating();
-  else if (store.phase === 'teach') root.innerHTML = renderTeaching();
-  else if (store.phase === 'schedule') root.innerHTML = renderSchedule();
-  else if (store.phase === 'ready') root.innerHTML = renderReady();
-  else if (store.phase === 'unlock-email') root.innerHTML = renderUnlockEmail();
-  else if (store.phase === 'unlock-sent') root.innerHTML = renderUnlockSent();
-  else if (store.phase === 'unlock-pay') root.innerHTML = renderUnlockPay();
-  else if (store.phase === 'open') root.innerHTML = renderOpen();
+  else if (store.phase === 'plan-ready') root.innerHTML = renderPlanReady();
   persistFlowState();
 }
 
@@ -435,6 +478,24 @@ function renderOnboardingStep() {
 
 function bindOnboardingOnly() {
   bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
+}
+
+function submitEmailLogin() {
+  const input = document.querySelector('[name="creatorEmail"]');
+  const email = (input?.value || store.email || '').trim();
+  if (!validEmail(email)) {
+    store.emailError = 'Enter a valid email address.';
+    store.email = email;
+    render();
+    input?.focus();
+    return;
+  }
+  store.email = email;
+  store.emailError = '';
+  sessionStorage.setItem('bnb_app_email', email);
+  store.phase = 'onboarding';
+  store.onboardingPage = 0;
+  render();
 }
 
 function validEmail(email) {
@@ -486,74 +547,14 @@ function bindGlobal() {
   bindGlobal.done = true;
 
   document.getElementById('app').addEventListener('click', (e) => {
-    if (e.target.closest('[data-teach-back]')) {
-      if (store.teachIndex > 0) store.teachIndex -= 1;
-      else {
-        store.phase = 'onboarding';
-        store.onboardingPage = totalOnboardingPages() - 1;
-      }
+    if (e.target.closest('[data-email-continue]')) {
+      submitEmailLogin();
+      return;
+    }
+    if (e.target.closest('[data-email-back]')) {
+      store.phase = 'home';
+      store.emailError = '';
       render();
-      return;
-    }
-    if (e.target.closest('[data-teach-next]')) {
-      if (store.teachIndex < TEACHING.length - 1) {
-        store.teachIndex += 1;
-      } else {
-        store.phase = 'schedule';
-      }
-      render();
-      return;
-    }
-    if (e.target.closest('[data-schedule-back]')) {
-      store.phase = 'teach';
-      store.teachIndex = TEACHING.length - 1;
-      render();
-      return;
-    }
-    if (e.target.closest('[data-schedule-next]')) {
-      buildProgramReady();
-      return;
-    }
-    if (e.target.closest('[data-ready-back]')) {
-      store.phase = 'schedule';
-      render();
-      return;
-    }
-    if (e.target.closest('[data-unlock-begin]')) {
-      store.phase = 'unlock-email';
-      render();
-      return;
-    }
-    if (e.target.closest('[data-unlock-back-ready]')) {
-      store.phase = 'ready';
-      render();
-      return;
-    }
-    if (e.target.closest('[data-unlock-back-confirm]')) {
-      store.phase = 'onboarding';
-      store.onboardingPage = confirmOnboardingPage();
-      render();
-      return;
-    }
-    if (e.target.closest('[data-unlock-send]')) {
-      sendMagicLink();
-      return;
-    }
-    if (e.target.closest('[data-unlock-back-email]')) {
-      store.phase = 'unlock-email';
-      render();
-      return;
-    }
-    if (e.target.closest('[data-unlock-resend]')) {
-      sendMagicLink();
-      return;
-    }
-    if (e.target.closest('[data-unlock-continue]')) {
-      handleUnlockVerified();
-      return;
-    }
-    if (e.target.closest('[data-unlock-purchase]')) {
-      completePurchase();
       return;
     }
     if (e.target.closest('[data-download-package]')) {
@@ -565,17 +566,10 @@ function bindGlobal() {
     }
   });
 
-  document.getElementById('app').addEventListener('change', (e) => {
-    if (e.target.matches('input[name="startDate"]')) {
-      store.startDate = e.target.value;
-      if (store.builtPackage) ensureBuiltPackage();
-    }
-  });
-
   document.getElementById('app').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.matches('[name="unlockEmail"]')) {
+    if (e.key === 'Enter' && e.target.matches('[name="creatorEmail"]')) {
       e.preventDefault();
-      sendMagicLink();
+      submitEmailLogin();
     }
   });
 }
@@ -606,27 +600,11 @@ function finishIntake() {
   render();
   window.setTimeout(() => {
     ensureBuiltPackage();
-    store.phase = 'unlock-email';
+    store.phase = 'plan-ready';
     render();
   }, 900);
 }
 
-function initFromUrl() {
-  restoreFlowState();
-  const params = new URLSearchParams(location.search);
-  if (params.get('unlock') === 'verified') {
-    if (!store.builtPackage && store.onboardingForm) ensureBuiltPackage();
-    handleUnlockVerified();
-    return;
-  }
-  if (params.get('unlock') === 'open' && sessionStorage.getItem('bnb_ownership') === 'true') {
-    store.email = sessionStorage.getItem('bnb_unlock_email') || '';
-    if (!store.builtPackage && store.onboardingForm) ensureBuiltPackage();
-    store.phase = 'open';
-  }
-}
-
 bindGlobal();
-initFromUrl();
 initStartSite();
 render();
