@@ -543,9 +543,6 @@ function renderHome() {
       <div class="home-btn-stack">
         <button type="button" class="btn-home" data-nav="plan">Your Custom Food Plan</button>
         <button type="button" class="btn-home" data-nav="lean-body">Lean Body Analysis</button>
-        <button type="button" class="btn-home" data-nav="coach">Daily Coaching</button>
-        <button type="button" class="btn-home" data-nav="setup">Edit Your Custom Food Plan</button>
-        <button type="button" class="btn-home" data-nav="pro-tips">Pro Tips</button>
       </div>
       <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;
