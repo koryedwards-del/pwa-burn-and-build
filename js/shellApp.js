@@ -58,7 +58,7 @@ const store = {
   programHistoryLoading: false,
   programHistoryError: null,
   programHistoryOpenId: null,
-  openNavDropdown: null,
+  expandedNavButton: null,
 };
 
 function hasActiveProgram() {
@@ -254,6 +254,7 @@ function applyImportedProgram(pkg) {
   store.program = result.program;
   store.settings = JSON.parse(localStorage.getItem('bnb_settings') || '{}');
   store.importError = null;
+  store.expandedNavButton = null;
   return true;
 }
 
@@ -565,21 +566,15 @@ function canOpenNav(nav) {
   return true;
 }
 
-function renderNavDropdown() {
-  if (!store.openNavDropdown) return '';
-  const nav = store.openNavDropdown;
-  const label = NAV_MENU_LABELS[nav] || 'Open';
-  const canOpen = canOpenNav(nav);
-
-  return `
-    <div class="nav-sheet-backdrop" data-close-nav-dropdown>
-      <div class="nav-sheet-panel">
-        <div class="nav-sheet-title">${label}</div>
-        ${canOpen ? `<button type="button" class="btn-home nav-sheet-open" data-nav="${nav}">Open ${label}</button>` : ''}
-        <a href="../start/" class="btn-home nav-sheet-link">Create your food plan</a>
-        <button type="button" class="nav-sheet-cancel" data-close-nav-dropdown>Cancel</button>
-      </div>
-    </div>`;
+function renderHomeNavButton(nav) {
+  const label = NAV_MENU_LABELS[nav];
+  if (store.expandedNavButton === nav && !canOpenNav(nav)) {
+    return `<a href="../start/" class="btn-home btn-home-build">Tap here to build your custom food plan</a>`;
+  }
+  if (canOpenNav(nav)) {
+    return `<button type="button" class="btn-home" data-nav="${nav}">${label}</button>`;
+  }
+  return `<button type="button" class="btn-home" data-expand-nav="${nav}">${label}</button>`;
 }
 
 function renderHome() {
@@ -589,13 +584,12 @@ function renderHome() {
         <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>
       <div class="home-btn-stack">
-        <button type="button" class="btn-home" data-open-nav-dropdown="plan">Your Custom Food Plan</button>
-        <button type="button" class="btn-home" data-open-nav-dropdown="grocery">Grocery List</button>
-        <button type="button" class="btn-home" data-open-nav-dropdown="projections">Projections</button>
-        <button type="button" class="btn-home" data-open-nav-dropdown="previous-plans">Previous Food Plans</button>
+        ${renderHomeNavButton('plan')}
+        ${renderHomeNavButton('grocery')}
+        ${renderHomeNavButton('projections')}
+        ${renderHomeNavButton('previous-plans')}
       </div>
       <p class="home-footer">Stay consistent. Eat on time.</p>
-      ${renderNavDropdown()}
     </div>`;
 }
 
@@ -638,7 +632,6 @@ function renderProjections() {
         <div class="projections-empty">
           <p>No program data yet.</p>
         </div>
-        ${renderNavDropdown()}
       </div>`;
   }
 
@@ -750,6 +743,7 @@ async function openHistoryProgram(programId) {
   }
 
   if (applyImportedProgram(result.package)) {
+    store.expandedNavButton = null;
     store.screen = 'home';
     render();
   }
@@ -773,7 +767,6 @@ function renderPreviousPlans() {
         <div class="history-empty">
           <p>No previous food plans yet.</p>
         </div>
-        ${renderNavDropdown()}
       </div>`;
   }
 
@@ -872,15 +865,9 @@ function renderMealFatPoints(fatTarget, fatUsed, fatPct) {
 function renderPlan() {
   const plan = getPlan();
   if (!plan) {
-    store.openNavDropdown = 'plan';
-    return `
-      <div class="screen food-plan-screen">
-        <div class="plan-header">
-          <button type="button" class="back-btn plan-back" data-nav="home">←</button>
-          <h1>Custom Food Plan</h1>
-        </div>
-        ${renderNavDropdown()}
-      </div>`;
+    store.expandedNavButton = 'plan';
+    store.screen = 'home';
+    return renderHome();
   }
 
   const slots = getMealSlots(plan);
@@ -1179,27 +1166,17 @@ function bindCoachCarousel() {
 }
 
 function bindEvents() {
-  document.querySelectorAll('[data-open-nav-dropdown]').forEach((btn) => {
+  document.querySelectorAll('[data-expand-nav]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      store.openNavDropdown = btn.dataset.openNavDropdown;
+      store.expandedNavButton = btn.dataset.expandNav;
       render();
     });
   });
-
-  document.querySelectorAll('[data-close-nav-dropdown]').forEach((el) => {
-    el.addEventListener('click', (e) => {
-      if (el.classList.contains('nav-sheet-backdrop') && e.target !== el) return;
-      store.openNavDropdown = null;
-      render();
-    });
-  });
-
-  document.querySelector('.nav-sheet-panel')?.addEventListener('click', (e) => e.stopPropagation());
 
   document.querySelectorAll('[data-nav]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const nav = btn.dataset.nav;
-      store.openNavDropdown = null;
+      if (nav === 'home') store.expandedNavButton = null;
       if (nav === 'setup') {
         openEditPlan();
         return;
