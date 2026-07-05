@@ -13,7 +13,7 @@ import {
 } from './groceryEngine.js';
 import { bindOnboardingEvents, initOnboardingForm, renderOnboarding } from './onboardingUI.js';
 import { totalOnboardingPages } from './onboardingEngine.js';
-import { computeWhatsPossible } from './previewCalculator.js';
+import { computeLeanBodyAnalysis } from './leanBodyAnalysis.js';
 import {
   getProgramDay,
   importProgramPackage,
@@ -49,6 +49,7 @@ const store = {
   onboardingEditMode: false,
   onboardingForm: null,
   importError: null,
+  lbmAnalysisExpanded: false,
 };
 
 function hasActiveProgram() {
@@ -595,64 +596,97 @@ function renderProjections() {
       <div class="screen projections-screen">
         ${renderProjectionsHeader()}
         <div class="projections-empty">
-          <p>Create your food plan first to see your lean body analysis and projections.</p>
+          <p>Create your food plan first to see your projections.</p>
           <a href="../start/" class="btn-primary">Create your food plan →</a>
         </div>
       </div>`;
   }
 
-  const result = computeWhatsPossible({
+  const analysis = computeLeanBodyAnalysis({
     gender: intakeGender(intake),
     weightLbs: intake.totalWeight,
     bodyFatPercent: intake.fatPercent,
   });
 
-  if (!result.valid) {
+  if (!analysis.valid) {
     return `
       <div class="screen projections-screen">
         ${renderProjectionsHeader()}
         <div class="projections-empty">
-          <p>${result.error}</p>
+          <p>${analysis.error}</p>
         </div>
       </div>`;
   }
 
-  const name = displayName();
+  const { composition, lbmStatus, projections } = analysis;
+  const statusClass = lbmStatus.atOrAbove ? 'good' : 'warn';
+
   return `
     <div class="screen projections-screen">
       ${renderProjectionsHeader()}
 
-      <p class="projections-lead">Lean body analysis${name ? ` for ${name}` : ''} — based on your program intake.</p>
-
-      <div class="lbm-card">
-        <div class="lbm-card-label">Lean body mass</div>
-        <div class="lbm-card-value">${intake.leanBodyMass.toFixed(1)} lbs</div>
-        <div class="lbm-card-sub">Current ${intake.totalWeight.toFixed(0)} lbs · ${intake.fatPercent.toFixed(0)}% body fat</div>
+      <div class="lba-section">
+        <div class="lba-section-title">Body composition</div>
+        <div class="lba-card">
+          <div class="lba-today-label">— TODAY —</div>
+          <div class="lba-comp-row">
+            <span class="lba-comp-label lean">LEAN</span>
+            <span class="lba-comp-pct">${composition.leanPct.toFixed(2)}%</span>
+            <span class="lba-comp-lbs">${composition.lbm.toFixed(1)} lbs</span>
+          </div>
+          <div class="lba-comp-row">
+            <span class="lba-comp-label fat">FAT</span>
+            <span class="lba-comp-pct">${composition.fatPct.toFixed(2)}%</span>
+            <span class="lba-comp-lbs">${composition.fatLbs.toFixed(1)} lbs</span>
+          </div>
+          <div class="lba-comp-row">
+            <span class="lba-comp-label total">TOTAL</span>
+            <span class="lba-comp-pct">100.00%</span>
+            <span class="lba-comp-lbs">${composition.totalWeight.toFixed(1)} lbs</span>
+          </div>
+        </div>
       </div>
 
-      <div class="projections-table-wrap">
-        <table class="projections-table">
-          <thead>
-            <tr>
-              <th>Timeline</th>
-              <th>Body Fat %</th>
-              <th>Bodyweight</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${result.rows.map((row) => `
-              <tr class="${row.isCurrent ? 'row-current' : ''}">
-                <td>${row.timeline}</td>
-                <td>${row.bodyFatDisplay}${row.badge ? `<span class="ace-badge">${row.badge}</span>` : ''}</td>
-                <td>${row.weightDisplay}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
+      <div class="lba-section">
+        <div class="lba-section-title">Lean body mass analysis</div>
+        <button type="button" class="lba-status-btn" data-toggle-lbm-analysis>
+          <span class="lba-status-icon ${statusClass}">${lbmStatus.atOrAbove ? '✓' : '!'}</span>
+          <span class="lba-status-text ${statusClass}">${lbmStatus.message}</span>
+          <span class="lba-status-chevron">${store.lbmAnalysisExpanded ? '▲' : '▼'}</span>
+        </button>
+        ${store.lbmAnalysisExpanded ? `
+        <div class="lba-status-detail">
+          Lean mass is ${composition.leanPct.toFixed(1)}% of your body weight.
+          Desirable lean mass is ${lbmStatus.threshold}% or higher for ${analysis.gender === 'female' ? 'women' : 'men'}.
+        </div>` : ''}
       </div>
 
-      <div class="projections-narrative">${result.narrative}</div>
+      <div class="lba-section">
+        <div class="lba-section-title">Body fat analysis</div>
+        <div class="lba-card">
+          <div class="lba-proj-title">What You Would Weigh…</div>
+          <div class="lba-proj-sub">Body fat % ranges derived from DXA scan database</div>
+          <table class="lba-proj-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Body Fat %</th>
+                <th>Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${projections.map((row) => `
+                <tr>
+                  <td>${row.label}</td>
+                  <td>${row.bfDisplay}</td>
+                  <td>${row.weightDisplay}</td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-      <p class="projections-disclaimer">Results may vary. For informational purposes only — not medical advice. Individual results depend on adherence, diet, exercise, and other factors.</p>
+      <div class="screen-spacer"></div>
     </div>`;
 }
 
@@ -1037,6 +1071,7 @@ function bindEvents() {
         refreshGroceryList();
         store.showGroceryAdd = false;
       }
+      if (nav !== 'projections') store.lbmAnalysisExpanded = false;
       if (nav === 'import') store.importError = null;
       store.screen = nav;
       store.expandedMeal = null;
@@ -1118,6 +1153,11 @@ function bindEvents() {
   });
 
   bindCoachCarousel();
+
+  document.querySelector('[data-toggle-lbm-analysis]')?.addEventListener('click', () => {
+    store.lbmAnalysisExpanded = !store.lbmAnalysisExpanded;
+    render();
+  });
 
   document.querySelector('[data-open-grocery-add]')?.addEventListener('click', () => {
     store.showGroceryAdd = true;
