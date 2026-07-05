@@ -20,7 +20,7 @@ import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
-  'Coaching from Coach Kory',
+  'Daily food plan in the app',
   'Meal logging',
   'Grocery lists',
   'Progress tracking',
@@ -29,7 +29,7 @@ const OWNERSHIP_INCLUDES = [
 
 const TEACHING = [
   {
-    kicker: 'Coach Kory',
+    kicker: 'Lean body mass',
     title: 'Your lean body mass is your fat burner.',
     body: [
       'Muscle tissue burns calories all day — even when you are sitting, sleeping, or at your desk. That is why two people can weigh the same and lose fat at completely different rates.',
@@ -69,7 +69,7 @@ const TEACHING = [
     title: 'Two parts. One system.',
     body: [
       'This website is where your personalized program is created — the same role the live seminar played for decades. Teaching, intake, and the Burn Engine all happen here.',
-      'The Burn & Build app is your daily coach: food plan, logging, grocery list, and messages from Coach Kory. It executes the program you build here.',
+      'The Burn & Build app is where you live your program every day: food plan, logging, grocery list, and progress tracking. It executes the program you build here.',
       'You can revisit this site anytime for deeper teaching. The app stays focused on doing the work every day.',
     ],
   },
@@ -273,7 +273,7 @@ function renderSchedule() {
         <div class="ob-content">
           <div class="teach-kicker">Program calendar</div>
           <h2 class="ob-step-title" style="font-size:32px;">WHEN DO YOU START?</h2>
-          <p style="color:#ccc;line-height:1.6;margin:16px 0;">Day 1 unlocks Coach Kory's daily messages and starts your 8-week (56-day) program clock in the app.</p>
+          <p style="color:#ccc;line-height:1.6;margin:16px 0;">Your start date anchors your 8-week program in the app — meal schedule, logging, and grocery tools all follow from there.</p>
           <div class="start-date-field">
             <label>Program start date</label>
             <input type="date" name="startDate" value="${store.startDate}" />
@@ -307,7 +307,7 @@ function renderReady() {
             <h3>Own Burn &amp; Build for Life</h3>
             ${renderOwnershipList()}
           </div>
-          <p class="unlock-tagline">My coach built my program. Now I'm opening it.</p>
+          <p class="unlock-tagline">My program is built. Now I'm opening it.</p>
           <button type="button" class="btn-primary unlock-cta" data-unlock-begin>UNLOCK MY PROGRAM →</button>
           <button type="button" class="unlock-back-link" data-ready-back>← Back to start date</button>
         </div>
@@ -373,7 +373,7 @@ function renderUnlockPay() {
         <div class="unlock-panel">
           <div class="teach-kicker">Step 3 of 3</div>
           <h2 class="unlock-title">Complete your ownership</h2>
-          <p class="unlock-lead">One-time purchase. Own Burn &amp; Build for life — your program, coaching, and daily tools in the app.</p>
+          <p class="unlock-lead">One-time purchase. Own Burn &amp; Build for life — your program and daily tools in the app.</p>
           <div class="unlock-box">
             <h3>Lifetime ownership includes</h3>
             ${renderOwnershipList()}
@@ -395,7 +395,7 @@ function renderOpen() {
           <div class="ob-welcome-line2">IN.</div>
         </div>
         <div class="unlock-panel">
-          <p class="unlock-lead">Your program is waiting in the Burn &amp; Build app. Tap below to open it — no files, no transfer, just your coach and your plan.</p>
+          <p class="unlock-lead">Your program is waiting in the Burn &amp; Build app. Tap below to open it — no files, no transfer, just your plan.</p>
           <a href="${store.importUrl}" class="btn-primary unlock-cta" style="display:block;text-align:center;text-decoration:none;">OPEN MY PROGRAM →</a>
           <p class="unlock-tagline">Eat the food. Trust the plan.</p>
           ${renderAdvancedFallback()}

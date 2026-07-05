@@ -8,7 +8,7 @@ export const TRANSFORMATIONS = [
     type: 'before-after',
     name: 'Personalized 8-Week Program',
     subtitle: 'Representative Burn Engine results',
-    before: { weight: 180, bodyFat: 25, label: 'Day 1' },
+    before: { weight: 180, bodyFat: 25, label: 'Start' },
     after: { weight: 167, bodyFat: 21, label: 'Week 8' },
     stats: ['13 lbs fat lost', '4% body fat reduction', 'Lean mass preserved'],
     quote: 'When the Burn Engine dials everything in for your body, the scale and the mirror start agreeing.',

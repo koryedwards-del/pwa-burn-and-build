@@ -27,7 +27,7 @@ const APP_FEATURES = [
   {
     icon: '📋',
     title: 'Simple Daily Implementation',
-    desc: 'Log meals, track fat servings, and get coaching messages from Coach Kory — one day at a time.',
+    desc: 'Log meals, track fat servings, and stay on schedule — one day at a time.',
     img: '../img/coach/card-5.png',
   },
 ];
@@ -146,7 +146,7 @@ function renderHowItWorks() {
           <div class="step-card">
             <div class="step-num">3</div>
             <h3>Use the App</h3>
-            <p>Your daily coach — food plan, grocery list, meal logging, and coaching from Coach Kory. Execute the program you built.</p>
+            <p>Your daily tools — food plan, grocery list, meal logging, and progress tracking. Execute the program you built.</p>
           </div>
         </div>
       </div>

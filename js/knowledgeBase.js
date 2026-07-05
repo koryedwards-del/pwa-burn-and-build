@@ -1,4 +1,4 @@
-/** Knowledge base — expanded from Eat to Lose Fat teaching, Coach Kory cards, and seminar content. */
+/** Knowledge base — expanded from Eat to Lose Fat teaching and seminar content. */
 
 import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -31,7 +31,7 @@ export const KB_ARTICLES = [
     ],
     quote: {
       text: 'Your lean body mass is your fat burner. More muscle burns more fat — all day long.',
-      by: 'Coach Kory',
+      by: 'Burn & Build',
     },
   },
   {
@@ -114,7 +114,7 @@ export const KB_ARTICLES = [
     ],
     quote: {
       text: 'This is the basic principle behind why the Burn & Build program is so effective for losing fat.',
-      by: 'Coach Kory',
+      by: 'Burn & Build',
     },
   },
   {
@@ -266,8 +266,8 @@ export const KB_ARTICLES = [
       },
     ],
     quote: {
-      text: "I'll check in tomorrow and we'll talk about how to use the grocery list.",
-      by: 'Coach Kory, Day 1',
+      text: 'Your grocery list is generated from your food plan. Walk in, buy it, done.',
+      by: 'Burn & Build',
     },
   },
   {
@@ -280,7 +280,7 @@ export const KB_ARTICLES = [
         heading: 'Why 8 weeks?',
         paragraphs: [
           'An 8-week program is not arbitrary. It gives your body time to adapt, your habits time to stick, and your results time to show up on the scale and in the mirror.',
-          'Day 1 unlocks Coach Kory\'s daily messages and starts your 56-day program clock in the app.',
+          'When you pick a start date, your program calendar and daily tools activate in the app on that date.',
         ],
       },
       {
@@ -312,13 +312,13 @@ export const KB_ARTICLES = [
         heading: 'Website, program creator, and app',
         paragraphs: [
           'What happens on the website? Teaching, intake, and the Burn Engine — the same role the live seminar played for decades. You learn, explore, and create your personalized program here.',
-          'Do I need the app? The app is your daily coach — food plan, logging, grocery list, and messages from Coach Kory. The website creates your program; the app executes it.',
+          'Do I need the app? The app is your daily execution layer — food plan, logging, grocery list, and progress tracking. The website creates your program; the app runs it.',
           'Can I revisit the knowledge base? Yes. The website is always available for deeper teaching. The app stays focused on doing the work every day.',
         ],
         bullets: [
           'Website → learn, explore, create your program.',
           'Program Creator → intake questionnaire and Burn Engine calculation.',
-          'App → daily food plan, logging, groceries, coaching.',
+          'App → daily food plan, logging, groceries, progress tracking.',
         ],
       },
     ],
