@@ -210,9 +210,6 @@ function renderPlanReady() {
             </ul>
           </div>
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
-          <a href="../shell/" class="btn-primary unlock-cta" style="display:block;text-align:center;text-decoration:none;">OPEN BURN &amp; BUILD →</a>
-          <p class="unlock-hint">Your plan is saved to your email. Open the app, install to your home screen, and sign in with the same email.</p>
-          ${renderAdvancedFallback()}
         </div>
       </div>
     </div>`;
