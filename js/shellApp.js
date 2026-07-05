@@ -836,7 +836,6 @@ function renderNoPlan() {
         <h1>Custom Food Plan</h1>
       </div>
       <div class="food-plan-empty">
-        <p>Create your food plan on the website first — then it loads here automatically.</p>
         <a href="../start/" class="btn-primary">Create your food plan →</a>
       </div>
     </div>`;
