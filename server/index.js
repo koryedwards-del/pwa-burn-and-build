@@ -2,6 +2,15 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
+import {
+  deleteContact,
+  ensureBurnAndBuildAccess,
+  getContact,
+  listContacts,
+  setBurnAndBuild,
+  touchContactFromProgram,
+  upsertContact,
+} from './contacts.js';
 import { countPrograms, dbPathForHealth, getLatestProgram, normalizeEmail, saveProgram } from './db.js';
 import { validateProgramPackage } from '../js/programPackage.js';
 
@@ -45,6 +54,20 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
 }
 
+function requireContactsAdmin(req, res, next) {
+  const configured = process.env.CONTACTS_ADMIN_KEY;
+  if (!configured) {
+    next();
+    return;
+  }
+  const key = req.get('x-contacts-admin-key') || req.query.adminKey;
+  if (key !== configured) {
+    res.status(401).json({ ok: false, message: 'Admin key required.' });
+    return;
+  }
+  next();
+}
+
 app.get('/health', (_req, res) => {
   res.json({
     ok: true,
@@ -52,6 +75,72 @@ app.get('/health', (_req, res) => {
     env: isProd ? 'production' : 'development',
     database: dbPathForHealth(),
   });
+});
+
+app.get('/api/contacts/lookup', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const contact = getContact(email);
+  if (!contact) {
+    res.status(404).json({ ok: false, message: 'This email is not in the contact list yet.' });
+    return;
+  }
+
+  res.json({ ok: true, contact });
+});
+
+app.get('/api/contacts', requireContactsAdmin, (_req, res) => {
+  res.json({ ok: true, contacts: listContacts() });
+});
+
+app.put('/api/contacts', requireContactsAdmin, (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const contact = upsertContact({
+    email,
+    displayName: String(req.body?.displayName || '').trim(),
+    burnAndBuild: !!req.body?.burnAndBuild,
+  });
+  res.json({ ok: true, contact });
+});
+
+app.patch('/api/contacts', requireContactsAdmin, (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  if (typeof req.body?.burnAndBuild !== 'boolean') {
+    res.status(400).json({ ok: false, message: 'burnAndBuild must be true or false.' });
+    return;
+  }
+
+  const contact = setBurnAndBuild(email, req.body.burnAndBuild);
+  res.json({ ok: true, contact });
+});
+
+app.delete('/api/contacts', requireContactsAdmin, (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  if (!deleteContact(email)) {
+    res.status(404).json({ ok: false, message: 'Contact not found.' });
+    return;
+  }
+
+  res.json({ ok: true, email });
 });
 
 app.post('/api/programs', (req, res) => {
@@ -63,6 +152,12 @@ app.post('/api/programs', (req, res) => {
     return;
   }
 
+  const access = ensureBurnAndBuildAccess(email);
+  if (!access.ok) {
+    res.status(403).json({ ok: false, message: access.message });
+    return;
+  }
+
   const validation = validateProgramPackage(pkg);
   if (!validation.ok) {
     res.status(400).json({ ok: false, message: validation.errors.join(' ') });
@@ -70,6 +165,7 @@ app.post('/api/programs', (req, res) => {
   }
 
   const programId = saveProgram(email, pkg);
+  touchContactFromProgram(email, pkg?.intake?.preferredName);
   res.json({ ok: true, email, programId, programCount: countPrograms(email) });
 });
 
@@ -77,6 +173,12 @@ app.get('/api/programs', (req, res) => {
   const email = normalizeEmail(req.query.email);
   if (!isValidEmail(email)) {
     res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const access = ensureBurnAndBuildAccess(email);
+  if (!access.ok) {
+    res.status(403).json({ ok: false, message: access.message });
     return;
   }
 

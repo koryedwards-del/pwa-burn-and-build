@@ -1,0 +1,114 @@
+.contacts-page {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  padding: 24px 20px 40px;
+}
+
+.contacts-header {
+  max-width: 960px;
+  margin: 0 auto 24px;
+}
+
+.contacts-header h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.contacts-header p {
+  margin: 0;
+  color: #bbb;
+  line-height: 1.5;
+}
+
+.contacts-panel {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.contacts-toolbar {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.contacts-toolbar input {
+  width: 100%;
+}
+
+.contacts-error {
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.35);
+  color: #ffb4b4;
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.contacts-table-wrap {
+  overflow-x: auto;
+}
+
+.contacts-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.contacts-table th,
+.contacts-table td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid #2a2a2a;
+  vertical-align: middle;
+}
+
+.contacts-table th {
+  color: #aaa;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.contacts-table td.email {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+}
+
+.contacts-table td.actions {
+  white-space: nowrap;
+}
+
+.contacts-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.contacts-checkbox input {
+  width: 18px;
+  height: 18px;
+}
+
+.contacts-empty {
+  color: #888;
+  padding: 24px 0;
+}
+
+.contacts-meta {
+  margin-top: 16px;
+  color: #777;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .contacts-toolbar {
+    grid-template-columns: 1fr;
+  }
+}

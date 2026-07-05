@@ -16,7 +16,8 @@ import {
 } from './websiteHome.js';
 import { totalOnboardingPages } from './onboardingEngine.js';
 import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
-import { persistAppEmail, saveProgramToServer } from './programApi.js';
+import { ensureBurnAndBuildContact } from './contactsApi.js';
+import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.js';
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
@@ -112,6 +113,9 @@ function persistBuiltPackage() {
 
 function persistFlowState() {
   sessionStorage.setItem('bnb_creator_phase', store.phase);
+  if (store.email) {
+    sessionStorage.setItem('bnb_app_email', store.email);
+  }
   if (store.onboardingForm) {
     sessionStorage.setItem('bnb_onboarding_form', JSON.stringify(store.onboardingForm));
   }
@@ -120,7 +124,9 @@ function persistFlowState() {
 
 function restoreFlowState() {
   restoreBuiltPackage();
-  store.email = sessionStorage.getItem('bnb_app_email') || sessionStorage.getItem('bnb_unlock_email') || '';
+  store.email = getAppEmail()
+    || sessionStorage.getItem('bnb_unlock_email')
+    || '';
   const formRaw = sessionStorage.getItem('bnb_onboarding_form');
   if (formRaw) {
     try {
@@ -188,6 +194,7 @@ function renderPlanReady() {
         </div>
         <div class="unlock-panel">
           <p class="unlock-lead">Your personalized food plan has been created${name ? ` for ${name}` : ''} and is ready to install on the Burn &amp; Build app.</p>
+          ${store.email ? `<p class="unlock-hint">Saved to <strong>${store.email}</strong> — use this email when you open the app.</p>` : ''}
           <div class="app-preview">
             <div class="app-preview-label">Burn &amp; Build app</div>
             <div class="app-preview-phone">
@@ -492,7 +499,7 @@ function bindOnboardingOnly() {
 
 function submitEmailLogin() {
   const input = document.querySelector('[name="creatorEmail"]');
-  const email = (input?.value || store.email || '').trim();
+  const email = (input?.value || store.email || getAppEmail() || '').trim();
   if (!validEmail(email)) {
     store.emailError = 'Enter a valid email address.';
     store.email = email;
@@ -500,12 +507,27 @@ function submitEmailLogin() {
     input?.focus();
     return;
   }
-  store.email = email;
-  store.emailError = '';
-  persistAppEmail(email);
-  store.phase = 'onboarding';
-  store.onboardingPage = 0;
-  render();
+
+  const btn = document.querySelector('[data-email-continue]');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'CHECKING…';
+  }
+
+  ensureBurnAndBuildContact(email).then((access) => {
+    if (!access.ok) {
+      store.emailError = access.message;
+      store.email = email;
+      render();
+      input?.focus();
+      return;
+    }
+    store.email = persistAppEmail(email);
+    store.emailError = '';
+    store.phase = 'onboarding';
+    store.onboardingPage = 0;
+    render();
+  });
 }
 
 function validEmail(email) {
@@ -606,6 +628,14 @@ function initStartSite() {
 }
 
 function finishIntake() {
+  const email = store.email || getAppEmail();
+  if (!email) {
+    store.phase = 'email-login';
+    store.emailError = 'Enter your email so we can save your food plan.';
+    render();
+    return;
+  }
+  store.email = persistAppEmail(email);
   store.phase = 'creating';
   store.saveError = '';
   render();
