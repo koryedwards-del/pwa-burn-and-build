@@ -1295,6 +1295,15 @@ function bindEvents() {
     btn.addEventListener('click', () => {
       store.groceryAddTab = btn.dataset.groceryAddTab;
       render();
+      requestAnimationFrame(() => {
+        const list = document.querySelector('.grocery-add-list');
+        if (list) {
+          list.scrollTop = 0;
+          list.scrollLeft = 0;
+        }
+        document.querySelector('[data-grocery-add-tab].active')
+          ?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      });
     });
   });
 
