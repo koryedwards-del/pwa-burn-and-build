@@ -542,6 +542,7 @@ function renderHome() {
       </div>
       <div class="home-btn-stack">
         <button type="button" class="btn-home" data-nav="plan">Your Custom Food Plan</button>
+        <button type="button" class="btn-home" data-nav="grocery">Grocery List</button>
         <button type="button" class="btn-home" data-nav="lean-body">Lean Body Analysis</button>
       </div>
       <p class="home-footer">Stay consistent. Eat on time.</p>
@@ -862,7 +863,7 @@ function renderGrocery() {
 function render() {
   const root = document.getElementById('app');
   if (store.screen === 'loading') {
-    root.innerHTML = '<div class="screen home-loading"><img class="home-logo" src="../img/shell/home-logo.svg" alt="Burn &amp; Build" width="240" height="210" /></div>';
+    root.innerHTML = '<div class="screen home-loading"><img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="240" height="210" /></div>';
     return;
   }
   if (store.screen === 'onboarding') root.innerHTML = renderOnboarding(store);
