@@ -538,7 +538,7 @@ function renderHome() {
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       <div class="home-logo-wrap">
-        <img class="home-logo" src="../img/shell/home-logo.svg" alt="Burn &amp; Build" width="280" height="245" />
+        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>
       <div class="home-btn-stack">
         <button type="button" class="btn-home" data-nav="plan">Your Custom Food Plan</button>

@@ -8,7 +8,7 @@ const ASSETS = [
   './sw.js',
   '../css/styles.css',
   '../css/home.css',
-  '../img/shell/home-logo.svg',
+  '../img/shell/B%26Blogo.png',
   '../js/shellApp.js',
   '../js/programApi.js',
   '../js/contactsApi.js',
