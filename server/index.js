@@ -5,10 +5,10 @@ import 'dotenv/config';
 import {
   deleteContact,
   ensureBurnAndBuildAccess,
+  enrollContactFromProgramCreation,
   getContact,
   listContacts,
   setBurnAndBuild,
-  touchContactFromProgram,
   upsertContact,
 } from './contacts.js';
 import { countPrograms, dbPathForHealth, getLatestProgram, normalizeEmail, saveProgram } from './db.js';
@@ -152,12 +152,6 @@ app.post('/api/programs', (req, res) => {
     return;
   }
 
-  const access = ensureBurnAndBuildAccess(email);
-  if (!access.ok) {
-    res.status(403).json({ ok: false, message: access.message });
-    return;
-  }
-
   const validation = validateProgramPackage(pkg);
   if (!validation.ok) {
     res.status(400).json({ ok: false, message: validation.errors.join(' ') });
@@ -165,8 +159,8 @@ app.post('/api/programs', (req, res) => {
   }
 
   const programId = saveProgram(email, pkg);
-  touchContactFromProgram(email, pkg?.intake?.preferredName);
-  res.json({ ok: true, email, programId, programCount: countPrograms(email) });
+  const contact = enrollContactFromProgramCreation(email, pkg?.intake?.preferredName);
+  res.json({ ok: true, email, programId, programCount: countPrograms(email), contact });
 });
 
 app.get('/api/programs', (req, res) => {

@@ -21,8 +21,8 @@ function render() {
   root.innerHTML = `
     <div class="contacts-page">
       <div class="contacts-header">
-        <h1>Contact list</h1>
-        <p>One list for Signal+ and Burn &amp; Build. Check B&amp;B to give a contact access to the Creator and Shell.</p>
+        <h1>Admin — Contact list</h1>
+        <p>One list for all apps. Creating a food plan adds the contact and checks B&amp;B. You can also toggle B&amp;B here.</p>
       </div>
       <div class="contacts-panel">
         ${store.error ? `<div class="contacts-error">${store.error}</div>` : ''}
@@ -38,7 +38,7 @@ function render() {
         <div class="contacts-table-wrap">
           ${store.loading ? '<div class="contacts-empty">Loading contacts…</div>' : renderTable()}
         </div>
-        <p class="contacts-meta">Same email everywhere — not two accounts. Programs stay keyed to the contact email.</p>
+        <p class="contacts-meta">Same email everywhere — not two accounts. Food plan creation checks B&amp;B automatically.</p>
       </div>
     </div>`;
 

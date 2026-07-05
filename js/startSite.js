@@ -16,7 +16,6 @@ import {
 } from './websiteHome.js';
 import { totalOnboardingPages } from './onboardingEngine.js';
 import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
-import { ensureBurnAndBuildContact } from './contactsApi.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.js';
 
 const OWNERSHIP_INCLUDES = [
@@ -508,26 +507,11 @@ function submitEmailLogin() {
     return;
   }
 
-  const btn = document.querySelector('[data-email-continue]');
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'CHECKING…';
-  }
-
-  ensureBurnAndBuildContact(email).then((access) => {
-    if (!access.ok) {
-      store.emailError = access.message;
-      store.email = email;
-      render();
-      input?.focus();
-      return;
-    }
-    store.email = persistAppEmail(email);
-    store.emailError = '';
-    store.phase = 'onboarding';
-    store.onboardingPage = 0;
-    render();
-  });
+  store.email = persistAppEmail(email);
+  store.emailError = '';
+  store.phase = 'onboarding';
+  store.onboardingPage = 0;
+  render();
 }
 
 function validEmail(email) {

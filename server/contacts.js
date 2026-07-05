@@ -157,12 +157,14 @@ export function ensureBurnAndBuildAccess(email) {
   return { ok: true, contact };
 }
 
-export function touchContactFromProgram(email, displayName) {
-  const key = normalizeEmail(email);
-  const existing = getContact(key);
-  if (!existing) return null;
-  if (!displayName || displayName === existing.displayName) return existing;
-  return upsertContact({ email: key, displayName, burnAndBuild: existing.burnAndBuild });
+/** Food plan creation adds or updates Admin contact and checks B&B. */
+export function enrollContactFromProgramCreation(email, displayName) {
+  const name = String(displayName || '').trim();
+  return upsertContact({
+    email,
+    displayName: name || undefined,
+    burnAndBuild: true,
+  });
 }
 
 export function deleteContact(email) {

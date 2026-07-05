@@ -1,4 +1,4 @@
-/** Shared contact list API — one list for Signal+ and Burn & Build */
+/** Admin contact list API — one list for all apps */
 
 import { normalizeEmail } from './programApi.js';
 
@@ -86,7 +86,7 @@ export async function deleteContact(email) {
 }
 
 export function burnAndBuildAccessMessage() {
-  return 'This email is not set up for Burn & Build yet. Contact Coach Kory to get access.';
+  return 'Create your food plan first, or ask Coach Kory to enable Burn & Build on your contact.';
 }
 
 export async function ensureBurnAndBuildContact(email) {
