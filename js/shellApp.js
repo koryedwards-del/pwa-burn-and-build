@@ -478,7 +478,7 @@ function renderExtraFatsSection(slotLabel) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Extra Fats</span>
-          ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} pts</span>` : ''}
+          ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} servings</span>` : ''}
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${grouped.length
@@ -493,7 +493,7 @@ function renderExtraFatsSection(slotLabel) {
           </button>`).join('')}
         ${grouped.length ? `<div class="food-divider"></div>` : ''}
         <input type="search" class="food-search" placeholder="Search fats…" data-search="${sk}" value="${store.foodSearch[sk] || ''}" />
-        <div class="food-hint">Tap to add a fat point</div>
+        <div class="food-hint">Tap to add a fat serving</div>
         <div class="food-list">${renderFatRows(slotLabel, foods, grouped, sk)}</div>
       </div>` : ''}
     </div>`;
@@ -716,8 +716,8 @@ function renderMealFatPoints(fatTarget, fatUsed, fatPct) {
     <div class="fat-bar-wrap plan-fat-points">
       <div class="fat-bar"><div class="fat-bar-fill ${fatUsed >= fatTarget ? 'over' : ''}" style="width:${fatPct * 100}%"></div></div>
       <div class="fat-bar-meta">
-        <span>Fat points</span>
-        <span>${fatUsed.toFixed(1)} / ${fatTarget} pts</span>
+        <span>Fat servings</span>
+        <span>${fatUsed.toFixed(1)} / ${fatTarget} servings</span>
       </div>
     </div>`;
 }
