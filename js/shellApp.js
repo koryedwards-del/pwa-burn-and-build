@@ -765,7 +765,7 @@ function renderPreviousPlans() {
       <div class="screen previous-plans-screen">
         ${renderPreviousPlansHeader()}
         <div class="history-empty">
-          <p>No previous food plans yet.</p>
+          <p>You haven't created a food plan.</p>
         </div>
       </div>`;
   }
