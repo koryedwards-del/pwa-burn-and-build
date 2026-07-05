@@ -2,6 +2,8 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
+import { dbPathForHealth, getProgram, normalizeEmail, saveProgram } from './db.js';
+import { validateProgramPackage } from '../js/programPackage.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -37,12 +39,54 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(express.json({ limit: '512kb' }));
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
+}
+
 app.get('/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'program-creator',
     env: isProd ? 'production' : 'development',
+    database: dbPathForHealth(),
   });
+});
+
+app.post('/api/programs', (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+  const pkg = req.body?.package;
+
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const validation = validateProgramPackage(pkg);
+  if (!validation.ok) {
+    res.status(400).json({ ok: false, message: validation.errors.join(' ') });
+    return;
+  }
+
+  saveProgram(email, pkg);
+  res.json({ ok: true, email });
+});
+
+app.get('/api/programs', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const pkg = getProgram(email);
+  if (!pkg) {
+    res.status(404).json({ ok: false, message: 'No food plan found for this email yet.' });
+    return;
+  }
+
+  res.json({ ok: true, email, package: pkg });
 });
 
 /** Public config for client — never put secrets here. */

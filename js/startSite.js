@@ -16,6 +16,7 @@ import {
 } from './websiteHome.js';
 import { totalOnboardingPages } from './onboardingEngine.js';
 import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
+import { persistAppEmail, saveProgramToServer } from './programApi.js';
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
@@ -86,6 +87,7 @@ const store = {
   importUrl: '',
   email: '',
   emailError: '',
+  saveError: '',
   showAdvanced: false,
 };
 
@@ -201,8 +203,9 @@ function renderPlanReady() {
               <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
             </ul>
           </div>
-          <a href="${store.importUrl}" class="btn-primary unlock-cta" style="display:block;text-align:center;text-decoration:none;">OPEN BURN &amp; BUILD →</a>
-          <p class="unlock-hint">Opens the app and loads your plan. Install to home screen from that screen if you haven't yet.</p>
+          ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
+          <a href="../shell/" class="btn-primary unlock-cta" style="display:block;text-align:center;text-decoration:none;">OPEN BURN &amp; BUILD →</a>
+          <p class="unlock-hint">Your plan is saved to your email. Open the app, install to your home screen, and sign in with the same email.</p>
           ${renderAdvancedFallback()}
         </div>
       </div>
@@ -499,7 +502,7 @@ function submitEmailLogin() {
   }
   store.email = email;
   store.emailError = '';
-  sessionStorage.setItem('bnb_app_email', email);
+  persistAppEmail(email);
   store.phase = 'onboarding';
   store.onboardingPage = 0;
   render();
@@ -604,9 +607,14 @@ function initStartSite() {
 
 function finishIntake() {
   store.phase = 'creating';
+  store.saveError = '';
   render();
-  window.setTimeout(() => {
+  window.setTimeout(async () => {
     ensureBuiltPackage();
+    const saved = await saveProgramToServer(store.email, store.builtPackage);
+    if (!saved.ok) {
+      store.saveError = saved.message || 'Could not save your plan.';
+    }
     store.phase = 'plan-ready';
     render();
   }, 900);

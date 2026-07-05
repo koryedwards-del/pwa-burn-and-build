@@ -1,5 +1,6 @@
 .env
 .env.local
 node_modules/
+server/data/*.db
 .DS_Store
 burnandbuildlandingpage/

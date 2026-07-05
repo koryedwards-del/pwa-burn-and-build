@@ -146,11 +146,21 @@ html:has(.plan-support) #app {
   text-decoration: none;
 }
 
-.ps-empty-hint {
-  margin-top: 20px;
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.5;
+.ps-empty .ob-welcome-line1,
+.ps-empty .ob-welcome-line2 {
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.ps-empty .unlock-label {
+  display: block;
+  text-align: left;
+  margin: 20px 0 8px;
+}
+
+.ps-empty .ob-input-lg {
+  width: 100%;
+  margin-bottom: 16px;
 }
 
 .ps-empty .import-error {

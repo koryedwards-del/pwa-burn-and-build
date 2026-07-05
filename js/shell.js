@@ -20,6 +20,11 @@ import {
   parseImportFromUrl,
   planFromPackage,
 } from './programPackage.js';
+import {
+  fetchProgramFromServer,
+  getAppEmail,
+  persistAppEmail,
+} from './programApi.js';
 
 const store = {
   program: null,
@@ -29,6 +34,9 @@ const store = {
   pickCounts: {},
   screen: 'loading',
   importError: null,
+  email: '',
+  emailError: '',
+  loadError: null,
   expandedMeal: null,
   expandedSections: {},
   sectionTabs: {},
@@ -460,6 +468,45 @@ function renderExtraFatsSection(slotLabel) {
     </div>`;
 }
 
+function validEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+}
+
+async function loadProgramFromServer(email) {
+  const result = await fetchProgramFromServer(email);
+  if (!result.ok || !result.package) {
+    store.loadError = result.message || 'No food plan found for this email.';
+    return false;
+  }
+  if (!applyImportedProgram(result.package)) {
+    store.loadError = store.importError || 'Could not load your food plan.';
+    return false;
+  }
+  store.loadError = null;
+  persistAppEmail(email);
+  return true;
+}
+
+async function submitShellEmail() {
+  const input = document.querySelector('[name="shellEmail"]');
+  const email = (input?.value || store.email || getAppEmail() || '').trim();
+  if (!validEmail(email)) {
+    store.emailError = 'Enter a valid email address.';
+    store.email = email;
+    render();
+    input?.focus();
+    return;
+  }
+  store.email = email;
+  store.emailError = '';
+  store.loadError = null;
+  store.screen = 'loading';
+  render();
+  const ok = await loadProgramFromServer(email);
+  store.screen = ok ? 'plan' : 'login';
+  render();
+}
+
 function mealProgress(slot) {
   const required = [];
   if (slot.proteinServings > 0) required.push('Protein');
@@ -477,10 +524,27 @@ function renderWaiting() {
         <div class="brand">BURN &amp; BUILD</div>
       </div>
       <h2 class="ps-empty-title">Get your food plan</h2>
-      ${store.importError ? `<div class="import-error">${store.importError}</div>` : ''}
-      <p class="ps-empty-lead">Create your personalized plan on the website — then open it here.</p>
+      ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
+      <p class="ps-empty-lead">Create your plan on the website first — then open this app and sign in with the same email.</p>
       <a href="../start/" class="btn-primary ps-empty-cta">Create your program →</a>
-      <p class="ps-empty-hint">Step 1–2 on the website · Step 3 is this app on your home screen</p>
+    </div>`;
+}
+
+function renderEmailLogin() {
+  return `
+    <div class="ps-empty">
+      <div class="logo-block ps-empty-logo">
+        <div class="brand">BURN &amp; BUILD</div>
+      </div>
+      <div class="ob-welcome-line1">YOUR EMAIL</div>
+      <div class="ob-welcome-line2">IS YOUR LOGIN</div>
+      <p class="ps-empty-lead">Enter the same email you used when you built your food plan.</p>
+      ${store.emailError ? `<div class="import-error">${store.emailError}</div>` : ''}
+      ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
+      <label class="unlock-label" for="shell-email">Email address</label>
+      <input id="shell-email" class="ob-input ob-input-lg" type="email" name="shellEmail" value="${store.email || getAppEmail()}" placeholder="you@example.com" autocomplete="email" />
+      <button type="button" class="btn-primary ps-empty-cta" data-shell-email-submit>LOAD MY FOOD PLAN →</button>
+      <a href="../start/" class="unlock-back-link" style="display:block;margin-top:16px;">Create your program →</a>
     </div>`;
 }
 
@@ -696,7 +760,13 @@ function renderShell(content, { showTabs = true, empty = false } = {}) {
 function render() {
   const root = document.getElementById('app');
   if (store.screen === 'loading') {
-    root.innerHTML = renderShell('<div class="ps-waiting"><div class="logo-block"><div class="brand">BURN &amp; BUILD</div></div></div>', { showTabs: false });
+    root.innerHTML = renderShell('<div class="ps-waiting"><div class="logo-block"><div class="brand">BURN &amp; BUILD</div></div></div>', { showTabs: false, empty: true });
+    return;
+  }
+
+  if (store.screen === 'login') {
+    root.innerHTML = renderShell(renderEmailLogin(), { showTabs: false, empty: true });
+    bindEvents();
     return;
   }
 
@@ -712,6 +782,17 @@ function render() {
 }
 
 function bindEvents() {
+  document.querySelector('[data-shell-email-submit]')?.addEventListener('click', () => {
+    submitShellEmail();
+  });
+
+  document.querySelector('[name="shellEmail"]')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitShellEmail();
+    }
+  });
+
   document.querySelectorAll('[data-screen]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const next = btn.dataset.screen;
@@ -839,6 +920,7 @@ function bindEvents() {
 
 async function init() {
   load();
+  store.email = getAppEmail();
   store.screen = 'loading';
   render();
 
@@ -857,8 +939,18 @@ async function init() {
     }
   }
 
-  store.screen = hasActiveProgram() ? 'plan' : 'waiting';
-  if (store.screen === 'grocery') refreshGroceryList();
+  if (!hasActiveProgram() && getAppEmail()) {
+    await loadProgramFromServer(getAppEmail());
+  }
+
+  if (hasActiveProgram()) {
+    store.screen = 'plan';
+  } else if (getAppEmail()) {
+    store.screen = 'login';
+  } else {
+    store.screen = 'login';
+  }
+
   render();
   registerServiceWorker();
 }
