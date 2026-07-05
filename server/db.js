@@ -101,6 +101,36 @@ export function countPrograms(email) {
   return row?.n || 0;
 }
 
+export function listPrograms(email) {
+  const rows = db.prepare(`
+    SELECT id, label, package_json, created_at FROM programs
+    WHERE email = ?
+    ORDER BY created_at DESC
+  `).all(normalizeEmail(email));
+
+  return rows.map((row) => {
+    try {
+      return {
+        id: row.id,
+        label: row.label,
+        createdAt: row.created_at,
+        package: JSON.parse(row.package_json),
+      };
+    } catch {
+      return null;
+    }
+  }).filter(Boolean);
+}
+
+export function getProgramById(email, programId) {
+  const row = db.prepare(`
+    SELECT package_json FROM programs
+    WHERE email = ? AND id = ?
+  `).get(normalizeEmail(email), programId);
+  if (!row) return null;
+  return JSON.parse(row.package_json);
+}
+
 export function dbPathForHealth() {
   return dbPath;
 }

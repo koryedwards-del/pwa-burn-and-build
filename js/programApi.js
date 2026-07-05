@@ -40,3 +40,25 @@ export async function fetchProgramFromServer(email) {
     return { ok: false, message: 'Network error loading your plan.' };
   }
 }
+
+export async function fetchProgramHistoryFromServer(email) {
+  try {
+    const res = await fetch(`/api/programs/history?email=${encodeURIComponent(normalizeEmail(email))}`);
+    const data = await res.json();
+    if (!res.ok) return { ok: false, message: data.message || 'Could not load food plan history.' };
+    return data;
+  } catch {
+    return { ok: false, message: 'Network error loading food plan history.' };
+  }
+}
+
+export async function fetchProgramByIdFromServer(email, programId) {
+  try {
+    const res = await fetch(`/api/programs/${encodeURIComponent(programId)}?email=${encodeURIComponent(normalizeEmail(email))}`);
+    const data = await res.json();
+    if (!res.ok) return { ok: false, message: data.message || 'Could not load that food plan.' };
+    return data;
+  } catch {
+    return { ok: false, message: 'Network error loading food plan.' };
+  }
+}

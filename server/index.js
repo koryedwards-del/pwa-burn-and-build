@@ -11,7 +11,8 @@ import {
   setBurnAndBuild,
   upsertContact,
 } from './contacts.js';
-import { countPrograms, dbPathForHealth, getLatestProgram, normalizeEmail, saveProgram } from './db.js';
+import { countPrograms, dbPathForHealth, getLatestProgram, getProgramById, listPrograms, normalizeEmail, saveProgram } from './db.js';
+import { summarizeProgram } from '../js/programHistory.js';
 import { validateProgramPackage } from '../js/programPackage.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -188,6 +189,53 @@ app.get('/api/programs', (req, res) => {
     package: pkg,
     programCount: countPrograms(email),
   });
+});
+
+app.get('/api/programs/history', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const access = ensureBurnAndBuildAccess(email);
+  if (!access.ok) {
+    res.status(403).json({ ok: false, message: access.message });
+    return;
+  }
+
+  const rows = listPrograms(email);
+  const programs = rows.map((row) => summarizeProgram(row.package, {
+    id: row.id,
+    createdAt: row.createdAt,
+    label: row.label,
+  }));
+
+  res.json({ ok: true, email, programs });
+});
+
+app.get('/api/programs/:id', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  const { id } = req.params;
+
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const access = ensureBurnAndBuildAccess(email);
+  if (!access.ok) {
+    res.status(403).json({ ok: false, message: access.message });
+    return;
+  }
+
+  const pkg = getProgramById(email, id);
+  if (!pkg) {
+    res.status(404).json({ ok: false, message: 'Food plan not found.' });
+    return;
+  }
+
+  res.json({ ok: true, email, package: pkg });
 });
 
 /** Public config for client — never put secrets here. */

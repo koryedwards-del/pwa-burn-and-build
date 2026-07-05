@@ -22,7 +22,12 @@ import {
   parseProgramPackageJson,
   planFromPackage,
 } from './programPackage.js';
-import { fetchProgramFromServer, getAppEmail } from './programApi.js';
+import {
+  fetchProgramByIdFromServer,
+  fetchProgramFromServer,
+  fetchProgramHistoryFromServer,
+  getAppEmail,
+} from './programApi.js';
 
 const store = {
   profile: null,
@@ -49,6 +54,10 @@ const store = {
   onboardingEditMode: false,
   onboardingForm: null,
   importError: null,
+  programHistory: [],
+  programHistoryLoading: false,
+  programHistoryError: null,
+  programHistoryOpenId: null,
 };
 
 function hasActiveProgram() {
@@ -660,8 +669,127 @@ function renderProTips() {
   return renderStubScreen('Pro Tips', 'Coming next in the rebuild.');
 }
 
+function renderPreviousPlansHeader() {
+  return `
+    <div class="plan-header">
+      <button type="button" class="back-btn history-back" data-nav="home">←</button>
+      <h1>Previous Food Plans</h1>
+    </div>`;
+}
+
+async function loadProgramHistory() {
+  store.programHistoryLoading = true;
+  store.programHistoryError = null;
+  render();
+
+  const email = getAppEmail();
+  if (!email) {
+    store.programHistoryLoading = false;
+    store.programHistory = [];
+    store.programHistoryError = 'Enter your email in the app to load food plan history.';
+    render();
+    return;
+  }
+
+  const result = await fetchProgramHistoryFromServer(email);
+  store.programHistoryLoading = false;
+  if (!result.ok) {
+    store.programHistory = [];
+    store.programHistoryError = result.message;
+  } else {
+    store.programHistory = result.programs || [];
+  }
+  render();
+}
+
+async function openHistoryProgram(programId) {
+  const email = getAppEmail();
+  if (!email || !programId) return;
+
+  store.programHistoryOpenId = programId;
+  store.programHistoryError = null;
+  render();
+
+  const result = await fetchProgramByIdFromServer(email, programId);
+  store.programHistoryOpenId = null;
+
+  if (!result.ok) {
+    store.programHistoryError = result.message;
+    render();
+    return;
+  }
+
+  if (applyImportedProgram(result.package)) {
+    store.screen = 'home';
+    render();
+  }
+}
+
 function renderPreviousPlans() {
-  return renderStubScreen('Previous Food Plans', 'Your purchased food plan history — coming next in the rebuild.');
+  const activeId = store.program?.program?.id;
+
+  if (store.programHistoryLoading) {
+    return `
+      <div class="screen previous-plans-screen">
+        ${renderPreviousPlansHeader()}
+        <div class="history-loading">Loading food plan history…</div>
+      </div>`;
+  }
+
+  if (!store.programHistory.length) {
+    return `
+      <div class="screen previous-plans-screen">
+        ${renderPreviousPlansHeader()}
+        ${store.programHistoryError ? `<div class="history-error">${store.programHistoryError}</div>` : ''}
+        <div class="history-empty">
+          <p>No previous food plans yet.</p>
+          <a href="../start/" class="btn-primary">Create your food plan →</a>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="screen previous-plans-screen">
+      ${renderPreviousPlansHeader()}
+
+      <p class="history-intro">Body composition history — tap a row to open that food plan.</p>
+
+      <div class="history-legend">Activity = weight training / cardio / fat burning hrs per week (e.g. 3/4/3)</div>
+
+      ${store.programHistoryError ? `<div class="history-error">${store.programHistoryError}</div>` : ''}
+
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Test date</th>
+              <th>Fat %</th>
+              <th>Weight</th>
+              <th>Lean</th>
+              <th>Fat</th>
+              <th>Activity</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${store.programHistory.map((row) => {
+              const isActive = row.id === activeId;
+              const isOpening = row.id === store.programHistoryOpenId;
+              return `
+              <tr class="history-row ${isActive ? 'active' : ''} ${isOpening ? 'opening' : ''}" data-open-history="${row.id}">
+                <td>${row.testDateDisplay}${isActive ? '<span class="history-active-tag">Active</span>' : ''}</td>
+                <td>${row.fatPercentDisplay}</td>
+                <td>${row.weightDisplay}</td>
+                <td>${row.leanDisplay}</td>
+                <td>${row.fatLbsDisplay}</td>
+                <td>${row.activity}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="history-footer-note">Check in every 6–8 weeks and build a new plan when your body composition changes.</p>
+    </div>`;
 }
 
 function openEditPlan() {
@@ -1037,6 +1165,9 @@ function bindEvents() {
         refreshGroceryList();
         store.showGroceryAdd = false;
       }
+      if (nav === 'previous-plans') {
+        loadProgramHistory();
+      }
       if (nav === 'import') store.importError = null;
       store.screen = nav;
       store.expandedMeal = null;
@@ -1118,6 +1249,10 @@ function bindEvents() {
   });
 
   bindCoachCarousel();
+
+  document.querySelectorAll('[data-open-history]').forEach((row) => {
+    row.addEventListener('click', () => openHistoryProgram(row.dataset.openHistory));
+  });
 
   document.querySelector('[data-open-grocery-add]')?.addEventListener('click', () => {
     store.showGroceryAdd = true;

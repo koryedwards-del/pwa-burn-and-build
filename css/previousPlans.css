@@ -1,0 +1,148 @@
+/** Previous Food Plans — body composition history table */
+
+.previous-plans-screen .plan-header {
+  position: relative;
+  justify-content: center;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+}
+
+.previous-plans-screen .plan-header h1 {
+  flex: 1;
+  text-align: center;
+  color: #fff;
+  font-size: 18px;
+  margin-right: 36px;
+  line-height: 1.25;
+}
+
+.previous-plans-screen .history-back {
+  position: absolute;
+  left: 16px;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 400;
+  padding: 4px 8px;
+}
+
+.history-intro {
+  padding: 0 20px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #aaa;
+  text-align: center;
+}
+
+.history-legend {
+  margin: 0 20px 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.history-loading,
+.history-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.history-error {
+  margin: 0 20px 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(232, 114, 42, 0.15);
+  border: 1px solid var(--flame);
+  color: var(--flame);
+  font-size: 14px;
+}
+
+.history-table-wrap {
+  margin: 0 12px 24px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.history-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  white-space: nowrap;
+}
+
+.history-table td {
+  padding: 10px 8px;
+  font-size: 13px;
+  color: #ddd;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.history-row {
+  cursor: pointer;
+}
+
+.history-row:hover,
+.history-row:focus-visible {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.history-row.active td {
+  background: rgba(91, 163, 224, 0.08);
+}
+
+.history-row.opening td {
+  opacity: 0.5;
+}
+
+.history-row td:first-child {
+  color: #fff;
+  font-weight: 600;
+}
+
+.history-row td:nth-child(2) {
+  color: var(--brand-blue);
+}
+
+.history-active-tag {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.history-footer-note {
+  margin: 0 20px 32px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  text-align: center;
+}
