@@ -45,3 +45,37 @@
   border-radius: 999px;
   padding: 0 6px;
 }
+
+/* Select Additional Foods sheet — header / tabs / search spacing */
+.sheet-panel .grocery-add-tabs {
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+}
+
+.sheet-panel .grocery-add-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 14px;
+  line-height: 1.2;
+}
+
+.sheet-panel .food-search {
+  flex-shrink: 0;
+  margin: 4px 16px 14px;
+}
+
+.sheet-panel .grocery-add-list {
+  padding-top: 2px;
+}
+
+.sheet-panel .grocery-add-list .food-hint {
+  margin: 10px 4px 8px;
+}
+
+.sheet-panel .grocery-add-list .top-picks-label {
+  margin: 6px 4px 8px;
+}
