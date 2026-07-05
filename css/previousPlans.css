@@ -1,4 +1,4 @@
-/** Previous Food Plans — body composition history table */
+/** Previous Food Plans — body composition history cards */
 
 .previous-plans-screen .plan-header {
   position: relative;
@@ -26,7 +26,7 @@
 }
 
 .history-intro {
-  padding: 0 20px 12px;
+  padding: 4px 20px 14px;
   font-size: 13px;
   line-height: 1.5;
   color: #aaa;
@@ -34,7 +34,7 @@
 }
 
 .history-legend {
-  margin: 0 20px 12px;
+  margin: 0 20px 16px;
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
@@ -42,6 +42,7 @@
   font-size: 11px;
   color: var(--muted);
   line-height: 1.45;
+  text-align: center;
 }
 
 .history-loading,
@@ -90,81 +91,114 @@
   font-size: 14px;
 }
 
-.history-table-wrap {
-  margin: 0 12px 24px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--card);
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 20px 16px;
 }
 
-.history-table {
+.history-card {
   width: 100%;
-  min-width: 520px;
-  border-collapse: collapse;
-}
-
-.history-table th {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 10px 8px;
   text-align: left;
-  border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-  white-space: nowrap;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: inherit;
 }
 
-.history-table td {
-  padding: 10px 8px;
-  font-size: 13px;
-  color: #ddd;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  vertical-align: middle;
-  white-space: nowrap;
+.history-card:active {
+  opacity: 0.92;
 }
 
-.history-table tr:last-child td {
-  border-bottom: none;
+.history-card.active {
+  border-color: rgba(91, 163, 224, 0.45);
+  background: rgba(91, 163, 224, 0.06);
 }
 
-.history-row {
-  cursor: pointer;
+.history-card.opening {
+  opacity: 0.55;
 }
 
-.history-row:hover,
-.history-row:focus-visible {
-  background: rgba(255, 255, 255, 0.04);
+.history-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.history-row.active td {
-  background: rgba(91, 163, 224, 0.08);
-}
-
-.history-row.opening td {
-  opacity: 0.5;
-}
-
-.history-row td:first-child {
+.history-date {
+  font-size: 16px;
+  font-weight: 700;
   color: #fff;
-  font-weight: 600;
-}
-
-.history-row td:nth-child(2) {
-  color: var(--brand-blue);
 }
 
 .history-active-tag {
   display: inline-block;
-  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--green);
+  background: rgba(110, 207, 138, 0.15);
+}
+
+.history-chevron {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.history-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.history-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.history-metric-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.history-metric-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-metric-value.accent {
+  color: var(--brand-blue);
+}
+
+.history-activity {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.history-activity strong {
+  color: #fff;
+  font-weight: 700;
+  margin-left: 6px;
 }
 
 .history-footer-note {

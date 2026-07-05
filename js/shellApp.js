@@ -757,34 +757,38 @@ function renderPreviousPlans() {
 
       ${store.programHistoryError ? `<div class="history-error">${store.programHistoryError}</div>` : ''}
 
-      <div class="history-table-wrap">
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Test date</th>
-              <th>Fat %</th>
-              <th>Weight</th>
-              <th>Lean</th>
-              <th>Fat</th>
-              <th>Activity</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${store.programHistory.map((row) => {
-              const isActive = row.id === activeId;
-              const isOpening = row.id === store.programHistoryOpenId;
-              return `
-              <tr class="history-row ${isActive ? 'active' : ''} ${isOpening ? 'opening' : ''}" data-open-history="${row.id}">
-                <td>${row.testDateDisplay}${isActive ? '<span class="history-active-tag">Active</span>' : ''}</td>
-                <td>${row.fatPercentDisplay}</td>
-                <td>${row.weightDisplay}</td>
-                <td>${row.leanDisplay}</td>
-                <td>${row.fatLbsDisplay}</td>
-                <td>${row.activity}</td>
-              </tr>`;
-            }).join('')}
-          </tbody>
-        </table>
+      <div class="history-list">
+        ${store.programHistory.map((row) => {
+          const isActive = row.id === activeId;
+          const isOpening = row.id === store.programHistoryOpenId;
+          return `
+          <button type="button" class="history-card ${isActive ? 'active' : ''} ${isOpening ? 'opening' : ''}" data-open-history="${row.id}">
+            <div class="history-card-top">
+              <span class="history-date">${row.testDateDisplay}</span>
+              ${isActive ? '<span class="history-active-tag">Active</span>' : ''}
+              <span class="history-chevron">›</span>
+            </div>
+            <div class="history-metrics">
+              <div class="history-metric">
+                <span class="history-metric-label">Fat %</span>
+                <span class="history-metric-value accent">${row.fatPercentDisplay}</span>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric-label">Weight</span>
+                <span class="history-metric-value">${row.weightDisplay}</span>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric-label">Lean</span>
+                <span class="history-metric-value">${row.leanDisplay}</span>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric-label">Fat</span>
+                <span class="history-metric-value">${row.fatLbsDisplay}</span>
+              </div>
+            </div>
+            <div class="history-activity">Activity<strong>${row.activity}</strong></div>
+          </button>`;
+        }).join('')}
       </div>
 
       <p class="history-footer-note">Check in every 6–8 weeks and build a new plan when your body composition changes.</p>
@@ -1249,8 +1253,8 @@ function bindEvents() {
 
   bindCoachCarousel();
 
-  document.querySelectorAll('[data-open-history]').forEach((row) => {
-    row.addEventListener('click', () => openHistoryProgram(row.dataset.openHistory));
+  document.querySelectorAll('[data-open-history]').forEach((btn) => {
+    btn.addEventListener('click', () => openHistoryProgram(btn.dataset.openHistory));
   });
 
   document.querySelector('[data-open-grocery-add]')?.addEventListener('click', () => {
