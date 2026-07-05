@@ -1,0 +1,47 @@
+/** Grocery List screen — shell styling */
+
+.grocery-screen .plan-header {
+  position: relative;
+  justify-content: center;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+}
+
+.grocery-screen .plan-header h1 {
+  flex: 1;
+  text-align: center;
+  color: var(--brand-blue);
+  font-size: 20px;
+  margin-right: 36px;
+}
+
+.grocery-screen .grocery-back {
+  position: absolute;
+  left: 16px;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 400;
+  padding: 4px 8px;
+}
+
+.grocery-screen .grocery-section-label {
+  color: var(--brand-blue);
+}
+
+.grocery-screen .grocery-row-qty {
+  color: var(--brand-blue);
+}
+
+.grocery-screen .grocery-row.checked .grocery-check {
+  color: var(--brand-blue);
+}
+
+.grocery-screen .grocery-section-count {
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 6px;
+}

@@ -80,9 +80,21 @@ function load() {
     if (c) store.pickCounts = JSON.parse(c);
     const cp = localStorage.getItem('bnb_coach_progress');
     if (cp) store.coachProgress = JSON.parse(cp);
+    const gc = localStorage.getItem('bnb_grocery_checked');
+    if (gc) store.groceryChecked = JSON.parse(gc);
+    const gr = localStorage.getItem('bnb_grocery_removed');
+    if (gr) store.groceryRemoved = JSON.parse(gr);
+    const ge = localStorage.getItem('bnb_grocery_extras');
+    if (ge) store.groceryExtras = JSON.parse(ge);
   } catch (err) {
     console.error(err);
   }
+}
+
+function saveGroceryState() {
+  localStorage.setItem('bnb_grocery_checked', JSON.stringify(store.groceryChecked));
+  localStorage.setItem('bnb_grocery_removed', JSON.stringify(store.groceryRemoved));
+  localStorage.setItem('bnb_grocery_extras', JSON.stringify(store.groceryExtras));
 }
 
 function saveProgram() {
@@ -138,12 +150,14 @@ function toggleGroceryCheck(id) {
   store.groceryChecked[id] = !store.groceryChecked[id];
   const item = store.groceryItems.find((i) => i.id === id);
   if (item) item.isChecked = store.groceryChecked[id];
+  saveGroceryState();
   render();
 }
 
 function removeGroceryItem(id) {
   store.groceryRemoved[id] = true;
   store.groceryItems = store.groceryItems.filter((i) => i.id !== id);
+  saveGroceryState();
   render();
 }
 
@@ -155,12 +169,14 @@ function addGroceryFood(foodName) {
   const item = { ...createManualGroceryItem(food), isChecked: false };
   store.groceryExtras.push(item);
   store.groceryItems.push(item);
+  saveGroceryState();
   render();
 }
 
 function uncheckAllGrocery() {
   store.groceryChecked = {};
   store.groceryItems.forEach((i) => { i.isChecked = false; });
+  saveGroceryState();
   render();
 }
 
@@ -795,7 +811,7 @@ function renderGrocery() {
   return `
     <div class="screen grocery-screen">
       <div class="plan-header">
-        <button type="button" class="back-btn" data-nav="home">← Home</button>
+        <button type="button" class="back-btn grocery-back" data-nav="home">←</button>
         <h1>Grocery List</h1>
       </div>
 
