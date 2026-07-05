@@ -113,11 +113,6 @@ function saveCoachProgress() {
   localStorage.setItem('bnb_coach_progress', JSON.stringify(store.coachProgress));
 }
 
-function showCoachBanner() {
-  const day = getCoachDay(currentProgramDay());
-  return day && !store.coachProgress.day1Complete;
-}
-
 function currentProgramDay() {
   if (store.program) return getProgramDay(store.program);
   return 1;
@@ -386,7 +381,6 @@ function renderProteinSection(slotLabel, servings) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Protein</span>
-          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
@@ -422,7 +416,6 @@ function renderGrainSection(slotLabel, servings) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Grains / Starches</span>
-          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
@@ -646,13 +639,6 @@ function renderPlan() {
         <button type="button" class="back-btn plan-back" data-nav="home">←</button>
         <h1>Custom Food Plan</h1>
       </div>
-
-      ${showCoachBanner() ? `
-      <button type="button" class="coach-banner" data-nav="coach">
-        <span class="coach-banner-icon">🔥</span>
-        <span class="coach-banner-text">New message from Coach Kory</span>
-        <span class="coach-banner-chevron">›</span>
-      </button>` : ''}
 
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
