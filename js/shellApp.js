@@ -542,7 +542,7 @@ function renderHome() {
       <div class="home-btn-stack">
         <button type="button" class="btn-home" data-nav="plan">Your Custom Food Plan</button>
         <button type="button" class="btn-home" data-nav="grocery">Grocery List</button>
-        <button type="button" class="btn-home" data-nav="lean-body">Lean Body Analysis</button>
+        <button type="button" class="btn-home" data-nav="projections">Projections</button>
         <button type="button" class="btn-home" data-nav="previous-plans">Previous Food Plans</button>
       </div>
       <p class="home-footer">Stay consistent. Eat on time.</p>
@@ -568,8 +568,8 @@ function renderProTips() {
   return renderStubScreen('Pro Tips', 'Coming next in the rebuild.');
 }
 
-function renderSettings() {
-  return renderStubScreen('Settings', 'Coming next in the rebuild.');
+function renderPreviousPlans() {
+  return renderStubScreen('Previous Food Plans', 'Your purchased food plan history — coming next in the rebuild.');
 }
 
 function openEditPlan() {
@@ -873,7 +873,7 @@ function render() {
   else if (store.screen === 'grocery') root.innerHTML = renderGrocery();
   else if (store.screen === 'lean-body') root.innerHTML = renderLeanBody();
   else if (store.screen === 'pro-tips') root.innerHTML = renderProTips();
-  else if (store.screen === 'settings') root.innerHTML = renderSettings();
+  else if (store.screen === 'previous-plans') root.innerHTML = renderPreviousPlans();
   else root.innerHTML = renderHome();
   bindEvents();
   if (store.screen === 'onboarding') {
