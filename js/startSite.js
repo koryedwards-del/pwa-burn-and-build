@@ -199,6 +199,7 @@ function renderPlanReady() {
               <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
             </ul>
           </div>
+          <a href="../shell/" class="plan-ready-pwa-link">Open Burn &amp; Build app →</a>
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
       </div>

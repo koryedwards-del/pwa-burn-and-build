@@ -631,6 +631,22 @@ html:has(.start-site .ob-flow) #app {
   color: #ddd;
 }
 
+.plan-ready-pwa-link {
+  display: block;
+  margin-top: 20px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  color: var(--flame);
+}
+
+.plan-ready-pwa-link:active {
+  opacity: 0.85;
+}
+
 .install-steps li::before {
   content: '•';
   position: absolute;
