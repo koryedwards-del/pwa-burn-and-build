@@ -836,7 +836,9 @@ function renderNoPlan() {
         <h1>Custom Food Plan</h1>
       </div>
       <div class="food-plan-empty">
-        <a href="../start/" class="btn-primary">Create your food plan →</a>
+        <div class="food-plan-empty-btn">
+          <a href="../start/" class="btn-home">Create your food plan</a>
+        </div>
       </div>
     </div>`;
 }
