@@ -1,0 +1,139 @@
+/** Plan Support UI — shell chrome (Food Plan + Grocery only) */
+
+html:has(.plan-support),
+html:has(.plan-support) body {
+  height: 100%;
+  overflow: hidden;
+}
+
+html:has(.plan-support) #app {
+  height: 100%;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+.plan-support {
+  min-height: 100svh;
+  min-height: -webkit-fill-available;
+  height: 100svh;
+  height: -webkit-fill-available;
+  max-height: 100svh;
+  max-height: -webkit-fill-available;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  max-width: var(--layout-max);
+  margin: 0 auto;
+}
+
+.ps-header {
+  flex-shrink: 0;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ps-brand {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--flame);
+  text-transform: uppercase;
+}
+
+.ps-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.ps-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.ps-day {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ps-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 12px;
+}
+
+.ps-main .screen {
+  min-height: 0;
+  max-width: none;
+}
+
+.ps-tabs {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 16px calc(10px + var(--safe-bottom) + var(--start-mobile-ui-lift));
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(8px);
+}
+
+.ps-tab {
+  padding: 14px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ps-tab.active {
+  color: #000;
+  background: var(--flame);
+  border-color: var(--flame);
+}
+
+.ps-waiting {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.ps-waiting h2 {
+  font-size: 28px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.ps-waiting p {
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.ps-waiting .import-error {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 80, 80, 0.12);
+  color: #ff8a8a;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (min-width: 768px) {
+  .ps-header,
+  .ps-tabs {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+}

@@ -112,7 +112,7 @@ function restoreBuiltPackage() {
   if (!raw) return;
   try {
     store.builtPackage = JSON.parse(raw);
-    store.importUrl = packageToImportUrl(store.builtPackage, '../');
+    store.importUrl = packageToImportUrl(store.builtPackage, '../shell/');
   } catch {
     sessionStorage.removeItem('bnb_built_package');
   }
@@ -161,7 +161,7 @@ function ensureBuiltPackage() {
   store.builtPackage = buildProgramPackage(store.onboardingForm, {
     label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
   });
-  store.importUrl = packageToImportUrl(store.builtPackage, '../');
+  store.importUrl = packageToImportUrl(store.builtPackage, '../shell/');
   persistBuiltPackage();
   return store.builtPackage;
 }
