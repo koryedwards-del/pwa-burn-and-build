@@ -480,6 +480,7 @@ function renderWaiting() {
       ${store.importError ? `<div class="import-error">${store.importError}</div>` : ''}
       <p class="ps-empty-lead">Create your personalized plan on the website — then open it here.</p>
       <a href="../start/" class="btn-primary ps-empty-cta">Create your program →</a>
+      <p class="ps-empty-hint">Step 1–2 on the website · Step 3 is this app on your home screen</p>
     </div>`;
 }
 
@@ -859,6 +860,12 @@ async function init() {
   store.screen = hasActiveProgram() ? 'plan' : 'waiting';
   if (store.screen === 'grocery') refreshGroceryList();
   render();
+  registerServiceWorker();
+}
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {});
 }
 
 init();

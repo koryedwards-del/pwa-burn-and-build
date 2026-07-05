@@ -202,7 +202,7 @@ function renderPlanReady() {
             </ul>
           </div>
           <a href="${store.importUrl}" class="btn-primary unlock-cta" style="display:block;text-align:center;text-decoration:none;">OPEN BURN &amp; BUILD →</a>
-          <p class="unlock-hint">Already installed? Tap Open above — your servings load in the app.</p>
+          <p class="unlock-hint">Opens the app and loads your plan. Install to home screen from that screen if you haven't yet.</p>
           ${renderAdvancedFallback()}
         </div>
       </div>

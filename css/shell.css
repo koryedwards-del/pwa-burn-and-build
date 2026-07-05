@@ -146,6 +146,13 @@ html:has(.plan-support) #app {
   text-decoration: none;
 }
 
+.ps-empty-hint {
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .ps-empty .import-error {
   margin-bottom: 16px;
   padding: 12px 14px;
