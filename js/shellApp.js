@@ -536,7 +536,6 @@ function mealProgress(slot) {
 function renderHome() {
   return `
     <div class="screen home-dashboard">
-      <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       <div class="home-logo-wrap">
         <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>
@@ -544,6 +543,7 @@ function renderHome() {
         <button type="button" class="btn-home" data-nav="plan">Your Custom Food Plan</button>
         <button type="button" class="btn-home" data-nav="grocery">Grocery List</button>
         <button type="button" class="btn-home" data-nav="lean-body">Lean Body Analysis</button>
+        <button type="button" class="btn-home" data-nav="previous-plans">Previous Food Plans</button>
       </div>
       <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;
