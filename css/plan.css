@@ -9,7 +9,7 @@
 .food-plan-screen .plan-header h1 {
   flex: 1;
   text-align: center;
-  color: var(--cyan);
+  color: var(--brand-blue);
   font-size: 20px;
   margin-right: 36px;
 }
@@ -49,7 +49,7 @@
 }
 
 .food-plan-screen .fats-section .cat-header-title {
-  color: var(--cyan);
+  color: var(--brand-blue);
 }
 
 .food-plan-screen .cat-header-title {
@@ -57,5 +57,5 @@
 }
 
 .food-plan-screen .cat-header-servings {
-  color: var(--cyan);
+  color: var(--brand-blue);
 }
