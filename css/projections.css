@@ -1,0 +1,150 @@
+/** Projections (Lean Body Analysis) — shell styling */
+
+.projections-screen .plan-header {
+  position: relative;
+  justify-content: center;
+  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+}
+
+.projections-screen .plan-header h1 {
+  flex: 1;
+  text-align: center;
+  color: var(--brand-blue);
+  font-size: 20px;
+  margin-right: 36px;
+}
+
+.projections-screen .projections-back {
+  position: absolute;
+  left: 16px;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 400;
+  padding: 4px 8px;
+}
+
+.projections-empty {
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.projections-empty p {
+  color: #ccc;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.projections-lead {
+  padding: 0 20px 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #aaa;
+  text-align: center;
+}
+
+.lbm-card {
+  margin: 0 20px 16px;
+  padding: 18px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.lbm-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.lbm-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--brand-blue);
+  line-height: 1.1;
+}
+
+.lbm-card-sub {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #ccc;
+}
+
+.projections-table-wrap {
+  margin: 0 20px 16px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.projections-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.projections-table th {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 0 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.projections-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 15px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.projections-table tr:last-child td {
+  border-bottom: none;
+}
+
+.projections-table tr.row-current td {
+  font-weight: 700;
+  color: #aaa;
+}
+
+.projections-table .ace-badge {
+  display: inline-block;
+  color: var(--flame);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.projections-narrative {
+  margin: 0 20px 16px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.65;
+}
+
+.projections-narrative strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.projections-disclaimer {
+  margin: 0 20px 32px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.55;
+}

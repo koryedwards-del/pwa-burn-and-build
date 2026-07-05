@@ -13,6 +13,7 @@ import {
 } from './groceryEngine.js';
 import { bindOnboardingEvents, initOnboardingForm, renderOnboarding } from './onboardingUI.js';
 import { totalOnboardingPages } from './onboardingEngine.js';
+import { computeWhatsPossible } from './previewCalculator.js';
 import {
   getProgramDay,
   importProgramPackage,
@@ -568,8 +569,91 @@ function renderStubScreen(title, lead) {
     </div>`;
 }
 
+function getUserIntake() {
+  const intake = store.program?.intake || store.profile;
+  if (!intake?.leanBodyMass || !intake?.totalWeight || !intake?.fatPercent) return null;
+  return intake;
+}
+
+function intakeGender(intake) {
+  const s = String(intake.sex || 'male').toLowerCase();
+  return s.startsWith('f') ? 'female' : 'male';
+}
+
+function renderProjectionsHeader() {
+  return `
+    <div class="plan-header">
+      <button type="button" class="back-btn projections-back" data-nav="home">←</button>
+      <h1>Projections</h1>
+    </div>`;
+}
+
 function renderProjections() {
-  return renderStubScreen('Projections', 'Coming next in the rebuild.');
+  const intake = getUserIntake();
+  if (!intake) {
+    return `
+      <div class="screen projections-screen">
+        ${renderProjectionsHeader()}
+        <div class="projections-empty">
+          <p>Create your food plan first to see your lean body analysis and projections.</p>
+          <a href="../start/" class="btn-primary">Create your food plan →</a>
+        </div>
+      </div>`;
+  }
+
+  const result = computeWhatsPossible({
+    gender: intakeGender(intake),
+    weightLbs: intake.totalWeight,
+    bodyFatPercent: intake.fatPercent,
+  });
+
+  if (!result.valid) {
+    return `
+      <div class="screen projections-screen">
+        ${renderProjectionsHeader()}
+        <div class="projections-empty">
+          <p>${result.error}</p>
+        </div>
+      </div>`;
+  }
+
+  const name = displayName();
+  return `
+    <div class="screen projections-screen">
+      ${renderProjectionsHeader()}
+
+      <p class="projections-lead">Lean body analysis${name ? ` for ${name}` : ''} — based on your program intake.</p>
+
+      <div class="lbm-card">
+        <div class="lbm-card-label">Lean body mass</div>
+        <div class="lbm-card-value">${intake.leanBodyMass.toFixed(1)} lbs</div>
+        <div class="lbm-card-sub">Current ${intake.totalWeight.toFixed(0)} lbs · ${intake.fatPercent.toFixed(0)}% body fat</div>
+      </div>
+
+      <div class="projections-table-wrap">
+        <table class="projections-table">
+          <thead>
+            <tr>
+              <th>Timeline</th>
+              <th>Body Fat %</th>
+              <th>Bodyweight</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${result.rows.map((row) => `
+              <tr class="${row.isCurrent ? 'row-current' : ''}">
+                <td>${row.timeline}</td>
+                <td>${row.bodyFatDisplay}${row.badge ? `<span class="ace-badge">${row.badge}</span>` : ''}</td>
+                <td>${row.weightDisplay}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="projections-narrative">${result.narrative}</div>
+
+      <p class="projections-disclaimer">Results may vary. For informational purposes only — not medical advice. Individual results depend on adherence, diet, exercise, and other factors.</p>
+    </div>`;
 }
 
 function renderProTips() {
