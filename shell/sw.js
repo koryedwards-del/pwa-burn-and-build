@@ -7,6 +7,8 @@ const ASSETS = [
   './manifest.json',
   './sw.js',
   '../css/styles.css',
+  '../css/home.css',
+  '../img/shell/home-logo.svg',
   '../js/shellApp.js',
   '../js/programApi.js',
   '../js/contactsApi.js',

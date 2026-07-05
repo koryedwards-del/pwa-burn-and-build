@@ -1,0 +1,106 @@
+/** Home dashboard — rebuilt to match original app */
+
+.home-dashboard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+.home-settings {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: #8a8a8a;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-settings:active {
+  opacity: 0.7;
+}
+
+.home-logo-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  padding: 36px 8px 28px;
+}
+
+.home-logo {
+  width: min(280px, 78vw);
+  height: auto;
+  display: block;
+}
+
+.home-btn-stack {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8px 0 24px;
+}
+
+.home-btn-stack .btn-home {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: none;
+  background: var(--flame);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.home-btn-stack .btn-home:active {
+  opacity: 0.88;
+}
+
+.home-dashboard .home-footer {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 14px;
+  color: #9a9a9a;
+  padding-top: 8px;
+}
+
+.home-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.home-loading .home-logo {
+  width: min(240px, 70vw);
+}
+
+.home-stub {
+  padding: 24px 20px;
+}
+
+.home-stub .plan-header h1 {
+  color: var(--cyan);
+}
+
+.home-stub-lead {
+  color: #ccc;
+  line-height: 1.6;
+  margin-top: 24px;
+}

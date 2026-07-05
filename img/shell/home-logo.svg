@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 280" role="img" aria-label="Burn &amp; Build">
+  <defs>
+    <linearGradient id="flame" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#c44a00"/>
+      <stop offset="45%" stop-color="#ff8c1a"/>
+      <stop offset="100%" stop-color="#ffd54a"/>
+    </linearGradient>
+    <linearGradient id="burnFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff9a4a"/>
+      <stop offset="100%" stop-color="#c44a00"/>
+    </linearGradient>
+    <linearGradient id="buildFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8aa0b8"/>
+      <stop offset="100%" stop-color="#4a6078"/>
+    </linearGradient>
+    <pattern id="brick" width="24" height="12" patternUnits="userSpaceOnUse">
+      <rect width="24" height="12" fill="#2a2a2a"/>
+      <rect x="0" y="0" width="11" height="5" fill="#3a3a3a"/>
+      <rect x="12" y="0" width="11" height="5" fill="#333"/>
+      <rect x="-6" y="6" width="11" height="5" fill="#333"/>
+      <rect x="6" y="6" width="11" height="5" fill="#3a3a3a"/>
+      <rect x="18" y="6" width="11" height="5" fill="#333"/>
+    </pattern>
+  </defs>
+  <!-- flame -->
+  <path d="M160 18 C145 48 132 58 128 78 C124 98 136 108 160 128 C184 108 196 98 192 78 C188 58 175 48 160 18Z" fill="url(#flame)"/>
+  <path d="M160 52 C152 68 148 76 150 86 C152 96 158 102 160 108 C162 102 168 96 170 86 C172 76 168 68 160 52Z" fill="#ffe082" opacity="0.85"/>
+  <!-- BURN -->
+  <text x="160" y="168" text-anchor="middle" font-family="Impact, Haettenschweiler, Arial Black, sans-serif" font-size="52" font-weight="900" fill="url(#burnFill)" stroke="#8a3000" stroke-width="1">BURN</text>
+  <!-- & -->
+  <text x="160" y="188" text-anchor="middle" font-family="Georgia, serif" font-size="22" fill="#9aa0a8">&amp;</text>
+  <!-- BUILD -->
+  <text x="160" y="228" text-anchor="middle" font-family="Impact, Haettenschweiler, Arial Black, sans-serif" font-size="52" font-weight="900" fill="url(#buildFill)" stroke="#2a3848" stroke-width="1">BUILD</text>
+  <!-- brick base -->
+  <path d="M40 236 Q160 252 280 236 L280 272 Q160 288 40 272 Z" fill="url(#brick)"/>
+</svg>

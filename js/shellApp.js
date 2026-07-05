@@ -12,6 +12,7 @@ import {
   groupGroceryItems,
 } from './groceryEngine.js';
 import { bindOnboardingEvents, initOnboardingForm, renderOnboarding } from './onboardingUI.js';
+import { totalOnboardingPages } from './onboardingEngine.js';
 import {
   getProgramDay,
   importProgramPackage,
@@ -533,24 +534,57 @@ function mealProgress(slot) {
 }
 
 function renderHome() {
-  const name = displayName();
-  const programDay = store.program ? currentProgramDay() : null;
   return `
-    <div class="screen">
-      <div class="logo-block">
-        <div class="brand">BURN &amp; BUILD</div>
-        <div class="tagline">Your effort defines you</div>
+    <div class="screen home-dashboard">
+      <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
+      <div class="home-logo-wrap">
+        <img class="home-logo" src="../img/shell/home-logo.svg" alt="Burn &amp; Build" width="280" height="245" />
       </div>
-      ${programDay ? `<p class="home-program-day">Day ${programDay} of ${store.program.program.durationDays}</p>` : ''}
-      <div class="btn-stack">
-        <button type="button" class="btn-primary" data-nav="plan">Your Custom Food Plan</button>
-        <button type="button" class="btn-primary" data-nav="grocery">Grocery List</button>
-        <button type="button" class="btn-primary" data-nav="coach">Coaching</button>
-        <button type="button" class="btn-secondary" data-nav="import">${hasActiveProgram() ? 'Open New Program' : 'Open Program'}</button>
-        ${hasActiveProgram() ? '' : '<a href="../start/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Build Your Program →</a>'}
+      <div class="home-btn-stack">
+        <button type="button" class="btn-home" data-nav="plan">Your Custom Food Plan</button>
+        <button type="button" class="btn-home" data-nav="lean-body">Lean Body Analysis</button>
+        <button type="button" class="btn-home" data-nav="coach">Daily Coaching</button>
+        <button type="button" class="btn-home" data-nav="setup">Edit Your Custom Food Plan</button>
+        <button type="button" class="btn-home" data-nav="pro-tips">Pro Tips</button>
       </div>
-      <p class="home-footer">Stay consistent. Eat on time.${name ? ` — ${name}` : ''}</p>
+      <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;
+}
+
+function renderStubScreen(title, lead) {
+  return `
+    <div class="screen home-stub">
+      <div class="plan-header">
+        <button type="button" class="back-btn" data-nav="home">←</button>
+        <h1>${title}</h1>
+      </div>
+      <p class="home-stub-lead">${lead}</p>
+    </div>`;
+}
+
+function renderLeanBody() {
+  return renderStubScreen('Lean Body Analysis', 'Coming next in the rebuild.');
+}
+
+function renderProTips() {
+  return renderStubScreen('Pro Tips', 'Coming next in the rebuild.');
+}
+
+function renderSettings() {
+  return renderStubScreen('Settings', 'Coming next in the rebuild.');
+}
+
+function openEditPlan() {
+  if (!hasActiveProgram() && !store.profile?.leanBodyMass) {
+    store.screen = 'plan';
+    render();
+    return;
+  }
+  initOnboardingForm(store);
+  store.onboardingEditMode = true;
+  store.onboardingPage = totalOnboardingPages() - 2;
+  store.screen = 'onboarding';
+  render();
 }
 
 function renderImport() {
@@ -831,7 +865,7 @@ function renderGrocery() {
 function render() {
   const root = document.getElementById('app');
   if (store.screen === 'loading') {
-    root.innerHTML = '<div class="screen"><div class="logo-block"><div class="brand">BURN &amp; BUILD</div></div></div>';
+    root.innerHTML = '<div class="screen home-loading"><img class="home-logo" src="../img/shell/home-logo.svg" alt="Burn &amp; Build" width="240" height="210" /></div>';
     return;
   }
   if (store.screen === 'onboarding') root.innerHTML = renderOnboarding(store);
@@ -839,6 +873,9 @@ function render() {
   else if (store.screen === 'plan') root.innerHTML = renderPlan();
   else if (store.screen === 'coach') root.innerHTML = renderCoach();
   else if (store.screen === 'grocery') root.innerHTML = renderGrocery();
+  else if (store.screen === 'lean-body') root.innerHTML = renderLeanBody();
+  else if (store.screen === 'pro-tips') root.innerHTML = renderProTips();
+  else if (store.screen === 'settings') root.innerHTML = renderSettings();
   else root.innerHTML = renderHome();
   bindEvents();
   if (store.screen === 'onboarding') {
@@ -908,6 +945,10 @@ function bindEvents() {
   document.querySelectorAll('[data-nav]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const nav = btn.dataset.nav;
+      if (nav === 'setup') {
+        openEditPlan();
+        return;
+      }
       if (nav === 'coach') store.coachCardIndex = 0;
       if (nav === 'grocery') {
         refreshGroceryList();
