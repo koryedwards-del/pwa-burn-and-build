@@ -3,23 +3,19 @@ description: Project map and hosting context
 alwaysApply: true
 ---
 
-# Project context
+# Burn & Build — one repo
 
-- Full map: `~/operatingmanual/PROJECTS.md`
+Repo: **`pwa-burn-and-build`** (this workspace)
 
-## Two repos — keep them separate
-
-| Repo | Host | Role |
+| Path | Host | Role |
 |------|------|------|
-| **`burnandbuildlandingpage`** | gettheburnandbuildapp.com (GitHub Pages) | Marketing only — hero, features, calculator, testimonials, pricing, CTA |
-| **`pwa-burn-and-build`** | Render (`/start/` creator) + GitHub Pages (`/shell/` app) | Program creator + daily shell app — no duplicate marketing homepage |
+| `landing/` | gettheburnandbuildapp.com (GitHub Pages) | Marketing — hero, calculator, testimonials, $149 CTA |
+| `start/` | Render `/start/` | Program creator — email → intake → Stripe → save plan |
+| `shell/` | GitHub Pages or Render `/shell/` | Daily app — food plan, grocery, logging |
+| `server/` | Render | API + SQLite for programs/contacts |
 
-**Flow:** Landing CTA → `program-creator.onrender.com/start/` → email → intake → Stripe → app.
+**Flow:** Landing CTA → Render creator → shell app.
 
-- This workspace repo: **`pwa-burn-and-build`** — vanilla HTML/JS, localStorage + SQLite on Render
-- Landing clone may exist at `burnandbuildlandingpage/` (gitignored here) for local preview only
-- **Not connected to Hardkor Diet** (`hardkordietlandingpage` / thehardkordiet.com)
+**Deploy landing:** push to `main` (changes under `landing/`) → GitHub Actions workflow `deploy-landing.yml`. In repo **Settings → Pages**, source must be **GitHub Actions** (not the old `burnandbuildlandingpage` repo).
 
-## Reminders
-
-- **~Jul 5–6, 2026:** Check **Enforce HTTPS** for Hardkor (`thehardkordiet.com`) in GitHub Pages settings — DNS is green; cert may be ready by then.
+**Not connected to Hardkor Diet** or **Signal+** (separate products).

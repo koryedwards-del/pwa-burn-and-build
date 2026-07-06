@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Burn & Build — Privacy & Support</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ember: #E8621C;
+            --steel-light: #7FB5CC;
+            --steel-mid: #3A6A80;
+            --ash: #A0A0A0;
+            --void: #000000;
+            --card-bg: #1A1A1A;
+            --card-border: #2A2A2A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--void);
+            color: #D0D0D0;
+            line-height: 1.7;
+        }
+
+        nav {
+            background: rgba(0,0,0,0.9);
+            border-bottom: 1px solid var(--card-border);
+            padding: 14px 0;
+        }
+
+        nav .nav-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .nav-brand {
+            font-family: 'Oswald', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--ember);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+
+        nav .nav-links a {
+            color: var(--ash);
+            text-decoration: none;
+            font-size: 14px;
+            margin-left: 28px;
+            transition: color 0.2s;
+        }
+
+        nav .nav-links a:hover { color: white; }
+
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px 80px;
+        }
+
+        h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--ember);
+            margin-top: 40px;
+            margin-bottom: 12px;
+        }
+
+        h2:first-of-type {
+            margin-top: 0;
+        }
+
+        p {
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        ul {
+            margin: 0 0 16px 24px;
+        }
+
+        li {
+            margin-bottom: 6px;
+            font-size: 16px;
+        }
+
+        .divider {
+            width: 60px;
+            height: 2px;
+            background: var(--ember);
+            margin: 48px 0;
+        }
+
+        a {
+            color: var(--steel-light);
+            text-decoration: none;
+        }
+
+        a:hover { color: white; }
+
+        .contact-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 28px 24px;
+            margin-top: 16px;
+        }
+
+        .contact-card p {
+            margin-bottom: 8px;
+        }
+
+        .last-updated {
+            font-size: 13px;
+            color: #555;
+            margin-top: 48px;
+        }
+
+        footer {
+            border-top: 1px solid var(--card-border);
+            padding: 28px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .nav-toggle {
+          display: none;
+          flex-direction: column;
+          gap: 5px;
+          cursor: pointer;
+          background: none;
+          border: none;
+          padding: 4px;
+        }
+        .nav-toggle span {
+          display: block;
+          width: 24px;
+          height: 2px;
+          background: #aaa;
+          border-radius: 2px;
+        }
+        @media (max-width: 680px) {
+          nav { position: relative; }
+          .nav-inner { flex-wrap: nowrap; }
+          .nav-toggle { display: flex; }
+          .nav-links {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            top: 52px;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.97);
+            padding: 20px 24px;
+            gap: 18px;
+            border-bottom: 1px solid #2A2A2A;
+            z-index: 200;
+          }
+          .nav-links.open { display: flex; }
+          footer { flex-direction: column; align-items: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+        <nav>
+        <div class="nav-inner">
+            <a href="/" class="nav-brand">BURN &amp; BUILD</a>
+            <button class="nav-toggle" onclick="this.nextElementSibling.classList.toggle('open')" aria-label="Menu"><span></span><span></span><span></span></button>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#features">Features</a>
+                <a href="/#pricing">Pricing</a>
+                <a href="/privacypolicy">Privacy Policy</a>
+                <a href="/support">Support</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="content">
+
+        <!-- PRIVACY POLICY -->
+        <h1 id="privacy">Privacy Policy</h1>
+
+        <h2>What We Collect</h2>
+        <p>To build your Custom Food Plan, the Burn & Build app collects the following information during onboarding:</p>
+        <ul>
+            <li>Name (preferred first name)</li>
+            <li>Sex</li>
+            <li>Height, age, and current weight</li>
+            <li>Body fat percentage and test method</li>
+            <li>Body composition test date (optional)</li>
+            <li>Workday type and stress level</li>
+            <li>Exercise type and hours</li>
+            <li>Wake time</li>
+        </ul>
+        <p>The app also stores food logging data, meal timing, fat point tracking, Coach Kory messages, and reminder preferences as you use the app.</p>
+
+        <h2>Where Your Data Lives</h2>
+        <p>All of your data is stored locally on your device. Burn & Build does not transmit, upload, or sync your personal information to any server, cloud service, or third party. Your data stays on your phone.</p>
+
+        <h2>What We Don't Do</h2>
+        <ul>
+            <li>We do not collect analytics or usage data</li>
+            <li>We do not display ads</li>
+            <li>We do not sell, share, or transfer your data to third parties</li>
+            <li>We do not use cookies or tracking technologies</li>
+            <li>We do not require an account or login</li>
+        </ul>
+
+        <h2>In-App Purchases</h2>
+        <p>Burn & Build offers a one-time in-app purchase to unlock the Custom Food Plan. This transaction is processed entirely by Apple through the App Store. We do not collect or store any payment information.</p>
+
+        <h2>Children's Privacy</h2>
+        <p>Burn & Build is not intended for use by children under the age of 13. We do not knowingly collect personal information from children.</p>
+
+        <h2>Changes to This Policy</h2>
+        <p>If we update this policy, we will post the revised version on this page with an updated effective date.</p>
+
+        <div class="divider"></div>
+
+        <!-- SUPPORT -->
+        <h1 id="support">Contact &amp; Support</h1>
+
+        <p>Have a question, need help with the app, or just want to say hello? We'd love to hear from you.</p>
+
+        <div class="contact-card">
+            <p><strong style="color: white;">Email</strong></p>
+            <p><a href="mailto:support@gettheburnandbuildapp.com">support@gettheburnandbuildapp.com</a></p>
+        </div>
+
+        <p style="margin-top: 24px;">We typically respond within 24–48 hours.</p>
+
+        <p class="last-updated">Last updated: February 27, 2026</p>
+
+    </div>
+
+        <footer style="border-top: 1px solid #2A2A2A; padding: 28px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <a href="/" style="font-family: 'Oswald', sans-serif; font-weight: 900; font-size: 16px; color: #E8621C; text-decoration: none; letter-spacing: 0.05em;">BURN &amp; BUILD</a>
+        <div style="display: flex; gap: 24px;">
+            <a href="/" style="color: #555; text-decoration: none; font-size: 13px;">Home</a>
+            <a href="/privacypolicy" style="color: #555; text-decoration: none; font-size: 13px;">Privacy Policy</a>
+            <a href="/support" style="color: #555; text-decoration: none; font-size: 13px;">Contact &amp; Support</a>
+        </div>
+        <span style="color: #555; font-size: 13px;">&copy; 2026 Burn &amp; Build. All rights reserved.</span>
+    </footer>
+
+</body>
+</html>
