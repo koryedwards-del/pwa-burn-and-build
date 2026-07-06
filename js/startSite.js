@@ -9,14 +9,11 @@ import {
   downloadProgramPackage,
   packageToImportUrl,
 } from './programPackage.js';
-import {
-  bindHomeEvents,
-  createHomeState,
-  renderWebsiteHome,
-} from './websiteHome.js';
+import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.js';
 import { totalOnboardingPages } from './onboardingEngine.js';
 import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
-import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.js';
+
+const LANDING_URL = 'https://gettheburnandbuildapp.com';
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
@@ -76,8 +73,7 @@ const TEACHING = [
 ];
 
 const store = {
-  phase: 'home',
-  home: createHomeState(),
+  phase: 'email-login',
   onboardingPage: 1,
   onboardingForm: null,
   onboardingEditMode: false,
@@ -140,7 +136,9 @@ function restoreFlowState() {
   }
   const phase = sessionStorage.getItem('bnb_creator_phase');
   const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
-  if (phase && flowPhases.includes(phase)) {
+  if (phase === 'home') {
+    sessionStorage.removeItem('bnb_creator_phase');
+  } else if (phase && flowPhases.includes(phase)) {
     store.phase = phase;
   }
 }
@@ -154,13 +152,6 @@ function restoreBuiltPackage() {
   } catch {
     sessionStorage.removeItem('bnb_built_package');
   }
-}
-
-function beginProgramCreation() {
-  store.phase = 'email-login';
-  store.emailError = '';
-  window.scrollTo(0, 0);
-  render();
 }
 
 function renderEmailLogin() {
@@ -438,11 +429,6 @@ function renderOnboardingWrapper() {
 
 function render() {
   const root = document.getElementById('app');
-  if (store.phase === 'home') {
-    root.innerHTML = renderWebsiteHome(store.home);
-    bindHomeEvents(root, store.home, { onCreateProgram: beginProgramCreation });
-    return;
-  }
   if (store.phase === 'email-login') root.innerHTML = renderEmailLogin();
   else if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
@@ -556,9 +542,7 @@ function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-email-back]')) {
-      store.phase = 'home';
-      store.emailError = '';
-      render();
+      window.location.href = LANDING_URL;
       return;
     }
     if (e.target.closest('[data-download-package]')) {

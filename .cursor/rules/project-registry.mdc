@@ -6,12 +6,19 @@ alwaysApply: true
 # Project context
 
 - Full map: `~/operatingmanual/PROJECTS.md`
-- This repo: **Burn & Build** diet PWA — vanilla HTML/JS, localStorage
-- Host: GitHub Pages → https://koryedwards-del.github.io/pwa-burn-and-build/
-- Landing: `~/code/burnandbuildlandingpage` → gettheburnandbuildapp.com
-- **Not connected to Hardkor Diet** (`hardkordietlandingpage` / thehardkordiet.com)
 
-Push to `main` deploys via GitHub Pages.
+## Two repos — keep them separate
+
+| Repo | Host | Role |
+|------|------|------|
+| **`burnandbuildlandingpage`** | gettheburnandbuildapp.com (GitHub Pages) | Marketing only — hero, features, calculator, testimonials, pricing, CTA |
+| **`pwa-burn-and-build`** | Render (`/start/` creator) + GitHub Pages (`/shell/` app) | Program creator + daily shell app — no duplicate marketing homepage |
+
+**Flow:** Landing CTA → `program-creator.onrender.com/start/` → email → intake → Stripe → app.
+
+- This workspace repo: **`pwa-burn-and-build`** — vanilla HTML/JS, localStorage + SQLite on Render
+- Landing clone may exist at `burnandbuildlandingpage/` (gitignored here) for local preview only
+- **Not connected to Hardkor Diet** (`hardkordietlandingpage` / thehardkordiet.com)
 
 ## Reminders
 
