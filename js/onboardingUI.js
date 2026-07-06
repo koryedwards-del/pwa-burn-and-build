@@ -26,12 +26,7 @@ function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
 }
 
-function stepHeader(step, title, subtitle, prefix = 'YOUR', reserveSubtitleSpace = false) {
-  const subBlock = subtitle
-    ? `<p class="ob-step-sub">${subtitle}</p>`
-    : reserveSubtitleSpace
-      ? '<p class="ob-step-sub ob-step-sub-spacer" aria-hidden="true"></p>'
-      : '';
+function stepHeadline(step, title, prefix = 'YOUR') {
   return `
     <div class="ob-step-header">
       <div class="ob-step-num">STEP ${step} OF ${QUESTION_COUNT}</div>
@@ -39,8 +34,136 @@ function stepHeader(step, title, subtitle, prefix = 'YOUR', reserveSubtitleSpace
         <div class="ob-welcome-line1">${prefix}</div>
         <div class="ob-welcome-line2">${title}</div>
       </div>
-      ${subBlock}
     </div>`;
+}
+
+function stepLead(text = '') {
+  return `<div class="ob-main-lead"><p class="ob-step-sub">${text}</p></div>`;
+}
+
+const QUESTION_META = [
+  { step: 1, prefix: 'YOUR', title: 'NAME', lead: "What's your first name?" },
+  { step: 2, prefix: 'YOUR', title: 'HEIGHT', lead: '' },
+  { step: 3, prefix: 'YOUR', title: 'AGE', lead: 'Used to determine your fat burn and cardiovascular training heart rate targets.' },
+  { step: 4, prefix: 'YOUR CURRENT', title: 'WEIGHT', lead: '' },
+  { step: 5, prefix: 'YOUR', title: 'BODY FAT', lead: 'How do you know your body fat percentage?' },
+  { step: 6, prefix: 'YOUR', title: 'WORKDAY', lead: 'How physical is your work?<br>Choose the one that most closely describes your typical work week.' },
+  { step: 7, prefix: 'YOUR', title: 'LIFESTYLE', lead: 'Choose the one that most closely describes your life.' },
+  { step: 8, prefix: 'YOUR', title: 'EXERCISE', lead: 'What do you plan to do exercise wise in the next 8 weeks? Be realistic — conservative is better. You can always update your plan.' },
+  { step: 9, prefix: 'YOUR', title: 'FAT BURNING', lead: 'Select your activities and weekly hours.' },
+  { step: 10, prefix: 'YOUR', title: 'WAKE TIME', lead: 'Eating every 2–3 hours keeps your fat burners (muscles) burning.' },
+];
+
+function renderWelcomeHeadline(screen) {
+  if (screen.type === 'intro') {
+    return `
+      <div class="ob-step-num ob-step-num-slot" aria-hidden="true"></div>
+      <div class="ob-intro-headline">
+        <div class="ob-welcome-line1">${screen.line1}</div>
+        <div class="ob-welcome-line2">${screen.line2}</div>
+      </div>`;
+  }
+  if (screen.type === 'brand') {
+    return `
+      <div class="ob-step-num ob-step-num-slot" aria-hidden="true"></div>
+      <div class="ob-intro-headline">
+        <div class="ob-brand-tag">${screen.tag}</div>
+        <div class="ob-brand-line1">${screen.line1}</div>
+      </div>`;
+  }
+  return `
+    <div class="ob-step-num ob-step-num-slot" aria-hidden="true"></div>
+    <div class="ob-intro-headline">
+      <div class="ob-welcome-line1">${screen.line1}</div>
+      <div class="ob-welcome-line2">${screen.line2}</div>
+    </div>`;
+}
+
+function renderWelcomeMain(screen) {
+  if (screen.type === 'intro') {
+    return `
+      ${stepLead('')}
+      <div class="ob-main-body">
+        <div class="ob-intro">
+          <p class="ob-intro-body">${screen.body}</p>
+          ${renderTestimonyBlock({
+            quote: screen.quote,
+            name: screen.quoteName,
+            meta: screen.quoteMeta,
+          })}
+        </div>
+      </div>`;
+  }
+  if (screen.type === 'brand') {
+    return `
+      ${stepLead('')}
+      <div class="ob-main-body">
+        <div class="ob-welcome ob-welcome-brand">
+          <div class="ob-brand-line2"><span class="ob-brand-amp">& </span><span class="ob-brand-accent">${screen.line2.replace('& ', '')}</span></div>
+          <p class="ob-brand-sub">${screen.sub.replace('\n', '<br>')}</p>
+        </div>
+      </div>`;
+  }
+  return `
+    ${stepLead('')}
+    <div class="ob-main-body">
+      <div class="ob-welcome">
+        <p class="ob-welcome-body">${screen.body}</p>
+        ${screen.quote ? `
+          <div class="ob-quote">
+            <p>${screen.quote}</p>
+            <div class="ob-quote-by">${screen.attribution}</div>
+          </div>` : ''}
+      </div>
+    </div>`;
+}
+
+function renderConfirmHeadline(isEditMode) {
+  return `
+    <div class="ob-step-header">
+      <div class="ob-step-num">${isEditMode ? 'REVIEW CHANGES' : 'ALMOST THERE'}</div>
+      <div class="ob-step-headline">
+        <div class="ob-welcome-line1">${isEditMode ? 'EDIT YOUR' : 'ARE THESE'}</div>
+        <div class="ob-welcome-line2">${isEditMode ? 'PLAN' : 'CORRECT?'}</div>
+      </div>
+    </div>`;
+}
+
+function renderFlowHeadline(phase, form, isEditMode, welcomeScreen) {
+  if (phase.kind === 'welcome') return renderWelcomeHeadline(welcomeScreen);
+  if (phase.kind === 'question') {
+    const meta = QUESTION_META[phase.index];
+    return stepHeadline(meta.step, meta.title, meta.prefix);
+  }
+  if (phase.kind === 'confirm') return renderConfirmHeadline(isEditMode);
+  if (isEditMode) {
+    return `
+      <div class="ob-step-num ob-step-num-slot" aria-hidden="true"></div>
+      <div class="ob-intro-headline">
+        <div class="ob-welcome-line1">PLAN</div>
+        <div class="ob-welcome-line2">UPDATED.</div>
+      </div>`;
+  }
+  return `
+    <div class="ob-step-num ob-step-num-slot" aria-hidden="true"></div>
+    <div class="ob-intro-headline">
+      <div class="ob-welcome-line1">YOU'RE</div>
+      <div class="ob-welcome-line2">SET.</div>
+    </div>`;
+}
+
+function renderFlowMain(phase, form, isEditMode) {
+  if (phase.kind === 'welcome') {
+    return renderWelcomeMain(welcomeScreens()[phase.index]);
+  }
+  if (phase.kind === 'question') {
+    const lead = QUESTION_META[phase.index].lead;
+    return `${stepLead(lead)}<div class="ob-main-body"><div class="ob-question">${renderQuestionBody(phase.index, form)}</div></div>`;
+  }
+  if (phase.kind === 'confirm') {
+    return `${stepLead('')}<div class="ob-main-body"><div class="ob-confirm">${renderConfirmBody(form, isEditMode)}</div></div>`;
+  }
+  return `<div class="ob-main-body">${renderDone(isEditMode)}</div>`;
 }
 
 function radioCard(name, value, selected, label, sub) {
@@ -54,52 +177,11 @@ function radioCard(name, value, selected, label, sub) {
     </label>`;
 }
 
-function renderWelcome(screen, index) {
-  if (screen.type === 'intro') {
-    return `
-      <div class="ob-intro">
-        <div class="ob-intro-headline">
-          <div class="ob-welcome-line1">${screen.line1}</div>
-          <div class="ob-welcome-line2">${screen.line2}</div>
-        </div>
-        <p class="ob-intro-body">${screen.body}</p>
-        ${renderTestimonyBlock({
-          quote: screen.quote,
-          name: screen.quoteName,
-          meta: screen.quoteMeta,
-        })}
-      </div>`;
-  }
-  if (screen.type === 'brand') {
-    return `
-      <div class="ob-welcome ob-welcome-brand">
-        <div class="ob-brand-tag">${screen.tag}</div>
-        <div class="ob-brand-line1">${screen.line1}</div>
-        <div class="ob-brand-line2"><span class="ob-brand-amp">& </span><span class="ob-brand-accent">${screen.line2.replace('& ', '')}</span></div>
-        <p class="ob-brand-sub">${screen.sub.replace('\n', '<br>')}</p>
-      </div>`;
-  }
-  return `
-    <div class="ob-welcome">
-      <div class="ob-welcome-headline">
-        <div class="ob-welcome-line1">${screen.line1}</div>
-        <div class="ob-welcome-line2">${screen.line2}</div>
-      </div>
-      <p class="ob-welcome-body">${screen.body}</p>
-      ${screen.quote ? `
-        <div class="ob-quote">
-          <p>${screen.quote}</p>
-          <div class="ob-quote-by">${screen.attribution}</div>
-        </div>` : ''}
-    </div>`;
-}
-
-function renderQuestion(index, form) {
+function renderQuestionBody(index, form) {
   const hr = heartRates(Number(form.age));
   switch (index) {
     case 0:
       return `
-        ${stepHeader(1, 'NAME', "What's your first name?")}
         <input class="ob-input ob-input-lg" name="preferredName" value="${form.preferredName}" placeholder="Your first name" autocomplete="given-name" />
         <div class="ob-field-label">SEX</div>
         <div class="ob-seg">
@@ -110,7 +192,6 @@ function renderQuestion(index, form) {
 
     case 1:
       return `
-        ${stepHeader(2, 'HEIGHT', '', 'YOUR', true)}
         <div class="ob-big-value" data-bind="heightInches" data-format="height">${heightDisplay(form.heightInches)}</div>
         <div class="ob-big-sub" data-bind-sub="heightInches">${Math.round(form.heightInches)} inches</div>
         <input type="range" class="ob-range" name="heightInches" min="48" max="84" step="1" value="${form.heightInches}" />
@@ -119,7 +200,6 @@ function renderQuestion(index, form) {
 
     case 2:
       return `
-        ${stepHeader(3, 'AGE', 'Used to determine your fat burn and cardiovascular training heart rate targets.', 'YOUR')}
         <div class="ob-field-label">DATE OF BIRTH</div>
         <input class="ob-input ob-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${form.birthDateText}" placeholder="MM/DD/YYYY" autocomplete="bday" />
         <div class="ob-big-value ob-big-age" data-bind="age">${form.age}</div>
@@ -129,7 +209,6 @@ function renderQuestion(index, form) {
 
     case 3:
       return `
-        ${stepHeader(4, 'WEIGHT', '', 'YOUR CURRENT')}
         ${infoBox('🎯', "For best results, don't guess your weight. Your entire plan depends on the accuracy of this number.")}
         <div class="ob-weight-row">
           <input class="ob-input ob-weight-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="000" />
@@ -139,7 +218,6 @@ function renderQuestion(index, form) {
 
     case 4:
       return `
-        ${stepHeader(5, 'BODY FAT', 'How do you know your body fat percentage?')}
         ${radioCard('fatSource', 'dexa', form.fatSource === 'dexa', 'DEXA Scan', 'Gold standard. The more recent the better.')}
         ${renderFatInput(form, 'dexa')}
         ${radioCard('fatSource', 'recent', form.fatSource === 'recent', 'Other method', 'Calipers, ultrasound, or BodPod. The more recent the better.')}
@@ -149,19 +227,16 @@ function renderQuestion(index, form) {
 
     case 5:
       return `
-        ${stepHeader(6, 'WORKDAY', 'How physical is your work?<br>Choose the one that most closely describes your typical work week.')}
         <div class="ob-section-label">PHYSICAL LEVEL</div>
         ${WORK_PHYSICAL.map((o) => radioCard('workPhysical', o.id, form.workPhysical === o.id, o.label, o.sub)).join('')}`;
 
     case 6:
       return `
-        ${stepHeader(7, 'LIFESTYLE', 'Choose the one that most closely describes your life.', 'YOUR')}
         ${WORK_STRESS.map((o) => radioCard('workStress', o.id, form.workStress === o.id, o.label, o.sub)).join('')}
         ${infoBox('🧠', 'Stress increases cortisol. Cortisol increases hunger and promotes fat storage — even if you\'re sitting at a desk all day. Your plan accounts for this.')}`;
 
     case 7:
       return `
-        ${stepHeader(8, 'EXERCISE', 'What do you plan to do exercise wise in the next 8 weeks? Be realistic — conservative is better. You can always update your plan.')}
         <div class="ob-section-label">WEIGHT TRAINING, RACQUET SPORTS</div>
         <p class="ob-exercise-desc">Weight training, racquet sports type activity. Count only the time with weight in your hand or actually moving — not the rest between sets.</p>
         <div class="ob-slider-label">Total hours per week: <strong data-bind="weightTrainingHours">${form.weightTrainingHours}</strong></div>
@@ -174,7 +249,6 @@ function renderQuestion(index, form) {
 
     case 8:
       return `
-        ${stepHeader(9, 'FAT BURNING', 'Select your activities and weekly hours.', 'YOUR')}
         <div class="ob-hr-label">HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM</div>
         ${LOW_ACTIVITIES.map((a) => `
           <label class="ob-check ${form.lowActivities.includes(a.id) ? 'selected' : ''}">
@@ -188,7 +262,6 @@ function renderQuestion(index, form) {
 
     case 9:
       return `
-        ${stepHeader(10, 'WAKE TIME', 'Eating every 2–3 hours keeps your fat burners (muscles) burning.')}
         ${renderWakePicker(form)}
         <div class="ob-divider"></div>
         <div class="ob-section-label">MEAL REMINDERS</div>
@@ -269,7 +342,7 @@ function confirmRow(label, value, subtitle, editPage) {
     </button>`;
 }
 
-function renderConfirm(form, isEditMode) {
+function renderConfirmBody(form, isEditMode) {
   const weight = Number(form.weightText);
   const fat = Number(form.fatPercentText);
   const lbm = weight * (1 - fat / 100);
@@ -279,10 +352,6 @@ function renderConfirm(form, isEditMode) {
   const base = WELCOME_COUNT;
 
   return `
-    <div class="ob-confirm">
-      <div class="ob-confirm-kicker">${isEditMode ? 'REVIEW CHANGES' : 'ALMOST THERE'}</div>
-      <div class="ob-welcome-line1">${isEditMode ? 'EDIT YOUR' : 'ARE THESE'}</div>
-      <div class="ob-welcome-line2">${isEditMode ? 'PLAN' : 'CORRECT?'}</div>
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', base)}
         ${confirmRow('SEX', form.sex, '', base)}
@@ -298,8 +367,11 @@ function renderConfirm(form, isEditMode) {
         ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9)}
         ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 9)}
-      </div>
-    </div>`;
+      </div>`;
+}
+
+function renderConfirm(form, isEditMode) {
+  return renderConfirmBody(form, isEditMode);
 }
 
 function renderDone(isEditMode) {
@@ -307,8 +379,6 @@ function renderDone(isEditMode) {
     return `
       <div class="ob-done">
         <div class="ob-done-check">✓</div>
-        <div class="ob-welcome-line1">PLAN</div>
-        <div class="ob-welcome-line2">UPDATED.</div>
         <p class="ob-done-body">Your food plan has been recalculated based on your updated numbers.</p>
         <p class="ob-done-sub">New servings. Same system.<br>Keep going.</p>
       </div>`;
@@ -316,8 +386,6 @@ function renderDone(isEditMode) {
   return `
     <div class="ob-done">
       <div class="ob-done-check">✓</div>
-      <div class="ob-welcome-line1">YOU'RE</div>
-      <div class="ob-welcome-line2">SET.</div>
       <p class="ob-done-body">Your custom food plan is calculated from your lean body mass, job, lifestyle, and activities.</p>
       <p class="ob-done-sub">Eat the food. Trust the plan.</p>
     </div>`;
@@ -333,12 +401,9 @@ export function renderOnboarding(store, options = {}) {
   const progressCurrent = page - start;
   const screens = welcomeScreens();
   const proceed = canProceed(phase, form);
-
-  let content = '';
-  if (phase.kind === 'welcome') content = renderWelcome(screens[phase.index], phase.index);
-  else if (phase.kind === 'question') content = `<div class="ob-question">${renderQuestion(phase.index, form)}</div>`;
-  else if (phase.kind === 'confirm') content = renderConfirm(form, isEditMode);
-  else content = renderDone(isEditMode);
+  const welcomeScreen = phase.kind === 'welcome' ? screens[phase.index] : null;
+  const headline = renderFlowHeadline(phase, form, isEditMode, welcomeScreen);
+  const main = renderFlowMain(phase, form, isEditMode);
 
   const showBar = phase.kind !== 'done';
   const showBack = page > start;
@@ -359,7 +424,8 @@ export function renderOnboarding(store, options = {}) {
         ${showBack ? '<button type="button" class="ob-back" data-ob-back>←</button>' : (isEditMode ? '<button type="button" class="ob-back" data-nav="home">×</button>' : '<span class="ob-back-spacer"></span>')}
         <div class="ob-progress">${Array.from({ length: progressTotal }, (_, i) => `<span class="${i <= progressCurrent ? 'filled' : ''}"></span>`).join('')}</div>
       </div>` : ''}
-      <div class="ob-content">${content}</div>
+      <div class="ob-headline">${headline}</div>
+      <div class="ob-main">${main}</div>
       <div class="ob-footer">
         <button type="button" class="ob-next ${proceed ? '' : 'disabled'}" data-ob-next ${proceed ? '' : 'disabled'}>${nextText}</button>
       </div>
