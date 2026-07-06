@@ -5,6 +5,8 @@
   background: var(--bg);
   color: var(--text);
   --layout-max: 480px;
+  --start-mobile-ui-lift: 72px;
+  --ob-footer-offset: calc(var(--safe-bottom) + var(--start-mobile-ui-lift));
   width: 100%;
   max-width: 480px;
   margin-inline: auto;
@@ -24,15 +26,19 @@ html:has(.start-site .ob-flow) #app {
 }
 
 .start-site:has(.ob-flow) {
+  min-height: 100dvh;
   min-height: 100svh;
   min-height: -webkit-fill-available;
+  height: 100dvh;
   height: 100svh;
   height: -webkit-fill-available;
+  max-height: 100dvh;
   max-height: 100svh;
   max-height: -webkit-fill-available;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  --ob-footer-block: calc(80px + var(--ob-footer-offset));
 }
 
 .start-site > .ob-flow {
@@ -43,6 +49,8 @@ html:has(.start-site .ob-flow) #app {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding-bottom: var(--ob-footer-block);
+  box-sizing: border-box;
 }
 
 /* Fixed zones — progress, headline, lead, body, footer stay put screen to screen */
@@ -93,11 +101,20 @@ html:has(.start-site .ob-flow) #app {
 }
 
 .start-site .ob-footer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: var(--ob-footer-offset);
+  z-index: 30;
+  width: 100%;
+  max-width: 480px;
   flex: 0 0 auto;
   flex-shrink: 0;
-  padding: 12px 20px calc(12px + var(--safe-bottom) + var(--start-mobile-ui-lift));
-  background: #000;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.96);
+  backdrop-filter: blur(10px);
   border-top: 1px solid var(--border);
+  box-sizing: border-box;
 }
 
 .start-site .ob-step-header {
@@ -166,7 +183,22 @@ html:has(.start-site .ob-flow) #app {
   margin-top: 16px;
 }
 
+.start-site .unlock-screen {
+  min-height: 100dvh;
+  min-height: 100svh;
+  box-sizing: border-box;
+  padding-bottom: calc(24px + var(--ob-footer-offset));
+}
+
+.start-site .unlock-panel {
+  padding-bottom: calc(16px + var(--ob-footer-offset));
+}
+
 @media (max-width: 767px) {
+  .start-site {
+    --start-mobile-ui-lift: 88px;
+  }
+
   .start-site .ob-welcome-line1,
   .start-site .ob-welcome-line2 {
     font-size: clamp(32px, 9vw, 44px);
@@ -175,14 +207,6 @@ html:has(.start-site .ob-flow) #app {
   .start-site .ob-step-headline .ob-welcome-line1,
   .start-site .ob-step-headline .ob-welcome-line2 {
     font-size: clamp(32px, 9vw, 44px);
-  }
-
-  .start-site .unlock-screen {
-    padding-bottom: calc(24px + var(--start-mobile-ui-lift) + var(--safe-bottom));
-  }
-
-  .start-site .unlock-panel {
-    padding-bottom: calc(32px + var(--start-mobile-ui-lift) + var(--safe-bottom));
   }
 }
 
