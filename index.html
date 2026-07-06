@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Open+Sans:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -426,6 +426,12 @@
       box-sizing: border-box;
     }
     .calc-input:focus { border-color: var(--fire); }
+    .calc-input::placeholder {
+      color: var(--muted);
+      font-weight: 300;
+      font-style: italic;
+      opacity: 1;
+    }
     .calc-input::-webkit-outer-spin-button,
     .calc-input::-webkit-inner-spin-button {
       -webkit-appearance: none;
