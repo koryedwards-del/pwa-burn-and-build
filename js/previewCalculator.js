@@ -107,16 +107,3 @@ export function computeWhatsPossible({ gender, weightLbs, bodyFatPercent }) {
     rows,
   };
 }
-
-/** @deprecated Use computeWhatsPossible */
-export function computePreview({ weightLbs, bodyFatPercent, targetBodyFatPercent, gender = 'male' }) {
-  return computeWhatsPossible({
-    gender,
-    weightLbs,
-    bodyFatPercent: bodyFatPercent ?? targetBodyFatPercent,
-  });
-}
-
-export function defaultTargetBf(currentBf, gender = 'male') {
-  return gender === 'female' ? TARGET_BF.female : TARGET_BF.male;
-}
