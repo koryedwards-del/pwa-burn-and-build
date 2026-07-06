@@ -1,0 +1,186 @@
+/** Accordion questionnaire — one scroll page, grouped sections, inline continue buttons. */
+
+.start-site:has(.accordion-flow) {
+  height: auto;
+  max-height: none;
+  min-height: 100dvh;
+  overflow: visible;
+}
+
+html:has(.start-site .accordion-flow),
+html:has(.start-site .accordion-flow) body {
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+html:has(.start-site .accordion-flow) #app {
+  height: auto;
+  min-height: 100dvh;
+  padding-bottom: calc(var(--safe-bottom) + var(--dock-bottom, 0px) + 16px);
+}
+
+.accordion-flow {
+  width: 100%;
+}
+
+.accordion-flow .acc-scroll {
+  padding: 16px 20px 32px;
+}
+
+.accordion-flow .acc-progress-meta {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.accordion-flow .acc-intro {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.accordion-flow .acc-intro-headline {
+  margin-bottom: 12px;
+}
+
+.accordion-flow .acc-intro-body {
+  margin: 0 0 18px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #b3b3b3;
+}
+
+.accordion-flow .acc-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accordion-flow .acc-panel {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #111;
+  overflow: hidden;
+}
+
+.accordion-flow .acc-panel.is-open {
+  border-color: rgba(232, 114, 42, 0.45);
+}
+
+.accordion-flow .acc-panel.is-done:not(.is-open) {
+  border-color: rgba(232, 114, 42, 0.25);
+}
+
+.accordion-flow .acc-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  text-align: left;
+  background: transparent;
+  color: inherit;
+}
+
+.accordion-flow .acc-trigger-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.accordion-flow .acc-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.accordion-flow .acc-hint {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.accordion-flow .acc-panel.is-done .acc-hint {
+  color: #aaa;
+}
+
+.accordion-flow .acc-chevron {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--flame);
+}
+
+.accordion-flow .acc-body {
+  padding: 0 18px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.accordion-flow .acc-body[hidden] {
+  display: none;
+}
+
+.accordion-flow .acc-question + .acc-question {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.accordion-flow .acc-question .ob-step-header {
+  display: none;
+}
+
+.accordion-flow .acc-continue {
+  width: 100%;
+  margin-top: 20px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--flame);
+  color: var(--btn-on-flame);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.accordion-flow .acc-continue.disabled,
+.accordion-flow .acc-continue:disabled {
+  background: #a85828;
+  color: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
+.accordion-flow .ob-question,
+.accordion-flow .ob-confirm {
+  text-align: center;
+  width: 100%;
+}
+
+.accordion-flow .ob-confirm-rows {
+  text-align: left;
+}
+
+.accordion-flow .ob-field-label,
+.accordion-flow .ob-section-label {
+  margin-top: 14px;
+}
+
+.accordion-flow .ob-info {
+  margin-top: 12px;
+  text-align: left;
+}

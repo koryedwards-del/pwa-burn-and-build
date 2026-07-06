@@ -436,7 +436,11 @@ export function initOnboardingForm(store) {
   store.onboardingForm = defaultOnboardingForm(store.profile);
 }
 
-export { profileFromForm, onboardingPhase, WELCOME_COUNT };
+export { profileFromForm, onboardingPhase, WELCOME_COUNT, renderQuestionBody, renderConfirmBody };
+
+function flowRoot() {
+  return '.ob-flow, .accordion-flow';
+}
 
 function syncNextButton(store, form) {
   const btn = document.querySelector('.ob-flow [data-ob-next]');
@@ -461,11 +465,13 @@ function syncAgeFromBirthDate(form, flow) {
 
 function updateBoundDisplays(name, value) {
   const num = Number(value);
-  document.querySelectorAll(`.ob-flow [data-bind="${name}"]`).forEach((el) => {
+  const sel = `[data-bind="${name}"]`;
+  document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}`).forEach((el) => {
     if (el.dataset.format === 'height') el.textContent = heightDisplay(num);
     else el.textContent = value;
   });
-  document.querySelectorAll(`.ob-flow [data-bind-sub="${name}"]`).forEach((el) => {
+  const subSel = `[data-bind-sub="${name}"]`;
+  document.querySelectorAll(`.ob-flow ${subSel}, .accordion-flow ${subSel}`).forEach((el) => {
     if (name === 'heightInches') el.textContent = `${Math.round(num)} inches`;
   });
 }
@@ -509,14 +515,14 @@ function ensureObDelegation() {
   ensureObDelegation.done = true;
 
   document.addEventListener('click', (e) => {
-    if (!obCtx.store || !e.target.closest('.ob-flow')) return;
+    if (!obCtx.store || !e.target.closest(flowRoot())) return;
 
     const target = e.target;
     if (target.closest('input, select, textarea, label.ob-radio, label.ob-check')) return;
 
     const store = obCtx.store;
     const form = store.onboardingForm;
-    const flow = e.target.closest('.ob-flow');
+    const flow = e.target.closest(flowRoot());
 
     if (e.target.closest('[data-ob-back]')) {
       if (store.onboardingPage > 0) {
@@ -557,7 +563,7 @@ function ensureObDelegation() {
   document.addEventListener('input', (e) => {
     if (!obCtx.store) return;
     const input = e.target;
-    if (!input.closest('.ob-flow') || !input.name) return;
+    if (!input.closest(flowRoot()) || !input.name) return;
     const form = obCtx.store.onboardingForm;
 
     if (input.type === 'range') {
@@ -583,7 +589,7 @@ function ensureObDelegation() {
   document.addEventListener('change', (e) => {
     if (!obCtx.store) return;
     const input = e.target;
-    if (!input.closest('.ob-flow')) return;
+    if (!input.closest(flowRoot())) return;
     const form = obCtx.store.onboardingForm;
     const flow = input.closest('.ob-flow');
 
@@ -625,7 +631,7 @@ function ensureObDelegation() {
   });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.closest('.ob-flow input, .ob-flow textarea')) {
+    if (e.key === 'Enter' && e.target.closest(`${flowRoot()} input, ${flowRoot()} textarea`)) {
       e.preventDefault();
     }
   });
@@ -644,4 +650,5 @@ export function syncObToStore(target) {
   if (!obCtx.store) return;
   target.onboardingPage = obCtx.store.onboardingPage;
   target.onboardingForm = obCtx.store.onboardingForm;
+  if (obCtx.store.accordionSection) target.accordionSection = obCtx.store.accordionSection;
 }
