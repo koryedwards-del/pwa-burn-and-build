@@ -592,6 +592,22 @@ html:has(.start-site .ob-flow) #app {
   text-align: center;
 }
 
+.email-login-note {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.email-login-note p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: #aaa;
+  text-align: center;
+}
+
 .install-box {
   background: var(--card);
   border: 1px solid var(--border);

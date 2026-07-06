@@ -166,6 +166,9 @@ function renderEmailLogin() {
           <label class="unlock-label" for="creator-email">Email address</label>
           <input id="creator-email" class="ob-input ob-input-lg" type="email" name="creatorEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
           <button type="button" class="btn-primary unlock-cta" data-email-continue>CONTINUE →</button>
+          <div class="email-login-note">
+            <p>Creating a custom diet requires collecting custom answers to a few questions.</p>
+          </div>
           <button type="button" class="unlock-back-link" data-email-back>← Back to website</button>
         </div>
       </div>
