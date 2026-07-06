@@ -1,9 +1,9 @@
 import {
   bindOnboardingEvents,
   initOnboardingForm,
-  renderOnboarding,
   syncObToStore,
 } from './onboardingUI.js';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -85,6 +85,7 @@ const store = {
   emailError: '',
   saveError: '',
   showAdvanced: false,
+  accordionSection: 'about',
 };
 
 function defaultStartDate() {
@@ -115,6 +116,9 @@ function persistFlowState() {
     sessionStorage.setItem('bnb_onboarding_form', JSON.stringify(store.onboardingForm));
   }
   sessionStorage.setItem('bnb_onboarding_page', String(store.onboardingPage));
+  if (store.accordionSection) {
+    sessionStorage.setItem('bnb_accordion_section', store.accordionSection);
+  }
 }
 
 function restoreFlowState() {
@@ -134,6 +138,8 @@ function restoreFlowState() {
   if (page != null && page !== '') {
     store.onboardingPage = Number(page) || 0;
   }
+  const accSection = sessionStorage.getItem('bnb_accordion_section');
+  if (accSection) store.accordionSection = accSection;
   const phase = sessionStorage.getItem('bnb_creator_phase');
   const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
   if (phase === 'home') {
@@ -425,12 +431,14 @@ function magicLinkUrl() {
 }
 
 function renderOnboardingWrapper() {
+  syncAccordionSection(store);
   const fakeStore = {
     onboardingForm: store.onboardingForm,
     onboardingPage: store.onboardingPage,
     onboardingEditMode: false,
+    accordionSection: store.accordionSection,
   };
-  return `<div class="start-site focus-host">${renderOnboarding(fakeStore)}</div>`;
+  return `<div class="start-site focus-host">${renderAccordion(fakeStore)}</div>`;
 }
 
 function afterRender() {
@@ -461,15 +469,6 @@ function onboardingStore() {
 function onboardingCallbacks() {
   return {
     render: renderOnboardingStep,
-    onBeforeAdvance: (page, phase) => {
-      if (phase.kind !== 'question' || phase.index !== QUESTION_COUNT - 1) return true;
-      const email = (store.email || getAppEmail() || '').trim();
-      if (validEmail(email)) return true;
-      store.phase = 'email-login';
-      persistFlowState();
-      render();
-      return false;
-    },
     onConfirm: (form) => {
       store.onboardingForm = form;
       finishIntake();
@@ -481,12 +480,27 @@ function onboardingCallbacks() {
 function renderOnboardingStep() {
   syncObToStore(store);
   document.getElementById('app').innerHTML = renderOnboardingWrapper();
-  bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
+  bindOnboardingOnly();
   syncFocusFlow();
 }
 
 function bindOnboardingOnly() {
   bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
+  bindAccordionEvents(store, {
+    render: renderOnboardingStep,
+    onConfirm: (form) => {
+      store.onboardingForm = form;
+      finishIntake();
+    },
+    onBeforeReview: () => {
+      const email = (store.email || getAppEmail() || '').trim();
+      if (validEmail(email)) return true;
+      store.phase = 'email-login';
+      persistFlowState();
+      render();
+      return false;
+    },
+  });
 }
 
 function submitEmailLogin() {
@@ -503,7 +517,7 @@ function submitEmailLogin() {
   store.email = persistAppEmail(email);
   store.emailError = '';
   store.phase = 'onboarding';
-  store.onboardingPage = confirmOnboardingPage();
+  store.accordionSection = 'review';
   render();
 }
 
