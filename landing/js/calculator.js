@@ -2,8 +2,8 @@ import { computeWhatsPossible } from './previewCalculator.js';
 
 const state = {
   gender: 'male',
-  weight: '180',
-  bodyFat: '25',
+  weight: '',
+  bodyFat: '',
 };
 
 function $(id) {
@@ -60,8 +60,6 @@ function runCalculator() {
 }
 
 function initCalculator() {
-  $('calc-weight').value = state.weight;
-  $('calc-bf').value = state.bodyFat;
   setGender(state.gender);
 
   document.querySelectorAll('[data-calc-gender]').forEach((btn) => {
