@@ -1,9 +1,3 @@
-import {
-  getArticle,
-  renderArticleBody,
-  renderArticleQuote,
-  searchArticles,
-} from './knowledgeBase.js';
 import { computeWhatsPossible } from './previewCalculator.js';
 
 const APP_FEATURES = [
@@ -33,8 +27,6 @@ export function createHomeState() {
     calcWeight: '180',
     calcBf: '25',
     calcResult: null,
-    kbQuery: '',
-    kbOpenId: null,
   };
 }
 
@@ -128,8 +120,8 @@ function renderHowItWorks() {
         <div class="steps-flow">
           <div class="step-card">
             <div class="step-num">1</div>
-            <h3>Learn</h3>
-            <p>Explore the knowledge base. Understand lean body mass, fat servings, and why personalized targets beat generic diets.</p>
+            <h3>See What's Possible</h3>
+            <p>Use the calculator to explore what Burn &amp; Build can do for your body — fat loss while preserving muscle.</p>
           </div>
           <div class="step-arrow">↓</div>
           <div class="step-card">
@@ -170,40 +162,6 @@ function renderAppPreview() {
     </section>`;
 }
 
-function renderKnowledgeBase(state) {
-  const articles = searchArticles(state.kbQuery);
-  const open = state.kbOpenId ? getArticle(state.kbOpenId) : null;
-
-  return `
-    <section class="site-section site-section-alt" id="knowledge">
-      <div class="site-section-inner">
-        <div class="section-label">Knowledge Base</div>
-        <h2>Learn before you build</h2>
-        <p class="section-lead">The same teaching that powered live seminars for decades — now searchable on the website.</p>
-        <div class="kb-search-wrap">
-          <input class="kb-search" type="search" name="kbQuery" placeholder="Search topics…" value="${state.kbQuery}" aria-label="Search knowledge base" />
-        </div>
-        ${open ? `
-          <article class="kb-article-open">
-            <button type="button" class="kb-back" data-action="kb-close">← All topics</button>
-            <div class="kb-article-meta">${open.category}</div>
-            <h3>${open.title}</h3>
-            ${renderArticleBody(open)}
-            ${renderArticleQuote(open)}
-          </article>` : `
-          <div class="kb-grid">
-            ${articles.map((a) => `
-              <button type="button" class="kb-card" data-kb-id="${a.id}">
-                <div class="kb-card-cat">${a.category}</div>
-                <div class="kb-card-title">${a.title}</div>
-                <div class="kb-card-summary">${a.summary}</div>
-              </button>`).join('')}
-            ${articles.length === 0 ? '<p class="kb-empty">No topics match your search.</p>' : ''}
-          </div>`}
-      </div>
-    </section>`;
-}
-
 function renderFinalCta() {
   return `
     <section class="site-section site-final-cta">
@@ -235,7 +193,6 @@ export function renderWebsiteHome(state) {
         ${renderCalculator(state)}
         ${renderHowItWorks()}
         ${renderAppPreview()}
-        ${renderKnowledgeBase(state)}
         ${renderFinalCta()}
       </main>
       ${renderFooter()}
@@ -278,33 +235,6 @@ export function bindHomeEvents(root, state, { onCreateProgram }) {
     rerenderHome(root, state, { onCreateProgram });
     document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
   });
-
-  root.querySelectorAll('[data-kb-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.kbOpenId = btn.dataset.kbId;
-      rerenderHome(root, state, { onCreateProgram });
-      document.getElementById('knowledge')?.scrollIntoView({ behavior: 'smooth' });
-    });
-  });
-
-  root.querySelector('[data-action="kb-close"]')?.addEventListener('click', () => {
-    state.kbOpenId = null;
-    rerenderHome(root, state, { onCreateProgram });
-  });
-
-  const searchInput = root.querySelector('[name="kbQuery"]');
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      state.kbQuery = e.target.value;
-      state.kbOpenId = null;
-      rerenderHome(root, state, { onCreateProgram });
-      const input = document.querySelector('[name="kbQuery"]');
-      if (input) {
-        input.focus();
-        input.setSelectionRange(input.value.length, input.value.length);
-      }
-    });
-  }
 
   root.querySelectorAll('[data-calc-gender]').forEach((btn) => {
     btn.addEventListener('click', () => {
