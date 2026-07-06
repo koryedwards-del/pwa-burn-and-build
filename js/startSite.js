@@ -11,7 +11,7 @@ import {
 } from './programPackage.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.js';
 import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js';
-import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
+import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
 const LANDING_URL = 'https://gettheburnandbuildapp.com';
 
@@ -160,15 +160,17 @@ function restoreBuiltPackage() {
 
 function renderEmailLogin() {
   return `
-    <div class="start-site">
-      <div class="screen unlock-screen">
-        <div class="unlock-panel email-login-panel">
+    <div class="start-site focus-host">
+      <div class="focus-unlock">
+        <div class="focus-unlock-scroll unlock-panel email-login-panel">
           <div class="ob-welcome-line1">YOUR EMAIL</div>
           <div class="ob-welcome-line2">IS YOUR LOGIN</div>
           <p class="unlock-lead">Your food plan will be created based on your answers. The custom servings created from those answers are transferred to your phone for convenience. The email you provide here links the food plan creator to your app.</p>
           ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
           <label class="unlock-label" for="creator-email">Email address</label>
           <input id="creator-email" class="ob-input ob-input-lg" type="email" name="creatorEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="ob-chrome-dock">
           <button type="button" class="btn-primary unlock-cta" data-email-continue>CONTINUE →</button>
           <button type="button" class="unlock-back-link" data-email-back>← Back to your answers</button>
         </div>
@@ -428,7 +430,12 @@ function renderOnboardingWrapper() {
     onboardingPage: store.onboardingPage,
     onboardingEditMode: false,
   };
-  return `<div class="start-site">${renderOnboarding(fakeStore)}</div>`;
+  return `<div class="start-site focus-host">${renderOnboarding(fakeStore)}</div>`;
+}
+
+function afterRender() {
+  syncFocusFlow();
+  persistFlowState();
 }
 
 function render() {
@@ -437,11 +444,9 @@ function render() {
   else if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
     bindOnboardingOnly();
-    persistFlowState();
-    return;
   } else if (store.phase === 'creating') root.innerHTML = renderCreating();
   else if (store.phase === 'plan-ready') root.innerHTML = renderPlanReady();
-  persistFlowState();
+  afterRender();
 }
 
 function onboardingStore() {
@@ -477,6 +482,7 @@ function renderOnboardingStep() {
   syncObToStore(store);
   document.getElementById('app').innerHTML = renderOnboardingWrapper();
   bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
+  syncFocusFlow();
 }
 
 function bindOnboardingOnly() {
@@ -628,5 +634,6 @@ function finishIntake() {
 }
 
 bindGlobal();
+initFocusFlow();
 initStartSite();
 render();
