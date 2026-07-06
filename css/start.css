@@ -4,6 +4,10 @@
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
+  --layout-max: 480px;
+  width: 100%;
+  max-width: 480px;
+  margin-inline: auto;
 }
 
 /* Onboarding — lock to visible viewport so footer stays above mobile browser chrome */
