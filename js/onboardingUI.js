@@ -430,6 +430,10 @@ function handleObNext() {
     return;
   }
 
+  if (obCtx.onBeforeAdvance && obCtx.onBeforeAdvance(store.onboardingPage, phase) === false) {
+    return;
+  }
+
   store.onboardingPage += 1;
   obCtx.render();
 }
@@ -561,11 +565,12 @@ function ensureObDelegation() {
   });
 }
 
-export function bindOnboardingEvents(store, { render, onComplete, onConfirm }) {
+export function bindOnboardingEvents(store, { render, onComplete, onConfirm, onBeforeAdvance }) {
   obCtx.store = store;
   obCtx.render = render;
   obCtx.onComplete = onComplete;
   obCtx.onConfirm = onConfirm;
+  obCtx.onBeforeAdvance = onBeforeAdvance;
   ensureObDelegation();
 }
 
