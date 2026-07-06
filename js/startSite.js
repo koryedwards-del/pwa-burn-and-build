@@ -10,7 +10,7 @@ import {
   packageToImportUrl,
 } from './programPackage.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.js';
-import { totalOnboardingPages } from './onboardingEngine.js';
+import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js';
 import { parseQuoteBy, renderTestimonyBlock } from './testimonyBlock.js';
 
 const LANDING_URL = 'https://gettheburnandbuildapp.com';
@@ -73,8 +73,8 @@ const TEACHING = [
 ];
 
 const store = {
-  phase: 'email-login',
-  onboardingPage: 1,
+  phase: 'onboarding',
+  onboardingPage: 0,
   onboardingForm: null,
   onboardingEditMode: false,
   teachIndex: 0,
@@ -141,6 +141,10 @@ function restoreFlowState() {
   } else if (phase && flowPhases.includes(phase)) {
     store.phase = phase;
   }
+  if (store.phase === 'email-login' && store.onboardingPage < WELCOME_COUNT + QUESTION_COUNT - 1) {
+    store.phase = 'onboarding';
+    store.onboardingPage = 0;
+  }
 }
 
 function restoreBuiltPackage() {
@@ -161,15 +165,12 @@ function renderEmailLogin() {
         <div class="unlock-panel email-login-panel">
           <div class="ob-welcome-line1">YOUR EMAIL</div>
           <div class="ob-welcome-line2">IS YOUR LOGIN</div>
-          <p class="unlock-lead">Your food plan will be created based on the answers collected on the next few screens. The custom servings created from your answers are transferred to your phone for convenience. The email you provide here links the food plan creator to your app.</p>
+          <p class="unlock-lead">Your food plan will be created based on your answers. The custom servings created from those answers are transferred to your phone for convenience. The email you provide here links the food plan creator to your app.</p>
           ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
           <label class="unlock-label" for="creator-email">Email address</label>
           <input id="creator-email" class="ob-input ob-input-lg" type="email" name="creatorEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
           <button type="button" class="btn-primary unlock-cta" data-email-continue>CONTINUE →</button>
-          <div class="email-login-note">
-            <p>Creating a custom diet requires collecting custom answers to a few questions.</p>
-          </div>
-          <button type="button" class="unlock-back-link" data-email-back>← Back to website</button>
+          <button type="button" class="unlock-back-link" data-email-back>← Back to your answers</button>
         </div>
       </div>
     </div>`;
@@ -455,6 +456,15 @@ function onboardingStore() {
 function onboardingCallbacks() {
   return {
     render: renderOnboardingStep,
+    onBeforeAdvance: (page, phase) => {
+      if (phase.kind !== 'question' || phase.index !== QUESTION_COUNT - 1) return true;
+      const email = (store.email || getAppEmail() || '').trim();
+      if (validEmail(email)) return true;
+      store.phase = 'email-login';
+      persistFlowState();
+      render();
+      return false;
+    },
     onConfirm: (form) => {
       store.onboardingForm = form;
       finishIntake();
@@ -487,7 +497,7 @@ function submitEmailLogin() {
   store.email = persistAppEmail(email);
   store.emailError = '';
   store.phase = 'onboarding';
-  store.onboardingPage = 0;
+  store.onboardingPage = confirmOnboardingPage();
   render();
 }
 
@@ -545,6 +555,13 @@ function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-email-back]')) {
+      if (store.onboardingForm) {
+        store.phase = 'onboarding';
+        store.onboardingPage = WELCOME_COUNT + QUESTION_COUNT - 1;
+        store.emailError = '';
+        render();
+        return;
+      }
       window.location.href = LANDING_URL;
       return;
     }
@@ -580,10 +597,11 @@ async function copyImportLink() {
 
 function initStartSite() {
   restoreFlowState();
-  if (store.onboardingForm) return;
-  const temp = { profile: null };
-  initOnboardingForm(temp);
-  store.onboardingForm = temp.onboardingForm;
+  if (!store.onboardingForm) {
+    const temp = { profile: null };
+    initOnboardingForm(temp);
+    store.onboardingForm = temp.onboardingForm;
+  }
 }
 
 function finishIntake() {
