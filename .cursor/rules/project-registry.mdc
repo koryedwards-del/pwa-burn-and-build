@@ -3,16 +3,19 @@ description: Project map and hosting context
 alwaysApply: true
 ---
 
-# Project context
+# Burn & Build — one repo
 
-- Full map: `~/operatingmanual/PROJECTS.md`
-- This repo: **Burn & Build** diet PWA — vanilla HTML/JS, localStorage
-- Host: GitHub Pages → https://koryedwards-del.github.io/pwa-burn-and-build/
-- Landing: `~/code/burnandbuildlandingpage` → gettheburnandbuildapp.com
-- **Not connected to Hardkor Diet** (`hardkordietlandingpage` / thehardkordiet.com)
+Repo: **`pwa-burn-and-build`** (this workspace)
 
-Push to `main` deploys via GitHub Pages.
+| Path | Host | Role |
+|------|------|------|
+| `landing/` | gettheburnandbuildapp.com (GitHub Pages) | Marketing — hero, calculator, testimonials, $149 CTA |
+| `start/` | Render `/start/` | Program creator — email → intake → Stripe → save plan |
+| `shell/` | GitHub Pages or Render `/shell/` | Daily app — food plan, grocery, logging |
+| `server/` | Render | API + SQLite for programs/contacts |
 
-## Reminders
+**Flow:** Landing CTA → Render creator → shell app.
 
-- **~Jul 5–6, 2026:** Check **Enforce HTTPS** for Hardkor (`thehardkordiet.com`) in GitHub Pages settings — DNS is green; cert may be ready by then.
+**Deploy landing:** push to `main` (changes under `landing/`) → GitHub Actions workflow `deploy-landing.yml`. In repo **Settings → Pages**, source must be **GitHub Actions** (not the old `burnandbuildlandingpage` repo).
+
+**Not connected to Hardkor Diet** or **Signal+** (separate products).
