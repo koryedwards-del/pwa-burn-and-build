@@ -161,7 +161,7 @@ function renderEmailLogin() {
         <div class="unlock-panel email-login-panel">
           <div class="ob-welcome-line1">YOUR EMAIL</div>
           <div class="ob-welcome-line2">IS YOUR LOGIN</div>
-          <p class="unlock-lead">This is how you open your food plan in the Burn &amp; Build app on your phone. Same email every time — your plan and your app stay with you.</p>
+          <p class="unlock-lead">Your food plan will be created based on the answers collected here. The custom servings created from your answers are transferred to your phone for convenience. The email you provide here links the food plan creator to your app.</p>
           ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
           <label class="unlock-label" for="creator-email">Email address</label>
           <input id="creator-email" class="ob-input ob-input-lg" type="email" name="creatorEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
