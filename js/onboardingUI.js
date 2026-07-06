@@ -83,7 +83,7 @@ function renderWelcomeMain(screen) {
   if (screen.type === 'intro') {
     return `
       ${stepLead('')}
-      <div class="ob-main-body">
+      <div class="ob-stage-body">
         <div class="ob-intro">
           <p class="ob-intro-body">${screen.body}</p>
           ${renderTestimonyBlock({
@@ -97,7 +97,7 @@ function renderWelcomeMain(screen) {
   if (screen.type === 'brand') {
     return `
       ${stepLead('')}
-      <div class="ob-main-body">
+      <div class="ob-stage-body">
         <div class="ob-welcome ob-welcome-brand">
           <div class="ob-brand-line2"><span class="ob-brand-amp">& </span><span class="ob-brand-accent">${screen.line2.replace('& ', '')}</span></div>
           <p class="ob-brand-sub">${screen.sub.replace('\n', '<br>')}</p>
@@ -106,7 +106,7 @@ function renderWelcomeMain(screen) {
   }
   return `
     ${stepLead('')}
-    <div class="ob-main-body">
+    <div class="ob-stage-body">
       <div class="ob-welcome">
         <p class="ob-welcome-body">${screen.body}</p>
         ${screen.quote ? `
@@ -158,12 +158,12 @@ function renderFlowMain(phase, form, isEditMode) {
   }
   if (phase.kind === 'question') {
     const lead = QUESTION_META[phase.index].lead;
-    return `${stepLead(lead)}<div class="ob-main-body"><div class="ob-question">${renderQuestionBody(phase.index, form)}</div></div>`;
+    return `${stepLead(lead)}<div class="ob-stage-body"><div class="ob-question">${renderQuestionBody(phase.index, form)}</div></div>`;
   }
   if (phase.kind === 'confirm') {
-    return `${stepLead('')}<div class="ob-main-body"><div class="ob-confirm">${renderConfirmBody(form, isEditMode)}</div></div>`;
+    return `${stepLead('')}<div class="ob-stage-body"><div class="ob-confirm">${renderConfirmBody(form, isEditMode)}</div></div>`;
   }
-  return `<div class="ob-main-body">${renderDone(isEditMode)}</div>`;
+  return `<div class="ob-stage-body">${renderDone(isEditMode)}</div>`;
 }
 
 function radioCard(name, value, selected, label, sub) {
@@ -418,15 +418,15 @@ export function renderOnboarding(store, options = {}) {
   const flowClassAttr = flowClass ? ` ${flowClass}` : '';
 
   return `
-    <div class="ob-flow${flowClassAttr}">
+    <div class="ob-flow focus-flow${flowClassAttr}">
       ${showBar ? `
-      <div class="ob-top">
+      <div class="ob-chrome-top ob-top">
         ${showBack ? '<button type="button" class="ob-back" data-ob-back>←</button>' : (isEditMode ? '<button type="button" class="ob-back" data-nav="home">×</button>' : '<span class="ob-back-spacer"></span>')}
         <div class="ob-progress">${Array.from({ length: progressTotal }, (_, i) => `<span class="${i <= progressCurrent ? 'filled' : ''}"></span>`).join('')}</div>
       </div>` : ''}
-      <div class="ob-headline">${headline}</div>
-      <div class="ob-main">${main}</div>
-      <div class="ob-footer">
+      <div class="ob-chrome-headline ob-headline">${headline}</div>
+      <div class="ob-stage ob-main">${main}</div>
+      <div class="ob-chrome-dock ob-footer">
         <button type="button" class="ob-next ${proceed ? '' : 'disabled'}" data-ob-next ${proceed ? '' : 'disabled'}>${nextText}</button>
       </div>
     </div>`;
