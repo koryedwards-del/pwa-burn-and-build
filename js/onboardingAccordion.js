@@ -15,7 +15,7 @@ const SECTIONS = [
   { id: 'personal', title: 'Personal', personal: true },
   { id: 'job', title: 'Job & lifestyle', questions: [5, 6] },
   { id: 'activity', title: 'Exercise & activities', questions: [7, 8] },
-  { id: 'rhythm', title: 'Daily rhythm', questions: [9] },
+  { id: 'rhythm', title: 'Wake time', questions: [9] },
   { id: 'body', title: 'Body composition', questions: [4] },
   { id: 'email', title: 'Email address', email: true },
   { id: 'review', title: 'Review & approve', review: true },

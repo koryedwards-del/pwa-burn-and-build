@@ -32,7 +32,7 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=84';
+} from './onboardingEngine.js?v=85';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -369,6 +369,7 @@ function renderQuestionBody(index, form) {
 
     case 9:
       return `
+        <p class="ob-exercise-desc">Your wake time sets breakfast, lunch, dinner, and snack times for each day of your food plan.</p>
         ${renderWakePicker(form)}
         <div class="ob-divider"></div>
         <div class="ob-section-label">MEAL REMINDERS</div>
