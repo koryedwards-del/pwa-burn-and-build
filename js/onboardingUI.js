@@ -449,6 +449,23 @@ export function initOnboardingForm(store) {
 
 export { profileFromForm, onboardingPhase, WELCOME_COUNT, renderQuestionBody, renderConfirmBody };
 
+function heightFeetInches(totalInches) {
+  const inches = Number(totalInches) || 68;
+  const ft = Math.floor(inches / 12);
+  const inc = Math.round(inches % 12);
+  return { ft, inc };
+}
+
+function syncHeightFromParts(form, flow) {
+  const ftEl = flow?.querySelector('[name="heightFeet"]');
+  const inEl = flow?.querySelector('[name="heightInchesPart"]');
+  if (!ftEl || !inEl) return;
+  const ft = Number(ftEl.value);
+  const inc = Number(inEl.value);
+  if (!Number.isFinite(ft) || !Number.isFinite(inc)) return;
+  form.heightInches = Math.min(84, Math.max(48, ft * 12 + inc));
+}
+
 export function personalSectionValid(form) {
   const iso = parseBirthDateText(form.birthDateText);
   const age = iso ? ageFromBirthDate(iso) : null;
@@ -459,6 +476,7 @@ export function personalSectionValid(form) {
 }
 
 export function renderPersonalDetails(form, open = true) {
+  const { ft, inc } = heightFeetInches(form.heightInches);
   return `
     <div class="pd-panel ${open ? 'is-open' : ''}">
       <button type="button" class="pd-trigger" data-pd-toggle aria-expanded="${open}">
@@ -488,10 +506,12 @@ export function renderPersonalDetails(form, open = true) {
           </div>
         </div>
         <div class="pd-row">
-          <label class="pd-label" for="pd-height">Height</label>
+          <label class="pd-label" for="pd-height-ft">Height</label>
           <div class="pd-box pd-box-split">
-            <span class="pd-value" data-bind="heightInches" data-format="height">${heightDisplay(form.heightInches)}</span>
-            <input id="pd-height" class="pd-range" type="range" name="heightInches" min="48" max="84" step="1" value="${form.heightInches}" />
+            <input id="pd-height-ft" class="pd-input pd-input-short" name="heightFeet" inputmode="numeric" value="${ft}" aria-label="Feet" />
+            <span class="pd-unit">ft</span>
+            <input id="pd-height-in" class="pd-input pd-input-short" name="heightInchesPart" inputmode="numeric" value="${inc}" aria-label="Inches" />
+            <span class="pd-unit">in</span>
           </div>
         </div>
         <div class="pd-row">
@@ -638,6 +658,12 @@ function ensureObDelegation() {
       if (input.name === 'age') return;
       form[input.name] = Number(input.value);
       updateBoundDisplays(input.name, input.value);
+      return;
+    }
+
+    if (input.name === 'heightFeet' || input.name === 'heightInchesPart') {
+      syncHeightFromParts(form, input.closest('.ob-flow, .chat-flow, .artshow-flow'));
+      syncNextButton(obCtx.store, form);
       return;
     }
 
