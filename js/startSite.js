@@ -4,7 +4,7 @@ import {
   refreshPersonalDetailFields,
   syncObToStore,
 } from './onboardingUI.js?v=90';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=97';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=98';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -74,7 +74,7 @@ const TEACHING = [
     title: 'Two parts. One system.',
     body: [
       'This website is where your personalized program is created — the same role the live seminar played for decades. Teaching, intake, and the Burn Engine all happen here.',
-      'The Burn & Build app is where you live your program every day: food plan, logging, grocery list, and progress tracking. It executes the program you build here.',
+      'The Burn & Build app is where you live your program every day: food plan, logging, grocery list, and progress tracking. It executes the program you create here.',
       'You can revisit this site anytime for deeper teaching. The app stays focused on doing the work every day.',
     ],
   },
@@ -307,7 +307,7 @@ function renderCreating() {
     <div class="start-site">
       <div class="screen unlock-screen creating-screen">
         <div class="unlock-panel creating-panel">
-          <div class="ob-welcome-line1">BUILDING</div>
+          <div class="ob-welcome-line1">CREATING</div>
           <div class="ob-welcome-line2">YOUR PLAN</div>
           <p class="unlock-lead">${name ? `Creating a personalized food plan for ${name}…` : 'Creating your personalized food plan…'}</p>
           <div class="creating-bar" aria-hidden="true"><span></span></div>
@@ -335,7 +335,7 @@ function renderSchedule() {
           <div class="ob-info"><span class="ob-info-icon">💡</span><p>Most people start on a Monday. Pick a date you can commit to — grocery shopping done, kitchen ready, mindset set.</p></div>
         </div>
         <div class="ob-footer">
-          <button type="button" class="ob-next" data-schedule-next>BUILD MY PROGRAM →</button>
+          <button type="button" class="ob-next" data-schedule-next>CREATE MY PROGRAM →</button>
         </div>
       </div>
     </div>`;

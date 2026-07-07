@@ -569,7 +569,7 @@ function canOpenNav(nav) {
 function renderHomeNavButton(nav) {
   const label = NAV_MENU_LABELS[nav];
   if (store.expandedNavButton === nav && !canOpenNav(nav)) {
-    return `<a href="../start/" class="btn-home btn-home-build">Tap here to build your custom food plan</a>`;
+    return `<a href="../start/" class="btn-home btn-home-build">Tap here to create your custom food plan</a>`;
   }
   if (canOpenNav(nav)) {
     return `<button type="button" class="btn-home" data-nav="${nav}">${label}</button>`;
@@ -814,7 +814,7 @@ function renderPreviousPlans() {
         }).join('')}
       </div>
 
-      <p class="history-footer-note">Check in every 6–8 weeks and build a new plan when your body composition changes.</p>
+      <p class="history-footer-note">Check in every 6–8 weeks and create a new plan when your body composition changes.</p>
     </div>`;
 }
 
@@ -839,14 +839,14 @@ function renderImport() {
         <h1>Open Program</h1>
       </div>
       <div class="import-block">
-        <p class="import-lead">Build your program on the website — it opens here. Or load a saved program file.</p>
+        <p class="import-lead">Create your program on the website — it opens here. Or load a saved program file.</p>
         ${store.importError ? `<div class="import-error">${store.importError}</div>` : ''}
         <label class="import-label">Program file (.bnbprogram.json)</label>
         <input type="file" accept=".json,.bnbprogram.json,application/json" data-import-file />
         <div class="import-divider">or paste JSON</div>
         <textarea class="import-paste" data-import-paste placeholder='{"schemaVersion":"1.0.0","packageType":"burn-and-build-program",...}'></textarea>
         <button type="button" class="btn-primary" data-import-submit style="margin-top:16px">OPEN PROGRAM</button>
-        <p class="import-note">Need a new program? <a href="../start/">Build one on the website →</a></p>
+        <p class="import-note">Need a new program? <a href="../start/">Create one on the website →</a></p>
       </div>
     </div>`;
 }
