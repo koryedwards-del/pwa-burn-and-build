@@ -595,10 +595,6 @@ function canOpenNav(nav) {
   return true;
 }
 
-function isStandalonePwa() {
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-
 function renderHomeNavButton(nav) {
   const label = NAV_MENU_LABELS[nav];
   if (store.expandedNavButton === nav && !canOpenNav(nav)) {
@@ -669,7 +665,6 @@ function renderHome() {
         ${renderHomeNavButton('previous-plans')}
       </div>
       <p class="home-site-link"><a href="https://gettheburnandbuildapp.com/">Burn &amp; Build website</a></p>
-      ${hasActiveProgram() && !isStandalonePwa() ? `<p class="home-install-hint">Install: open this page in Safari, then Share → Add to Home Screen.</p>` : ''}
       <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;
 }
