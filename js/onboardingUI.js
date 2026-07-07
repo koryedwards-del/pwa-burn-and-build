@@ -449,6 +449,17 @@ export function initOnboardingForm(store) {
 
 export { profileFromForm, onboardingPhase, WELCOME_COUNT, renderQuestionBody, renderConfirmBody };
 
+export function renderCollapsiblePanel(title, innerHtml, open = true, complete = false) {
+  return `
+    <div class="pd-panel ${open ? 'is-open' : ''} ${complete ? 'is-complete' : ''}">
+      <button type="button" class="pd-trigger" data-pd-toggle aria-expanded="${open}">
+        <span class="pd-trigger-title">${title}</span>
+        <span class="pd-chevron" aria-hidden="true">${open ? '−' : '+'}</span>
+      </button>
+      <div class="pd-fields" ${open ? '' : 'hidden'}>${innerHtml}</div>
+    </div>`;
+}
+
 export function personalSectionValid(form) {
   const iso = parseBirthDateText(form.birthDateText);
   const age = iso ? ageFromBirthDate(iso) : null;
@@ -459,13 +470,7 @@ export function personalSectionValid(form) {
 }
 
 export function renderPersonalDetails(form, open = true, complete = false) {
-  return `
-    <div class="pd-panel ${open ? 'is-open' : ''} ${complete ? 'is-complete' : ''}">
-      <button type="button" class="pd-trigger" data-pd-toggle aria-expanded="${open}">
-        <span class="pd-trigger-title">Personal details</span>
-        <span class="pd-chevron" aria-hidden="true">${open ? '−' : '+'}</span>
-      </button>
-      <div class="pd-fields" ${open ? '' : 'hidden'}>
+  const fields = `
         <div class="pd-row">
           <label class="pd-label" for="pd-name">Name</label>
           <div class="pd-box">
@@ -500,9 +505,8 @@ export function renderPersonalDetails(form, open = true, complete = false) {
             <input id="pd-weight" class="pd-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="000" />
             <span class="pd-unit">lbs</span>
           </div>
-        </div>
-      </div>
-    </div>`;
+        </div>`;
+  return renderCollapsiblePanel('Personal details', fields, open, complete);
 }
 
 export function jobLifestyleSectionValid(form) {
@@ -514,14 +518,7 @@ export function renderJobLifestyleActivity(form, open = true, complete = false) 
     <option value="${o.id}" ${form.workPhysical === o.id ? 'selected' : ''}>${o.label}</option>`).join('');
   const lifeOpts = WORK_STRESS.map((o) => `
     <option value="${o.id}" ${form.workStress === o.id ? 'selected' : ''}>${o.label}</option>`).join('');
-
-  return `
-    <div class="pd-panel ${open ? 'is-open' : ''} ${complete ? 'is-complete' : ''}">
-      <button type="button" class="pd-trigger" data-pd-toggle aria-expanded="${open}">
-        <span class="pd-trigger-title">Job, lifestyle & activity</span>
-        <span class="pd-chevron" aria-hidden="true">${open ? '−' : '+'}</span>
-      </button>
-      <div class="pd-fields" ${open ? '' : 'hidden'}>
+  const fields = `
         <div class="pd-row">
           <label class="pd-label" for="pd-job">Job</label>
           <div class="pd-box">
@@ -560,9 +557,8 @@ export function renderJobLifestyleActivity(form, open = true, complete = false) 
             <input id="pd-fatburn" class="pd-input" name="fatBurningHours" type="number" inputmode="numeric" min="0" max="20" step="1" value="${form.fatBurningHours}" />
             <span class="pd-unit">hrs / wk</span>
           </div>
-        </div>
-      </div>
-    </div>`;
+        </div>`;
+  return renderCollapsiblePanel('Job, lifestyle & activity', fields, open, complete);
 }
 
 function flowRoot() {

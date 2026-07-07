@@ -9,52 +9,26 @@ import {
   personalSectionValid,
   renderJobLifestyleActivity,
   jobLifestyleSectionValid,
+  renderCollapsiblePanel,
 } from './onboardingUI.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
-  {
-    id: 'intro',
-    title: 'Opening',
-    frame: 'Ready?',
-    intro: true,
-  },
-  {
-    id: 'personal',
-    title: 'Personal details',
-    frame: 'Personal',
-    personal: true,
-  },
-  {
-    id: 'body',
-    title: 'Your body',
-    frame: 'Body',
-    questions: [4],
-  },
-  {
-    id: 'work',
-    title: 'Job, lifestyle & activity',
-    frame: 'Work',
-    workActivity: true,
-  },
-  {
-    id: 'rhythm',
-    title: 'Daily rhythm',
-    frame: 'Rhythm',
-    questions: [9],
-  },
-  {
-    id: 'review',
-    title: 'Review',
-    frame: 'Build',
-    review: true,
-  },
+  { id: 'intro', title: 'Getting started', intro: true },
+  { id: 'personal', title: 'Personal details', personal: true },
+  { id: 'body', title: 'Your body', questions: [4] },
+  { id: 'work', title: 'Job, lifestyle & activity', workActivity: true },
+  { id: 'rhythm', title: 'Daily rhythm', questions: [9] },
+  { id: 'review', title: 'Review & build', review: true },
 ];
 
 const REVIEW_INDEX = SECTIONS.length - 1;
 
-function isPanelSection(section) {
-  return section.personal || section.workActivity;
+function getActiveIndex(store) {
+  if (store.accordionSection === 'review' && (store.accordionMax ?? 0) >= REVIEW_INDEX) {
+    return REVIEW_INDEX;
+  }
+  return Math.min(store.accordionMax ?? 0, REVIEW_INDEX);
 }
 
 function sectionValid(section, form) {
@@ -62,14 +36,6 @@ function sectionValid(section, form) {
   if (section.personal) return personalSectionValid(form);
   if (section.workActivity) return jobLifestyleSectionValid(form);
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
-}
-
-function currentSection(store) {
-  if (store.accordionSection === 'review' && (store.accordionMax ?? 0) >= REVIEW_INDEX) {
-    return { section: SECTIONS[REVIEW_INDEX], index: REVIEW_INDEX };
-  }
-  const index = Math.min(store.accordionMax ?? 0, REVIEW_INDEX - 1);
-  return { section: SECTIONS[index], index };
 }
 
 function renderIntroBody() {
@@ -88,20 +54,24 @@ function renderIntroBody() {
     })}`;
 }
 
-function renderSectionBody(section, form) {
-  const complete = sectionValid(section, form);
-  if (section.intro) return renderIntroBody();
-  if (section.personal) return renderPersonalDetails(form, true, complete);
-  if (section.workActivity) return renderJobLifestyleActivity(form, true, complete);
+function renderSectionPanel(section, form, open, complete) {
+  if (section.intro) return renderCollapsiblePanel('Getting started', renderIntroBody(), open, complete);
+  if (section.personal) return renderPersonalDetails(form, open, complete);
+  if (section.workActivity) return renderJobLifestyleActivity(form, open, complete);
   if (section.review) {
-    return `<div class="ob-confirm">${renderConfirmBody(form, false, { readOnly: true })}</div>`;
+    return renderCollapsiblePanel(
+      'Review & build',
+      `<div class="ob-confirm">${renderConfirmBody(form, false, { readOnly: true })}</div>`,
+      open,
+      complete,
+    );
   }
-  return section.questions.map((qi) => `
+  const inner = section.questions.map((qi) => `
     <div class="acc-question" data-question="${qi}">
       ${renderQuestionBody(qi, form)}
     </div>`).join('');
+  return renderCollapsiblePanel(section.title, inner, open, complete);
 }
-
 
 function continueLabel(section) {
   if (section.intro) return 'Start building →';
@@ -109,49 +79,45 @@ function continueLabel(section) {
   return 'Continue →';
 }
 
-function renderProgressRail(currentIndex) {
+function renderProgressRail(activeIndex) {
   return `
-    <div class="acc-rail" aria-label="Section ${currentIndex + 1} of ${SECTIONS.length}">
+    <div class="acc-rail" aria-label="Section ${activeIndex + 1} of ${SECTIONS.length}">
       ${SECTIONS.map((_, i) => `
-        <span class="acc-dot ${i < currentIndex ? 'is-done' : ''} ${i === currentIndex ? 'is-current' : ''} ${i > currentIndex ? 'is-future' : ''}"></span>`).join('')}
+        <span class="acc-dot ${i < activeIndex ? 'is-done' : ''} ${i === activeIndex ? 'is-current' : ''} ${i > activeIndex ? 'is-future' : ''}"></span>`).join('')}
     </div>`;
 }
 
-function renderFrame(section, form, index) {
-  const canContinue = sectionValid(section, form);
-  const panel = isPanelSection(section);
+function renderStackItem(section, form, index, activeIndex) {
+  const isActive = index === activeIndex;
+  const isDone = index < activeIndex;
+  const complete = isDone || sectionValid(section, form);
+  const open = isActive;
+  const canContinue = isActive && sectionValid(section, form);
 
   return `
-    <article class="acc-frame ${panel ? 'acc-frame-panel' : ''} ${canContinue && !section.intro && !section.review ? 'is-complete' : ''}" data-acc-section="${section.id}">
-      ${panel ? '' : `
-      <div class="acc-placard">
-        <span class="acc-step">${String(index + 1).padStart(2, '0')}</span>
-        <span class="acc-frame-title">${section.frame}</span>
-      </div>`}
-      <div class="acc-frame-body">
-        ${renderSectionBody(section, form)}
-      </div>
+    <div class="acc-stack-item ${isDone ? 'is-done' : ''} ${isActive ? 'is-active' : ''}"
+      data-stack-index="${index}" data-acc-section="${section.id}">
+      ${renderSectionPanel(section, form, open, complete)}
+      ${isActive ? `
       <button type="button" class="acc-continue ${canContinue ? '' : 'disabled'}"
         data-acc-continue="${section.id}"
         ${canContinue ? '' : 'disabled'}>
         ${continueLabel(section)}
-      </button>
-    </article>`;
+      </button>` : ''}
+    </div>`;
 }
 
 export function renderAccordion(store) {
   const form = store.onboardingForm;
-  const { section, index } = currentSection(store);
+  const activeIndex = getActiveIndex(store);
 
   return `
     <div class="accordion-flow artshow-flow">
       <div class="acc-stage">
-        ${renderProgressRail(index)}
-        ${isPanelSection(section) ? '' : `
-        <div class="acc-stage-toolbar">
-          <span class="acc-stage-label">${section.title}</span>
-        </div>`}
-        ${renderFrame(section, form, index)}
+        ${renderProgressRail(activeIndex)}
+        <div class="acc-stack">
+          ${SECTIONS.slice(0, activeIndex + 1).map((section, i) => renderStackItem(section, form, i, activeIndex)).join('')}
+        </div>
       </div>
     </div>`;
 }
@@ -163,15 +129,27 @@ function syncAccordionButtons() {
   const store = accordionCtx.store;
   const form = store?.onboardingForm;
   if (!form) return;
-  const { section } = currentSection(store);
-  const btn = document.querySelector('.artshow-flow [data-acc-continue]');
-  const ok = sectionValid(section, form);
-  if (btn && section) {
+  const activeIndex = getActiveIndex(store);
+  const activeSection = SECTIONS[activeIndex];
+  const ok = sectionValid(activeSection, form);
+
+  document.querySelectorAll('.artshow-flow [data-acc-continue]').forEach((btn) => {
     btn.disabled = !ok;
     btn.classList.toggle('disabled', !ok);
-  }
-  document.querySelector('.artshow-flow .pd-panel')?.classList.toggle('is-complete', ok);
-  document.querySelector('.artshow-flow .acc-frame')?.classList.toggle('is-complete', ok && !section.intro && !section.review);
+  });
+
+  document.querySelectorAll('.artshow-flow .acc-stack-item').forEach((el) => {
+    const idx = Number(el.dataset.stackIndex);
+    const section = SECTIONS[idx];
+    const complete = idx < activeIndex || (idx === activeIndex && sectionValid(section, form));
+    el.querySelector('.pd-panel')?.classList.toggle('is-complete', complete);
+  });
+}
+
+function scrollToStackItem(index) {
+  window.requestAnimationFrame(() => {
+    document.querySelector(`[data-stack-index="${index}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
 }
 
 function ensureAccordionDelegation() {
@@ -208,7 +186,8 @@ function ensureAccordionDelegation() {
     if (!cont || cont.disabled || cont.classList.contains('disabled')) return;
 
     const store = accordionCtx.store;
-    const { section, index } = currentSection(store);
+    const activeIndex = getActiveIndex(store);
+    const section = SECTIONS[activeIndex];
     if (cont.dataset.accContinue !== section.id || !sectionValid(section, store.onboardingForm)) return;
 
     if (section.review) {
@@ -216,12 +195,13 @@ function ensureAccordionDelegation() {
       return;
     }
 
-    const next = SECTIONS[index + 1];
+    const next = SECTIONS[activeIndex + 1];
     if (next?.id === 'review' && accordionCtx.onBeforeReview && !accordionCtx.onBeforeReview()) return;
 
-    store.accordionMax = index + 1;
+    store.accordionMax = activeIndex + 1;
     store.accordionSection = next.id;
     accordionCtx.render?.();
+    scrollToStackItem(activeIndex + 1);
   });
 }
 
@@ -237,11 +217,7 @@ export function bindAccordionEvents(store, { render, onConfirm, onBeforeReview }
 export function syncAccordionSection(store) {
   if (store.accordionMax == null) store.accordionMax = 0;
   if (store.accordionSection === 'review') return;
-  const legacy = {
-    about: 'personal',
-    life: 'work',
-    exercise: 'work',
-  };
+  const legacy = { about: 'personal', life: 'work', exercise: 'work' };
   if (legacy[store.accordionSection]) store.accordionSection = legacy[store.accordionSection];
   store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
 }
