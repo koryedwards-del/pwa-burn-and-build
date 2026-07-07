@@ -28,6 +28,23 @@ const app = express();
 const port = Number(process.env.PORT) || 3001;
 const isProd = process.env.NODE_ENV === 'production';
 
+const defaultCorsOrigins = [
+  'https://gettheburnandbuildapp.com',
+  'https://www.gettheburnandbuildapp.com',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+];
+
+function corsOrigins() {
+  const extra = String(process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return new Set([...defaultCorsOrigins, ...extra]);
+}
+
 const blockedPrefixes = [
   '/server',
   '/.env',
@@ -40,6 +57,21 @@ const blockedPrefixes = [
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
+
+app.use((req, res, next) => {
+  const origin = req.get('origin');
+  if (origin && corsOrigins().has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Contacts-Admin-Key');
+  }
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
 
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -335,10 +367,22 @@ app.get('/api/programs/:id', (req, res) => {
 /** Public config for client — never put secrets here. */
 app.get('/config.js', (_req, res) => {
   res.type('application/javascript');
+  res.setHeader('Cache-Control', 'public, max-age=300');
   res.send(`window.BNB_CONFIG=${JSON.stringify({
+    apiBaseUrl: process.env.API_BASE_URL || '',
     creatorBaseUrl: process.env.CREATOR_BASE_URL || '',
     webpageUrl: process.env.WEBPAGE_URL || '',
   })};`);
+});
+
+app.get('/api/config', (_req, res) => {
+  res.json({
+    ok: true,
+    apiBaseUrl: process.env.API_BASE_URL || '',
+    creatorBaseUrl: process.env.CREATOR_BASE_URL || '',
+    webpageUrl: process.env.WEBPAGE_URL || '',
+    stripe: stripeConfigured(),
+  });
 });
 
 app.get('/', (_req, res) => {

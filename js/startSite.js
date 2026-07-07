@@ -97,11 +97,13 @@ const store = {
   reviewViewed: false,
   accordionEditReturn: null,
   accessGranted: false,
+  apiReachable: true,
   stripeConfigured: false,
   checkoutTestBypass: false,
   checkoutError: '',
   checkoutMessage: '',
   checkoutBusy: false,
+  saveBusy: false,
 };
 
 function defaultStartDate() {
@@ -217,9 +219,14 @@ function restoreBuiltPackage() {
 function renderPlanReady() {
   const name = programName();
   const paid = store.accessGranted;
-  const lead = paid
-    ? `Your personalized food plan${name ? ` for ${name}` : ''} is ready in the Burn &amp; Build app.`
-    : `Your personalized food plan${name ? ` for ${name}` : ''} is saved. Complete checkout to unlock the app.`;
+  let lead;
+  if (paid) {
+    lead = `Your personalized food plan${name ? ` for ${name}` : ''} is ready in the Burn &amp; Build app.`;
+  } else if (store.saveError) {
+    lead = `Your food plan${name ? ` for ${name}` : ''} is ready on this device. Save it to your account, then complete checkout.`;
+  } else {
+    lead = `Your personalized food plan${name ? ` for ${name}` : ''} is saved. Complete checkout to unlock the app.`;
+  }
 
   const payBlock = paid ? `
           <a href="../myplan/" class="btn-primary unlock-cta plan-ready-open-app">Open Burn &amp; Build app →</a>
@@ -231,6 +238,9 @@ function renderPlanReady() {
               <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
             </ul>
           </div>`
+    : !store.apiReachable ? `
+          <p class="unlock-hint">Could not reach the Burn &amp; Build server. Check your connection and try again.</p>
+          ${store.saveError ? `<button type="button" class="btn-secondary unlock-cta-secondary" data-retry-save ${store.saveBusy ? 'disabled' : ''}>${store.saveBusy ? 'SAVING…' : 'Retry save'}</button>` : ''}`
     : store.stripeConfigured ? `
           <button type="button" class="btn-primary unlock-cta" data-start-checkout ${store.checkoutBusy ? 'disabled' : ''}>
             ${store.checkoutBusy ? 'OPENING CHECKOUT…' : 'COMPLETE PURCHASE — $149'}
@@ -238,8 +248,12 @@ function renderPlanReady() {
           <p class="unlock-hint">Secure checkout · Promo codes accepted · One-time · Yours for life</p>
           ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
     : `
-          <p class="unlock-hint">Checkout is being connected. Add Stripe keys on the server to enable payment.</p>
+          <p class="unlock-hint">Checkout is not available yet. Contact support@gettheburnandbuildapp.com if you need help.</p>
           ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`;
+
+  const saveActions = !paid && store.saveError && store.apiReachable
+    ? `<button type="button" class="btn-secondary unlock-cta-secondary" data-retry-save ${store.saveBusy ? 'disabled' : ''}>${store.saveBusy ? 'SAVING…' : 'Retry save'}</button>`
+    : '';
 
   return `
     <div class="start-site">
@@ -253,6 +267,7 @@ function renderPlanReady() {
           <p class="unlock-lead">${lead}</p>
           ${store.checkoutMessage ? `<div class="ob-info"><span class="ob-info-icon">ℹ️</span><p>${store.checkoutMessage}</p></div>` : ''}
           ${payBlock}
+          ${saveActions}
           ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
@@ -502,8 +517,35 @@ function afterRender() {
 
 async function refreshCheckoutConfig() {
   const status = await fetchCheckoutStatus();
+  store.apiReachable = status.reachable !== false;
   store.stripeConfigured = !!status.configured;
   store.checkoutTestBypass = !!status.testBypass || isTestMode();
+}
+
+async function savePlanToServer() {
+  if (!isValidEmail(store.email)) {
+    store.saveError = 'Enter a valid email address.';
+    return false;
+  }
+  ensureBuiltPackage();
+  if (!store.builtPackage) {
+    store.saveError = 'No food plan to save.';
+    return false;
+  }
+  store.saveBusy = true;
+  store.saveError = '';
+  const saved = await saveProgramToServer(store.email, store.builtPackage);
+  store.saveBusy = false;
+  if (!saved.ok) {
+    store.saveError = saved.message || 'Could not save your plan.';
+    return false;
+  }
+  if (saved.programId && store.builtPackage?.program) {
+    store.builtPackage.program.id = saved.programId;
+    persistBuiltPackage();
+  }
+  store.saveError = '';
+  return true;
 }
 
 async function refreshAccessState() {
@@ -557,6 +599,13 @@ async function handleCheckoutReturn() {
 
   store.checkoutMessage = 'Payment complete. Your Burn & Build app access is unlocked.';
   await refreshAccessState();
+}
+
+async function retrySavePlan() {
+  if (store.saveBusy) return;
+  const ok = await savePlanToServer();
+  if (ok) await refreshCheckoutConfig();
+  render();
 }
 
 async function startCheckout() {
@@ -715,6 +764,10 @@ function bindGlobal() {
       startCheckout();
       return;
     }
+    if (e.target.closest('[data-retry-save]')) {
+      retrySavePlan();
+      return;
+    }
     if (e.target.closest('[data-test-checkout]')) {
       completeTestCheckout();
     }
@@ -775,10 +828,8 @@ function finishIntake() {
   render();
   window.setTimeout(async () => {
     ensureBuiltPackage();
-    const saved = await saveProgramToServer(store.email, store.builtPackage);
-    if (!saved.ok) {
-      store.saveError = saved.message || 'Could not save your plan.';
-    }
+    persistBuiltPackage();
+    await savePlanToServer();
     await renderPlanReadyPhase();
   }, 900);
 }

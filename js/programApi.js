@@ -1,5 +1,7 @@
 /** Client API — save/load food plan by email (Creator → DB → Shell PWA) */
 
+import { apiUrl } from './apiConfig.js';
+
 export function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
@@ -21,7 +23,7 @@ export function getAppEmail() {
 
 export async function saveProgramToServer(email, pkg) {
   try {
-    const res = await fetch('/api/programs', {
+    const res = await fetch(apiUrl('/api/programs'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: normalizeEmail(email), package: pkg }),
@@ -36,7 +38,7 @@ export async function saveProgramToServer(email, pkg) {
 
 export async function fetchProgramFromServer(email) {
   try {
-    const res = await fetch(`/api/programs?email=${encodeURIComponent(normalizeEmail(email))}`);
+    const res = await fetch(apiUrl(`/api/programs?email=${encodeURIComponent(normalizeEmail(email))}`));
     const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'No plan found for this email.' };
     return data;
@@ -47,7 +49,7 @@ export async function fetchProgramFromServer(email) {
 
 export async function fetchProgramHistoryFromServer(email) {
   try {
-    const res = await fetch(`/api/programs/history?email=${encodeURIComponent(normalizeEmail(email))}`);
+    const res = await fetch(apiUrl(`/api/programs/history?email=${encodeURIComponent(normalizeEmail(email))}`));
     const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'Could not load food plan history.' };
     return data;
@@ -58,7 +60,7 @@ export async function fetchProgramHistoryFromServer(email) {
 
 export async function fetchProgramByIdFromServer(email, programId) {
   try {
-    const res = await fetch(`/api/programs/${encodeURIComponent(programId)}?email=${encodeURIComponent(normalizeEmail(email))}`);
+    const res = await fetch(apiUrl(`/api/programs/${encodeURIComponent(programId)}?email=${encodeURIComponent(normalizeEmail(email))}`));
     const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'Could not load that food plan.' };
     return data;

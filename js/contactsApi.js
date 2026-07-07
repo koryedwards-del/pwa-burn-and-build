@@ -1,5 +1,6 @@
 /** Admin contact list API — one list for all apps */
 
+import { apiUrl } from './apiConfig.js';
 import { normalizeEmail } from './programApi.js';
 
 const ADMIN_KEY_STORAGE = 'bnb_contacts_admin_key';
@@ -20,7 +21,7 @@ function adminHeaders() {
 
 export async function lookupContact(email) {
   try {
-    const res = await fetch(`/api/contacts/lookup?email=${encodeURIComponent(normalizeEmail(email))}`);
+    const res = await fetch(apiUrl(`/api/contacts/lookup?email=${encodeURIComponent(normalizeEmail(email))}`));
     const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'Contact not found.' };
     return data;
@@ -31,7 +32,7 @@ export async function lookupContact(email) {
 
 export async function fetchContacts() {
   try {
-    const res = await fetch('/api/contacts', { headers: adminHeaders() });
+    const res = await fetch(apiUrl('/api/contacts'), { headers: adminHeaders() });
     const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'Could not load contacts.' };
     return data;
@@ -42,7 +43,7 @@ export async function fetchContacts() {
 
 export async function saveContact({ email, displayName, burnAndBuild }) {
   try {
-    const res = await fetch('/api/contacts', {
+    const res = await fetch(apiUrl('/api/contacts'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...adminHeaders() },
       body: JSON.stringify({ email: normalizeEmail(email), displayName, burnAndBuild }),
@@ -57,7 +58,7 @@ export async function saveContact({ email, displayName, burnAndBuild }) {
 
 export async function setContactBurnAndBuild(email, burnAndBuild) {
   try {
-    const res = await fetch('/api/contacts', {
+    const res = await fetch(apiUrl('/api/contacts'), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', ...adminHeaders() },
       body: JSON.stringify({ email: normalizeEmail(email), burnAndBuild }),
@@ -72,7 +73,7 @@ export async function setContactBurnAndBuild(email, burnAndBuild) {
 
 export async function deleteContact(email) {
   try {
-    const res = await fetch('/api/contacts', {
+    const res = await fetch(apiUrl('/api/contacts'), {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json', ...adminHeaders() },
       body: JSON.stringify({ email: normalizeEmail(email) }),
