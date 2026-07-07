@@ -96,7 +96,7 @@ function renderSectionPanel(section, form, open, complete) {
 
 function continueLabel(section, store) {
   if (store?.accordionEditReturn) return 'Back to review →';
-  if (section.intro) return 'Start building →';
+  if (section.intro) return 'Create your food plan';
   if (section.id === 'email') return 'Review & approve →';
   if (section.review) return 'Build my food plan →';
   return 'Continue →';
