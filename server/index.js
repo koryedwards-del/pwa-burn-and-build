@@ -14,6 +14,13 @@ import {
 import { countPrograms, dbPathForHealth, getLatestProgram, getProgramById, listPrograms, normalizeEmail, saveProgram } from './db.js';
 import { summarizeProgram } from '../js/programHistory.js';
 import { validateProgramPackage } from '../js/programPackage.js';
+import {
+  constructStripeWebhookEvent,
+  createCheckoutSession,
+  handleStripeWebhookEvent,
+  stripeConfigured,
+  verifyCheckoutSession,
+} from './stripe.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -49,6 +56,22 @@ app.use((req, res, next) => {
   next();
 });
 
+app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), (req, res) => {
+  try {
+    const signature = req.get('stripe-signature');
+    if (!signature) {
+      res.status(400).json({ ok: false, message: 'Missing Stripe signature.' });
+      return;
+    }
+    const event = constructStripeWebhookEvent(req.body, signature);
+    const result = handleStripeWebhookEvent(event);
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error('Stripe webhook error:', err.message);
+    res.status(400).json({ ok: false, message: err.message || 'Webhook error.' });
+  }
+});
+
 app.use(express.json({ limit: '512kb' }));
 
 function isValidEmail(email) {
@@ -75,7 +98,78 @@ app.get('/health', (_req, res) => {
     service: 'program-creator',
     env: isProd ? 'production' : 'development',
     database: dbPathForHealth(),
+    stripe: stripeConfigured(),
   });
+});
+
+function creatorBaseUrl(req) {
+  return process.env.CREATOR_BASE_URL || `${req.protocol}://${req.get('host')}`;
+}
+
+app.get('/api/checkout/status', (_req, res) => {
+  res.json({
+    ok: true,
+    configured: stripeConfigured(),
+    testBypass: !isProd || process.env.STRIPE_TEST_BYPASS === '1',
+  });
+});
+
+app.post('/api/checkout', async (req, res) => {
+  const email = normalizeEmail(req.body?.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+  if (!stripeConfigured()) {
+    res.status(503).json({ ok: false, message: 'Checkout is not configured yet.' });
+    return;
+  }
+
+  try {
+    const session = await createCheckoutSession({
+      email,
+      programId: req.body?.programId,
+      baseUrl: creatorBaseUrl(req),
+    });
+    res.json({ ok: true, ...session });
+  } catch (err) {
+    console.error('Checkout session error:', err.message);
+    res.status(500).json({ ok: false, message: err.message || 'Could not start checkout.' });
+  }
+});
+
+app.get('/api/checkout/verify', async (req, res) => {
+  const sessionId = String(req.query.session_id || '');
+  if (!sessionId) {
+    res.status(400).json({ ok: false, message: 'Missing checkout session.' });
+    return;
+  }
+  if (!stripeConfigured()) {
+    res.status(503).json({ ok: false, message: 'Checkout is not configured yet.' });
+    return;
+  }
+
+  try {
+    const result = await verifyCheckoutSession(sessionId);
+    res.json(result);
+  } catch (err) {
+    console.error('Checkout verify error:', err.message);
+    res.status(500).json({ ok: false, message: err.message || 'Could not verify payment.' });
+  }
+});
+
+app.post('/api/checkout/test-complete', (req, res) => {
+  if (isProd && process.env.STRIPE_TEST_BYPASS !== '1') {
+    res.status(404).json({ ok: false, message: 'Not found.' });
+    return;
+  }
+  const email = normalizeEmail(req.body?.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+  const contact = setBurnAndBuild(email, true);
+  res.json({ ok: true, email, contact, test: true });
 });
 
 app.get('/api/contacts/lookup', (req, res) => {

@@ -157,13 +157,14 @@ export function ensureBurnAndBuildAccess(email) {
   return { ok: true, contact };
 }
 
-/** Food plan creation adds or updates Admin contact and checks B&B. */
+/** Food plan creation adds or updates Admin contact; access unlocks after payment. */
 export function enrollContactFromProgramCreation(email, displayName) {
   const name = String(displayName || '').trim();
+  const existing = getContact(email);
   return upsertContact({
     email,
     displayName: name || undefined,
-    burnAndBuild: true,
+    burnAndBuild: existing?.burnAndBuild ? true : false,
   });
 }
 

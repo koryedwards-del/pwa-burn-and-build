@@ -11,6 +11,13 @@ import {
   packageToImportUrl,
 } from './programPackage.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail } from './programApi.js';
+import { lookupContact } from './contactsApi.js';
+import {
+  completeCheckoutForTest,
+  createCheckoutSession,
+  fetchCheckoutStatus,
+  verifyCheckoutSession,
+} from './checkoutApi.js';
 import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js';
 import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
@@ -89,6 +96,12 @@ const store = {
   accordionSection: 'intro',
   reviewViewed: false,
   accordionEditReturn: null,
+  accessGranted: false,
+  stripeConfigured: false,
+  checkoutTestBypass: false,
+  checkoutError: '',
+  checkoutMessage: '',
+  checkoutBusy: false,
 };
 
 function defaultStartDate() {
@@ -202,6 +215,32 @@ function restoreBuiltPackage() {
 }
 
 function renderPlanReady() {
+  const name = programName();
+  const paid = store.accessGranted;
+  const lead = paid
+    ? `Your personalized food plan${name ? ` for ${name}` : ''} is ready in the Burn &amp; Build app.`
+    : `Your personalized food plan${name ? ` for ${name}` : ''} is saved. Complete checkout to unlock the app.`;
+
+  const payBlock = paid ? `
+          <a href="../shell/" class="btn-primary unlock-cta plan-ready-open-app">Open Burn &amp; Build app →</a>
+          <p class="unlock-tagline">Eat the food. Trust the plan.</p>
+          <div class="install-box">
+            <h3>Install on your home screen</h3>
+            <ul class="install-steps">
+              <li><strong>iPhone:</strong> Tap Share → <strong>Add to Home Screen</strong></li>
+              <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
+            </ul>
+          </div>`
+    : store.stripeConfigured ? `
+          <button type="button" class="btn-primary unlock-cta" data-start-checkout ${store.checkoutBusy ? 'disabled' : ''}>
+            ${store.checkoutBusy ? 'OPENING CHECKOUT…' : 'COMPLETE PURCHASE — $149'}
+          </button>
+          <p class="unlock-hint">Secure checkout · Promo codes accepted · One-time · Yours for life</p>
+          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
+    : `
+          <p class="unlock-hint">Checkout is being connected. Add Stripe keys on the server to enable payment.</p>
+          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`;
+
   return `
     <div class="start-site">
       <div class="screen unlock-screen">
@@ -211,15 +250,10 @@ function renderPlanReady() {
           <div class="ob-welcome-line2">IS READY</div>
         </div>
         <div class="unlock-panel">
-          <p class="unlock-lead">Your personalized food plan is ready to be installed on the Burn &amp; Build app. If you don't have the app on your phone home screen, install it now. Follow the instructions below.</p>
-          <div class="install-box">
-            <h3>Install on your home screen</h3>
-            <ul class="install-steps">
-              <li><strong>iPhone:</strong> Tap Share → <strong>Add to Home Screen</strong></li>
-              <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
-            </ul>
-          </div>
-          <a href="../shell/" class="plan-ready-pwa-link">Open Burn &amp; Build app →</a>
+          <p class="unlock-lead">${lead}</p>
+          ${store.checkoutMessage ? `<div class="ob-info"><span class="ob-info-icon">ℹ️</span><p>${store.checkoutMessage}</p></div>` : ''}
+          ${payBlock}
+          ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
       </div>
@@ -466,6 +500,109 @@ function afterRender() {
   persistFlowState();
 }
 
+async function refreshCheckoutConfig() {
+  const status = await fetchCheckoutStatus();
+  store.stripeConfigured = !!status.configured;
+  store.checkoutTestBypass = !!status.testBypass || isTestMode();
+}
+
+async function refreshAccessState() {
+  if (!isValidEmail(store.email)) {
+    store.accessGranted = false;
+    return;
+  }
+  const result = await lookupContact(store.email);
+  store.accessGranted = !!(result.ok && result.contact?.burnAndBuild);
+}
+
+function cleanCheckoutQuery() {
+  const url = new URL(location.href);
+  url.searchParams.delete('checkout');
+  url.searchParams.delete('session_id');
+  history.replaceState({}, '', `${url.pathname}${url.search}`);
+}
+
+async function handleCheckoutReturn() {
+  const params = new URLSearchParams(location.search);
+  const checkoutState = params.get('checkout');
+  if (!checkoutState) return;
+
+  store.phase = 'plan-ready';
+  sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
+
+  if (checkoutState === 'cancel') {
+    store.checkoutMessage = 'Checkout was canceled. Your plan is still saved — complete purchase when you are ready.';
+    cleanCheckoutQuery();
+    return;
+  }
+
+  if (checkoutState !== 'success') return;
+
+  const sessionId = params.get('session_id');
+  if (!sessionId) {
+    store.checkoutError = 'Missing checkout session. Contact support if you were charged.';
+    cleanCheckoutQuery();
+    return;
+  }
+
+  store.checkoutBusy = true;
+  const result = await verifyCheckoutSession(sessionId);
+  store.checkoutBusy = false;
+  cleanCheckoutQuery();
+
+  if (!result.ok) {
+    store.checkoutError = result.message || 'Could not verify payment.';
+    return;
+  }
+
+  store.checkoutMessage = 'Payment complete. Your Burn & Build app access is unlocked.';
+  await refreshAccessState();
+}
+
+async function startCheckout() {
+  if (!isValidEmail(store.email)) {
+    store.checkoutError = 'Enter a valid email address before checkout.';
+    render();
+    return;
+  }
+  store.checkoutError = '';
+  store.checkoutMessage = '';
+  store.checkoutBusy = true;
+  render();
+
+  const programId = store.builtPackage?.program?.id;
+  const result = await createCheckoutSession(store.email, programId);
+  store.checkoutBusy = false;
+
+  if (!result.ok || !result.url) {
+    store.checkoutError = result.message || 'Could not start checkout.';
+    render();
+    return;
+  }
+
+  window.location.href = result.url;
+}
+
+async function completeTestCheckout() {
+  store.checkoutError = '';
+  store.checkoutMessage = '';
+  const result = await completeCheckoutForTest(store.email);
+  if (!result.ok) {
+    store.checkoutError = result.message || 'Test checkout failed.';
+    render();
+    return;
+  }
+  store.checkoutMessage = 'Test access granted.';
+  await refreshAccessState();
+  render();
+}
+
+async function preparePlanReadyState() {
+  await refreshCheckoutConfig();
+  await handleCheckoutReturn();
+  await refreshAccessState();
+}
+
 function render() {
   const root = document.getElementById('app');
   if (store.phase === 'onboarding') {
@@ -474,6 +611,12 @@ function render() {
   } else if (store.phase === 'creating') root.innerHTML = renderCreating();
   else if (store.phase === 'plan-ready') root.innerHTML = renderPlanReady();
   afterRender();
+}
+
+async function renderPlanReadyPhase() {
+  store.phase = 'plan-ready';
+  await preparePlanReadyState();
+  render();
 }
 
 function onboardingStore() {
@@ -566,6 +709,14 @@ function bindGlobal() {
     }
     if (e.target.closest('[data-copy-import-link]')) {
       copyImportLink();
+      return;
+    }
+    if (e.target.closest('[data-start-checkout]')) {
+      startCheckout();
+      return;
+    }
+    if (e.target.closest('[data-test-checkout]')) {
+      completeTestCheckout();
     }
   });
 
@@ -628,12 +779,17 @@ function finishIntake() {
     if (!saved.ok) {
       store.saveError = saved.message || 'Could not save your plan.';
     }
-    store.phase = 'plan-ready';
-    render();
+    await renderPlanReadyPhase();
   }, 900);
 }
 
 bindGlobal();
 initFocusFlow();
 initStartSite();
-render();
+
+(async () => {
+  if (store.phase === 'plan-ready') {
+    await preparePlanReadyState();
+  }
+  render();
+})();
