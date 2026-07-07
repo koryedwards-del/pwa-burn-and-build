@@ -863,8 +863,8 @@ function renderMealFatPoints(fatTarget, fatUsed, fatPct) {
     <div class="fat-bar-wrap plan-fat-points">
       <div class="fat-bar"><div class="fat-bar-fill ${fatUsed >= fatTarget ? 'over' : ''}" style="width:${fatPct * 100}%"></div></div>
       <div class="fat-bar-meta">
-        <span>Fat servings</span>
-        <span>${fatUsed.toFixed(1)} / ${fatTarget} servings</span>
+        <span>Fat Servings</span>
+        <span>${fatUsed.toFixed(1)} / ${fatTarget} Servings</span>
       </div>
     </div>`;
 }
