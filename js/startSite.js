@@ -86,6 +86,7 @@ const store = {
   saveError: '',
   showAdvanced: false,
   accordionSection: 'intro',
+  reviewViewed: false,
 };
 
 function defaultStartDate() {
@@ -122,6 +123,7 @@ function persistFlowState() {
   if (store.accordionMax != null) {
     sessionStorage.setItem('bnb_accordion_max', String(store.accordionMax));
   }
+  sessionStorage.setItem('bnb_review_viewed', store.reviewViewed ? '1' : '0');
 }
 
 function restoreFlowState() {
@@ -145,6 +147,7 @@ function restoreFlowState() {
   if (accSection) store.accordionSection = accSection;
   const accMax = sessionStorage.getItem('bnb_accordion_max');
   if (accMax != null && accMax !== '') store.accordionMax = Number(accMax) || 0;
+  store.reviewViewed = sessionStorage.getItem('bnb_review_viewed') === '1';
   const phase = sessionStorage.getItem('bnb_creator_phase');
   const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
   if (phase === 'home') {
@@ -423,6 +426,7 @@ function renderOnboardingWrapper() {
     onboardingEditMode: false,
     accordionSection: store.accordionSection,
     accordionMax: store.accordionMax,
+    reviewViewed: store.reviewViewed,
   };
   return `<div class="start-site">${renderAccordion(fakeStore)}</div>`;
 }

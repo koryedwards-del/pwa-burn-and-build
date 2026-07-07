@@ -36,6 +36,19 @@ function getActiveIndex(store) {
   return Math.min(store.accordionMax ?? 0, REVIEW_INDEX);
 }
 
+function sectionCanContinue(section, form, store) {
+  if (section.review) return !!store?.reviewViewed;
+  return sectionValid(section, form);
+}
+
+function markReviewViewed() {
+  const store = accordionCtx.store;
+  if (!store || store.reviewViewed) return;
+  store.reviewViewed = true;
+  sessionStorage.setItem('bnb_review_viewed', '1');
+  syncAccordionButtons();
+}
+
 function sectionValid(section, form) {
   if (section.intro || section.review) return true;
   if (section.personal) return personalSectionValid(form);
@@ -106,7 +119,7 @@ function sectionLabel(section) {
   return SECTION_LABELS[section.id] || section.title;
 }
 
-function renderStackItem(section, form, index, activeIndex) {
+function renderStackItem(section, form, index, activeIndex, store) {
   const isActive = index === activeIndex;
   const isDone = index < activeIndex;
   const isLocked = index > activeIndex;
@@ -118,9 +131,11 @@ function renderStackItem(section, form, index, activeIndex) {
       </div>`;
   }
 
-  const complete = isDone || sectionValid(section, form);
+  const complete = section.review
+    ? !!store.reviewViewed
+    : (isDone || sectionValid(section, form));
   const open = isActive;
-  const canContinue = isActive && sectionValid(section, form);
+  const canContinue = isActive && sectionCanContinue(section, form, store);
 
   return `
     <div class="acc-stack-item ${isDone ? 'is-done' : ''} ${isActive ? 'is-active' : ''}"
@@ -144,7 +159,7 @@ export function renderAccordion(store) {
       <div class="acc-stage">
         ${renderProgressRail(activeIndex)}
         <div class="acc-stack">
-          ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex)).join('')}
+          ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex, store)).join('')}
         </div>
       </div>
     </div>`;
@@ -226,7 +241,7 @@ function syncAccordionButtons() {
   if (!form) return;
   const activeIndex = getActiveIndex(store);
   const activeSection = SECTIONS[activeIndex];
-  const ok = sectionValid(activeSection, form);
+  const ok = sectionCanContinue(activeSection, form, store);
 
   document.querySelectorAll('.artshow-flow [data-acc-continue]').forEach((btn) => {
     btn.disabled = !ok;
@@ -236,7 +251,9 @@ function syncAccordionButtons() {
   document.querySelectorAll('.artshow-flow .acc-stack-item').forEach((el) => {
     const idx = Number(el.dataset.stackIndex);
     const section = SECTIONS[idx];
-    const complete = idx < activeIndex || (idx === activeIndex && sectionValid(section, form));
+    const complete = section.review
+      ? !!store.reviewViewed
+      : (idx < activeIndex || (idx === activeIndex && sectionValid(section, form)));
     el.querySelector('.pd-panel')?.classList.toggle('is-complete', complete);
   });
 
@@ -277,8 +294,13 @@ function ensureAccordionDelegation() {
 
     const editRow = e.target.closest('[data-acc-edit-section]');
     if (editRow) {
+      markReviewViewed();
       openFieldFromReview(editRow.dataset.accEditSection, editRow.dataset.accEditField);
       return;
+    }
+
+    if (e.target.closest('[data-acc-section="review"]') && !e.target.closest('[data-acc-continue]')) {
+      markReviewViewed();
     }
 
     const pdToggle = e.target.closest('[data-pd-toggle]');
@@ -289,6 +311,7 @@ function ensureAccordionDelegation() {
       if (willOpen) {
         closeAllAccordionPanels();
         setAccordionPanelOpen(panel, true);
+        if (panel.closest('[data-acc-section="review"]')) markReviewViewed();
       } else {
         setAccordionPanelOpen(panel, false);
       }
@@ -303,7 +326,7 @@ function ensureAccordionDelegation() {
     const store = accordionCtx.store;
     const activeIndex = getActiveIndex(store);
     const section = SECTIONS[activeIndex];
-    if (cont.dataset.accContinue !== section.id || !sectionValid(section, store.onboardingForm)) return;
+    if (cont.dataset.accContinue !== section.id || !sectionCanContinue(section, store.onboardingForm, store)) return;
 
     if (section.review) {
       accordionCtx.onConfirm?.(store.onboardingForm);
@@ -312,6 +335,11 @@ function ensureAccordionDelegation() {
 
     const next = SECTIONS[activeIndex + 1];
     if (next?.id === 'review' && accordionCtx.onBeforeReview && !accordionCtx.onBeforeReview()) return;
+
+    if (next?.id === 'review') {
+      store.reviewViewed = false;
+      sessionStorage.removeItem('bnb_review_viewed');
+    }
 
     store.accordionMax = activeIndex + 1;
     store.accordionSection = next.id;
