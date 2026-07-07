@@ -3,7 +3,7 @@ import {
   initOnboardingForm,
   syncObToStore,
 } from './onboardingUI.js';
-import { renderChat, bindChatEvents, syncChatPage } from './onboardingChat.js';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -85,6 +85,7 @@ const store = {
   emailError: '',
   saveError: '',
   showAdvanced: false,
+  accordionSection: 'intro',
 };
 
 function defaultStartDate() {
@@ -115,6 +116,12 @@ function persistFlowState() {
     sessionStorage.setItem('bnb_onboarding_form', JSON.stringify(store.onboardingForm));
   }
   sessionStorage.setItem('bnb_onboarding_page', String(store.onboardingPage));
+  if (store.accordionSection) {
+    sessionStorage.setItem('bnb_accordion_section', store.accordionSection);
+  }
+  if (store.accordionMax != null) {
+    sessionStorage.setItem('bnb_accordion_max', String(store.accordionMax));
+  }
 }
 
 function restoreFlowState() {
@@ -134,6 +141,10 @@ function restoreFlowState() {
   if (page != null && page !== '') {
     store.onboardingPage = Number(page) || 0;
   }
+  const accSection = sessionStorage.getItem('bnb_accordion_section');
+  if (accSection) store.accordionSection = accSection;
+  const accMax = sessionStorage.getItem('bnb_accordion_max');
+  if (accMax != null && accMax !== '') store.accordionMax = Number(accMax) || 0;
   const phase = sessionStorage.getItem('bnb_creator_phase');
   const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
   if (phase === 'home') {
@@ -425,13 +436,15 @@ function magicLinkUrl() {
 }
 
 function renderOnboardingWrapper() {
-  syncChatPage(store);
+  syncAccordionSection(store);
   const fakeStore = {
     onboardingForm: store.onboardingForm,
     onboardingPage: store.onboardingPage,
     onboardingEditMode: false,
+    accordionSection: store.accordionSection,
+    accordionMax: store.accordionMax,
   };
-  return `<div class="start-site focus-host">${renderChat(fakeStore)}</div>`;
+  return `<div class="start-site">${renderAccordion(fakeStore)}</div>`;
 }
 
 function afterRender() {
@@ -479,7 +492,7 @@ function renderOnboardingStep() {
 
 function bindOnboardingOnly() {
   bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
-  bindChatEvents(store, {
+  bindAccordionEvents(store, {
     render: renderOnboardingStep,
     onConfirm: (form) => {
       store.onboardingForm = form;
@@ -510,7 +523,8 @@ function submitEmailLogin() {
   store.email = persistAppEmail(email);
   store.emailError = '';
   store.phase = 'onboarding';
-  store.onboardingPage = confirmOnboardingPage();
+  store.accordionSection = 'review';
+  store.accordionMax = 6;
   render();
 }
 
@@ -570,7 +584,7 @@ function bindGlobal() {
     if (e.target.closest('[data-email-back]')) {
       if (store.onboardingForm) {
         store.phase = 'onboarding';
-        store.onboardingPage = WELCOME_COUNT + QUESTION_COUNT - 1;
+        store.accordionSection = 'rhythm';
         store.emailError = '';
         render();
         return;

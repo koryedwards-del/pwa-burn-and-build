@@ -651,4 +651,5 @@ export function syncObToStore(target) {
   target.onboardingPage = obCtx.store.onboardingPage;
   target.onboardingForm = obCtx.store.onboardingForm;
   if (obCtx.store.accordionSection) target.accordionSection = obCtx.store.accordionSection;
+  if (obCtx.store.accordionMax != null) target.accordionMax = obCtx.store.accordionMax;
 }
