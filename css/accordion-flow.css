@@ -380,6 +380,21 @@ html:has(.start-site .artshow-flow) #app {
   gap: 10px;
 }
 
+.artshow-flow .pd-box-wake {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 12px;
+  gap: 8px;
+}
+
+.artshow-flow .pd-box-wake .ob-wake-picker {
+  justify-content: center;
+}
+
+.artshow-flow .pd-box-wake .ob-wake-display {
+  text-align: center;
+}
+
 .artshow-flow .pd-input {
   width: 100%;
   border: none;

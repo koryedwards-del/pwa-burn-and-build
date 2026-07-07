@@ -9,6 +9,8 @@ import {
   personalSectionValid,
   renderJobLifestyleActivity,
   jobLifestyleSectionValid,
+  renderWakeTime,
+  wakeTimeSectionValid,
   renderCollapsiblePanel,
   renderLockedPanel,
 } from './onboardingUI.js';
@@ -19,7 +21,7 @@ const SECTIONS = [
   { id: 'personal', title: 'Personal details', personal: true },
   { id: 'body', title: 'Your body', questions: [4] },
   { id: 'work', title: 'Job, lifestyle & activity', workActivity: true },
-  { id: 'rhythm', title: 'Daily rhythm', questions: [9] },
+  { id: 'rhythm', title: 'Wake Time', wakeTime: true },
   { id: 'review', title: 'Review & build', review: true },
 ];
 
@@ -36,6 +38,7 @@ function sectionValid(section, form) {
   if (section.intro || section.review) return true;
   if (section.personal) return personalSectionValid(form);
   if (section.workActivity) return jobLifestyleSectionValid(form);
+  if (section.wakeTime) return wakeTimeSectionValid(form);
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
 }
 
@@ -59,6 +62,7 @@ function renderSectionPanel(section, form, open, complete) {
   if (section.intro) return renderCollapsiblePanel('Getting started', renderIntroBody(), open, complete);
   if (section.personal) return renderPersonalDetails(form, open, complete);
   if (section.workActivity) return renderJobLifestyleActivity(form, open, complete);
+  if (section.wakeTime) return renderWakeTime(form, open, complete);
   if (section.review) {
     return renderCollapsiblePanel(
       'Review & build',
@@ -94,7 +98,7 @@ const SECTION_LABELS = {
   personal: 'Personal details',
   body: 'Your body',
   work: 'Job, lifestyle & activity',
-  rhythm: 'Daily rhythm',
+  rhythm: 'Wake Time',
   review: 'Review & build',
 };
 
@@ -149,6 +153,14 @@ export function renderAccordion(store) {
 let accordionBound = false;
 let accordionCtx = { store: null, render: null, onConfirm: null, onBeforeReview: null };
 
+function syncReviewBody(form) {
+  const stackItem = document.querySelector('.artshow-flow [data-acc-section="review"]');
+  if (!stackItem || stackItem.classList.contains('is-locked')) return;
+  const confirm = stackItem.querySelector('.ob-confirm');
+  if (!confirm) return;
+  confirm.innerHTML = renderConfirmBody(form, false, { readOnly: true });
+}
+
 function syncAccordionButtons() {
   const store = accordionCtx.store;
   const form = store?.onboardingForm;
@@ -168,6 +180,12 @@ function syncAccordionButtons() {
     const complete = idx < activeIndex || (idx === activeIndex && sectionValid(section, form));
     el.querySelector('.pd-panel')?.classList.toggle('is-complete', complete);
   });
+
+  syncReviewBody(form);
+}
+
+export function syncAccordionUI() {
+  syncAccordionButtons();
 }
 
 function scrollToStackItem(index) {

@@ -261,17 +261,7 @@ function renderQuestionBody(index, form) {
         ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}`;
 
     case 9:
-      return `
-        ${renderWakePicker(form)}
-        <div class="ob-divider"></div>
-        <div class="ob-section-label">MEAL REMINDERS</div>
-        <button type="button" class="ob-reminder-toggle ${form.remindersEnabled ? 'on' : ''}" data-ob-reminders>
-          <div>
-            <div class="ob-reminder-title">Time-to-eat reminders</div>
-            <div class="ob-reminder-sub">${form.remindersEnabled ? 'Burn & Build will notify you when it\'s time to eat each meal and fruit snack.' : 'No reminders set.'}</div>
-          </div>
-          <span class="ob-toggle-pill"></span>
-        </button>`;
+      return renderWakePicker(form);
 
     default:
       return '';
@@ -377,7 +367,6 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, base + 7, readOnly)}
         ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8, readOnly)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9, readOnly)}
-        ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 9, readOnly)}
       </div>`;
 }
 
@@ -569,6 +558,21 @@ export function renderJobLifestyleActivity(form, open = true, complete = false) 
           </div>
         </div>`;
   return renderCollapsiblePanel('Job, lifestyle & activity', fields, open, complete);
+}
+
+export function wakeTimeSectionValid() {
+  return true;
+}
+
+export function renderWakeTime(form, open = true, complete = false) {
+  const fields = `
+        <div class="pd-row">
+          <label class="pd-label">Wake time</label>
+          <div class="pd-box pd-box-wake">
+            ${renderWakePicker(form)}
+          </div>
+        </div>`;
+  return renderCollapsiblePanel('Wake Time', fields, open, complete);
 }
 
 function flowRoot() {
