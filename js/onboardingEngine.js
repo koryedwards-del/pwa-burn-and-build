@@ -168,6 +168,7 @@ export function defaultOnboardingForm(profile) {
   const birthDate = p.birthDate || defaultBirthDateFromAge(age);
   return {
     preferredName: p.preferredName || '',
+    email: p.email || '',
     sex: p.sex || 'Male',
     heightInches: p.heightInches ?? 68,
     age,

@@ -29,6 +29,10 @@ function getActiveIndex(store) {
   if (store.accordionSection === 'review' && (store.accordionMax ?? 0) >= REVIEW_INDEX) {
     return REVIEW_INDEX;
   }
+  const sectionIndex = SECTIONS.findIndex((s) => s.id === store.accordionSection);
+  if (sectionIndex >= 0 && sectionIndex <= (store.accordionMax ?? 0)) {
+    return sectionIndex;
+  }
   return Math.min(store.accordionMax ?? 0, REVIEW_INDEX);
 }
 
@@ -149,6 +153,14 @@ export function renderAccordion(store) {
 let accordionBound = false;
 let accordionCtx = { store: null, render: null, onConfirm: null, onBeforeReview: null };
 
+function syncReviewBody(form) {
+  const stackItem = document.querySelector('.artshow-flow [data-acc-section="review"]');
+  if (!stackItem || stackItem.classList.contains('is-locked')) return;
+  const confirm = stackItem.querySelector('.ob-confirm');
+  if (!confirm) return;
+  confirm.innerHTML = renderConfirmBody(form, false, { readOnly: true });
+}
+
 function syncAccordionButtons() {
   const store = accordionCtx.store;
   const form = store?.onboardingForm;
@@ -168,6 +180,8 @@ function syncAccordionButtons() {
     const complete = idx < activeIndex || (idx === activeIndex && sectionValid(section, form));
     el.querySelector('.pd-panel')?.classList.toggle('is-complete', complete);
   });
+
+  syncReviewBody(form);
 }
 
 function scrollToStackItem(index) {

@@ -357,6 +357,13 @@ html:has(.start-site .artshow-flow) #app {
   gap: 6px;
 }
 
+.artshow-flow .pd-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
 .artshow-flow .pd-label {
   font-size: 10px;
   font-weight: 700;

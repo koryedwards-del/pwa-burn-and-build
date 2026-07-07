@@ -20,6 +20,7 @@ import {
   formatBirthDateDigits,
   parseBirthDateText,
 } from './onboardingEngine.js';
+import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 function infoBox(icon, text) {
@@ -365,6 +366,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
   return `
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', base, readOnly)}
+        ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', base, readOnly)}
         ${confirmRow('SEX', form.sex, '', base, readOnly)}
         ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', base + 1, readOnly)}
         ${confirmRow('AGE', String(form.age), '', base + 2, readOnly)}
@@ -474,6 +476,7 @@ export function personalSectionValid(form) {
   const iso = parseBirthDateText(form.birthDateText);
   const age = iso ? ageFromBirthDate(iso) : null;
   return form.preferredName.trim().length > 0
+    && isValidEmail(form.email)
     && !!form.sex
     && age != null && age >= 13 && age <= 99
     && Number(form.weightText) > 0;
@@ -486,6 +489,13 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           <div class="pd-box">
             <input id="pd-name" class="pd-input" name="preferredName" value="${form.preferredName}" placeholder="First name" autocomplete="given-name" />
           </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-email">Email</label>
+          <div class="pd-box">
+            <input id="pd-email" class="pd-input" type="email" name="email" value="${form.email || ''}" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <p class="pd-hint">Connects your food plan to your phone.</p>
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-sex">Sex</label>

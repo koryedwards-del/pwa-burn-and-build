@@ -9,7 +9,7 @@ import {
   downloadProgramPackage,
   packageToImportUrl,
 } from './programPackage.js';
-import { getAppEmail, persistAppEmail, saveProgramToServer } from './programApi.js';
+import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail } from './programApi.js';
 import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js';
 import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
@@ -152,9 +152,9 @@ function restoreFlowState() {
   } else if (phase && flowPhases.includes(phase)) {
     store.phase = phase;
   }
-  if (store.phase === 'email-login' && store.onboardingPage < WELCOME_COUNT + QUESTION_COUNT - 1) {
+  if (store.phase === 'email-login') {
     store.phase = 'onboarding';
-    store.onboardingPage = 0;
+    store.accordionSection = 'personal';
   }
 }
 
@@ -167,26 +167,6 @@ function restoreBuiltPackage() {
   } catch {
     sessionStorage.removeItem('bnb_built_package');
   }
-}
-
-function renderEmailLogin() {
-  return `
-    <div class="start-site focus-host">
-      <div class="focus-unlock">
-        <div class="focus-unlock-scroll unlock-panel email-login-panel">
-          <div class="ob-welcome-line1">YOUR EMAIL</div>
-          <div class="ob-welcome-line2">IS YOUR LOGIN</div>
-          <p class="unlock-lead">Your food plan will be created based on your answers. The custom servings created from those answers are transferred to your phone for convenience. The email you provide here links the food plan creator to your app.</p>
-          ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
-          <label class="unlock-label" for="creator-email">Email address</label>
-          <input id="creator-email" class="ob-input ob-input-lg" type="email" name="creatorEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
-        </div>
-        <div class="ob-chrome-dock">
-          <button type="button" class="btn-primary unlock-cta" data-email-continue>CONTINUE →</button>
-          <button type="button" class="unlock-back-link" data-email-back>← Back to your answers</button>
-        </div>
-      </div>
-    </div>`;
 }
 
 function renderPlanReady() {
@@ -337,7 +317,7 @@ function renderUnlockEmail() {
         <div class="unlock-panel">
           <div class="teach-kicker">Step 1 of 3 · Unlock</div>
           <h2 class="unlock-title">Get your custom food plan</h2>
-          <p class="unlock-lead">Your 8-week Burn &amp; Build program has been created${name ? ` for ${name}` : ''}${lbm ? ` from ${lbm.toFixed(1)} lbs of lean body mass` : ''}. Enter your email to save it and continue.</p>
+          <p class="unlock-lead">Your 8-week Burn &amp; Build program has been created${name ? ` for ${name}` : ''}${lbm ? ` from ${lbm.toFixed(1)} lbs of lean body mass` : ''}. Enter your email to connect it to your phone and continue.</p>
           ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
           <label class="unlock-label" for="unlock-email">Email address</label>
           <input id="unlock-email" class="ob-input ob-input-lg" type="email" name="unlockEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
@@ -454,8 +434,7 @@ function afterRender() {
 
 function render() {
   const root = document.getElementById('app');
-  if (store.phase === 'email-login') root.innerHTML = renderEmailLogin();
-  else if (store.phase === 'onboarding') {
+  if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
     bindOnboardingOnly();
   } else if (store.phase === 'creating') root.innerHTML = renderCreating();
@@ -501,33 +480,10 @@ function bindOnboardingOnly() {
   });
 }
 
-function submitEmailLogin() {
-  const input = document.querySelector('[name="creatorEmail"]');
-  const email = (input?.value || store.email || getAppEmail() || '').trim();
-  if (!validEmail(email)) {
-    store.emailError = 'Enter a valid email address.';
-    store.email = email;
-    render();
-    input?.focus();
-    return;
-  }
-
-  store.email = persistAppEmail(email);
-  store.emailError = '';
-  store.phase = 'onboarding';
-  store.accordionSection = 'review';
-  store.accordionMax = 5;
-  render();
-}
-
-function validEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-}
-
 function sendMagicLink() {
   const input = document.querySelector('[name="unlockEmail"]');
   const email = (input?.value || store.email || '').trim();
-  if (!validEmail(email)) {
+  if (!isValidEmail(email)) {
     store.emailError = 'Enter a valid email address.';
     store.email = email;
     render();
@@ -569,22 +525,6 @@ function bindGlobal() {
   bindGlobal.done = true;
 
   document.getElementById('app').addEventListener('click', (e) => {
-    if (e.target.closest('[data-email-continue]')) {
-      submitEmailLogin();
-      return;
-    }
-    if (e.target.closest('[data-email-back]')) {
-      if (store.onboardingForm) {
-        store.phase = 'onboarding';
-        store.accordionSection = 'rhythm';
-        store.accordionMax = 4;
-        store.emailError = '';
-        render();
-        return;
-      }
-      window.location.href = LANDING_URL;
-      return;
-    }
     if (e.target.closest('[data-download-package]')) {
       downloadProgramPackage(store.builtPackage);
       return;
@@ -595,9 +535,9 @@ function bindGlobal() {
   });
 
   document.getElementById('app').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.matches('[name="creatorEmail"]')) {
+    if (e.key === 'Enter' && e.target.matches('[name="unlockEmail"]')) {
       e.preventDefault();
-      submitEmailLogin();
+      sendMagicLink();
     }
   });
 }
@@ -622,17 +562,27 @@ function initStartSite() {
     initOnboardingForm(temp);
     store.onboardingForm = temp.onboardingForm;
   }
+  if (store.email && !store.onboardingForm.email) {
+    store.onboardingForm.email = store.email;
+  } else if (store.onboardingForm.email && isValidEmail(store.onboardingForm.email)) {
+    store.email = store.onboardingForm.email;
+  }
+}
+
+function openPersonalForEmail() {
+  store.phase = 'onboarding';
+  store.accordionSection = 'personal';
+  render();
 }
 
 function finishIntake() {
-  const email = store.email || getAppEmail();
-  if (!email) {
-    store.phase = 'email-login';
-    store.emailError = 'Enter your email so we can save your food plan.';
-    render();
+  const email = (store.onboardingForm?.email || store.email || getAppEmail() || '').trim();
+  if (!isValidEmail(email)) {
+    openPersonalForEmail();
     return;
   }
-  store.email = persistAppEmail(email);
+  store.onboardingForm.email = persistAppEmail(email);
+  store.email = store.onboardingForm.email;
   store.phase = 'creating';
   store.saveError = '';
   render();

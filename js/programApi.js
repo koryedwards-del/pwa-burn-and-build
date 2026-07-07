@@ -4,6 +4,10 @@ export function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
+export function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
+}
+
 export function persistAppEmail(email) {
   const key = normalizeEmail(email);
   localStorage.setItem('bnb_app_email', key);
