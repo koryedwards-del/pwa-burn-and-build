@@ -24,7 +24,7 @@ import {
   birthDateCursorPosition,
   birthDateDigits,
   parseBirthDateText,
-} from './onboardingEngine.js?v=73';
+} from './onboardingEngine.js?v=74';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 

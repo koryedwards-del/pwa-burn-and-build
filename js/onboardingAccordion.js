@@ -1,7 +1,7 @@
 import {
   canProceed,
   welcomeScreens,
-} from './onboardingEngine.js?v=73';
+} from './onboardingEngine.js?v=74';
 import {
   renderQuestionBody,
   renderConfirmBody,
@@ -10,7 +10,7 @@ import {
   renderJobLifestyleActivity,
   jobLifestyleSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=73';
+} from './onboardingUI.js?v=74';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -102,14 +102,6 @@ function continueLabel(section, store) {
   return 'Continue →';
 }
 
-function renderProgressRail(activeIndex, maxUnlocked) {
-  return `
-    <div class="acc-rail" aria-label="Section ${activeIndex + 1} of ${SECTIONS.length}">
-      ${SECTIONS.map((_, i) => `
-        <span class="acc-dot ${i < activeIndex ? 'is-done' : ''} ${i === activeIndex ? 'is-current' : ''} ${i > activeIndex && i <= maxUnlocked ? 'is-unlocked' : ''} ${i > maxUnlocked ? 'is-future' : ''}"></span>`).join('')}
-    </div>`;
-}
-
 const SECTION_LABELS = {
   intro: 'Getting started',
   personal: 'Personal details',
@@ -146,13 +138,10 @@ function renderStackItem(section, form, index, activeIndex, store) {
 export function renderAccordion(store) {
   const form = store.onboardingForm;
   const activeIndex = getActiveIndex(store);
-  const maxUnlocked = store.accordionMax ?? activeIndex;
-  const showProgressRail = activeIndex > 0;
 
   return `
     <div class="accordion-flow artshow-flow">
-      <div class="acc-stage${showProgressRail ? '' : ' acc-stage-intro'}">
-        ${showProgressRail ? renderProgressRail(activeIndex, maxUnlocked) : ''}
+      <div class="acc-stage">
         <div class="acc-stack">
           ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex, store)).join('')}
         </div>
