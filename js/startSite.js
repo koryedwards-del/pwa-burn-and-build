@@ -129,7 +129,7 @@ function persistFlowState() {
   sessionStorage.setItem('bnb_review_viewed', store.reviewViewed ? '1' : '0');
 }
 
-const ONBOARDING_FORM_VERSION = 6;
+const ONBOARDING_FORM_VERSION = 7;
 
 function restoreFlowState() {
   restoreBuiltPackage();
