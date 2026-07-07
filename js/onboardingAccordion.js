@@ -1,7 +1,7 @@
 import {
   canProceed,
   welcomeScreens,
-} from './onboardingEngine.js?v=88';
+} from './onboardingEngine.js?v=89';
 import {
   renderQuestionBody,
   renderConfirmBody,
@@ -10,7 +10,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=88';
+} from './onboardingUI.js?v=89';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -344,6 +344,7 @@ export function syncAccordionSection(store) {
   if (store.accordionMax == null) store.accordionMax = 0;
   if (store.accordionEditReturn) return;
   const sectionIndex = SECTIONS.findIndex((s) => s.id === store.accordionSection);
+  if (store.accordionSection === 'intro' && store.accordionMax === 0) return;
   if (sectionIndex >= 0 && sectionIndex <= store.accordionMax) return;
   if (store.accordionSection === 'review' && store.accordionMax >= REVIEW_INDEX) return;
   const legacy = {
@@ -353,5 +354,9 @@ export function syncAccordionSection(store) {
     work: 'job',
   };
   if (legacy[store.accordionSection]) store.accordionSection = legacy[store.accordionSection];
+  if (store.accordionMax <= 0) {
+    store.accordionSection = 'intro';
+    return;
+  }
   store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
 }

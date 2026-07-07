@@ -3,8 +3,8 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=88';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=88';
+} from './onboardingUI.js?v=89';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=89';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -126,10 +126,12 @@ function persistFlowState() {
   if (store.accordionMax != null) {
     sessionStorage.setItem('bnb_accordion_max', String(store.accordionMax));
   }
+  sessionStorage.setItem('bnb_accordion_layout_version', String(ACCORDION_LAYOUT_VERSION));
   sessionStorage.setItem('bnb_review_viewed', store.reviewViewed ? '1' : '0');
 }
 
 const ONBOARDING_FORM_VERSION = 7;
+const ACCORDION_LAYOUT_VERSION = 1;
 
 function restoreFlowState() {
   restoreBuiltPackage();
@@ -144,6 +146,17 @@ function restoreFlowState() {
     sessionStorage.removeItem('bnb_review_viewed');
     sessionStorage.setItem('bnb_onboarding_form_version', String(ONBOARDING_FORM_VERSION));
   }
+  const savedLayoutVersion = Number(sessionStorage.getItem('bnb_accordion_layout_version') || 0);
+  const layoutMigrated = savedLayoutVersion < ACCORDION_LAYOUT_VERSION;
+  if (layoutMigrated) {
+    sessionStorage.removeItem('bnb_accordion_section');
+    sessionStorage.removeItem('bnb_accordion_max');
+    sessionStorage.removeItem('bnb_review_viewed');
+    sessionStorage.setItem('bnb_accordion_layout_version', String(ACCORDION_LAYOUT_VERSION));
+    store.accordionSection = 'intro';
+    store.accordionMax = 0;
+    store.reviewViewed = false;
+  }
   const formRaw = sessionStorage.getItem('bnb_onboarding_form');
   if (formRaw) {
     try {
@@ -156,11 +169,13 @@ function restoreFlowState() {
   if (page != null && page !== '') {
     store.onboardingPage = Number(page) || 0;
   }
-  const accSection = sessionStorage.getItem('bnb_accordion_section');
-  if (accSection) store.accordionSection = accSection;
-  const accMax = sessionStorage.getItem('bnb_accordion_max');
-  if (accMax != null && accMax !== '') store.accordionMax = Number(accMax) || 0;
-  store.reviewViewed = sessionStorage.getItem('bnb_review_viewed') === '1';
+  if (!layoutMigrated) {
+    const accSection = sessionStorage.getItem('bnb_accordion_section');
+    if (accSection) store.accordionSection = accSection;
+    const accMax = sessionStorage.getItem('bnb_accordion_max');
+    if (accMax != null && accMax !== '') store.accordionMax = Number(accMax) || 0;
+    store.reviewViewed = sessionStorage.getItem('bnb_review_viewed') === '1';
+  }
   const phase = sessionStorage.getItem('bnb_creator_phase');
   const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
   if (phase === 'home') {
@@ -170,7 +185,8 @@ function restoreFlowState() {
   }
   if (store.phase === 'email-login') {
     store.phase = 'onboarding';
-    store.accordionSection = 'personal';
+    store.accordionSection = 'intro';
+    store.accordionMax = 0;
   }
 }
 
@@ -576,6 +592,7 @@ async function copyImportLink() {
 
 function initStartSite() {
   restoreFlowState();
+  syncAccordionSection(store);
   if (!store.onboardingForm) {
     const temp = { profile: null };
     initOnboardingForm(temp);
