@@ -32,6 +32,27 @@ function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
 }
 
+const HEIGHT_INSTRUCTION = 'height in inches (72" is 6 feet)';
+
+function heightFieldDisplay(inches) {
+  const n = Number(inches);
+  return Number.isFinite(n) && n >= 48 && n <= 84 ? String(Math.round(n)) : HEIGHT_INSTRUCTION;
+}
+
+function heightHasValue(inches) {
+  const n = Number(inches);
+  return Number.isFinite(n) && n >= 48 && n <= 84;
+}
+
+function syncHeightInput(input, form) {
+  const hasValue = heightHasValue(form.heightInches);
+  input.classList.toggle('is-instruction', !hasValue);
+  input.value = hasValue ? String(Math.round(Number(form.heightInches))) : HEIGHT_INSTRUCTION;
+  updateBoundDisplays('heightInches', form.heightInches);
+  syncNextButton(obCtx.store, form);
+  input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
 function stepHeadline(step, title, prefix = 'YOUR') {
   return `
     <div class="ob-step-header">
@@ -541,6 +562,7 @@ export function personalSectionValid(form) {
     && isValidEmail(form.email)
     && !!form.sex
     && age != null && age >= 13 && age <= 99
+    && heightHasValue(form.heightInches)
     && Number(form.weightText) > 0;
 }
 
@@ -574,9 +596,8 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-height">Height</label>
-          <div class="pd-box pd-box-split">
-            <input id="pd-height" class="pd-input pd-input-height" name="heightInches" type="number" inputmode="numeric" min="48" max="84" step="1" value="${form.heightInches}" placeholder="72" aria-label="Height in inches" />
-            <span class="pd-unit">inches</span>
+          <div class="pd-box">
+            <input id="pd-height" class="pd-input pd-input-height${heightHasValue(form.heightInches) ? '' : ' is-instruction'}" name="heightInches" type="text" inputmode="numeric" maxlength="2" value="${heightFieldDisplay(form.heightInches)}" aria-label="Height in inches" />
           </div>
         </div>
         <div class="pd-row">
@@ -794,16 +815,15 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'heightInches' && input.type === 'number') {
-      const n = Number(input.value);
-      if (input.value === '') {
-        form.heightInches = '';
-      } else if (!Number.isNaN(n)) {
-        form.heightInches = Math.min(84, Math.max(48, Math.round(n)));
-        if (String(form.heightInches) !== input.value) input.value = form.heightInches;
-      }
+    if (input.name === 'heightInches') {
+      const raw = input.value === HEIGHT_INSTRUCTION ? '' : input.value.replace(/\D/g, '').slice(0, 2);
+      form.heightInches = raw ? Number(raw) : '';
+      const focused = document.activeElement === input;
+      input.classList.toggle('is-instruction', !raw && !focused);
+      input.value = raw || (focused ? '' : HEIGHT_INSTRUCTION);
       updateBoundDisplays('heightInches', form.heightInches);
       syncNextButton(obCtx.store, form);
+      input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
       return;
     }
 
@@ -863,8 +883,31 @@ function ensureObDelegation() {
 
   document.addEventListener('focusin', (e) => {
     const input = e.target;
-    if (!obCtx.store || input.name !== 'birthDateText' || !input.closest(flowRoot())) return;
-    window.requestAnimationFrame(() => syncBirthDateInput(input, obCtx.store.onboardingForm));
+    if (!obCtx.store || !input.closest(flowRoot())) return;
+    const form = obCtx.store.onboardingForm;
+
+    if (input.name === 'birthDateText') {
+      window.requestAnimationFrame(() => syncBirthDateInput(input, form));
+      return;
+    }
+
+    if (input.name === 'heightInches' && input.value === HEIGHT_INSTRUCTION) {
+      input.value = '';
+      input.classList.remove('is-instruction');
+    }
+  });
+
+  document.addEventListener('focusout', (e) => {
+    const input = e.target;
+    if (!obCtx.store || input.name !== 'heightInches' || !input.closest(flowRoot())) return;
+    const form = obCtx.store.onboardingForm;
+    const n = Number(form.heightInches);
+    if (heightHasValue(n)) {
+      form.heightInches = Math.min(84, Math.max(48, Math.round(n)));
+    } else {
+      form.heightInches = '';
+    }
+    syncHeightInput(input, form);
   });
 
   document.addEventListener('keydown', (e) => {

@@ -446,8 +446,15 @@ html:has(.start-site .artshow-flow) #app {
   accent-color: var(--flame);
 }
 
-.artshow-flow .pd-input-height {
+.artshow-flow .pd-input-height.is-instruction {
   font-style: italic;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.artshow-flow .pd-input-height:not(.is-instruction) {
+  font-style: normal;
+  color: var(--text);
 }
 
 .artshow-flow .pd-input-birth {

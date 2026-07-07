@@ -193,7 +193,7 @@ export function defaultOnboardingForm(profile) {
     preferredName: p.preferredName || '',
     email: p.email || '',
     sex: p.sex || 'Male',
-    heightInches: p.heightInches ?? 68,
+    heightInches: p.heightInches ?? '',
     age,
     birthDate,
     birthDateText: p.birthDateText || '',
