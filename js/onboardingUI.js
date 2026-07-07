@@ -359,13 +359,13 @@ function renderQuestionBody(index, form) {
         <div class="ob-section-label">FAT BURNING</div>
         <div class="ob-hr-label ob-hr-label-tight">HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM</div>
         ${renderActivityHoursInput('fatBurningHours', form, 20)}
+        ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}
         ${LOW_ACTIVITIES.map((a) => `
           <label class="ob-check ${form.lowActivities.includes(a.id) ? 'selected' : ''}">
             <input type="checkbox" name="lowActivity" value="${a.id}" ${form.lowActivities.includes(a.id) ? 'checked' : ''} />
             <span>${a.icon}</span>
             <span>${a.label}</span>
-          </label>`).join('')}
-        ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}`;
+          </label>`).join('')}`;
 
     case 9:
       return `
