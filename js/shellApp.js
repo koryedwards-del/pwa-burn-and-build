@@ -351,7 +351,7 @@ function renderFoodRows(slotLabel, category, servings, foods, loggedName, sk) {
       <button type="button" class="food-row ${logged ? 'logged' : ''}"
         data-log-slot="${slotLabel}" data-log-category="${category}" data-log-servings="${servings || 1}"
         data-log-food="${encodeURIComponent(food.name)}" data-collapse="${sk}">
-        <span class="food-row-plus">${logged ? '✓' : '+'}</span>
+        <span class="food-row-indicator" aria-hidden="true"></span>
         <span class="food-row-name">${food.name}</span>
         <span class="food-row-label">${label}</span>
       </button>`;
@@ -381,7 +381,7 @@ function renderCategorySection(slotLabel, sectionId, title, category, servings, 
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">${title}</span>
-          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
+          <span class="cat-header-servings">${fmtServings(servings)} Servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
@@ -413,7 +413,7 @@ function renderProteinSection(slotLabel, servings) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Protein</span>
-          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
+          <span class="cat-header-servings">${fmtServings(servings)} Servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
@@ -449,7 +449,7 @@ function renderGrainSection(slotLabel, servings) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Grains / Starches</span>
-          <span class="cat-header-servings">${fmtServings(servings)} servings</span>
+          <span class="cat-header-servings">${fmtServings(servings)} Servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
@@ -495,7 +495,7 @@ function renderExtraFatsSection(slotLabel) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Extra Fats</span>
-          ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} servings</span>` : ''}
+          ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} Servings</span>` : ''}
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${grouped.length
@@ -530,8 +530,8 @@ function renderFatRows(slotLabel, foods, grouped, sk) {
       <button type="button" class="food-row ${count ? 'logged' : ''}"
         data-log-slot="${slotLabel}" data-log-category="Fats" data-log-servings="1"
         data-log-food="${encodeURIComponent(food.name)}">
-        <span class="food-row-plus">${count ? `×${count}` : '+'}</span>
-        <span class="food-row-name">${food.name}</span>
+        <span class="food-row-indicator" aria-hidden="true"></span>
+        <span class="food-row-name">${food.name}${count > 1 ? ` ×${count}` : ''}</span>
         <span class="food-row-label">${food.servingDescription}</span>
       </button>`;
   };
@@ -885,9 +885,11 @@ function renderPlan() {
   return `
     <div class="screen food-plan-screen">
       <div class="plan-header">
-        <button type="button" class="back-btn plan-back" data-nav="home">←</button>
+        <button type="button" class="back-btn plan-back" data-nav="home" aria-label="Back">‹</button>
         <h1>Custom Food Plan</h1>
       </div>
+
+      <button type="button" class="plan-fat-hint" data-reveal-fats>Tap here to reveal the Extra Fats list.</button>
 
       ${renderMealFatPoints(fatTarget, fatUsed, fatPct)}
 
@@ -1211,6 +1213,19 @@ function bindEvents() {
         btn.classList.add('active');
         row.parentElement.querySelector('input[type=hidden]').value = btn.dataset.val;
       });
+    });
+  });
+
+  document.querySelectorAll('[data-reveal-fats]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const plan = getPlan();
+      if (!plan) return;
+      const slots = getMealSlots(plan);
+      const first = slots[0];
+      if (!first) return;
+      store.expandedMeal = first.label;
+      store.expandedSections[sectionKey(first.label, 'Fats')] = true;
+      render();
     });
   });
 

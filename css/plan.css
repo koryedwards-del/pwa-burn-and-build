@@ -1,27 +1,65 @@
-/** Custom Food Plan screen — rebuilt styling */
+/** Custom Food Plan screen — reference design (dark, light-blue borders) */
+
+.food-plan-screen {
+  --plan-accent: #5ac8fa;
+  --plan-accent-dim: rgba(90, 200, 250, 0.35);
+  --plan-orange: #ff9500;
+  --plan-gold: #ffd60a;
+  --plan-muted: #8e8e93;
+  --plan-tab-active: #1c2e3a;
+  --plan-back-bg: #1c1c1e;
+  background: #000;
+}
 
 .food-plan-screen .plan-header {
   position: relative;
-  justify-content: center;
-  padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 8px;
 }
 
 .food-plan-screen .plan-header h1 {
-  flex: 1;
+  flex: none;
+  width: 100%;
   text-align: center;
-  color: var(--brand-blue);
+  color: var(--plan-accent);
   font-size: 20px;
-  margin-right: 36px;
+  font-weight: 600;
+  margin: 0 36px;
 }
 
 .food-plan-screen .plan-back {
   position: absolute;
   left: 16px;
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--plan-back-bg);
   color: #fff;
-  font-size: 28px;
+  font-size: 22px;
   line-height: 1;
   font-weight: 400;
-  padding: 4px 8px;
+  padding: 0;
+}
+
+.food-plan-screen .plan-fat-hint {
+  width: calc(100% - 40px);
+  margin: 4px 20px 10px;
+  padding: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--plan-gold);
+  background: none;
+}
+
+.food-plan-screen .plan-fat-hint:active {
+  opacity: 0.75;
 }
 
 .food-plan-empty {
@@ -59,27 +97,238 @@
   margin-bottom: 24px;
 }
 
+/* Daily fat servings bar */
 .food-plan-screen .plan-fat-points {
-  margin: 8px 20px 16px;
-  border-color: rgba(255, 214, 74, 0.35);
+  margin: 0 20px 16px;
+  padding: 12px 14px;
+  background: transparent;
+  border: 1px solid var(--plan-accent-dim);
+  border-radius: 12px;
+}
+
+.food-plan-screen .plan-fat-points .fat-bar {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .food-plan-screen .plan-fat-points .fat-bar-fill {
-  background: #ffd54a;
+  background: var(--plan-gold);
+}
+
+.food-plan-screen .plan-fat-points .fat-bar-fill.over {
+  background: var(--plan-orange);
 }
 
 .food-plan-screen .plan-fat-points .fat-bar-meta {
-  color: #ffd54a;
+  color: var(--plan-gold);
+  font-size: 12px;
 }
 
-.food-plan-screen .fats-section .cat-header-title {
-  color: var(--brand-blue);
+/* Meal cards */
+.food-plan-screen .meal-card {
+  margin: 0 16px 12px;
+  background: transparent;
+  border: 1px solid var(--plan-accent);
+  border-left: 1px solid var(--plan-accent);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.food-plan-screen .meal-card.meal-complete {
+  border-color: var(--plan-accent);
+  border-left-color: var(--plan-accent);
+}
+
+.food-plan-screen .meal-card-header {
+  padding: 14px 16px;
+}
+
+.food-plan-screen .meal-card-header .label {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--plan-accent);
+}
+
+.food-plan-screen .meal-card-header .logged {
+  font-size: 14px;
+  color: #fff;
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
+.food-plan-screen .meal-card-header .meta {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.food-plan-screen .meal-card-header .expand {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--plan-orange);
+  margin-top: 4px;
+}
+
+.food-plan-screen .meal-card-header .meal-progress {
+  display: none;
+}
+
+.food-plan-screen .meal-card-header .meal-check {
+  color: var(--plan-accent);
+}
+
+.food-plan-screen .meal-body {
+  padding: 0 12px 14px;
+  border-top: 1px solid var(--plan-accent-dim);
+  gap: 10px;
+}
+
+/* Category sections */
+.food-plan-screen .cat-section {
+  border: 1px solid var(--plan-accent);
+  border-radius: 10px;
+  background: transparent;
+}
+
+.food-plan-screen .cat-section.has-logged {
+  border-color: var(--plan-accent);
+}
+
+.food-plan-screen .cat-section.fats-section {
+  border-color: var(--plan-accent);
+}
+
+.food-plan-screen .cat-header {
+  padding: 12px 14px;
+}
+
+.food-plan-screen .cat-header-main {
+  gap: 10px;
 }
 
 .food-plan-screen .cat-header-title {
   color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.food-plan-screen .fats-section .cat-header-title {
+  color: var(--plan-accent);
 }
 
 .food-plan-screen .cat-header-servings {
   color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.food-plan-screen .cat-chevron {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--plan-muted);
+}
+
+.food-plan-screen .cat-header-logged {
+  color: #fff;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.food-plan-screen .cat-header-hint {
+  color: var(--plan-muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.food-plan-screen .fat-pts-badge {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.food-plan-screen .cat-body {
+  border-top: 1px solid var(--plan-accent-dim);
+  padding: 0 12px 12px;
+}
+
+/* Tabs (Starches / Grains, Protein / Dairy) */
+.food-plan-screen .cat-tabs {
+  background: transparent;
+  padding: 0;
+  gap: 16px;
+  margin: 12px 0 10px;
+}
+
+.food-plan-screen .cat-tabs button {
+  flex: 0 0 auto;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--plan-muted);
+  background: transparent;
+}
+
+.food-plan-screen .cat-tabs button.active {
+  background: var(--plan-tab-active);
+  color: #fff;
+}
+
+.food-plan-screen .food-search {
+  border-color: var(--plan-accent-dim);
+  background: #000;
+  color: #fff;
+}
+
+.food-plan-screen .food-hint {
+  color: var(--plan-muted);
+  font-size: 12px;
+}
+
+.food-plan-screen .top-picks-label {
+  color: var(--plan-gold);
+}
+
+.food-plan-screen .food-divider {
+  background: var(--plan-accent-dim);
+}
+
+/* Food rows — radio-style circles */
+.food-plan-screen .food-row {
+  padding: 10px 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 12px;
+}
+
+.food-plan-screen .food-row-indicator {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.food-plan-screen .food-row.logged .food-row-indicator {
+  border-color: var(--plan-accent);
+  background: radial-gradient(circle at center, var(--plan-accent) 0 5px, transparent 6px);
+}
+
+.food-plan-screen .food-row-name {
+  color: #fff;
+  font-size: 15px;
+}
+
+.food-plan-screen .food-row.logged .food-row-name {
+  color: #fff;
+}
+
+.food-plan-screen .food-row-label {
+  color: var(--plan-muted);
+  font-size: 14px;
+}
+
+.food-plan-screen .none-btn,
+.food-plan-screen .remove-fat-btn {
+  color: var(--plan-orange);
+  border-color: var(--plan-accent-dim);
 }
