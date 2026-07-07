@@ -280,8 +280,20 @@ function applyImportedProgram(pkg) {
   store.settings = JSON.parse(localStorage.getItem('bnb_settings') || '{}');
   store.importError = null;
   store.expandedNavButton = null;
+  const email = pkg?.intake?.email || getAppEmail();
+  if (isValidEmail(email)) persistAppEmail(email);
   saveProgram();
   return true;
+}
+
+async function syncProgramFromServer() {
+  const email = getAppEmail();
+  if (!isValidEmail(email)) return false;
+  const result = await fetchProgramFromServer(email);
+  if (result.ok && result.package) {
+    return applyImportedProgram(result.package);
+  }
+  return false;
 }
 
 function fatPointsConsumed() {
@@ -1530,10 +1542,7 @@ async function init() {
   }
 
   if (!hasActiveProgram() && getAppEmail()) {
-    const result = await fetchProgramFromServer(getAppEmail());
-    if (result.ok && result.package) {
-      applyImportedProgram(result.package);
-    }
+    await syncProgramFromServer();
   }
 
   const hasLegacyPlan = store.profile?.leanBodyMass > 0 && localStorage.getItem('bnb_onboarding_complete') === 'true';

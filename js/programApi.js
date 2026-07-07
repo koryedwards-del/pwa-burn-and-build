@@ -10,15 +10,29 @@ export function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
 }
 
+function readCookie(name) {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name.replace(/[.$?*|{}()[\]\\/+^]/g, '\\$&')}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
 export function persistAppEmail(email) {
   const key = normalizeEmail(email);
+  if (!key) return '';
   localStorage.setItem('bnb_app_email', key);
   sessionStorage.setItem('bnb_app_email', key);
+  if (typeof document !== 'undefined') {
+    const secure = location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `bnb_app_email=${encodeURIComponent(key)}; path=/; max-age=31536000; SameSite=Lax${secure}`;
+  }
   return key;
 }
 
 export function getAppEmail() {
-  return localStorage.getItem('bnb_app_email') || sessionStorage.getItem('bnb_app_email') || '';
+  return localStorage.getItem('bnb_app_email')
+    || sessionStorage.getItem('bnb_app_email')
+    || readCookie('bnb_app_email')
+    || '';
 }
 
 export async function saveProgramToServer(email, pkg) {

@@ -270,6 +270,7 @@ export function profileFromForm(form) {
   const intensity = computeWorkIntensity(form.workPhysical, form.workStress);
   return {
     preferredName: form.preferredName.trim().replace(/\b\w/g, (c) => c.toUpperCase()),
+    email: String(form.email || '').trim().toLowerCase(),
     sex: form.sex,
     age: Number(form.age),
     heightInches: Number(form.heightInches),

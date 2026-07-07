@@ -228,8 +228,19 @@ function myplanHandoffUrl() {
   return '../myplan/';
 }
 
+function escapeStandaloneToMyplan() {
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (!standalone) return false;
+  const email = (store.email || getAppEmail() || '').trim();
+  const q = isValidEmail(email) ? `?email=${encodeURIComponent(email)}` : '';
+  window.location.replace(`../myplan/${q}`);
+  return true;
+}
+
 function openMyplanApp() {
   restoreBuiltPackage();
+  const email = (store.email || getAppEmail() || store.builtPackage?.intake?.email || '').trim();
+  if (isValidEmail(email)) persistAppEmail(email);
   if (store.builtPackage) {
     try {
       sessionStorage.setItem('bnb_pending_import', JSON.stringify(store.builtPackage));
@@ -237,12 +248,8 @@ function openMyplanApp() {
       console.error(err);
     }
   }
-  const email = (store.email || getAppEmail() || '').trim();
-  if (!store.builtPackage && isValidEmail(email)) {
-    window.location.href = `../myplan/?email=${encodeURIComponent(email)}`;
-    return;
-  }
-  window.location.href = '../myplan/';
+  const q = isValidEmail(email) ? `?email=${encodeURIComponent(email)}` : '';
+  window.location.href = `../myplan/${q}`;
 }
 
 function renderPlanReady() {
@@ -865,6 +872,7 @@ initFocusFlow();
 initStartSite();
 
 (async () => {
+  if (escapeStandaloneToMyplan()) return;
   if (store.phase === 'plan-ready') {
     await preparePlanReadyState();
   }
