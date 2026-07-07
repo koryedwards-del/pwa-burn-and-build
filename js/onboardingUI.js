@@ -24,7 +24,7 @@ import {
   birthDateCursorPosition,
   birthDateDigits,
   parseBirthDateText,
-} from './onboardingEngine.js?v=76';
+} from './onboardingEngine.js?v=77';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -430,7 +430,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
     return `
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', { section: 'personal', field: 'pd-name' }, false, true)}
-        ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', { section: 'personal', field: 'pd-email' }, false, true)}
+        ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', { section: 'email', field: 'pd-email' }, false, true)}
         ${confirmRow('GENDER', form.sex, '', { section: 'personal', field: 'pd-sex' }, false, true)}
         ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
@@ -574,11 +574,26 @@ export function personalSectionValid(form) {
   const iso = parseBirthDateText(form.birthDateText);
   const age = iso ? ageFromBirthDate(iso) : null;
   return form.preferredName.trim().length > 0
-    && isValidEmail(form.email)
     && !!form.sex
     && age != null && age >= 13 && age <= 99
     && heightHasValue(form.heightInches)
     && Number(form.weightText) > 0;
+}
+
+export function emailSectionValid(form) {
+  return isValidEmail(form.email);
+}
+
+export function renderEmailDetails(form, open = true, complete = false) {
+  const fields = `
+        <div class="pd-row">
+          <label class="pd-label" for="pd-email">Email</label>
+          <div class="pd-box">
+            <input id="pd-email" class="pd-input" type="email" name="email" value="${form.email || ''}" placeholder="you@example.com" autocomplete="email" />
+          </div>
+          <p class="pd-hint">Connects your food plan to your phone.</p>
+        </div>`;
+  return renderCollapsiblePanel('Email address', fields, open, complete);
 }
 
 export function renderPersonalDetails(form, open = true, complete = false) {
@@ -588,13 +603,6 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           <div class="pd-box">
             <input id="pd-name" class="pd-input" name="preferredName" value="${form.preferredName}" placeholder="First name" autocomplete="given-name" />
           </div>
-        </div>
-        <div class="pd-row">
-          <label class="pd-label" for="pd-email">Email</label>
-          <div class="pd-box">
-            <input id="pd-email" class="pd-input" type="email" name="email" value="${form.email || ''}" placeholder="you@example.com" autocomplete="email" />
-          </div>
-          <p class="pd-hint">Connects your food plan to your phone.</p>
         </div>
         <div class="pd-row">
           <span class="pd-label" id="pd-sex-label">Gender</span>
@@ -629,7 +637,7 @@ export function renderPersonalDetails(form, open = true, complete = false) {
             <span class="pd-unit">lbs</span>
           </div>
         </div>`;
-  return renderCollapsiblePanel('Personal details', fields, open, complete);
+  return renderCollapsiblePanel('Personal', fields, open, complete);
 }
 
 function flowRoot() {

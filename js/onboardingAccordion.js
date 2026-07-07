@@ -1,24 +1,24 @@
 import {
   canProceed,
-  welcomeScreens,
-} from './onboardingEngine.js?v=76';
+} from './onboardingEngine.js?v=77';
 import {
   renderQuestionBody,
   renderConfirmBody,
   renderPersonalDetails,
+  renderEmailDetails,
   personalSectionValid,
+  emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=76';
-import { renderTestimonyBlock } from './testimonyBlock.js';
+} from './onboardingUI.js?v=77';
 
 const SECTIONS = [
-  { id: 'intro', title: 'Getting started', intro: true },
-  { id: 'personal', title: 'Personal details', personal: true },
-  { id: 'body', title: 'Your body', questions: [4] },
+  { id: 'personal', title: 'Personal', personal: true },
   { id: 'job', title: 'Job & lifestyle', questions: [5, 6] },
-  { id: 'activity', title: 'Activities', questions: [7, 8] },
+  { id: 'activity', title: 'Exercise & activities', questions: [7, 8] },
   { id: 'rhythm', title: 'Daily rhythm', questions: [9] },
-  { id: 'review', title: 'Review & build', review: true },
+  { id: 'body', title: 'Body composition', questions: [4] },
+  { id: 'email', title: 'Email address', email: true },
+  { id: 'review', title: 'Review & approve', review: true },
 ];
 
 const REVIEW_INDEX = SECTIONS.length - 1;
@@ -48,35 +48,18 @@ function markReviewViewed() {
 }
 
 function sectionValid(section, form) {
-  if (section.intro || section.review) return true;
+  if (section.review) return true;
   if (section.personal) return personalSectionValid(form);
+  if (section.email) return emailSectionValid(form);
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
 }
 
-function renderIntroBody() {
-  const screen = welcomeScreens()[0];
-  return `
-    <div class="acc-art-headline">
-      <div class="ob-welcome-line1">${screen.line1}</div>
-      <div class="ob-welcome-line2">${screen.line2}</div>
-    </div>
-    <p class="acc-art-lead">${screen.body}</p>
-    ${renderTestimonyBlock({
-      quote: screen.quote,
-      name: screen.quoteName,
-      meta: screen.quoteMeta,
-      className: 'acc-art-quote',
-    })}`;
-}
-
 function renderSectionPanel(section, form, open, complete) {
-  if (section.intro) {
-    return renderCollapsiblePanel('Getting started', renderIntroBody(), open, complete);
-  }
   if (section.personal) return renderPersonalDetails(form, open, complete);
+  if (section.email) return renderEmailDetails(form, open, complete);
   if (section.review) {
     return renderCollapsiblePanel(
-      'Review & build',
+      'Review & approve',
       `<div class="ob-confirm">${renderConfirmBody(form, false, { accordionEdit: true })}</div>`,
       open,
       complete,
@@ -91,20 +74,19 @@ function renderSectionPanel(section, form, open, complete) {
 
 function continueLabel(section, store) {
   if (store?.accordionEditReturn) return 'Back to review →';
-  if (section.intro) return 'Start building →';
-  if (section.id === 'rhythm') return 'Review & build →';
+  if (section.id === 'email') return 'Review & approve →';
   if (section.review) return 'Build my food plan →';
   return 'Continue →';
 }
 
 const SECTION_LABELS = {
-  intro: 'Getting started',
-  personal: 'Personal details',
-  body: 'Your body',
+  personal: 'Personal',
   job: 'Job & lifestyle',
-  activity: 'Activities',
+  activity: 'Exercise & activities',
   rhythm: 'Daily rhythm',
-  review: 'Review & build',
+  body: 'Body composition',
+  email: 'Email address',
+  review: 'Review & approve',
 };
 
 function sectionLabel(section) {
@@ -340,7 +322,13 @@ export function syncAccordionSection(store) {
   const sectionIndex = SECTIONS.findIndex((s) => s.id === store.accordionSection);
   if (sectionIndex >= 0 && sectionIndex <= store.accordionMax) return;
   if (store.accordionSection === 'review' && store.accordionMax >= REVIEW_INDEX) return;
-  const legacy = { about: 'personal', life: 'job', exercise: 'activity', work: 'job' };
+  const legacy = {
+    intro: 'personal',
+    about: 'personal',
+    life: 'job',
+    exercise: 'activity',
+    work: 'job',
+  };
   if (legacy[store.accordionSection]) store.accordionSection = legacy[store.accordionSection];
-  store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
+  store.accordionSection = SECTIONS[store.accordionMax]?.id || 'personal';
 }

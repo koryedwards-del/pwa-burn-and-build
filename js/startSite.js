@@ -3,8 +3,8 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=76';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=76';
+} from './onboardingUI.js?v=77';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=77';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -86,7 +86,7 @@ const store = {
   emailError: '',
   saveError: '',
   showAdvanced: false,
-  accordionSection: 'intro',
+  accordionSection: 'personal',
   reviewViewed: false,
   accordionEditReturn: null,
 };
@@ -129,7 +129,7 @@ function persistFlowState() {
   sessionStorage.setItem('bnb_review_viewed', store.reviewViewed ? '1' : '0');
 }
 
-const ONBOARDING_FORM_VERSION = 4;
+const ONBOARDING_FORM_VERSION = 5;
 
 function restoreFlowState() {
   restoreBuiltPackage();
@@ -139,6 +139,9 @@ function restoreFlowState() {
   const savedFormVersion = Number(sessionStorage.getItem('bnb_onboarding_form_version') || 0);
   if (savedFormVersion < ONBOARDING_FORM_VERSION) {
     sessionStorage.removeItem('bnb_onboarding_form');
+    sessionStorage.removeItem('bnb_accordion_section');
+    sessionStorage.removeItem('bnb_accordion_max');
+    sessionStorage.removeItem('bnb_review_viewed');
     sessionStorage.setItem('bnb_onboarding_form_version', String(ONBOARDING_FORM_VERSION));
   }
   const formRaw = sessionStorage.getItem('bnb_onboarding_form');
