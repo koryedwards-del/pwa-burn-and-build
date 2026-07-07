@@ -473,6 +473,11 @@ html:has(.start-site .artshow-flow) #app {
   font-style: normal;
 }
 
+.artshow-flow .pd-select-gender:focus-visible {
+  outline: 2px solid var(--flame);
+  outline-offset: 2px;
+}
+
 .artshow-flow .pd-value {
   font-size: 15px;
   font-weight: 600;

@@ -32,7 +32,7 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=89';
+} from './onboardingEngine.js?v=90';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -666,11 +666,26 @@ export function renderEmailDetails(form, open = true, complete = false) {
 function renderGenderSelect(form) {
   const hasValue = !!form.sex;
   return `
-            <select id="pd-sex" class="pd-input pd-select pd-select-gender${hasValue ? '' : ' is-instruction'}" name="sex" autocomplete="sex" aria-labelledby="pd-sex-label">
-              <option value="" ${hasValue ? '' : 'selected'} disabled hidden>Select gender</option>
+            <select id="pd-sex" class="pd-input pd-select pd-select-gender${hasValue ? '' : ' is-instruction'}" name="sex" autocomplete="off" aria-labelledby="pd-sex-label" aria-haspopup="listbox">
+              <option value="" ${hasValue ? '' : 'selected'} disabled>Select gender</option>
               <option value="Male" ${form.sex === 'Male' ? 'selected' : ''}>Male</option>
               <option value="Female" ${form.sex === 'Female' ? 'selected' : ''}>Female</option>
             </select>`;
+}
+
+function genderSelectNear(el) {
+  return el.closest('.pd-fields, .ob-stage-body, .acc-stack-item')?.querySelector('select[name="sex"]');
+}
+
+function openGenderPicker(select) {
+  if (!select) return;
+  if (typeof select.showPicker === 'function') {
+    try {
+      select.showPicker();
+    } catch {
+      /* showPicker requires a user gesture in some browsers. */
+    }
+  }
 }
 
 export function renderPersonalDetails(form, open = true, complete = false) {
@@ -958,15 +973,9 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'sex' && input.tagName === 'SELECT') {
-      window.requestAnimationFrame(() => {
-        if (typeof input.showPicker === 'function') {
-          try {
-            input.showPicker();
-          } catch {
-            /* Some browsers require a direct user gesture before showPicker. */
-          }
-        }
-      });
+      if (input.matches(':focus-visible')) {
+        window.requestAnimationFrame(() => openGenderPicker(input));
+      }
       return;
     }
 
@@ -1021,6 +1030,28 @@ function ensureObDelegation() {
       e.preventDefault();
       form.birthDateText = formatBirthDateDigits(digits.slice(0, -1));
       syncBirthDateInput(input, form);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!obCtx.store) return;
+    const input = e.target;
+    if (!input.closest(flowRoot())) return;
+
+    if (input.name === 'sex' && input.tagName === 'SELECT') {
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        openGenderPicker(input);
+      }
+      return;
+    }
+
+    if (e.key === 'Tab' && !e.shiftKey && input.name === 'preferredName') {
+      const sexSelect = genderSelectNear(input);
+      if (!sexSelect) return;
+      e.preventDefault();
+      sexSelect.focus({ preventScroll: true });
+      window.requestAnimationFrame(() => openGenderPicker(sexSelect));
     }
   });
 
