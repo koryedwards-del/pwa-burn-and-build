@@ -237,9 +237,9 @@ export function activityHoursReviewLabel(value, max = 20) {
 
 export function defaultOnboardingForm(profile) {
   const p = profile || {};
-  const work = reverseWorkIntensity(p.workIntensity ?? 2);
   const age = p.age ?? 35;
   const birthDate = p.birthDate || (p.birthDateText ? parseBirthDateText(p.birthDateText) : null) || defaultBirthDateFromAge(age);
+  const work = p.workIntensity != null ? reverseWorkIntensity(p.workIntensity) : null;
   return {
     preferredName: p.preferredName || '',
     email: p.email || '',
@@ -251,8 +251,8 @@ export function defaultOnboardingForm(profile) {
     weightText: p.totalWeight > 0 ? String(Math.round(p.totalWeight)) : '',
     fatPercentText: p.fatPercent > 0 ? String(p.fatPercent) : '',
     fatSource: p.fatPercent > 0 ? 'recent' : '',
-    workPhysical: p.workPhysical || work.physical,
-    workStress: p.workStress || work.stress,
+    workPhysical: p.workPhysical || (work?.physical ?? ''),
+    workStress: p.workStress || (work?.stress ?? ''),
     weightTrainingHours: p.weightTrainingHours != null ? p.weightTrainingHours : '',
     cardioHours: p.cardioHours != null ? p.cardioHours : '',
     fatBurningHours: p.fatBurningHours != null ? p.fatBurningHours : '',
