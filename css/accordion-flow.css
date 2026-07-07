@@ -449,7 +449,9 @@ html:has(.start-site .artshow-flow) #app {
 .artshow-flow .pd-input-height.is-instruction {
   font-style: italic;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
+  flex: 1;
+  min-width: 0;
 }
 
 .artshow-flow .pd-input-height:not(.is-instruction) {

@@ -1,7 +1,7 @@
 import {
   canProceed,
   welcomeScreens,
-} from './onboardingEngine.js?v=72';
+} from './onboardingEngine.js?v=73';
 import {
   renderQuestionBody,
   renderConfirmBody,
@@ -10,7 +10,7 @@ import {
   renderJobLifestyleActivity,
   jobLifestyleSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=72';
+} from './onboardingUI.js?v=73';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [

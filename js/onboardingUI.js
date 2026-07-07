@@ -24,7 +24,7 @@ import {
   birthDateCursorPosition,
   birthDateDigits,
   parseBirthDateText,
-} from './onboardingEngine.js?v=72';
+} from './onboardingEngine.js?v=73';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -32,7 +32,7 @@ function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
 }
 
-const HEIGHT_INSTRUCTION = 'height in inches (72" is 6 feet)';
+const HEIGHT_INSTRUCTION = '(72" is 6 feet)';
 
 function heightFieldDisplay(inches) {
   const n = Number(inches);
@@ -616,8 +616,9 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-height">Height</label>
-          <div class="pd-box">
+          <div class="pd-box pd-box-split">
             <input id="pd-height" class="pd-input pd-input-height${heightHasValue(form.heightInches) ? '' : ' is-instruction'}" name="heightInches" type="text" inputmode="numeric" maxlength="2" value="${heightFieldDisplay(form.heightInches)}" aria-label="Height in inches" />
+            <span class="pd-unit">inches</span>
           </div>
         </div>
         <div class="pd-row">
