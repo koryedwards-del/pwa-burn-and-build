@@ -3,7 +3,7 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=94';
+} from './onboardingUI.js?v=95';
 import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=101';
 import {
   buildProgramPackage,

@@ -10,7 +10,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=94';
+} from './onboardingUI.js?v=95';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [

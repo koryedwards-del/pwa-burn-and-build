@@ -798,12 +798,24 @@ function ensureObDelegation() {
   document.addEventListener('click', (e) => {
     if (!obCtx.store || !e.target.closest(flowRoot())) return;
 
-    const target = e.target;
-    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio, [data-pd-sex]')) return;
-
     const store = obCtx.store;
     const form = store.onboardingForm;
     const flow = e.target.closest(flowRoot());
+
+    const sexBtn = e.target.closest('[data-pd-sex]');
+    if (sexBtn) {
+      form.sex = sexBtn.dataset.pdSex;
+      const group = sexBtn.closest('.pd-gender-seg');
+      group?.querySelectorAll('[data-pd-sex]').forEach((b) => {
+        b.classList.toggle('is-active', b === sexBtn);
+      });
+      syncNextButton(store, form);
+      flow.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+
+    const target = e.target;
+    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio')) return;
 
     if (e.target.closest('[data-ob-back]')) {
       if (store.onboardingPage > 0) {
@@ -825,18 +837,6 @@ function ensureObDelegation() {
       if (e.target.closest('.artshow-flow')) return;
       store.onboardingPage = Number(gotoBtn.dataset.obGoto);
       obCtx.render();
-      return;
-    }
-
-    const sexBtn = e.target.closest('[data-pd-sex]');
-    if (sexBtn) {
-      form.sex = sexBtn.dataset.pdSex;
-      const group = sexBtn.closest('.pd-gender-seg');
-      group?.querySelectorAll('[data-pd-sex]').forEach((b) => {
-        b.classList.toggle('is-active', b === sexBtn);
-      });
-      syncNextButton(store, form);
-      flow.dispatchEvent(new Event('input', { bubbles: true }));
       return;
     }
 
