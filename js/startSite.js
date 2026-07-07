@@ -524,7 +524,7 @@ function submitEmailLogin() {
   store.emailError = '';
   store.phase = 'onboarding';
   store.accordionSection = 'review';
-  store.accordionMax = 6;
+  store.accordionMax = 5;
   render();
 }
 
@@ -585,7 +585,7 @@ function bindGlobal() {
       if (store.onboardingForm) {
         store.phase = 'onboarding';
         store.accordionSection = 'rhythm';
-        store.accordionMax = 5;
+        store.accordionMax = 4;
         store.emailError = '';
         render();
         return;
