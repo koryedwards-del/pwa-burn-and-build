@@ -258,6 +258,7 @@ export function defaultOnboardingForm(profile) {
     fatBurningHours: p.fatBurningHours != null ? p.fatBurningHours : '',
     wakeTime: p.wakeTime || '06:00',
     remindersEnabled: p.remindersEnabled !== false,
+    newsletterOptIn: !!p.newsletterOptIn,
     lowActivities: p.lowActivities || [],
   };
 }
@@ -283,6 +284,7 @@ export function profileFromForm(form) {
     fatBurningHours: parseActivityHours(form.fatBurningHours, 20) ?? 0,
     wakeTime: form.wakeTime,
     remindersEnabled: !!form.remindersEnabled,
+    newsletterOptIn: !!form.newsletterOptIn,
     lowActivities: form.lowActivities || [],
   };
 }
