@@ -24,7 +24,12 @@ import {
   birthDateCursorPosition,
   birthDateDigits,
   parseBirthDateText,
-} from './onboardingEngine.js?v=77';
+  ACTIVITY_HOURS_INSTRUCTION,
+  activityHoursHasValue,
+  activityHoursFieldDisplay,
+  activityHoursReviewLabel,
+  parseActivityHours,
+} from './onboardingEngine.js?v=78';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -51,6 +56,42 @@ function syncHeightInput(input, form) {
   updateBoundDisplays('heightInches', form.heightInches);
   syncNextButton(obCtx.store, form);
   input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function renderActivityHoursInput(name, form, max) {
+  const value = form[name];
+  const hasValue = activityHoursHasValue(value, max);
+  return `
+        <input class="ob-input ob-input-activity-hours${hasValue ? '' : ' is-instruction'}"
+          name="${name}"
+          type="text"
+          inputmode="decimal"
+          value="${activityHoursFieldDisplay(value, max)}"
+          aria-label="Hours per week" />`;
+}
+
+function syncActivityHoursInput(input, form) {
+  const max = input.name === 'fatBurningHours' ? 20 : 15;
+  const parsed = parseActivityHours(form[input.name], max);
+  const hasValue = parsed != null;
+  input.classList.toggle('is-instruction', !hasValue);
+  if (hasValue) {
+    form[input.name] = parsed;
+    input.value = activityHoursFieldDisplay(parsed, max);
+  } else if (form[input.name] === '' || form[input.name] == null) {
+    form[input.name] = '';
+    input.value = ACTIVITY_HOURS_INSTRUCTION;
+  }
+  syncNextButton(obCtx.store, form);
+  input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function sanitizeActivityHoursInput(raw) {
+  let cleaned = String(raw || '').replace(/[^\d.]/g, '');
+  const parts = cleaned.split('.');
+  if (parts.length > 2) cleaned = `${parts[0]}.${parts.slice(1).join('')}`;
+  if (parts.length === 2 && parts[1].length > 2) cleaned = `${parts[0]}.${parts[1].slice(0, 2)}`;
+  return cleaned;
 }
 
 function stepHeadline(step, title, prefix = 'YOUR') {
@@ -280,13 +321,11 @@ function renderQuestionBody(index, form) {
       return `
         <div class="ob-section-label">WEIGHT TRAINING, RACQUET SPORTS</div>
         <p class="ob-exercise-desc">Weight training, racquet sports type activity. Count only the time with weight in your hand or actually moving — not the rest between sets.</p>
-        <div class="ob-slider-label">Total hours per week: <strong data-bind="weightTrainingHours">${form.weightTrainingHours}</strong></div>
-        <input type="range" class="ob-range" name="weightTrainingHours" min="0" max="15" step="1" value="${form.weightTrainingHours}" />
+        ${renderActivityHoursInput('weightTrainingHours', form, 15)}
         <div class="ob-divider"></div>
         <div class="ob-section-label">CARDIOVASCULAR TRAINING</div>
         <div class="ob-hr-label">HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM</div>
-        <div class="ob-slider-label">Total hours per week: <strong data-bind="cardioHours">${form.cardioHours}</strong></div>
-        <input type="range" class="ob-range" name="cardioHours" min="0" max="15" step="1" value="${form.cardioHours}" />`;
+        ${renderActivityHoursInput('cardioHours', form, 15)}`;
 
     case 8:
       return `
@@ -297,8 +336,7 @@ function renderQuestionBody(index, form) {
             <span>${a.icon}</span>
             <span>${a.label}</span>
           </label>`).join('')}
-        <div class="ob-slider-label">Total hours per week: <strong data-bind="fatBurningHours">${form.fatBurningHours}</strong></div>
-        <input type="range" class="ob-range" name="fatBurningHours" min="0" max="20" step="1" value="${form.fatBurningHours}" />
+        ${renderActivityHoursInput('fatBurningHours', form, 20)}
         ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}`;
 
     case 9:
@@ -439,9 +477,9 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, false, true)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'job', field: 'workPhysical' }, false, true)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'job', field: 'workStress' }, false, true)}
-        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
-        ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, { section: 'activity', field: 'cardioHours' }, false, true)}
-        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, { section: 'activity', field: 'fatBurningHours' }, false, true)}
+        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
+        ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, { section: 'activity', field: 'cardioHours' }, false, true)}
+        ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, { section: 'activity', field: 'fatBurningHours' }, false, true)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', { section: 'rhythm', field: 'wake-hour' }, false, true)}
         ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', { section: 'rhythm', field: 'reminders' }, false, true)}
       </div>`;
@@ -459,9 +497,9 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, readOnly)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', base + 5, readOnly)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6, readOnly)}
-        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', base + 7, readOnly)}
-        ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, base + 7, readOnly)}
-        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8, readOnly)}
+        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', base + 7, readOnly)}
+        ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, base + 7, readOnly)}
+        ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8, readOnly)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9, readOnly)}
         ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 9, readOnly)}
       </div>`;
@@ -780,9 +818,13 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours') {
-      const max = input.name === 'fatBurningHours' ? 20 : 15;
-      form[input.name] = Math.min(max, Math.max(0, Number(input.value) || 0));
+      if (input.value === ACTIVITY_HOURS_INSTRUCTION) return;
+      const cleaned = sanitizeActivityHoursInput(input.value);
+      form[input.name] = cleaned;
+      input.classList.toggle('is-instruction', cleaned === '');
+      input.value = cleaned === '' ? ACTIVITY_HOURS_INSTRUCTION : cleaned;
       syncNextButton(obCtx.store, form);
+      input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
       return;
     }
 
@@ -874,12 +916,27 @@ function ensureObDelegation() {
       input.value = '';
       input.classList.remove('is-instruction');
     }
+
+    if (
+      (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours')
+      && input.value === ACTIVITY_HOURS_INSTRUCTION
+    ) {
+      input.value = '';
+      input.classList.remove('is-instruction');
+    }
   });
 
   document.addEventListener('focusout', (e) => {
     const input = e.target;
-    if (!obCtx.store || input.name !== 'heightInches' || !input.closest(flowRoot())) return;
+    if (!obCtx.store || !input.closest(flowRoot())) return;
     const form = obCtx.store.onboardingForm;
+
+    if (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours') {
+      syncActivityHoursInput(input, form);
+      return;
+    }
+
+    if (input.name !== 'heightInches') return;
     const n = Number(form.heightInches);
     if (heightHasValue(n)) {
       form.heightInches = Math.min(84, Math.max(48, Math.round(n)));

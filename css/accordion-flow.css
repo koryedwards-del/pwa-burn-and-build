@@ -461,6 +461,17 @@ html:has(.start-site .artshow-flow) #app {
   accent-color: var(--flame);
 }
 
+.artshow-flow .ob-input-activity-hours.is-instruction {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.artshow-flow .ob-input-activity-hours:not(.is-instruction) {
+  font-style: normal;
+  color: var(--text);
+}
+
 .artshow-flow .pd-input-height.is-instruction {
   font-style: italic;
   color: var(--muted);

@@ -184,6 +184,39 @@ export function wakeTimeFromParts(hour12, minute, ampm) {
   return `${String(h).padStart(2, '0')}:${minute}`;
 }
 
+export const ACTIVITY_HOURS_INSTRUCTION = 'enter the hours each week down to the 1/4 hour (15 minutes)';
+
+export function formatActivityHoursNumber(hours) {
+  const n = Number(hours);
+  if (!Number.isFinite(n)) return '';
+  return Number.isInteger(n) ? String(n) : String(parseFloat(n.toFixed(2)));
+}
+
+export function parseActivityHours(value, max = 15) {
+  if (value === '' || value == null) return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0 || n > max) return null;
+  const quarters = Math.round(n * 4);
+  if (Math.abs(n * 4 - quarters) > 0.001) return null;
+  return quarters / 4;
+}
+
+export function activityHoursHasValue(value, max = 15) {
+  return parseActivityHours(value, max) != null;
+}
+
+export function activityHoursFieldDisplay(value, max = 15) {
+  const parsed = parseActivityHours(value, max);
+  if (parsed != null) return formatActivityHoursNumber(parsed);
+  if (value === '' || value == null) return ACTIVITY_HOURS_INSTRUCTION;
+  return ACTIVITY_HOURS_INSTRUCTION;
+}
+
+export function activityHoursReviewLabel(value, max = 20) {
+  const parsed = parseActivityHours(value, max);
+  return parsed != null ? `${formatActivityHoursNumber(parsed)} hrs/week` : '—';
+}
+
 export function defaultOnboardingForm(profile) {
   const p = profile || {};
   const work = reverseWorkIntensity(p.workIntensity ?? 2);
@@ -202,8 +235,8 @@ export function defaultOnboardingForm(profile) {
     fatSource: p.fatPercent > 0 ? 'recent' : '',
     workPhysical: p.workPhysical || work.physical,
     workStress: p.workStress || work.stress,
-    weightTrainingHours: p.weightTrainingHours ?? 0,
-    cardioHours: p.cardioHours ?? 0,
+    weightTrainingHours: p.weightTrainingHours != null ? p.weightTrainingHours : '',
+    cardioHours: p.cardioHours != null ? p.cardioHours : '',
     fatBurningHours: p.fatBurningHours ?? 3,
     wakeTime: p.wakeTime || '06:00',
     remindersEnabled: p.remindersEnabled !== false,
@@ -227,9 +260,9 @@ export function profileFromForm(form) {
     workIntensity: intensity,
     workPhysical: form.workPhysical,
     workStress: form.workStress,
-    weightTrainingHours: Number(form.weightTrainingHours),
-    cardioHours: Number(form.cardioHours),
-    fatBurningHours: Number(form.fatBurningHours),
+    weightTrainingHours: parseActivityHours(form.weightTrainingHours, 15) ?? 0,
+    cardioHours: parseActivityHours(form.cardioHours, 15) ?? 0,
+    fatBurningHours: parseActivityHours(form.fatBurningHours, 20) ?? 0,
     wakeTime: form.wakeTime,
     remindersEnabled: !!form.remindersEnabled,
     lowActivities: form.lowActivities || [],
@@ -279,6 +312,10 @@ export function canProceed(phase, form) {
         case 4: return Number(form.fatPercentText) > 0 && form.fatSource;
         case 5: return !!form.workPhysical;
         case 6: return !!form.workStress;
+        case 7:
+          return activityHoursHasValue(form.weightTrainingHours, 15)
+            && activityHoursHasValue(form.cardioHours, 15);
+        case 8: return activityHoursHasValue(form.fatBurningHours, 20);
         default: return true;
       }
     default:

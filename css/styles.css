@@ -1494,6 +1494,17 @@ a.btn-secondary {
   margin-bottom: 16px;
 }
 
+.ob-input-activity-hours.is-instruction {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ob-input-activity-hours:not(.is-instruction) {
+  font-style: normal;
+  color: var(--text);
+}
+
 .ob-range {
   width: 100%;
   accent-color: var(--flame);
