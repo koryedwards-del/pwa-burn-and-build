@@ -217,15 +217,14 @@ function restoreBuiltPackage() {
 }
 
 function renderPlanReady() {
-  const name = programName();
   const paid = store.accessGranted;
   let lead;
   if (paid) {
-    lead = `Your personalized food plan${name ? ` for ${name}` : ''} is ready in the Burn &amp; Build app.`;
+    lead = 'Your personalized food plan is ready in the Burn &amp; Build app.';
   } else if (store.saveError) {
-    lead = `Your food plan${name ? ` for ${name}` : ''} is ready on this device. Save it to your account, then complete checkout.`;
+    lead = 'Your food plan is ready on this device. Save it to your account, then complete checkout.';
   } else {
-    lead = `Your personalized food plan${name ? ` for ${name}` : ''} is saved. Complete checkout to unlock the app.`;
+    lead = 'Your personalized food plan is saved. Complete checkout to unlock the app.';
   }
 
   const payBlock = paid ? `
