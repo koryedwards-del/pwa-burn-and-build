@@ -573,6 +573,7 @@ async function savePlanToServer() {
     store.builtPackage.program.id = saved.programId;
     persistBuiltPackage();
   }
+  persistAppEmail(store.email);
   store.saveError = '';
   return true;
 }

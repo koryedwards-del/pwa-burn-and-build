@@ -112,6 +112,51 @@
   padding: 24px;
 }
 
+.home-load-plan {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 8px 0 24px;
+}
+
+.home-load-lead {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #ccc;
+  text-align: center;
+  margin: 0 0 8px;
+}
+
+.home-load-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.home-load-plan .import-error {
+  margin: 0;
+}
+
+.home-load-create {
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--flame);
+  text-decoration: none;
+}
+
+.home-load-create:active {
+  opacity: 0.75;
+}
+
 .home-loading .home-logo {
   width: min(240px, 70vw);
 }

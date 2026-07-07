@@ -67,6 +67,9 @@ const store = {
   programHistoryError: null,
   programHistoryOpenId: null,
   expandedNavButton: null,
+  loadError: null,
+  emailError: null,
+  loadBusy: false,
 };
 
 function hasActiveProgram() {
@@ -291,9 +294,35 @@ async function syncProgramFromServer() {
   if (!isValidEmail(email)) return false;
   const result = await fetchProgramFromServer(email);
   if (result.ok && result.package) {
+    store.loadError = null;
     return applyImportedProgram(result.package);
   }
+  store.loadError = result.message || 'No food plan found for this email.';
   return false;
+}
+
+async function submitLoadPlan() {
+  const input = document.querySelector('[name="loadPlanEmail"]');
+  const email = (input?.value || getAppEmail() || '').trim();
+  if (!isValidEmail(email)) {
+    store.emailError = 'Enter a valid email address.';
+    render();
+    input?.focus();
+    return;
+  }
+  store.emailError = '';
+  store.loadError = null;
+  store.loadBusy = true;
+  persistAppEmail(email);
+  render();
+  const ok = await syncProgramFromServer();
+  store.loadBusy = false;
+  if (!ok && !store.loadError) {
+    store.loadError = 'No food plan found for this email.';
+  }
+  store.expandedNavButton = null;
+  render();
+  if (ok) input?.blur();
 }
 
 function fatPointsConsumed() {
@@ -609,13 +638,52 @@ function canOpenNav(nav) {
 
 function renderHomeNavButton(nav) {
   const label = NAV_MENU_LABELS[nav];
-  if (store.expandedNavButton === nav && !canOpenNav(nav)) {
-    return `<a href="../createyourfoodplan/" class="btn-home btn-home-build">Tap here to create your custom food plan</a>`;
-  }
   if (canOpenNav(nav)) {
     return `<button type="button" class="btn-home" data-nav="${nav}">${label}</button>`;
   }
   return `<button type="button" class="btn-home" data-expand-nav="${nav}">${label}</button>`;
+}
+
+function renderLoadPlanHome() {
+  return `
+    <div class="screen home-dashboard">
+      <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
+      <div class="home-logo-wrap">
+        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
+      </div>
+      <div class="home-load-plan">
+        <p class="home-load-lead">Enter the email you used to create your food plan.</p>
+        ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
+        ${store.emailError ? `<div class="import-error">${store.emailError}</div>` : ''}
+        <label class="home-load-label" for="load-plan-email">Email address</label>
+        <input id="load-plan-email" class="ob-input ob-input-lg" type="email" name="loadPlanEmail" value="${getAppEmail()}" placeholder="you@example.com" autocomplete="email" inputmode="email" />
+        <button type="button" class="btn-home" data-load-plan ${store.loadBusy ? 'disabled' : ''}>${store.loadBusy ? 'Loading…' : 'Load my food plan'}</button>
+        <a href="../createyourfoodplan/" class="home-load-create">Need a new plan? Create one →</a>
+      </div>
+      <p class="home-site-link"><a href="https://gettheburnandbuildapp.com/">Burn &amp; Build website</a></p>
+      <p class="home-footer">Stay consistent. Eat on time.</p>
+    </div>`;
+}
+
+function renderHome() {
+  if (!hasActiveProgram()) {
+    return renderLoadPlanHome();
+  }
+  return `
+    <div class="screen home-dashboard">
+      <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
+      <div class="home-logo-wrap">
+        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
+      </div>
+      <div class="home-btn-stack">
+        ${renderHomeNavButton('plan')}
+        ${renderHomeNavButton('grocery')}
+        ${renderHomeNavButton('projections')}
+        ${renderHomeNavButton('previous-plans')}
+      </div>
+      <p class="home-site-link"><a href="https://gettheburnandbuildapp.com/">Burn &amp; Build website</a></p>
+      <p class="home-footer">Stay consistent. Eat on time.</p>
+    </div>`;
 }
 
 function renderWakePickerSettings(wakeTime) {
@@ -660,24 +728,6 @@ function renderSettings() {
           <a href="../createyourfoodplan/" class="btn-primary settings-create-link">Create your food plan</a>
         `}
       </div>
-    </div>`;
-}
-
-function renderHome() {
-  return `
-    <div class="screen home-dashboard">
-      <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
-      <div class="home-logo-wrap">
-        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
-      </div>
-      <div class="home-btn-stack">
-        ${renderHomeNavButton('plan')}
-        ${renderHomeNavButton('grocery')}
-        ${renderHomeNavButton('projections')}
-        ${renderHomeNavButton('previous-plans')}
-      </div>
-      <p class="home-site-link"><a href="https://gettheburnandbuildapp.com/">Burn &amp; Build website</a></p>
-      <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;
 }
 
@@ -1257,6 +1307,17 @@ function bindCoachCarousel() {
 }
 
 function bindEvents() {
+  document.querySelector('[data-load-plan]')?.addEventListener('click', () => {
+    submitLoadPlan();
+  });
+
+  document.querySelector('[name="loadPlanEmail"]')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submitLoadPlan();
+    }
+  });
+
   document.querySelectorAll('[data-expand-nav]').forEach((btn) => {
     btn.addEventListener('click', () => {
       store.expandedNavButton = btn.dataset.expandNav;
