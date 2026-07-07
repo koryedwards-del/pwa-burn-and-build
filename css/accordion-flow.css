@@ -472,6 +472,18 @@ html:has(.start-site .artshow-flow) #app {
   color: var(--text);
 }
 
+.artshow-flow .pd-box.is-invalid {
+  border-color: rgba(248, 113, 113, 0.75);
+}
+
+.artshow-flow .pd-input-birth.is-invalid {
+  color: #fca5a5;
+}
+
+.artshow-flow .pd-hint-error {
+  color: #f87171;
+}
+
 .artshow-flow .pd-input-height.is-instruction {
   font-style: italic;
   color: var(--muted);

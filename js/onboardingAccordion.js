@@ -1,6 +1,6 @@
 import {
   canProceed,
-} from './onboardingEngine.js?v=79';
+} from './onboardingEngine.js?v=80';
 import {
   renderQuestionBody,
   renderConfirmBody,
@@ -9,7 +9,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=79';
+} from './onboardingUI.js?v=80';
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal', personal: true },

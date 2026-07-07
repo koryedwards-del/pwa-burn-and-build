@@ -1419,6 +1419,17 @@ a.btn-secondary {
   font-variant-numeric: tabular-nums;
 }
 
+.ob-input-birth.is-invalid {
+  color: #fca5a5;
+}
+
+.ob-field-error {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #f87171;
+  text-align: center;
+}
+
 .ob-range-readonly {
   pointer-events: none;
 }

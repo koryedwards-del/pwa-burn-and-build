@@ -24,13 +24,15 @@ import {
   birthDateCursorPosition,
   birthDateDigits,
   parseBirthDateText,
+  birthDateEntryError,
+  birthDateIsValid,
   ACTIVITY_HOURS_INSTRUCTION,
   activityHoursHasValue,
   activityHoursFieldDisplay,
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=79';
+} from './onboardingEngine.js?v=80';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -257,9 +259,25 @@ function syncBirthDateInput(input, form) {
   input.value = birthDateMaskDisplay(form.birthDateText);
   const pos = birthDateCursorPosition(digits.length);
   input.setSelectionRange(pos, pos);
+  syncBirthDateValidation(input, form);
   syncAgeFromBirthDate(form, input.closest(flowRoot()));
   syncNextButton(obCtx.store, form);
   input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function syncBirthDateValidation(input, form) {
+  const row = input.closest('.pd-row') || input.closest('.ob-stage-body') || input.parentElement;
+  const box = input.closest('.pd-box');
+  const hint = row?.querySelector('[data-birth-date-error]');
+  const error = birthDateEntryError(form.birthDateText);
+  const showError = !!error;
+  box?.classList.toggle('is-invalid', showError);
+  input.classList.toggle('is-invalid', showError);
+  input.setAttribute('aria-invalid', showError ? 'true' : 'false');
+  if (hint) {
+    hint.hidden = !showError;
+    hint.textContent = error || '';
+  }
 }
 
 function renderQuestionBody(index, form) {
@@ -286,7 +304,8 @@ function renderQuestionBody(index, form) {
     case 2:
       return `
         <div class="ob-field-label">DATE OF BIRTH</div>
-        <input class="ob-input ob-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${birthDateMaskDisplay(form.birthDateText)}" autocomplete="bday" />
+        <input class="ob-input ob-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${birthDateMaskDisplay(form.birthDateText)}" autocomplete="bday" aria-describedby="ob-birth-date-error" />
+        <p class="ob-field-error" id="ob-birth-date-error" data-birth-date-error hidden>Enter a valid date (MM/DD/YYYY).</p>
         ${infoBox('❤️', 'Your birth date is used to calculate your personal fat burning (60–70%) and cardio training (70–85%) heart rate zones.')}`;
 
     case 3:
@@ -578,6 +597,7 @@ export function refreshPersonalDetailFields(form) {
     const digits = birthDateDigits(form.birthDateText);
     form.birthDateText = formatBirthDateDigits(digits);
     input.value = birthDateMaskDisplay(form.birthDateText);
+    syncBirthDateValidation(input, form);
   });
   document.querySelectorAll(`${flowRoot()} [name="heightInches"]`).forEach((input) => {
     const hasValue = heightHasValue(form.heightInches);
@@ -610,11 +630,9 @@ export function renderCollapsiblePanel(title, innerHtml, open = true, complete =
 }
 
 export function personalSectionValid(form) {
-  const iso = parseBirthDateText(form.birthDateText);
-  const age = iso ? ageFromBirthDate(iso) : null;
   return form.preferredName.trim().length > 0
     && !!form.sex
-    && age != null && age >= 13 && age <= 99
+    && birthDateIsValid(form.birthDateText)
     && heightHasValue(form.heightInches)
     && Number(form.weightText) > 0;
 }
@@ -659,8 +677,9 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         <div class="pd-row">
           <label class="pd-label" for="pd-age">Birth date</label>
           <div class="pd-box">
-            <input id="pd-age" class="pd-input pd-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${birthDateMaskDisplay(form.birthDateText)}" autocomplete="bday" />
+            <input id="pd-age" class="pd-input pd-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${birthDateMaskDisplay(form.birthDateText)}" autocomplete="bday" aria-describedby="pd-birth-date-error" />
           </div>
+          <p class="pd-hint pd-hint-error" id="pd-birth-date-error" data-birth-date-error hidden>Enter a valid date (MM/DD/YYYY).</p>
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-height">Height</label>

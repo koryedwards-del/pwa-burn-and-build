@@ -127,6 +127,23 @@ export function parseBirthDateText(text) {
   return iso;
 }
 
+export function birthDateIsComplete(text) {
+  return birthDateDigits(text).length === 8;
+}
+
+export function birthDateEntryError(text) {
+  if (!birthDateIsComplete(text)) return null;
+  const iso = parseBirthDateText(text);
+  if (!iso) return 'Enter a valid date (MM/DD/YYYY).';
+  const { min, max } = birthDateFieldBounds();
+  if (iso < min || iso > max) return 'Age must be between 13 and 99.';
+  return null;
+}
+
+export function birthDateIsValid(text) {
+  return birthDateIsComplete(text) && birthDateEntryError(text) === null;
+}
+
 export function defaultBirthDateFromAge(age) {
   const today = new Date();
   const born = new Date(today.getFullYear() - age, today.getMonth(), today.getDate());
@@ -305,9 +322,7 @@ export function canProceed(phase, form) {
       switch (phase.index) {
         case 0: return form.preferredName.trim().length > 0;
         case 2: {
-          const iso = parseBirthDateText(form.birthDateText);
-          const age = iso ? ageFromBirthDate(iso) : null;
-          return age != null && age >= 13 && age <= 99;
+          return birthDateIsValid(form.birthDateText);
         }
         case 3: return Number(form.weightText) > 0;
         case 4: return Number(form.fatPercentText) > 0 && form.fatSource;
