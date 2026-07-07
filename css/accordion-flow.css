@@ -463,30 +463,27 @@ html:has(.start-site .artshow-flow) #app {
 }
 
 .artshow-flow .pd-box-gender {
-  display: flex;
-  padding: 0;
-  overflow: hidden;
+  gap: 24px;
 }
 
-.artshow-flow .pd-gender-btn {
-  flex: 1;
-  border: none;
-  background: transparent;
-  color: var(--muted);
+.artshow-flow .pd-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 0;
   font-size: 15px;
   font-weight: 500;
-  padding: 10px 8px;
-  min-height: 44px;
-}
-
-.artshow-flow .pd-gender-btn.active {
-  background: rgba(232, 114, 42, 0.16);
   color: var(--text);
-  font-weight: 600;
+  cursor: pointer;
 }
 
-.artshow-flow .pd-gender-btn + .pd-gender-btn {
-  border-left: 1px solid rgba(255, 255, 255, 0.14);
+.artshow-flow .pd-radio input[type="radio"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--flame);
+  cursor: pointer;
 }
 
 .artshow-flow .pd-unit {

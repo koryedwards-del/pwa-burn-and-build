@@ -583,9 +583,15 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         </div>
         <div class="pd-row">
           <span class="pd-label" id="pd-sex-label">Gender</span>
-          <div class="pd-box pd-box-gender" id="pd-sex" role="group" aria-labelledby="pd-sex-label">
-            <button type="button" class="pd-gender-btn ${form.sex === 'Male' ? 'active' : ''}" data-ob-sex="Male">Male</button>
-            <button type="button" class="pd-gender-btn ${form.sex === 'Female' ? 'active' : ''}" data-ob-sex="Female">Female</button>
+          <div class="pd-box pd-box-gender" id="pd-sex" role="radiogroup" aria-labelledby="pd-sex-label">
+            <label class="pd-radio">
+              <input type="radio" name="sex" value="Male" ${form.sex === 'Male' ? 'checked' : ''} />
+              <span>Male</span>
+            </label>
+            <label class="pd-radio">
+              <input type="radio" name="sex" value="Female" ${form.sex === 'Female' ? 'checked' : ''} />
+              <span>Female</span>
+            </label>
           </div>
         </div>
         <div class="pd-row">
@@ -744,7 +750,7 @@ function ensureObDelegation() {
     if (!obCtx.store || !e.target.closest(flowRoot())) return;
 
     const target = e.target;
-    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check')) return;
+    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio')) return;
 
     const store = obCtx.store;
     const form = store.onboardingForm;
@@ -841,6 +847,7 @@ function ensureObDelegation() {
     if (input.name === 'sex') {
       form.sex = input.value;
       syncNextButton(obCtx.store, form);
+      input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
       return;
     }
 

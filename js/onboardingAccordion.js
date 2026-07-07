@@ -315,7 +315,7 @@ function ensureAccordionDelegation() {
       return;
     }
 
-    if (e.target.closest('input, select, textarea, label.ob-radio, label.ob-check')) return;
+    if (e.target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio')) return;
 
     const cont = e.target.closest('[data-acc-continue]');
     if (!cont || cont.disabled || cont.classList.contains('disabled')) return;
