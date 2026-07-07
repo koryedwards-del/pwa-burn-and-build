@@ -1,7 +1,5 @@
 import {
-  WELCOME_COUNT,
   canProceed,
-  heightDisplay,
   welcomeScreens,
 } from './onboardingEngine.js';
 import { renderQuestionBody, renderConfirmBody } from './onboardingUI.js';
@@ -52,12 +50,10 @@ const SECTIONS = [
   },
 ];
 
+const REVIEW_INDEX = SECTIONS.length - 1;
+
 function sectionIndex(id) {
   return SECTIONS.findIndex((s) => s.id === id);
-}
-
-function sectionForQuestion(qi) {
-  return SECTIONS.find((s) => s.questions?.includes(qi))?.id || 'about';
 }
 
 function sectionValid(section, form) {
@@ -65,20 +61,12 @@ function sectionValid(section, form) {
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
 }
 
-function deriveAccordionMax(form) {
-  let max = 0;
-  const hasProgress = !!(form.preferredName?.trim() || Number(form.weightText) > 0);
-  for (let i = 0; i < SECTIONS.length; i += 1) {
-    const section = SECTIONS[i];
-    if (section.intro) {
-      if (hasProgress) max = 1;
-      continue;
-    }
-    if (section.review) break;
-    if (sectionValid(section, form)) max = i + 1;
-    else break;
+function currentSection(store) {
+  if (store.accordionSection === 'review' && (store.accordionMax ?? 0) >= REVIEW_INDEX) {
+    return { section: SECTIONS[REVIEW_INDEX], index: REVIEW_INDEX };
   }
-  return max;
+  const index = Math.min(store.accordionMax ?? 0, REVIEW_INDEX - 1);
+  return { section: SECTIONS[index], index };
 }
 
 function renderIntroBody() {
@@ -100,7 +88,7 @@ function renderIntroBody() {
 function renderSectionBody(section, form) {
   if (section.intro) return renderIntroBody();
   if (section.review) {
-    return `<div class="ob-confirm">${renderConfirmBody(form, false)}</div>`;
+    return `<div class="ob-confirm">${renderConfirmBody(form, false, { readOnly: true })}</div>`;
   }
   return section.questions.map((qi) => `
     <div class="acc-question" data-question="${qi}">
@@ -122,14 +110,13 @@ function renderProgressRail(currentIndex) {
     </div>`;
 }
 
-function renderFrame(section, form, index, maxUnlocked) {
-  const canContinue = index <= maxUnlocked && sectionValid(section, form);
-  const step = String(index + 1).padStart(2, '0');
+function renderFrame(section, form, index) {
+  const canContinue = sectionValid(section, form);
 
   return `
     <article class="acc-frame" data-acc-section="${section.id}">
       <div class="acc-placard">
-        <span class="acc-step">${step}</span>
+        <span class="acc-step">${String(index + 1).padStart(2, '0')}</span>
         <span class="acc-frame-title">${section.frame}</span>
       </div>
       <div class="acc-frame-body">
@@ -145,21 +132,16 @@ function renderFrame(section, form, index, maxUnlocked) {
 
 export function renderAccordion(store) {
   const form = store.onboardingForm;
-  const openId = store.accordionSection || 'intro';
-  const openIndex = Math.max(0, sectionIndex(openId));
-  const section = SECTIONS[openIndex] || SECTIONS[0];
-  const maxUnlocked = store.accordionMax ?? deriveAccordionMax(form);
-  const showBack = openIndex > 0;
+  const { section, index } = currentSection(store);
 
   return `
     <div class="accordion-flow artshow-flow">
       <div class="acc-stage">
-        ${renderProgressRail(openIndex)}
+        ${renderProgressRail(index)}
         <div class="acc-stage-toolbar">
-          ${showBack ? '<button type="button" class="acc-back" data-acc-back>← Back</button>' : '<span class="acc-back-spacer"></span>'}
           <span class="acc-stage-label">${section.title}</span>
         </div>
-        ${renderFrame(section, form, openIndex, maxUnlocked)}
+        ${renderFrame(section, form, index)}
       </div>
     </div>`;
 }
@@ -171,13 +153,10 @@ function syncAccordionButtons() {
   const store = accordionCtx.store;
   const form = store?.onboardingForm;
   if (!form) return;
-  const openId = store.accordionSection || 'intro';
-  const openIndex = sectionIndex(openId);
-  const section = SECTIONS[openIndex];
-  const maxUnlocked = store.accordionMax ?? deriveAccordionMax(form);
+  const { section } = currentSection(store);
   const btn = document.querySelector('.artshow-flow [data-acc-continue]');
   if (!btn || !section) return;
-  const ok = openIndex <= maxUnlocked && sectionValid(section, form);
+  const ok = sectionValid(section, form);
   btn.disabled = !ok;
   btn.classList.toggle('disabled', !ok);
 }
@@ -197,45 +176,23 @@ function ensureAccordionDelegation() {
     if (!accordionCtx.store || !e.target.closest('.artshow-flow')) return;
     if (e.target.closest('input, select, textarea, label.ob-radio, label.ob-check')) return;
 
-    const store = accordionCtx.store;
-    const openId = store.accordionSection || 'intro';
-    const openIndex = sectionIndex(openId);
-    const maxUnlocked = store.accordionMax ?? deriveAccordionMax(store.onboardingForm);
-
-    const backBtn = e.target.closest('[data-acc-back]');
-    if (backBtn && openIndex > 0) {
-      store.accordionSection = SECTIONS[openIndex - 1].id;
-      accordionCtx.render?.();
-      return;
-    }
-
-    const gotoBtn = e.target.closest('[data-ob-goto]');
-    if (gotoBtn) {
-      const page = Number(gotoBtn.dataset.obGoto);
-      const qi = page - WELCOME_COUNT;
-      store.accordionSection = sectionForQuestion(qi);
-      accordionCtx.render?.();
-      return;
-    }
-
     const cont = e.target.closest('[data-acc-continue]');
     if (!cont || cont.disabled || cont.classList.contains('disabled')) return;
 
-    const sectionId = cont.dataset.accContinue;
-    const section = SECTIONS.find((s) => s.id === sectionId);
-    const idx = sectionIndex(sectionId);
-    if (!section || idx > maxUnlocked || !sectionValid(section, store.onboardingForm)) return;
+    const store = accordionCtx.store;
+    const { section, index } = currentSection(store);
+    if (cont.dataset.accContinue !== section.id || !sectionValid(section, store.onboardingForm)) return;
 
     if (section.review) {
       accordionCtx.onConfirm?.(store.onboardingForm);
       return;
     }
 
-    const next = SECTIONS[idx + 1];
+    const next = SECTIONS[index + 1];
     if (next?.id === 'review' && accordionCtx.onBeforeReview && !accordionCtx.onBeforeReview()) return;
 
-    store.accordionMax = Math.max(maxUnlocked, idx + 1);
-    store.accordionSection = next?.id || 'review';
+    store.accordionMax = index + 1;
+    store.accordionSection = next.id;
     accordionCtx.render?.();
   });
 }
@@ -250,12 +207,7 @@ export function bindAccordionEvents(store, { render, onConfirm, onBeforeReview }
 }
 
 export function syncAccordionSection(store) {
-  if (!store.accordionSection) store.accordionSection = 'intro';
-  if (store.accordionMax == null) {
-    store.accordionMax = deriveAccordionMax(store.onboardingForm);
-  }
-  const idx = sectionIndex(store.accordionSection);
-  if (idx > (store.accordionMax ?? 0) && store.accordionSection !== 'review') {
-    store.accordionSection = SECTIONS[store.accordionMax ?? 0]?.id || 'intro';
-  }
+  if (store.accordionMax == null) store.accordionMax = 0;
+  if (store.accordionSection === 'review') return;
+  store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
 }

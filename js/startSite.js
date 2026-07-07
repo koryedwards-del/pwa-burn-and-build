@@ -585,6 +585,7 @@ function bindGlobal() {
       if (store.onboardingForm) {
         store.phase = 'onboarding';
         store.accordionSection = 'rhythm';
+        store.accordionMax = 5;
         store.emailError = '';
         render();
         return;

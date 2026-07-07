@@ -331,18 +331,29 @@ function renderFatInput(form, source) {
     </div>`;
 }
 
-function confirmRow(label, value, subtitle, editPage) {
-  return `
-    <button type="button" class="ob-confirm-row" ${editPage != null ? `data-ob-goto="${editPage}"` : ''}>
+function confirmRow(label, value, subtitle, editPage, readOnly) {
+  if (readOnly || editPage == null) {
+    return `
+    <div class="ob-confirm-row ob-confirm-row-readonly">
       <div>
         <div class="ob-confirm-label">${label}</div>
         ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
       </div>
-      <div class="ob-confirm-value">${value}${editPage != null ? ' <span class="ob-edit">Edit</span>' : ''}</div>
+      <div class="ob-confirm-value">${value}</div>
+    </div>`;
+  }
+  return `
+    <button type="button" class="ob-confirm-row" data-ob-goto="${editPage}">
+      <div>
+        <div class="ob-confirm-label">${label}</div>
+        ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
+      </div>
+      <div class="ob-confirm-value">${value} <span class="ob-edit">Edit</span></div>
     </button>`;
 }
 
-function renderConfirmBody(form, isEditMode) {
+function renderConfirmBody(form, isEditMode, options = {}) {
+  const readOnly = !!options.readOnly;
   const weight = Number(form.weightText);
   const fat = Number(form.fatPercentText);
   const lbm = weight * (1 - fat / 100);
@@ -353,20 +364,20 @@ function renderConfirmBody(form, isEditMode) {
 
   return `
       <div class="ob-confirm-rows">
-        ${confirmRow('NAME', form.preferredName || '—', '', base)}
-        ${confirmRow('SEX', form.sex, '', base)}
-        ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', base + 1)}
-        ${confirmRow('AGE', String(form.age), '', base + 2)}
-        ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', base + 3)}
-        ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', base + 4)}
-        ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null)}
-        ${confirmRow('WORKDAY', phys?.label || '—', '', base + 5)}
-        ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6)}
-        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', base + 7)}
-        ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, base + 7)}
-        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8)}
-        ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9)}
-        ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 9)}
+        ${confirmRow('NAME', form.preferredName || '—', '', base, readOnly)}
+        ${confirmRow('SEX', form.sex, '', base, readOnly)}
+        ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', base + 1, readOnly)}
+        ${confirmRow('AGE', String(form.age), '', base + 2, readOnly)}
+        ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', base + 3, readOnly)}
+        ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', base + 4, readOnly)}
+        ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, readOnly)}
+        ${confirmRow('WORKDAY', phys?.label || '—', '', base + 5, readOnly)}
+        ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6, readOnly)}
+        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', base + 7, readOnly)}
+        ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, base + 7, readOnly)}
+        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8, readOnly)}
+        ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9, readOnly)}
+        ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 9, readOnly)}
       </div>`;
 }
 
@@ -541,6 +552,7 @@ function ensureObDelegation() {
 
     const gotoBtn = e.target.closest('[data-ob-goto]');
     if (gotoBtn) {
+      if (e.target.closest('.artshow-flow')) return;
       store.onboardingPage = Number(gotoBtn.dataset.obGoto);
       obCtx.render();
       return;
