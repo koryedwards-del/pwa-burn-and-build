@@ -588,6 +588,7 @@ function renderHome() {
         ${renderHomeNavButton('grocery')}
         ${renderHomeNavButton('projections')}
         ${renderHomeNavButton('previous-plans')}
+        <p class="home-site-link"><a href="https://gettheburnandbuildapp.com/">gettheburnandbuildapp.com</a></p>
       </div>
       <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;

@@ -77,6 +77,21 @@
   font-size: 16px;
 }
 
+.home-site-link {
+  text-align: center;
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+
+.home-site-link a {
+  color: var(--flame);
+  text-decoration: none;
+}
+
+.home-site-link a:active {
+  opacity: 0.75;
+}
+
 .home-dashboard .home-footer {
   flex-shrink: 0;
   text-align: center;
