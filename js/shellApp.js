@@ -12,7 +12,12 @@ import {
   groupGroceryItems,
 } from './groceryEngine.js';
 import { bindOnboardingEvents, initOnboardingForm, renderOnboarding } from './onboardingUI.js';
-import { totalOnboardingPages } from './onboardingEngine.js';
+import {
+  formatWakeDisplay,
+  parseWakeTime,
+  totalOnboardingPages,
+  wakeTimeFromParts,
+} from './onboardingEngine.js';
 import { computeWhatsPossible } from './previewCalculator.js';
 import {
   getProgramDay,
@@ -21,6 +26,7 @@ import {
   parseImportFromUrl,
   parseProgramPackageJson,
   planFromPackage,
+  wakeTimeFromProgram,
 } from './programPackage.js';
 import {
   fetchProgramByIdFromServer,
@@ -85,6 +91,7 @@ function load() {
     if (prog) store.program = JSON.parse(prog);
     const settings = localStorage.getItem('bnb_settings');
     if (settings) store.settings = JSON.parse(settings);
+    ensureSettings();
     const p = localStorage.getItem('bnb_profile');
     if (p) store.profile = JSON.parse(p);
     const e = localStorage.getItem('bnb_entries');
@@ -116,6 +123,22 @@ function saveProgram() {
 
 function saveSettings() {
   if (store.settings) localStorage.setItem('bnb_settings', JSON.stringify(store.settings));
+}
+
+function ensureSettings() {
+  if (!store.settings || typeof store.settings !== 'object') {
+    store.settings = {};
+  }
+}
+
+function canEditWakeTime() {
+  return hasActiveProgram() || !!getPlan();
+}
+
+function currentWakeTime() {
+  ensureSettings();
+  if (store.program) return wakeTimeFromProgram(store.program, store.settings);
+  return store.settings.wakeTime || store.profile?.wakeTime || '08:00';
 }
 
 function displayName() {
@@ -583,9 +606,55 @@ function renderHomeNavButton(nav) {
   return `<button type="button" class="btn-home" data-expand-nav="${nav}">${label}</button>`;
 }
 
+function renderWakePickerSettings(wakeTime) {
+  const { hour12, minute, ampm } = parseWakeTime(wakeTime);
+  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+  const hourOpts = hours.map((h) => `<option value="${h}" ${h === hour12 ? 'selected' : ''}>${h}</option>`).join('');
+  const minOpts = minutes.map((m) => `<option value="${m}" ${m === minute ? 'selected' : ''}>${m}</option>`).join('');
+  return `
+    <div class="settings-wake-block">
+      <div class="settings-field-label">Wake time</div>
+      <p class="settings-field-desc">Sets breakfast, lunch, dinner, and snack times on your daily food plan.</p>
+      <div class="ob-wake-picker">
+        <select class="ob-select" data-wake-part="hour" aria-label="Wake hour">${hourOpts}</select>
+        <span class="ob-wake-colon">:</span>
+        <select class="ob-select" data-wake-part="minute" aria-label="Wake minute">${minOpts}</select>
+        <select class="ob-select" data-wake-part="ampm" aria-label="AM or PM">
+          <option value="AM" ${ampm === 'AM' ? 'selected' : ''}>AM</option>
+          <option value="PM" ${ampm === 'PM' ? 'selected' : ''}>PM</option>
+        </select>
+      </div>
+      <div class="ob-wake-display settings-wake-display">${formatWakeDisplay(wakeTime)}</div>
+    </div>`;
+}
+
+function renderSettings() {
+  const canEdit = canEditWakeTime();
+  const wakeTime = currentWakeTime();
+  return `
+    <div class="screen settings-screen">
+      <div class="plan-header settings-header">
+        <button type="button" class="back-btn settings-back" data-nav="home" aria-label="Back">←</button>
+        <h1>Settings</h1>
+      </div>
+      <div class="settings-body">
+        ${canEdit ? `
+          ${renderWakePickerSettings(wakeTime)}
+          <button type="button" class="btn-primary settings-save" data-save-wake>Save wake time</button>
+          <p class="settings-note">Wake time is the only setting you can change here. To update servings or activity, create a new food plan.</p>
+        ` : `
+          <p class="settings-empty">Open or create a food plan first — wake time controls when your meals are scheduled each day.</p>
+          <a href="../createyourfoodplan/" class="btn-primary settings-create-link">Create your food plan</a>
+        `}
+      </div>
+    </div>`;
+}
+
 function renderHome() {
   return `
     <div class="screen home-dashboard">
+      <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       <div class="home-logo-wrap">
         <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>
@@ -1109,6 +1178,7 @@ function render() {
   else if (store.screen === 'projections') root.innerHTML = renderProjections();
   else if (store.screen === 'pro-tips') root.innerHTML = renderProTips();
   else if (store.screen === 'previous-plans') root.innerHTML = renderPreviousPlans();
+  else if (store.screen === 'settings') root.innerHTML = renderSettings();
   else root.innerHTML = renderHome();
   bindEvents();
   if (store.screen === 'onboarding') {
@@ -1214,6 +1284,30 @@ function bindEvents() {
         row.parentElement.querySelector('input[type=hidden]').value = btn.dataset.val;
       });
     });
+  });
+
+  document.querySelectorAll('[data-wake-part]').forEach((sel) => {
+    sel.addEventListener('change', () => {
+      const hour = document.querySelector('[data-wake-part="hour"]')?.value;
+      const minute = document.querySelector('[data-wake-part="minute"]')?.value;
+      const ampm = document.querySelector('[data-wake-part="ampm"]')?.value;
+      if (!hour || !minute || !ampm) return;
+      const display = document.querySelector('.settings-wake-display');
+      if (display) display.textContent = formatWakeDisplay(wakeTimeFromParts(hour, minute, ampm));
+    });
+  });
+
+  document.querySelector('[data-save-wake]')?.addEventListener('click', () => {
+    const hour = document.querySelector('[data-wake-part="hour"]')?.value;
+    const minute = document.querySelector('[data-wake-part="minute"]')?.value;
+    const ampm = document.querySelector('[data-wake-part="ampm"]')?.value;
+    if (!hour || !minute || !ampm) return;
+    ensureSettings();
+    store.settings.wakeTime = wakeTimeFromParts(hour, minute, ampm);
+    saveSettings();
+    store.expandedMeal = null;
+    store.screen = 'home';
+    render();
   });
 
   document.querySelectorAll('[data-reveal-fats]').forEach((btn) => {

@@ -1,6 +1,6 @@
 /** My Plan PWA service worker */
 
-const CACHE = 'bnb-myplan-v6';
+const CACHE = 'bnb-myplan-v7';
 const ASSETS = [
   './',
   './index.html',
