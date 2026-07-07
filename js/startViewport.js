@@ -17,7 +17,7 @@ function updateDock() {
 }
 
 function scrollFieldIntoView(input) {
-  const stage = input.closest('.ob-stage, .focus-unlock-scroll');
+  const stage = input.closest('.ob-stage, .focus-unlock-scroll, .chat-thread');
   if (!stage) {
     input.scrollIntoView({ block: 'center', inline: 'nearest' });
     return;

@@ -439,7 +439,7 @@ export function initOnboardingForm(store) {
 export { profileFromForm, onboardingPhase, WELCOME_COUNT, renderQuestionBody, renderConfirmBody };
 
 function flowRoot() {
-  return '.ob-flow, .accordion-flow';
+  return '.ob-flow, .accordion-flow, .chat-flow';
 }
 
 function syncNextButton(store, form) {
@@ -466,12 +466,12 @@ function syncAgeFromBirthDate(form, flow) {
 function updateBoundDisplays(name, value) {
   const num = Number(value);
   const sel = `[data-bind="${name}"]`;
-  document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}`).forEach((el) => {
+  document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}, .chat-flow ${sel}`).forEach((el) => {
     if (el.dataset.format === 'height') el.textContent = heightDisplay(num);
     else el.textContent = value;
   });
   const subSel = `[data-bind-sub="${name}"]`;
-  document.querySelectorAll(`.ob-flow ${subSel}, .accordion-flow ${subSel}`).forEach((el) => {
+  document.querySelectorAll(`.ob-flow ${subSel}, .accordion-flow ${subSel}, .chat-flow ${subSel}`).forEach((el) => {
     if (name === 'heightInches') el.textContent = `${Math.round(num)} inches`;
   });
 }
@@ -577,7 +577,7 @@ function ensureObDelegation() {
       const formatted = formatBirthDateDigits(input.value);
       form.birthDateText = formatted;
       input.value = formatted;
-      syncAgeFromBirthDate(form, input.closest('.ob-flow'));
+      syncAgeFromBirthDate(form, input.closest('.ob-flow, .chat-flow'));
       syncNextButton(obCtx.store, form);
       return;
     }
@@ -591,7 +591,7 @@ function ensureObDelegation() {
     const input = e.target;
     if (!input.closest(flowRoot())) return;
     const form = obCtx.store.onboardingForm;
-    const flow = input.closest('.ob-flow');
+    const flow = input.closest('.ob-flow, .chat-flow');
 
     if (input.name === 'fatSource') {
       form.fatSource = input.value;

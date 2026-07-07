@@ -3,7 +3,7 @@ import {
   initOnboardingForm,
   syncObToStore,
 } from './onboardingUI.js';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js';
+import { renderChat, bindChatEvents, syncChatPage } from './onboardingChat.js';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -85,7 +85,6 @@ const store = {
   emailError: '',
   saveError: '',
   showAdvanced: false,
-  accordionSection: 'about',
 };
 
 function defaultStartDate() {
@@ -116,9 +115,6 @@ function persistFlowState() {
     sessionStorage.setItem('bnb_onboarding_form', JSON.stringify(store.onboardingForm));
   }
   sessionStorage.setItem('bnb_onboarding_page', String(store.onboardingPage));
-  if (store.accordionSection) {
-    sessionStorage.setItem('bnb_accordion_section', store.accordionSection);
-  }
 }
 
 function restoreFlowState() {
@@ -138,8 +134,6 @@ function restoreFlowState() {
   if (page != null && page !== '') {
     store.onboardingPage = Number(page) || 0;
   }
-  const accSection = sessionStorage.getItem('bnb_accordion_section');
-  if (accSection) store.accordionSection = accSection;
   const phase = sessionStorage.getItem('bnb_creator_phase');
   const flowPhases = ['email-login', 'onboarding', 'creating', 'plan-ready'];
   if (phase === 'home') {
@@ -431,14 +425,13 @@ function magicLinkUrl() {
 }
 
 function renderOnboardingWrapper() {
-  syncAccordionSection(store);
+  syncChatPage(store);
   const fakeStore = {
     onboardingForm: store.onboardingForm,
     onboardingPage: store.onboardingPage,
     onboardingEditMode: false,
-    accordionSection: store.accordionSection,
   };
-  return `<div class="start-site focus-host">${renderAccordion(fakeStore)}</div>`;
+  return `<div class="start-site focus-host">${renderChat(fakeStore)}</div>`;
 }
 
 function afterRender() {
@@ -486,7 +479,7 @@ function renderOnboardingStep() {
 
 function bindOnboardingOnly() {
   bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
-  bindAccordionEvents(store, {
+  bindChatEvents(store, {
     render: renderOnboardingStep,
     onConfirm: (form) => {
       store.onboardingForm = form;
@@ -517,7 +510,7 @@ function submitEmailLogin() {
   store.email = persistAppEmail(email);
   store.emailError = '';
   store.phase = 'onboarding';
-  store.accordionSection = 'review';
+  store.onboardingPage = confirmOnboardingPage();
   render();
 }
 
