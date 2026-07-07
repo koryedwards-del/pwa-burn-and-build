@@ -515,8 +515,8 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'job', field: 'workPhysical' }, false, true)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'job', field: 'workStress' }, false, true)}
         ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
-        ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, { section: 'activity', field: 'cardioHours' }, false, true)}
-        ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, { section: 'activity', field: 'fatBurningHours' }, false, true)}
+        ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), '', { section: 'activity', field: 'cardioHours' }, false, true)}
+        ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), '', { section: 'activity', field: 'fatBurningHours' }, false, true)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', { section: 'rhythm', field: 'wake-hour' }, false, true)}
         ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', { section: 'rhythm', field: 'reminders' }, false, true)}
       </div>`;
@@ -525,7 +525,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
   return `
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', base, readOnly)}
-        ${confirmRow('EMAIL', form.email || '—', 'Authorizes and uploads your custom food plan', base, readOnly)}
+        ${confirmRow('EMAIL', form.email || '—', '', base, readOnly)}
         ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', base, readOnly)}
         ${confirmRow('GENDER', form.sex, '', base, readOnly)}
         ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', base + 1, readOnly)}
@@ -535,8 +535,8 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('WORKDAY', phys?.label || '—', '', base + 5, readOnly)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6, readOnly)}
         ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', base + 7, readOnly)}
-        ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, base + 7, readOnly)}
-        ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, base + 8, readOnly)}
+        ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), '', base + 7, readOnly)}
+        ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), '', base + 8, readOnly)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9, readOnly)}
         ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', base + 9, readOnly)}
       </div>`;
