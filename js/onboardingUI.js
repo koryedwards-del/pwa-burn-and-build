@@ -684,12 +684,25 @@ export function renderEmailDetails(form, open = true, complete = false) {
 
 function renderGenderSelect(form) {
   const hasValue = !!form.sex;
+  const display = hasValue ? form.sex : 'Select gender';
   return `
-            <select id="pd-sex" class="pd-input pd-select pd-select-gender${hasValue ? '' : ' is-instruction'}" name="sex" autocomplete="off" aria-labelledby="pd-sex-label" aria-haspopup="listbox">
+            <span class="pd-select-display pd-select-gender${hasValue ? '' : ' is-instruction'}" data-gender-display aria-hidden="true">${display}</span>
+            <select id="pd-sex" class="pd-select-native pd-select-gender" name="sex" autocomplete="sex" aria-labelledby="pd-sex-label" aria-haspopup="listbox">
               <option value="" ${hasValue ? '' : 'selected'} disabled>Select gender</option>
               <option value="Male" ${form.sex === 'Male' ? 'selected' : ''}>Male</option>
               <option value="Female" ${form.sex === 'Female' ? 'selected' : ''}>Female</option>
             </select>`;
+}
+
+function syncGenderSelectDisplay(select, form) {
+  if (!select) return;
+  const hasValue = !!form.sex;
+  const display = select.closest('.pd-box-select')?.querySelector('[data-gender-display]');
+  if (display) {
+    display.textContent = hasValue ? form.sex : 'Select gender';
+    display.classList.toggle('is-instruction', !hasValue);
+  }
+  if (select.value !== (form.sex || '')) select.value = form.sex || '';
 }
 
 function genderSelectNear(el) {
@@ -698,7 +711,7 @@ function genderSelectNear(el) {
     ?? document.querySelector('.artshow-flow .acc-stack-item.is-active select[name="sex"]');
 }
 
-function openGenderPicker(select) {
+export function openGenderPicker(select) {
   if (!select) return;
   if (typeof select.showPicker === 'function') {
     try {
@@ -836,7 +849,7 @@ function ensureObDelegation() {
     if (!obCtx.store || !e.target.closest(flowRoot())) return;
 
     const target = e.target;
-    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio')) return;
+    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio, .pd-box-select, [data-ob-sex]')) return;
 
     const store = obCtx.store;
     const form = store.onboardingForm;
@@ -948,7 +961,7 @@ function ensureObDelegation() {
 
     if (input.name === 'sex') {
       form.sex = input.value;
-      input.classList.toggle('is-instruction', !input.value);
+      syncGenderSelectDisplay(input, form);
       syncNextButton(obCtx.store, form);
       input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
       return;
@@ -1008,9 +1021,6 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'sex' && input.tagName === 'SELECT') {
-      if (input.matches(':focus-visible')) {
-        openGenderPicker(input);
-      }
       return;
     }
 
@@ -1068,13 +1078,25 @@ function ensureObDelegation() {
     }
   });
 
+  document.addEventListener('pointerdown', (e) => {
+    if (!obCtx.store) return;
+    const box = e.target.closest(`${flowRoot()} .pd-box-select`);
+    if (!box) return;
+    const select = box.querySelector('select[name="sex"]');
+    if (!select) return;
+    if (e.target !== select) {
+      select.focus({ preventScroll: true });
+    }
+    openGenderPicker(select);
+  }, true);
+
   document.addEventListener('keydown', (e) => {
     if (!obCtx.store) return;
     const input = e.target;
     if (!input.closest(flowRoot())) return;
 
     if (input.name === 'sex' && input.tagName === 'SELECT') {
-      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') {
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         openGenderPicker(input);
       }

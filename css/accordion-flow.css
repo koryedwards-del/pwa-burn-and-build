@@ -512,14 +512,10 @@ html:has(.start-site .artshow-flow) #app {
   outline: none;
 }
 
-.artshow-flow .pd-select {
-  appearance: none;
-  cursor: pointer;
-  width: 100%;
-}
-
 .artshow-flow .pd-box-select {
   position: relative;
+  cursor: pointer;
+  padding: 0;
 }
 
 .artshow-flow .pd-box-select::after {
@@ -531,6 +527,32 @@ html:has(.start-site .artshow-flow) #app {
   color: var(--flame);
   pointer-events: none;
   font-size: 14px;
+  z-index: 1;
+}
+
+.artshow-flow .pd-box-select .pd-select-display {
+  display: block;
+  width: 100%;
+  padding: 10px 36px 10px 12px;
+  pointer-events: none;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.artshow-flow .pd-box-select .pd-select-native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .artshow-flow .pd-select-gender.is-instruction {
@@ -541,11 +563,6 @@ html:has(.start-site .artshow-flow) #app {
 .artshow-flow .pd-select-gender:not(.is-instruction) {
   color: var(--text);
   font-style: normal;
-}
-
-.artshow-flow .pd-select-gender:focus,
-.artshow-flow .pd-select-gender:focus-visible {
-  outline: none;
 }
 
 .artshow-flow .pd-value {

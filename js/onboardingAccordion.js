@@ -10,7 +10,8 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=90';
+  openGenderPicker,
+} from './onboardingUI.js?v=91';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -201,6 +202,11 @@ function focusAccordionField(sectionId, fieldRef) {
 
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (fieldRef === 'pd-sex' && el.tagName === 'SELECT') {
+        el.focus({ preventScroll: true });
+        openGenderPicker(el);
+        return;
+      }
       if (typeof el.focus === 'function') {
         el.focus({ preventScroll: true });
       }
@@ -290,7 +296,7 @@ function ensureAccordionDelegation() {
       return;
     }
 
-    if (e.target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio')) return;
+    if (e.target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio, .pd-box-select, [data-ob-sex]')) return;
 
     const cont = e.target.closest('[data-acc-continue]');
     if (!cont || cont.disabled || cont.classList.contains('disabled')) return;
