@@ -147,11 +147,12 @@ export function renderAccordion(store) {
   const form = store.onboardingForm;
   const activeIndex = getActiveIndex(store);
   const maxUnlocked = store.accordionMax ?? activeIndex;
+  const showProgressRail = activeIndex > 0;
 
   return `
     <div class="accordion-flow artshow-flow">
-      <div class="acc-stage">
-        ${renderProgressRail(activeIndex, maxUnlocked)}
+      <div class="acc-stage${showProgressRail ? '' : ' acc-stage-intro'}">
+        ${showProgressRail ? renderProgressRail(activeIndex, maxUnlocked) : ''}
         <div class="acc-stack">
           ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex, store)).join('')}
         </div>

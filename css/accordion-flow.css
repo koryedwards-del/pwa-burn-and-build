@@ -188,7 +188,14 @@ html:has(.start-site .artshow-flow) #app {
 }
 
 .artshow-flow .acc-intro-panel {
-  padding: 4px 2px 0;
+  border: 1px solid var(--flame);
+  border-radius: 12px;
+  padding: 24px 18px 18px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.artshow-flow .acc-stage-intro {
+  padding-top: 28px;
 }
 
 .artshow-flow .acc-question + .acc-question {
