@@ -32,7 +32,7 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=82';
+} from './onboardingEngine.js?v=83';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -251,6 +251,13 @@ function radioCard(name, value, selected, label, sub) {
 function displayBirthDate(form) {
   const iso = parseBirthDateText(form.birthDateText);
   return iso ? formatBirthDateText(iso) : '—';
+}
+
+function birthDateAgeDisplay(form) {
+  const iso = parseBirthDateText(form.birthDateText);
+  if (!iso) return '';
+  const age = ageFromBirthDate(iso);
+  return age != null ? String(age) : '';
 }
 
 function syncBirthDateInput(input, form) {
@@ -598,6 +605,7 @@ export function refreshPersonalDetailFields(form) {
     form.birthDateText = formatBirthDateDigits(digits);
     input.value = birthDateMaskDisplay(form.birthDateText);
     syncBirthDateValidation(input, form);
+    syncAgeFromBirthDate(form, input.closest(flowRoot()));
   });
   document.querySelectorAll(`${flowRoot()} [name="heightInches"]`).forEach((input) => {
     const hasValue = heightHasValue(form.heightInches);
@@ -676,8 +684,9 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-age">Birth date</label>
-          <div class="pd-box">
+          <div class="pd-box pd-box-split">
             <input id="pd-age" class="pd-input pd-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${birthDateMaskDisplay(form.birthDateText)}" autocomplete="bday" aria-describedby="pd-birth-date-error" />
+            <span class="pd-unit" data-bind="age" aria-live="polite">${birthDateAgeDisplay(form)}</span>
           </div>
           <p class="pd-hint pd-hint-error" id="pd-birth-date-error" data-birth-date-error hidden>Enter a valid date (MM/DD/YYYY).</p>
         </div>
@@ -714,14 +723,12 @@ function syncNextButton(store, form) {
 function syncAgeFromBirthDate(form, flow) {
   const iso = parseBirthDateText(form.birthDateText);
   form.birthDate = iso || '';
-  if (!iso) return;
-  const age = ageFromBirthDate(iso);
-  if (age == null) return;
-  form.age = Math.min(99, Math.max(13, age));
-  updateBoundDisplays('age', form.age);
+  const age = iso ? ageFromBirthDate(iso) : null;
+  form.age = age != null ? age : '';
+  updateBoundDisplays('age', age != null ? String(age) : '');
   updateBoundDisplays('birthDateText', form.birthDateText);
   const range = flow?.querySelector('input[name="age"]');
-  if (range) range.value = form.age;
+  if (range && age != null) range.value = age;
 }
 
 function updateBoundDisplays(name, value) {

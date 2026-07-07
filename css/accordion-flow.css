@@ -497,6 +497,19 @@ html:has(.start-site .artshow-flow) #app {
   color: var(--text);
 }
 
+.artshow-flow .pd-box-split .pd-input-birth {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.artshow-flow .pd-box-split [data-bind="age"] {
+  min-width: 1.5rem;
+  text-align: right;
+}
+
 .artshow-flow .pd-input-birth {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
