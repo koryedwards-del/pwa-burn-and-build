@@ -5,7 +5,7 @@ import {
   WORK_STRESS,
   canProceed,
   formatWakeDisplay,
-  heightDisplay,
+  heightInchesLabel,
   heartRates,
   onboardingPhase,
   welcomeScreens,
@@ -32,9 +32,9 @@ function formatUserAnswer(qi, form) {
     case 0:
       return [form.preferredName, form.sex].filter(Boolean).join(' · ');
     case 1:
-      return `${heightDisplay(form.heightInches)} (${Math.round(form.heightInches)} in)`;
+      return `${heightInchesLabel(form.heightInches)}`;
     case 2:
-      return `${form.birthDateText} · age ${form.age}`;
+      return form.birthDateText || '—';
     case 3:
       return `${form.weightText} lbs`;
     case 4:

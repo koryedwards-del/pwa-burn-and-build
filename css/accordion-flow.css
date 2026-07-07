@@ -439,6 +439,18 @@ html:has(.start-site .artshow-flow) #app {
   accent-color: var(--flame);
 }
 
+.artshow-flow .pd-input-height {
+  font-style: italic;
+}
+
+.artshow-flow .pd-seg {
+  margin-top: 2px;
+}
+
+.artshow-flow .pd-seg button {
+  padding: 14px 12px;
+}
+
 .artshow-flow .pd-unit {
   font-size: 13px;
   color: var(--muted);
