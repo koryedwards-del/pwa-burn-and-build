@@ -502,6 +502,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('NAME', form.preferredName || '—', '', { section: 'personal', field: 'pd-name' }, false, true)}
         ${confirmRow('EMAIL', form.email || '—', '', { section: 'email', field: 'pd-email' }, false, true)}
         ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', { section: 'email', field: 'newsletterOptIn' }, false, true)}
+        ${confirmRow('GENDER', form.sex || '—', '', { section: 'personal', field: 'pd-sex' }, false, true)}
         ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
@@ -521,6 +522,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('NAME', form.preferredName || '—', '', base, readOnly)}
         ${confirmRow('EMAIL', form.email || '—', '', base, readOnly)}
         ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', base, readOnly)}
+        ${confirmRow('GENDER', form.sex || '—', '', base, readOnly)}
         ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', base + 1, readOnly)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', base + 2, readOnly)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', base + 3, readOnly)}
@@ -642,6 +644,7 @@ export function renderCollapsiblePanel(title, innerHtml, open = true, complete =
 
 export function personalSectionValid(form) {
   return form.preferredName.trim().length > 0
+    && (form.sex === 'Male' || form.sex === 'Female')
     && birthDateIsValid(form.birthDateText)
     && heightHasValue(form.heightInches)
     && Number(form.weightText) > 0;
@@ -680,6 +683,15 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           <label class="pd-label" for="pd-name">Name</label>
           <div class="pd-box">
             <input id="pd-name" class="pd-input" name="preferredName" value="${form.preferredName}" placeholder="First name" autocomplete="given-name" />
+          </div>
+        </div>
+        <div class="pd-row">
+          <span class="pd-label" id="pd-sex-label">Gender</span>
+          <div class="pd-box pd-box-gender" id="pd-sex" role="group" aria-labelledby="pd-sex-label">
+            <div class="pd-gender-seg">
+              <button type="button" class="pd-gender-btn${form.sex === 'Male' ? ' is-active' : ''}" data-pd-sex="Male">Male</button>
+              <button type="button" class="pd-gender-btn${form.sex === 'Female' ? ' is-active' : ''}" data-pd-sex="Female">Female</button>
+            </div>
           </div>
         </div>
         <div class="pd-row">
@@ -787,7 +799,7 @@ function ensureObDelegation() {
     if (!obCtx.store || !e.target.closest(flowRoot())) return;
 
     const target = e.target;
-    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio')) return;
+    if (target.closest('input, select, textarea, label.ob-radio, label.ob-check, label.pd-radio, [data-pd-sex]')) return;
 
     const store = obCtx.store;
     const form = store.onboardingForm;
@@ -813,6 +825,18 @@ function ensureObDelegation() {
       if (e.target.closest('.artshow-flow')) return;
       store.onboardingPage = Number(gotoBtn.dataset.obGoto);
       obCtx.render();
+      return;
+    }
+
+    const sexBtn = e.target.closest('[data-pd-sex]');
+    if (sexBtn) {
+      form.sex = sexBtn.dataset.pdSex;
+      const group = sexBtn.closest('.pd-gender-seg');
+      group?.querySelectorAll('[data-pd-sex]').forEach((b) => {
+        b.classList.toggle('is-active', b === sexBtn);
+      });
+      syncNextButton(store, form);
+      flow.dispatchEvent(new Event('input', { bubbles: true }));
       return;
     }
 

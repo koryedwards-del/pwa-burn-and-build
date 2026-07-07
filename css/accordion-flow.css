@@ -512,6 +512,36 @@ html:has(.start-site .artshow-flow) #app {
   outline: none;
 }
 
+.artshow-flow .pd-box-gender {
+  padding: 4px;
+}
+
+.artshow-flow .pd-gender-seg {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+}
+
+.artshow-flow .pd-gender-btn {
+  flex: 1;
+  margin: 0;
+  padding: 8px 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.artshow-flow .pd-gender-btn.is-active {
+  background: var(--flame);
+  color: #fff;
+}
+
 .artshow-flow .pd-value {
   font-size: 15px;
   font-weight: 600;
