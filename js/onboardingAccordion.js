@@ -1,23 +1,22 @@
 import {
   canProceed,
   welcomeScreens,
-} from './onboardingEngine.js?v=74';
+} from './onboardingEngine.js?v=75';
 import {
   renderQuestionBody,
   renderConfirmBody,
   renderPersonalDetails,
   personalSectionValid,
-  renderJobLifestyleActivity,
-  jobLifestyleSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=74';
+} from './onboardingUI.js?v=75';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
   { id: 'intro', title: 'Getting started', intro: true },
   { id: 'personal', title: 'Personal details', personal: true },
   { id: 'body', title: 'Your body', questions: [4] },
-  { id: 'work', title: 'Job, lifestyle & activity', workActivity: true },
+  { id: 'job', title: 'Job & lifestyle', questions: [5, 6] },
+  { id: 'activity', title: 'Activities', questions: [7, 8] },
   { id: 'rhythm', title: 'Daily rhythm', questions: [9] },
   { id: 'review', title: 'Review & build', review: true },
 ];
@@ -51,7 +50,6 @@ function markReviewViewed() {
 function sectionValid(section, form) {
   if (section.intro || section.review) return true;
   if (section.personal) return personalSectionValid(form);
-  if (section.workActivity) return jobLifestyleSectionValid(form);
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
 }
 
@@ -78,7 +76,6 @@ function renderIntroPanel() {
 function renderSectionPanel(section, form, open, complete) {
   if (section.intro) return renderIntroPanel();
   if (section.personal) return renderPersonalDetails(form, open, complete);
-  if (section.workActivity) return renderJobLifestyleActivity(form, open, complete);
   if (section.review) {
     return renderCollapsiblePanel(
       'Review & build',
@@ -106,7 +103,8 @@ const SECTION_LABELS = {
   intro: 'Getting started',
   personal: 'Personal details',
   body: 'Your body',
-  work: 'Job, lifestyle & activity',
+  job: 'Job & lifestyle',
+  activity: 'Activities',
   rhythm: 'Daily rhythm',
   review: 'Review & build',
 };
@@ -359,7 +357,7 @@ export function syncAccordionSection(store) {
   const sectionIndex = SECTIONS.findIndex((s) => s.id === store.accordionSection);
   if (sectionIndex >= 0 && sectionIndex <= store.accordionMax) return;
   if (store.accordionSection === 'review' && store.accordionMax >= REVIEW_INDEX) return;
-  const legacy = { about: 'personal', life: 'work', exercise: 'work' };
+  const legacy = { about: 'personal', life: 'job', exercise: 'activity', work: 'job' };
   if (legacy[store.accordionSection]) store.accordionSection = legacy[store.accordionSection];
   store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
 }

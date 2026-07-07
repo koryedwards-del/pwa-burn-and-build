@@ -214,6 +214,16 @@ html:has(.start-site .artshow-flow) #app {
   width: 100%;
 }
 
+.artshow-flow .acc-question .ob-section-label {
+  text-align: left;
+}
+
+.artshow-flow .acc-question .ob-radio,
+.artshow-flow .acc-question .ob-check {
+  width: 100%;
+  text-align: left;
+}
+
 .artshow-flow .ob-confirm-rows {
   text-align: left;
 }

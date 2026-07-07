@@ -3,8 +3,8 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=74';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=74';
+} from './onboardingUI.js?v=75';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=75';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -129,7 +129,7 @@ function persistFlowState() {
   sessionStorage.setItem('bnb_review_viewed', store.reviewViewed ? '1' : '0');
 }
 
-const ONBOARDING_FORM_VERSION = 3;
+const ONBOARDING_FORM_VERSION = 4;
 
 function restoreFlowState() {
   restoreBuiltPackage();

@@ -24,7 +24,7 @@ import {
   birthDateCursorPosition,
   birthDateDigits,
   parseBirthDateText,
-} from './onboardingEngine.js?v=74';
+} from './onboardingEngine.js?v=75';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -267,11 +267,12 @@ function renderQuestionBody(index, form) {
 
     case 5:
       return `
-        <div class="ob-section-label">PHYSICAL LEVEL</div>
+        <div class="ob-section-label">JOB</div>
         ${WORK_PHYSICAL.map((o) => radioCard('workPhysical', o.id, form.workPhysical === o.id, o.label, o.sub)).join('')}`;
 
     case 6:
       return `
+        <div class="ob-section-label">LIFESTYLE</div>
         ${WORK_STRESS.map((o) => radioCard('workStress', o.id, form.workStress === o.id, o.label, o.sub)).join('')}
         ${infoBox('🧠', 'Stress increases cortisol. Cortisol increases hunger and promotes fat storage — even if you\'re sitting at a desk all day. Your plan accounts for this.')}`;
 
@@ -436,11 +437,11 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
         ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, false, true)}
-        ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'work', field: 'pd-job' }, false, true)}
-        ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'work', field: 'pd-lifestyle' }, false, true)}
-        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', { section: 'work', field: 'pd-weights' }, false, true)}
-        ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, { section: 'work', field: 'pd-cardio' }, false, true)}
-        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, { section: 'work', field: 'pd-fatburn' }, false, true)}
+        ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'job', field: 'workPhysical' }, false, true)}
+        ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'job', field: 'workStress' }, false, true)}
+        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
+        ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, { section: 'activity', field: 'cardioHours' }, false, true)}
+        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, { section: 'activity', field: 'fatBurningHours' }, false, true)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', { section: 'rhythm', field: 'wake-hour' }, false, true)}
         ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', { section: 'rhythm', field: 'reminders' }, false, true)}
       </div>`;
@@ -629,58 +630,6 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           </div>
         </div>`;
   return renderCollapsiblePanel('Personal details', fields, open, complete);
-}
-
-export function jobLifestyleSectionValid(form) {
-  return !!form.workPhysical && !!form.workStress;
-}
-
-export function renderJobLifestyleActivity(form, open = true, complete = false) {
-  const jobOpts = WORK_PHYSICAL.map((o) => `
-    <option value="${o.id}" ${form.workPhysical === o.id ? 'selected' : ''}>${o.label}</option>`).join('');
-  const lifeOpts = WORK_STRESS.map((o) => `
-    <option value="${o.id}" ${form.workStress === o.id ? 'selected' : ''}>${o.label}</option>`).join('');
-  const fields = `
-        <div class="pd-row">
-          <label class="pd-label" for="pd-job">Job</label>
-          <div class="pd-box">
-            <select id="pd-job" class="pd-input pd-select" name="workPhysical">
-              <option value="" disabled ${form.workPhysical ? '' : 'selected'}>Select your job type</option>
-              ${jobOpts}
-            </select>
-          </div>
-        </div>
-        <div class="pd-row">
-          <label class="pd-label" for="pd-lifestyle">Lifestyle</label>
-          <div class="pd-box">
-            <select id="pd-lifestyle" class="pd-input pd-select" name="workStress">
-              <option value="" disabled ${form.workStress ? '' : 'selected'}>Select your lifestyle</option>
-              ${lifeOpts}
-            </select>
-          </div>
-        </div>
-        <div class="pd-row">
-          <label class="pd-label" for="pd-weights">Weight training</label>
-          <div class="pd-box pd-box-split">
-            <input id="pd-weights" class="pd-input" name="weightTrainingHours" type="number" inputmode="numeric" min="0" max="15" step="1" value="${form.weightTrainingHours}" />
-            <span class="pd-unit">hrs / wk</span>
-          </div>
-        </div>
-        <div class="pd-row">
-          <label class="pd-label" for="pd-cardio">Cardio</label>
-          <div class="pd-box pd-box-split">
-            <input id="pd-cardio" class="pd-input" name="cardioHours" type="number" inputmode="numeric" min="0" max="15" step="1" value="${form.cardioHours}" />
-            <span class="pd-unit">hrs / wk</span>
-          </div>
-        </div>
-        <div class="pd-row">
-          <label class="pd-label" for="pd-fatburn">Fat burning</label>
-          <div class="pd-box pd-box-split">
-            <input id="pd-fatburn" class="pd-input" name="fatBurningHours" type="number" inputmode="numeric" min="0" max="20" step="1" value="${form.fatBurningHours}" />
-            <span class="pd-unit">hrs / wk</span>
-          </div>
-        </div>`;
-  return renderCollapsiblePanel('Job, lifestyle & activity', fields, open, complete);
 }
 
 function flowRoot() {
