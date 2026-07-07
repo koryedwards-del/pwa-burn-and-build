@@ -544,12 +544,10 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           <p class="pd-hint">Connects your food plan to your phone.</p>
         </div>
         <div class="pd-row">
-          <label class="pd-label" for="pd-sex">Gender</label>
-          <div class="pd-box">
-            <select id="pd-sex" class="pd-input pd-select" name="sex">
-              <option value="Male" ${form.sex === 'Male' ? 'selected' : ''}>Male</option>
-              <option value="Female" ${form.sex === 'Female' ? 'selected' : ''}>Female</option>
-            </select>
+          <span class="pd-label" id="pd-sex-label">Gender</span>
+          <div class="ob-seg pd-seg" id="pd-sex" role="group" aria-labelledby="pd-sex-label">
+            <button type="button" class="${form.sex === 'Male' ? 'active' : ''}" data-ob-sex="Male">Male</button>
+            <button type="button" class="${form.sex === 'Female' ? 'active' : ''}" data-ob-sex="Female">Female</button>
           </div>
         </div>
         <div class="pd-row">
@@ -744,6 +742,7 @@ function ensureObDelegation() {
       form.sex = sexBtn.dataset.obSex;
       flow.querySelectorAll('[data-ob-sex]').forEach((b) => b.classList.toggle('active', b === sexBtn));
       syncNextButton(store, form);
+      flow.dispatchEvent(new Event('input', { bubbles: true }));
       return;
     }
 
