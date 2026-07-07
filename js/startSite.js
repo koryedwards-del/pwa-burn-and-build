@@ -1,9 +1,10 @@
 import {
   bindOnboardingEvents,
   initOnboardingForm,
+  refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js';
+} from './onboardingUI.js?v=72';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=72';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -116,6 +117,7 @@ function persistFlowState() {
   }
   if (store.onboardingForm) {
     sessionStorage.setItem('bnb_onboarding_form', JSON.stringify(store.onboardingForm));
+    sessionStorage.setItem('bnb_onboarding_form_version', String(ONBOARDING_FORM_VERSION));
   }
   sessionStorage.setItem('bnb_onboarding_page', String(store.onboardingPage));
   if (store.accordionSection) {
@@ -127,11 +129,18 @@ function persistFlowState() {
   sessionStorage.setItem('bnb_review_viewed', store.reviewViewed ? '1' : '0');
 }
 
+const ONBOARDING_FORM_VERSION = 3;
+
 function restoreFlowState() {
   restoreBuiltPackage();
   store.email = getAppEmail()
     || sessionStorage.getItem('bnb_unlock_email')
     || '';
+  const savedFormVersion = Number(sessionStorage.getItem('bnb_onboarding_form_version') || 0);
+  if (savedFormVersion < ONBOARDING_FORM_VERSION) {
+    sessionStorage.removeItem('bnb_onboarding_form');
+    sessionStorage.setItem('bnb_onboarding_form_version', String(ONBOARDING_FORM_VERSION));
+  }
   const formRaw = sessionStorage.getItem('bnb_onboarding_form');
   if (formRaw) {
     try {
@@ -484,6 +493,7 @@ function bindOnboardingOnly() {
       finishIntake();
     },
   });
+  refreshPersonalDetailFields(store.onboardingForm);
 }
 
 function sendMagicLink() {

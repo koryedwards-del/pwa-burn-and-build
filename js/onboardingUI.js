@@ -24,7 +24,7 @@ import {
   birthDateCursorPosition,
   birthDateDigits,
   parseBirthDateText,
-} from './onboardingEngine.js';
+} from './onboardingEngine.js?v=72';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -530,6 +530,20 @@ export function renderOnboarding(store, options = {}) {
 
 export function initOnboardingForm(store) {
   store.onboardingForm = defaultOnboardingForm(store.profile);
+}
+
+export function refreshPersonalDetailFields(form) {
+  if (!form) return;
+  document.querySelectorAll(`${flowRoot()} [name="birthDateText"]`).forEach((input) => {
+    const digits = birthDateDigits(form.birthDateText);
+    form.birthDateText = formatBirthDateDigits(digits);
+    input.value = birthDateMaskDisplay(form.birthDateText);
+  });
+  document.querySelectorAll(`${flowRoot()} [name="heightInches"]`).forEach((input) => {
+    const hasValue = heightHasValue(form.heightInches);
+    input.classList.toggle('is-instruction', !hasValue);
+    input.value = heightFieldDisplay(form.heightInches);
+  });
 }
 
 export { profileFromForm, onboardingPhase, WELCOME_COUNT, renderQuestionBody, renderConfirmBody };
