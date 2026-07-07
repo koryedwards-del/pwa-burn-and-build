@@ -1609,6 +1609,14 @@ a.btn-secondary {
   margin-bottom: 8px;
 }
 
+.ob-hr-label-tight {
+  margin-bottom: 4px;
+}
+
+.ob-input-activity-hours {
+  margin-bottom: 8px;
+}
+
 .ob-slider-label {
   margin-top: 16px;
   font-size: 16px;

@@ -32,7 +32,7 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=83';
+} from './onboardingEngine.js?v=84';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -351,19 +351,21 @@ function renderQuestionBody(index, form) {
         ${renderActivityHoursInput('weightTrainingHours', form, 15)}
         <div class="ob-divider"></div>
         <div class="ob-section-label">CARDIOVASCULAR TRAINING</div>
-        <div class="ob-hr-label">HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM</div>
+        <div class="ob-hr-label ob-hr-label-tight">HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM</div>
         ${renderActivityHoursInput('cardioHours', form, 15)}`;
 
     case 8:
       return `
-        <div class="ob-hr-label">HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM</div>
+        <div class="ob-divider"></div>
+        <div class="ob-section-label">FAT BURNING</div>
+        <div class="ob-hr-label ob-hr-label-tight">HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM</div>
+        ${renderActivityHoursInput('fatBurningHours', form, 20)}
         ${LOW_ACTIVITIES.map((a) => `
           <label class="ob-check ${form.lowActivities.includes(a.id) ? 'selected' : ''}">
             <input type="checkbox" name="lowActivity" value="${a.id}" ${form.lowActivities.includes(a.id) ? 'checked' : ''} />
             <span>${a.icon}</span>
             <span>${a.label}</span>
           </label>`).join('')}
-        ${renderActivityHoursInput('fatBurningHours', form, 20)}
         ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}`;
 
     case 9:
