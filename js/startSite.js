@@ -3,8 +3,8 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=87';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=87';
+} from './onboardingUI.js?v=88';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=88';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -86,7 +86,7 @@ const store = {
   emailError: '',
   saveError: '',
   showAdvanced: false,
-  accordionSection: 'personal',
+  accordionSection: 'intro',
   reviewViewed: false,
   accordionEditReturn: null,
 };

@@ -1,6 +1,7 @@
 import {
   canProceed,
-} from './onboardingEngine.js?v=87';
+  welcomeScreens,
+} from './onboardingEngine.js?v=88';
 import {
   renderQuestionBody,
   renderConfirmBody,
@@ -9,9 +10,11 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=87';
+} from './onboardingUI.js?v=88';
+import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
+  { id: 'intro', title: 'Getting started', intro: true },
   { id: 'personal', title: 'Personal', personal: true },
   { id: 'job', title: 'Job & lifestyle', questions: [5, 6] },
   { id: 'activity', title: 'Exercise & activities', questions: [7, 8] },
@@ -48,13 +51,32 @@ function markReviewViewed() {
 }
 
 function sectionValid(section, form) {
-  if (section.review) return true;
+  if (section.intro || section.review) return true;
   if (section.personal) return personalSectionValid(form);
   if (section.email) return emailSectionValid(form);
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
 }
 
+function renderIntroBody() {
+  const screen = welcomeScreens()[0];
+  return `
+    <div class="acc-art-headline">
+      <div class="ob-welcome-line1">${screen.line1}</div>
+      <div class="ob-welcome-line2">${screen.line2}</div>
+    </div>
+    <p class="acc-art-lead">${screen.body}</p>
+    ${renderTestimonyBlock({
+      quote: screen.quote,
+      name: screen.quoteName,
+      meta: screen.quoteMeta,
+      className: 'acc-art-quote',
+    })}`;
+}
+
 function renderSectionPanel(section, form, open, complete) {
+  if (section.intro) {
+    return renderCollapsiblePanel('Getting started', renderIntroBody(), open, complete);
+  }
   if (section.personal) return renderPersonalDetails(form, open, complete);
   if (section.email) return renderEmailDetails(form, open, complete);
   if (section.review) {
@@ -74,12 +96,14 @@ function renderSectionPanel(section, form, open, complete) {
 
 function continueLabel(section, store) {
   if (store?.accordionEditReturn) return 'Back to review →';
+  if (section.intro) return 'Start building →';
   if (section.id === 'email') return 'Review & approve →';
   if (section.review) return 'Build my food plan →';
   return 'Continue →';
 }
 
 const SECTION_LABELS = {
+  intro: 'Getting started',
   personal: 'Personal',
   job: 'Job & lifestyle',
   activity: 'Exercise & activities',
@@ -323,12 +347,11 @@ export function syncAccordionSection(store) {
   if (sectionIndex >= 0 && sectionIndex <= store.accordionMax) return;
   if (store.accordionSection === 'review' && store.accordionMax >= REVIEW_INDEX) return;
   const legacy = {
-    intro: 'personal',
     about: 'personal',
     life: 'job',
     exercise: 'activity',
     work: 'job',
   };
   if (legacy[store.accordionSection]) store.accordionSection = legacy[store.accordionSection];
-  store.accordionSection = SECTIONS[store.accordionMax]?.id || 'personal';
+  store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
 }
