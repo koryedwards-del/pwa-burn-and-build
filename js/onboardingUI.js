@@ -687,7 +687,9 @@ function renderGenderSelect(form) {
 }
 
 function genderSelectNear(el) {
-  return el.closest('.pd-fields, .ob-stage-body, .acc-stack-item')?.querySelector('select[name="sex"]');
+  const scope = el.closest('.acc-stack-item, .pd-panel, .pd-fields, .ob-stage-body');
+  return scope?.querySelector('select[name="sex"]')
+    ?? document.querySelector('.artshow-flow .acc-stack-item.is-active select[name="sex"]');
 }
 
 function openGenderPicker(select) {
@@ -699,6 +701,14 @@ function openGenderPicker(select) {
       /* showPicker requires a user gesture in some browsers. */
     }
   }
+}
+
+function focusGenderFromName(nameInput) {
+  const sexSelect = genderSelectNear(nameInput);
+  if (!sexSelect) return false;
+  sexSelect.focus({ preventScroll: true });
+  openGenderPicker(sexSelect);
+  return document.activeElement === sexSelect;
 }
 
 export function renderPersonalDetails(form, open = true, complete = false) {
@@ -993,7 +1003,7 @@ function ensureObDelegation() {
 
     if (input.name === 'sex' && input.tagName === 'SELECT') {
       if (input.matches(':focus-visible')) {
-        window.requestAnimationFrame(() => openGenderPicker(input));
+        openGenderPicker(input);
       }
       return;
     }
@@ -1066,11 +1076,8 @@ function ensureObDelegation() {
     }
 
     if (e.key === 'Tab' && !e.shiftKey && input.name === 'preferredName') {
-      const sexSelect = genderSelectNear(input);
-      if (!sexSelect) return;
       e.preventDefault();
-      sexSelect.focus({ preventScroll: true });
-      window.requestAnimationFrame(() => openGenderPicker(sexSelect));
+      focusGenderFromName(input);
     }
   });
 
