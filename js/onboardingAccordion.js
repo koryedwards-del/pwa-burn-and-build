@@ -1,14 +1,14 @@
 import {
   canProceed,
   welcomeScreens,
-} from './onboardingEngine.js?v=75';
+} from './onboardingEngine.js?v=76';
 import {
   renderQuestionBody,
   renderConfirmBody,
   renderPersonalDetails,
   personalSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=75';
+} from './onboardingUI.js?v=76';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -69,12 +69,10 @@ function renderIntroBody() {
     })}`;
 }
 
-function renderIntroPanel() {
-  return `<div class="acc-intro-panel">${renderIntroBody()}</div>`;
-}
-
 function renderSectionPanel(section, form, open, complete) {
-  if (section.intro) return renderIntroPanel();
+  if (section.intro) {
+    return renderCollapsiblePanel('Getting started', renderIntroBody(), open, complete);
+  }
   if (section.personal) return renderPersonalDetails(form, open, complete);
   if (section.review) {
     return renderCollapsiblePanel(
@@ -113,35 +111,37 @@ function sectionLabel(section) {
   return SECTION_LABELS[section.id] || section.title;
 }
 
-function renderStackItem(section, form, index, activeIndex, store) {
-  if (index !== activeIndex) return '';
+function renderStackItem(section, form, index, activeIndex, maxUnlocked, store) {
+  if (index > maxUnlocked) return '';
 
-  const complete = section.review
-    ? !!store.reviewViewed
-    : sectionValid(section, form);
+  const isActive = index === activeIndex;
+  const isComplete = index < maxUnlocked && !isActive;
+  const open = isActive;
   const canContinue = store.accordionEditReturn || sectionCanContinue(section, form, store);
 
   return `
-    <div class="acc-stack-item is-active"
+    <div class="acc-stack-item ${isActive ? 'is-active' : ''} ${isComplete ? 'is-done' : ''}"
       data-stack-index="${index}" data-acc-section="${section.id}">
-      ${renderSectionPanel(section, form, true, complete)}
+      ${renderSectionPanel(section, form, open, isComplete)}
+      ${isActive ? `
       <button type="button" class="acc-continue ${canContinue ? '' : 'disabled'}"
         data-acc-continue="${section.id}"
         ${canContinue ? '' : 'disabled'}>
         ${continueLabel(section, store)}
-      </button>
+      </button>` : ''}
     </div>`;
 }
 
 export function renderAccordion(store) {
   const form = store.onboardingForm;
   const activeIndex = getActiveIndex(store);
+  const maxUnlocked = store.accordionMax ?? activeIndex;
 
   return `
     <div class="accordion-flow artshow-flow">
       <div class="acc-stage">
         <div class="acc-stack">
-          ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex, store)).join('')}
+          ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex, maxUnlocked, store)).join('')}
         </div>
       </div>
     </div>`;
@@ -171,41 +171,32 @@ function setAccordionPanelOpen(panel, open) {
   }
 }
 
-function closeAllAccordionPanels(root = document.querySelector('.artshow-flow')) {
-  root?.querySelectorAll('.pd-panel.is-open').forEach((panel) => {
-    setAccordionPanelOpen(panel, false);
-  });
-}
-
-function openAccordionPanel(stackItem) {
-  const panel = stackItem?.querySelector('.pd-panel');
-  if (!panel || panel.classList.contains('is-locked')) return;
-  closeAllAccordionPanels();
-  setAccordionPanelOpen(panel, true);
-}
-
 function focusAccordionField(sectionId, fieldRef) {
-  const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
-  if (!stackItem) return;
-  openAccordionPanel(stackItem);
-
-  let el = null;
-  if (fieldRef.startsWith('pd-')) {
-    el = stackItem.querySelector(`#${fieldRef}`);
-  } else if (fieldRef.startsWith('wake-')) {
-    el = stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
-  } else if (fieldRef === 'reminders') {
-    el = stackItem.querySelector('[data-ob-reminders]');
-  } else {
-    el = stackItem.querySelector(`[name="${fieldRef}"]`);
-  }
-
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    if (typeof el.focus === 'function') {
-      el.focus({ preventScroll: true });
+  const store = accordionCtx.store;
+  if (!store) return;
+  store.accordionSection = sectionId;
+  accordionCtx.render?.();
+  window.requestAnimationFrame(() => {
+    const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
+    if (!stackItem) return;
+    let el = null;
+    if (fieldRef.startsWith('pd-')) {
+      el = stackItem.querySelector(`#${fieldRef}`);
+    } else if (fieldRef.startsWith('wake-')) {
+      el = stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
+    } else if (fieldRef === 'reminders') {
+      el = stackItem.querySelector('[data-ob-reminders]');
+    } else {
+      el = stackItem.querySelector(`[name="${fieldRef}"]`);
     }
-  }
+
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (typeof el.focus === 'function') {
+        el.focus({ preventScroll: true });
+      }
+    }
+  });
 }
 
 function openFieldFromReview(sectionId, fieldRef) {
@@ -227,33 +218,25 @@ function syncAccordionButtons() {
   const activeSection = SECTIONS[activeIndex];
   const ok = store.accordionEditReturn || sectionCanContinue(activeSection, form, store);
 
-  document.querySelectorAll('.artshow-flow [data-acc-continue]').forEach((btn) => {
-    btn.disabled = !ok;
-    btn.classList.toggle('disabled', !ok);
-  });
-
   document.querySelectorAll('.artshow-flow .acc-stack-item').forEach((el) => {
     const idx = Number(el.dataset.stackIndex);
-    const section = SECTIONS[idx];
-    const complete = section.review
-      ? !!store.reviewViewed
-      : sectionValid(section, form);
-    el.querySelector('.pd-panel')?.classList.toggle('is-complete', complete);
+    const isActive = idx === activeIndex;
+    const isComplete = idx < (store.accordionMax ?? 0) && !isActive;
+    const panel = el.querySelector('.pd-panel');
+
+    el.classList.toggle('is-active', isActive);
+    el.classList.toggle('is-done', isComplete);
+    setAccordionPanelOpen(panel, isActive);
+    panel?.classList.toggle('is-complete', isComplete);
+
+    const btn = el.querySelector('[data-acc-continue]');
+    if (btn) {
+      btn.disabled = !ok || !isActive;
+      btn.classList.toggle('disabled', !ok || !isActive);
+    }
   });
 
   syncReviewBody(form);
-  enforceSingleOpenPanel();
-}
-
-function enforceSingleOpenPanel() {
-  const root = document.querySelector('.artshow-flow');
-  if (!root) return;
-  const openPanels = root.querySelectorAll('.pd-panel.is-open');
-  if (openPanels.length <= 1) return;
-  const keep = openPanels[openPanels.length - 1];
-  openPanels.forEach((panel) => {
-    if (panel !== keep) setAccordionPanelOpen(panel, false);
-  });
 }
 
 function scrollToStackItem(index) {
@@ -275,6 +258,8 @@ function ensureAccordionDelegation() {
 
   document.addEventListener('click', (e) => {
     if (!accordionCtx.store || !e.target.closest('.artshow-flow')) return;
+    const store = accordionCtx.store;
+    const activeIndex = getActiveIndex(store);
 
     const editRow = e.target.closest('[data-acc-edit-section]');
     if (editRow) {
@@ -289,16 +274,14 @@ function ensureAccordionDelegation() {
 
     const pdToggle = e.target.closest('[data-pd-toggle]');
     if (pdToggle) {
-      const panel = pdToggle.closest('.pd-panel');
-      if (panel?.classList.contains('is-locked')) return;
-      const willOpen = !panel.classList.contains('is-open');
-      if (willOpen) {
-        closeAllAccordionPanels();
-        setAccordionPanelOpen(panel, true);
-        if (panel.closest('[data-acc-section="review"]')) markReviewViewed();
-      } else {
-        setAccordionPanelOpen(panel, false);
-      }
+      const stackItem = pdToggle.closest('.acc-stack-item');
+      if (!stackItem) return;
+      const idx = Number(stackItem.dataset.stackIndex);
+      if (idx > (store.accordionMax ?? 0)) return;
+      if (idx === activeIndex && stackItem.querySelector('.pd-panel')?.classList.contains('is-open')) return;
+      store.accordionSection = SECTIONS[idx].id;
+      if (SECTIONS[idx].id === 'review') markReviewViewed();
+      accordionCtx.render?.();
       return;
     }
 
@@ -307,10 +290,11 @@ function ensureAccordionDelegation() {
     const cont = e.target.closest('[data-acc-continue]');
     if (!cont || cont.disabled || cont.classList.contains('disabled')) return;
 
-    const store = accordionCtx.store;
-    const activeIndex = getActiveIndex(store);
-    const section = SECTIONS[activeIndex];
-    if (cont.dataset.accContinue !== section.id) return;
+    const contSection = SECTIONS.find((s) => s.id === cont.dataset.accContinue);
+    if (!contSection) return;
+    const contIndex = SECTIONS.indexOf(contSection);
+    if (contIndex !== activeIndex) return;
+    const section = contSection;
 
     if (store.accordionEditReturn) {
       store.accordionSection = store.accordionEditReturn;
@@ -334,7 +318,7 @@ function ensureAccordionDelegation() {
       sessionStorage.removeItem('bnb_review_viewed');
     }
 
-    store.accordionMax = activeIndex + 1;
+    store.accordionMax = Math.max(store.accordionMax ?? 0, activeIndex + 1);
     store.accordionSection = next.id;
     accordionCtx.render?.();
     scrollToStackItem(activeIndex + 1);
@@ -348,7 +332,6 @@ export function bindAccordionEvents(store, { render, onConfirm, onBeforeReview }
   accordionCtx.onBeforeReview = onBeforeReview;
   ensureAccordionDelegation();
   syncAccordionButtons();
-  enforceSingleOpenPanel();
 }
 
 export function syncAccordionSection(store) {

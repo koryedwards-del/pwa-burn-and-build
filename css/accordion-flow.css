@@ -188,10 +188,11 @@ html:has(.start-site .artshow-flow) #app {
 }
 
 .artshow-flow .acc-intro-panel {
-  border: 1px solid var(--flame);
-  border-radius: 12px;
-  padding: 24px 18px 18px;
-  background: rgba(255, 255, 255, 0.02);
+  padding: 4px 2px 0;
+}
+
+.artshow-flow .pd-fields .acc-art-headline {
+  margin-top: 4px;
 }
 
 .artshow-flow .acc-stage-intro {
@@ -328,11 +329,15 @@ html:has(.start-site .artshow-flow) #app {
 }
 
 .artshow-flow .pd-panel {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--flame);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
   overflow: hidden;
   transition: border-color 0.2s ease;
+}
+
+.artshow-flow .pd-panel.is-open {
+  border-color: var(--flame);
 }
 
 .artshow-flow .pd-panel.is-complete {
