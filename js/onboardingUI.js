@@ -9,6 +9,7 @@ import {
   formatWakeDisplay,
   heartRates,
   heightDisplay,
+  heightInchesLabel,
   nextLabel,
   onboardingPhase,
   parseWakeTime,
@@ -188,7 +189,7 @@ function renderQuestionBody(index, form) {
     case 0:
       return `
         <input class="ob-input ob-input-lg" name="preferredName" value="${form.preferredName}" placeholder="Your first name" autocomplete="given-name" />
-        <div class="ob-field-label">SEX</div>
+        <div class="ob-field-label">GENDER</div>
         <div class="ob-seg">
           <button type="button" class="${form.sex === 'Male' ? 'active' : ''}" data-ob-sex="Male">Male</button>
           <button type="button" class="${form.sex === 'Female' ? 'active' : ''}" data-ob-sex="Female">Female</button>
@@ -392,8 +393,8 @@ function renderConfirmBody(form, isEditMode, options = {}) {
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', { section: 'personal', field: 'pd-name' }, false, true)}
         ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', { section: 'personal', field: 'pd-email' }, false, true)}
-        ${confirmRow('SEX', form.sex, '', { section: 'personal', field: 'pd-sex' }, false, true)}
-        ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
+        ${confirmRow('GENDER', form.sex, '', { section: 'personal', field: 'pd-sex' }, false, true)}
+        ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
@@ -412,8 +413,8 @@ function renderConfirmBody(form, isEditMode, options = {}) {
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', base, readOnly)}
         ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', base, readOnly)}
-        ${confirmRow('SEX', form.sex, '', base, readOnly)}
-        ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', base + 1, readOnly)}
+        ${confirmRow('GENDER', form.sex, '', base, readOnly)}
+        ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', base + 1, readOnly)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', base + 2, readOnly)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', base + 3, readOnly)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', base + 4, readOnly)}
@@ -543,7 +544,7 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           <p class="pd-hint">Connects your food plan to your phone.</p>
         </div>
         <div class="pd-row">
-          <label class="pd-label" for="pd-sex">Sex</label>
+          <label class="pd-label" for="pd-sex">Gender</label>
           <div class="pd-box">
             <select id="pd-sex" class="pd-input pd-select" name="sex">
               <option value="Male" ${form.sex === 'Male' ? 'selected' : ''}>Male</option>
@@ -561,8 +562,8 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         <div class="pd-row">
           <label class="pd-label" for="pd-height">Height</label>
           <div class="pd-box pd-box-split">
-            <span class="pd-value" data-bind="heightInches" data-format="height">${heightDisplay(form.heightInches)}</span>
-            <input id="pd-height" class="pd-range" type="range" name="heightInches" min="48" max="84" step="1" value="${form.heightInches}" />
+            <input id="pd-height" class="pd-input pd-input-height" name="heightInches" type="number" inputmode="numeric" min="48" max="84" step="1" value="${form.heightInches}" placeholder="72" aria-label="Height in inches" />
+            <span class="pd-unit">inches</span>
           </div>
         </div>
         <div class="pd-row">
@@ -657,7 +658,8 @@ function updateBoundDisplays(name, value) {
   const num = Number(value);
   const sel = `[data-bind="${name}"]`;
   document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}, .chat-flow ${sel}, .artshow-flow ${sel}`).forEach((el) => {
-    if (el.dataset.format === 'height') el.textContent = heightDisplay(num);
+    if (el.dataset.format === 'height') el.textContent = heightInchesLabel(num);
+    else if (el.dataset.format === 'inches') el.textContent = Number.isFinite(num) && num > 0 ? String(Math.round(num)) : '';
     else el.textContent = value;
   });
   const subSel = `[data-bind-sub="${name}"]`;
@@ -776,6 +778,19 @@ function ensureObDelegation() {
       form.birthDateText = formatted;
       input.value = formatted;
       syncAgeFromBirthDate(form, input.closest(flowRoot()));
+      syncNextButton(obCtx.store, form);
+      return;
+    }
+
+    if (input.name === 'heightInches' && input.type === 'number') {
+      const n = Number(input.value);
+      if (input.value === '') {
+        form.heightInches = '';
+      } else if (!Number.isNaN(n)) {
+        form.heightInches = Math.min(84, Math.max(48, Math.round(n)));
+        if (String(form.heightInches) !== input.value) input.value = form.heightInches;
+      }
+      updateBoundDisplays('heightInches', form.heightInches);
       syncNextButton(obCtx.store, form);
       return;
     }

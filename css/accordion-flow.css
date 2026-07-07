@@ -435,6 +435,10 @@ html:has(.start-site .artshow-flow) #app {
   accent-color: var(--flame);
 }
 
+.artshow-flow .pd-input-height {
+  font-style: italic;
+}
+
 .artshow-flow .pd-unit {
   font-size: 13px;
   color: var(--muted);

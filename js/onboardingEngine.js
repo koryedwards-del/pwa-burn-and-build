@@ -135,6 +135,11 @@ export function heightDisplay(inches) {
   return `${ft}'${rem}"`;
 }
 
+export function heightInchesLabel(inches) {
+  const n = Math.round(Number(inches));
+  return Number.isFinite(n) && n > 0 ? `${n} inches` : '—';
+}
+
 export function formatWakeDisplay(wakeTime) {
   if (!wakeTime) return '—';
   const { hour12, minute, ampm } = parseWakeTime(wakeTime);
