@@ -76,6 +76,7 @@ function renderSectionPanel(section, form, open, complete) {
 
 function continueLabel(section) {
   if (section.intro) return 'Start building →';
+  if (section.id === 'rhythm') return 'Review & build →';
   if (section.review) return 'Build my food plan →';
   return 'Continue →';
 }
