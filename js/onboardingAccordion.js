@@ -66,7 +66,7 @@ function renderSectionPanel(section, form, open, complete) {
   if (section.review) {
     return renderCollapsiblePanel(
       'Review & build',
-      `<div class="ob-confirm">${renderConfirmBody(form, false, { readOnly: true })}</div>`,
+      `<div class="ob-confirm">${renderConfirmBody(form, false, { accordionEdit: true })}</div>`,
       open,
       complete,
     );
@@ -158,7 +158,54 @@ function syncReviewBody(form) {
   if (!stackItem || stackItem.classList.contains('is-locked')) return;
   const confirm = stackItem.querySelector('.ob-confirm');
   if (!confirm) return;
-  confirm.innerHTML = renderConfirmBody(form, false, { readOnly: true });
+  confirm.innerHTML = renderConfirmBody(form, false, { accordionEdit: true });
+}
+
+function openAccordionPanel(stackItem) {
+  const panel = stackItem?.querySelector('.pd-panel');
+  if (!panel || panel.classList.contains('is-locked')) return;
+  const fields = panel.querySelector('.pd-fields');
+  const trigger = panel.querySelector('[data-pd-toggle]');
+  panel.classList.add('is-open');
+  if (fields) fields.hidden = false;
+  if (trigger) {
+    trigger.setAttribute('aria-expanded', 'true');
+    const chev = trigger.querySelector('.pd-chevron');
+    if (chev) chev.textContent = '−';
+  }
+}
+
+function focusAccordionField(sectionId, fieldRef) {
+  const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
+  if (!stackItem) return;
+  openAccordionPanel(stackItem);
+
+  let el = null;
+  if (fieldRef.startsWith('pd-')) {
+    el = stackItem.querySelector(`#${fieldRef}`);
+  } else if (fieldRef.startsWith('wake-')) {
+    el = stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
+  } else if (fieldRef === 'reminders') {
+    el = stackItem.querySelector('[data-ob-reminders]');
+  } else {
+    el = stackItem.querySelector(`[name="${fieldRef}"]`);
+  }
+
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (typeof el.focus === 'function') {
+      el.focus({ preventScroll: true });
+    }
+  }
+}
+
+function openFieldFromReview(sectionId, fieldRef) {
+  const index = SECTIONS.findIndex((s) => s.id === sectionId);
+  if (index < 0) return;
+  scrollToStackItem(index);
+  window.requestAnimationFrame(() => {
+    focusAccordionField(sectionId, fieldRef);
+  });
 }
 
 function syncAccordionButtons() {
@@ -203,6 +250,12 @@ function ensureAccordionDelegation() {
 
   document.addEventListener('click', (e) => {
     if (!accordionCtx.store || !e.target.closest('.artshow-flow')) return;
+
+    const editRow = e.target.closest('[data-acc-edit-section]');
+    if (editRow) {
+      openFieldFromReview(editRow.dataset.accEditSection, editRow.dataset.accEditField);
+      return;
+    }
 
     const pdToggle = e.target.closest('[data-pd-toggle]');
     if (pdToggle) {

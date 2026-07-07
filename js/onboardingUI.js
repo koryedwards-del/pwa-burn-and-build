@@ -332,8 +332,30 @@ function renderFatInput(form, source) {
     </div>`;
 }
 
-function confirmRow(label, value, subtitle, editPage, readOnly) {
-  if (readOnly || editPage == null) {
+function confirmRow(label, value, subtitle, editTarget, readOnly, accordionEdit) {
+  if (accordionEdit) {
+    if (!editTarget) {
+      return `
+    <div class="ob-confirm-row ob-confirm-row-readonly">
+      <div>
+        <div class="ob-confirm-label">${label}</div>
+        ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
+      </div>
+      <div class="ob-confirm-value">${value}</div>
+    </div>`;
+    }
+    return `
+    <button type="button" class="ob-confirm-row ob-confirm-row-edit"
+      data-acc-edit-section="${editTarget.section}"
+      data-acc-edit-field="${editTarget.field}">
+      <div>
+        <div class="ob-confirm-label">${label}</div>
+        ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
+      </div>
+      <div class="ob-confirm-value">${value}</div>
+    </button>`;
+  }
+  if (readOnly || editTarget == null) {
     return `
     <div class="ob-confirm-row ob-confirm-row-readonly">
       <div>
@@ -344,7 +366,7 @@ function confirmRow(label, value, subtitle, editPage, readOnly) {
     </div>`;
   }
   return `
-    <button type="button" class="ob-confirm-row" data-ob-goto="${editPage}">
+    <button type="button" class="ob-confirm-row" data-ob-goto="${editTarget}">
       <div>
         <div class="ob-confirm-label">${label}</div>
         ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
@@ -354,7 +376,8 @@ function confirmRow(label, value, subtitle, editPage, readOnly) {
 }
 
 function renderConfirmBody(form, isEditMode, options = {}) {
-  const readOnly = !!options.readOnly;
+  const accordionEdit = !!options.accordionEdit;
+  const readOnly = accordionEdit ? false : !!options.readOnly;
   const weight = Number(form.weightText);
   const fat = Number(form.fatPercentText);
   const lbm = weight * (1 - fat / 100);
@@ -362,6 +385,27 @@ function renderConfirmBody(form, isEditMode, options = {}) {
   const phys = WORK_PHYSICAL.find((w) => w.id === form.workPhysical);
   const stress = WORK_STRESS.find((w) => w.id === form.workStress);
   const base = WELCOME_COUNT;
+
+  if (accordionEdit) {
+    return `
+      <div class="ob-confirm-rows">
+        ${confirmRow('NAME', form.preferredName || '—', '', { section: 'personal', field: 'pd-name' }, false, true)}
+        ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', { section: 'personal', field: 'pd-email' }, false, true)}
+        ${confirmRow('SEX', form.sex, '', { section: 'personal', field: 'pd-sex' }, false, true)}
+        ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
+        ${confirmRow('AGE', String(form.age), '', { section: 'personal', field: 'pd-age' }, false, true)}
+        ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
+        ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
+        ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, false, true)}
+        ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'work', field: 'pd-job' }, false, true)}
+        ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'work', field: 'pd-lifestyle' }, false, true)}
+        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', `${form.weightTrainingHours} hrs/week`, '', { section: 'work', field: 'pd-weights' }, false, true)}
+        ${confirmRow('CARDIOVASCULAR TRAINING', `${form.cardioHours} hrs/week`, `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM`, { section: 'work', field: 'pd-cardio' }, false, true)}
+        ${confirmRow('FAT BURNING', `${form.fatBurningHours} hrs/week`, `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM`, { section: 'work', field: 'pd-fatburn' }, false, true)}
+        ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', { section: 'rhythm', field: 'wake-hour' }, false, true)}
+        ${confirmRow('MEAL REMINDERS', form.remindersEnabled ? 'On' : 'Off', '', { section: 'rhythm', field: 'reminders' }, false, true)}
+      </div>`;
+  }
 
   return `
       <div class="ob-confirm-rows">
