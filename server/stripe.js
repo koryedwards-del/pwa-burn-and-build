@@ -51,6 +51,12 @@ export async function createCheckoutSession({ email, programId, baseUrl }) {
 
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
+    payment_method_types: ['card'],
+    wallet_options: {
+      link: {
+        display: 'never',
+      },
+    },
     customer_email: normalizedEmail,
     line_items: [{ price: priceId, quantity: 1 }],
     allow_promotion_codes: true,
