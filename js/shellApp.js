@@ -38,6 +38,22 @@ import {
   persistAppEmail,
   saveProgramToServer,
 } from './programApi.js';
+import {
+  backupLocalAppData,
+  downloadLocalAppData,
+  getLocalBackupDate,
+  hasLocalBackup,
+  restoreLocalAppData,
+} from './localDataBackup.js';
+
+let backupTimer = null;
+function scheduleLocalBackup() {
+  if (backupTimer) return;
+  backupTimer = window.setTimeout(() => {
+    backupTimer = null;
+    backupLocalAppData();
+  }, 1500);
+}
 
 const store = {
   profile: null,
@@ -72,6 +88,7 @@ const store = {
   loadError: null,
   emailError: null,
   loadBusy: false,
+  dataNotice: null,
 };
 
 function hasActiveProgram() {
@@ -120,14 +137,21 @@ function saveGroceryState() {
   localStorage.setItem('bnb_grocery_checked', JSON.stringify(store.groceryChecked));
   localStorage.setItem('bnb_grocery_removed', JSON.stringify(store.groceryRemoved));
   localStorage.setItem('bnb_grocery_extras', JSON.stringify(store.groceryExtras));
+  scheduleLocalBackup();
 }
 
 function saveProgram() {
-  if (store.program) localStorage.setItem('bnb_program', JSON.stringify(store.program));
+  if (store.program) {
+    localStorage.setItem('bnb_program', JSON.stringify(store.program));
+    scheduleLocalBackup();
+  }
 }
 
 function saveSettings() {
-  if (store.settings) localStorage.setItem('bnb_settings', JSON.stringify(store.settings));
+  if (store.settings) {
+    localStorage.setItem('bnb_settings', JSON.stringify(store.settings));
+    scheduleLocalBackup();
+  }
 }
 
 function ensureSettings() {
@@ -156,6 +180,7 @@ function saveProfile() {
 
 function saveEntries() {
   localStorage.setItem('bnb_entries', JSON.stringify(store.entries));
+  scheduleLocalBackup();
 }
 
 function savePickCounts() {
@@ -276,6 +301,7 @@ function getMealSlots(plan) {
 }
 
 function applyImportedProgram(pkg) {
+  backupLocalAppData();
   const result = importProgramPackage(pkg);
   if (!result.ok) {
     store.importError = result.errors.join(' ');
@@ -294,6 +320,7 @@ function applyImportedProgram(pkg) {
 async function syncProgramFromServer() {
   const email = getAppEmail();
   if (!isValidEmail(email)) return false;
+  if (hasActiveProgram()) return true;
   const result = await fetchProgramFromServer(email);
   if (result.ok && result.package) {
     store.loadError = null;
@@ -698,6 +725,7 @@ function renderHome() {
         <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>
       <div class="home-btn-stack">
+        ${store.dataNotice ? `<div class="home-data-notice">${store.dataNotice}</div>` : ''}
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
         ${renderHomeNavButton('projections')}
@@ -734,6 +762,10 @@ function renderWakePickerSettings(wakeTime) {
 function renderSettings() {
   const canEdit = canEditWakeTime();
   const wakeTime = currentWakeTime();
+  const backupDate = getLocalBackupDate();
+  const backupLabel = backupDate
+    ? new Date(backupDate).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+    : null;
   return `
     <div class="screen settings-screen">
       <div class="plan-header settings-header">
@@ -749,8 +781,37 @@ function renderSettings() {
           <p class="settings-empty">Open or create a food plan first — wake time controls when your meals are scheduled each day.</p>
           <a href="../createyourfoodplan/" class="btn-primary settings-create-link">Create your food plan</a>
         `}
+        <div class="settings-data-block">
+          <div class="settings-field-label">Your data on this device</div>
+          <p class="settings-field-desc">The home screen app and Safari keep separate storage on iPhone. Saving to your account keeps plans available in both.</p>
+          ${backupLabel ? `<p class="settings-backup-meta">Last on-device backup: ${backupLabel}</p>` : ''}
+          ${hasLocalBackup() ? `<button type="button" class="btn-secondary settings-restore" data-restore-backup>Restore from backup</button>` : ''}
+          <button type="button" class="btn-secondary settings-export" data-export-backup>Download backup file</button>
+        </div>
+        ${store.dataNotice ? `<div class="settings-notice">${store.dataNotice}</div>` : ''}
       </div>
     </div>`;
+}
+
+function restoreFromLocalBackup() {
+  const result = restoreLocalAppData();
+  if (!result.ok) {
+    store.dataNotice = result.message;
+    render();
+    return;
+  }
+  load();
+  store.dataNotice = `Restored backup from ${new Date(result.savedAt).toLocaleString()}.`;
+  store.screen = 'home';
+  render();
+}
+
+function exportLocalBackup() {
+  const result = downloadLocalAppData();
+  if (!result.ok) {
+    store.dataNotice = result.message || 'Could not export backup.';
+    render();
+  }
 }
 
 function renderStubScreen(title, lead) {
@@ -1446,6 +1507,9 @@ function bindEvents() {
     render();
   });
 
+  document.querySelector('[data-restore-backup]')?.addEventListener('click', restoreFromLocalBackup);
+  document.querySelector('[data-export-backup]')?.addEventListener('click', exportLocalBackup);
+
   document.querySelectorAll('[data-reveal-fats]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const plan = getPlan();
@@ -1620,6 +1684,25 @@ function bindEvents() {
 
 async function init() {
   load();
+
+  if (!hasActiveProgram() && hasLocalBackup()) {
+    const restored = restoreLocalAppData();
+    if (restored.ok) {
+      load();
+      store.dataNotice = 'Restored your food plan from an on-device backup.';
+    }
+  } else if (hasActiveProgram()) {
+    backupLocalAppData();
+  }
+
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (standalone && !localStorage.getItem('bnb_pwa_storage_warned')) {
+    localStorage.setItem('bnb_pwa_storage_warned', '1');
+    if (!store.dataNotice) {
+      store.dataNotice = 'This home screen app keeps its own storage, separate from Safari. Save your plan to your account from the creator so it stays available everywhere.';
+    }
+  }
+
   store.screen = 'loading';
   render();
   try {
