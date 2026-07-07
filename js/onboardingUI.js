@@ -19,6 +19,10 @@ import {
   welcomeScreens,
   ageFromBirthDate,
   formatBirthDateDigits,
+  formatBirthDateText,
+  birthDateMaskDisplay,
+  birthDateCursorPosition,
+  birthDateDigits,
   parseBirthDateText,
 } from './onboardingEngine.js';
 import { isValidEmail } from './programApi.js';
@@ -180,7 +184,19 @@ function radioCard(name, value, selected, label, sub) {
 }
 
 function displayBirthDate(form) {
-  return form.birthDateText || '—';
+  const iso = parseBirthDateText(form.birthDateText);
+  return iso ? formatBirthDateText(iso) : '—';
+}
+
+function syncBirthDateInput(input, form) {
+  const digits = birthDateDigits(form.birthDateText);
+  form.birthDateText = formatBirthDateDigits(digits);
+  input.value = birthDateMaskDisplay(form.birthDateText);
+  const pos = birthDateCursorPosition(digits.length);
+  input.setSelectionRange(pos, pos);
+  syncAgeFromBirthDate(form, input.closest(flowRoot()));
+  syncNextButton(obCtx.store, form);
+  input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function renderQuestionBody(index, form) {
@@ -207,7 +223,7 @@ function renderQuestionBody(index, form) {
     case 2:
       return `
         <div class="ob-field-label">DATE OF BIRTH</div>
-        <input class="ob-input ob-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${form.birthDateText}" placeholder="MM/DD/YYYY" autocomplete="bday" />
+        <input class="ob-input ob-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${birthDateMaskDisplay(form.birthDateText)}" autocomplete="bday" />
         ${infoBox('❤️', 'Your birth date is used to calculate your personal fat burning (60–70%) and cardio training (70–85%) heart rate zones.')}`;
 
     case 3:
@@ -545,17 +561,16 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         </div>
         <div class="pd-row">
           <span class="pd-label" id="pd-sex-label">Gender</span>
-          <div class="ob-seg pd-seg" id="pd-sex" role="group" aria-labelledby="pd-sex-label">
-            <button type="button" class="${form.sex === 'Male' ? 'active' : ''}" data-ob-sex="Male">Male</button>
-            <button type="button" class="${form.sex === 'Female' ? 'active' : ''}" data-ob-sex="Female">Female</button>
+          <div class="pd-box pd-box-gender" id="pd-sex" role="group" aria-labelledby="pd-sex-label">
+            <button type="button" class="pd-gender-btn ${form.sex === 'Male' ? 'active' : ''}" data-ob-sex="Male">Male</button>
+            <button type="button" class="pd-gender-btn ${form.sex === 'Female' ? 'active' : ''}" data-ob-sex="Female">Female</button>
           </div>
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-age">Birth date</label>
           <div class="pd-box">
-            <input id="pd-age" class="pd-input" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${form.birthDateText}" placeholder="MM/DD/YYYY" autocomplete="bday" />
+            <input id="pd-age" class="pd-input pd-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${birthDateMaskDisplay(form.birthDateText)}" autocomplete="bday" />
           </div>
-          <p class="pd-hint">MM/DD/YYYY</p>
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-height">Height</label>
@@ -773,11 +788,9 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'birthDateText') {
-      const formatted = formatBirthDateDigits(input.value);
-      form.birthDateText = formatted;
-      input.value = formatted;
-      syncAgeFromBirthDate(form, input.closest(flowRoot()));
-      syncNextButton(obCtx.store, form);
+      const digits = birthDateDigits(input.value);
+      form.birthDateText = formatBirthDateDigits(digits);
+      syncBirthDateInput(input, form);
       return;
     }
 
@@ -845,6 +858,32 @@ function ensureObDelegation() {
 
     if (input.dataset.wakePart) {
       syncWakeTimeFromPicker(form);
+    }
+  });
+
+  document.addEventListener('focusin', (e) => {
+    const input = e.target;
+    if (!obCtx.store || input.name !== 'birthDateText' || !input.closest(flowRoot())) return;
+    window.requestAnimationFrame(() => syncBirthDateInput(input, obCtx.store.onboardingForm));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const input = e.target;
+    if (!obCtx.store || input.name !== 'birthDateText' || !input.closest(flowRoot())) return;
+    const form = obCtx.store.onboardingForm;
+    const digits = birthDateDigits(form.birthDateText);
+
+    if (e.key >= '0' && e.key <= '9' && digits.length < 8) {
+      e.preventDefault();
+      form.birthDateText = formatBirthDateDigits(digits + e.key);
+      syncBirthDateInput(input, form);
+      return;
+    }
+
+    if (e.key === 'Backspace' && digits.length > 0) {
+      e.preventDefault();
+      form.birthDateText = formatBirthDateDigits(digits.slice(0, -1));
+      syncBirthDateInput(input, form);
     }
   });
 

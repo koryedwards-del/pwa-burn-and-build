@@ -5,9 +5,11 @@ import {
   WORK_STRESS,
   canProceed,
   formatWakeDisplay,
+  formatBirthDateText,
   heightInchesLabel,
   heartRates,
   onboardingPhase,
+  parseBirthDateText,
   welcomeScreens,
 } from './onboardingEngine.js';
 import { renderQuestionBody, renderConfirmBody } from './onboardingUI.js';
@@ -34,7 +36,9 @@ function formatUserAnswer(qi, form) {
     case 1:
       return `${heightInchesLabel(form.heightInches)}`;
     case 2:
-      return form.birthDateText || '—';
+      return form.birthDateText && parseBirthDateText(form.birthDateText)
+        ? formatBirthDateText(parseBirthDateText(form.birthDateText))
+        : '—';
     case 3:
       return `${form.weightText} lbs`;
     case 4:

@@ -450,12 +450,36 @@ html:has(.start-site .artshow-flow) #app {
   font-style: italic;
 }
 
-.artshow-flow .pd-seg {
-  margin-top: 2px;
+.artshow-flow .pd-input-birth {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
 
-.artshow-flow .pd-seg button {
-  padding: 14px 12px;
+.artshow-flow .pd-box-gender {
+  display: flex;
+  padding: 0;
+  overflow: hidden;
+}
+
+.artshow-flow .pd-gender-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 8px;
+  min-height: 44px;
+}
+
+.artshow-flow .pd-gender-btn.active {
+  background: rgba(232, 114, 42, 0.16);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.artshow-flow .pd-gender-btn + .pd-gender-btn {
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .artshow-flow .pd-unit {

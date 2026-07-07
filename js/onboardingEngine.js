@@ -95,6 +95,24 @@ export function formatBirthDateDigits(digits) {
   return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
 }
 
+export const BIRTH_DATE_TEMPLATE = 'MM/DD/YYYY';
+
+export function birthDateDigits(text) {
+  return String(text || '').replace(/\D/g, '').slice(0, 8);
+}
+
+export function birthDateMaskDisplay(text) {
+  const digits = birthDateDigits(text);
+  if (!digits.length) return BIRTH_DATE_TEMPLATE;
+  let di = 0;
+  return BIRTH_DATE_TEMPLATE.replace(/[MDY]/g, (ch) => (di < digits.length ? digits[di++] : ch));
+}
+
+export function birthDateCursorPosition(digitCount) {
+  const positions = [0, 1, 3, 4, 6, 7, 8, 9, 10];
+  return positions[Math.min(digitCount, 8)] ?? 10;
+}
+
 export function parseBirthDateText(text) {
   const m = String(text || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
   if (!m) return null;
@@ -170,7 +188,7 @@ export function defaultOnboardingForm(profile) {
   const p = profile || {};
   const work = reverseWorkIntensity(p.workIntensity ?? 2);
   const age = p.age ?? 35;
-  const birthDate = p.birthDate || defaultBirthDateFromAge(age);
+  const birthDate = p.birthDate || (p.birthDateText ? parseBirthDateText(p.birthDateText) : null) || defaultBirthDateFromAge(age);
   return {
     preferredName: p.preferredName || '',
     email: p.email || '',
@@ -178,7 +196,7 @@ export function defaultOnboardingForm(profile) {
     heightInches: p.heightInches ?? 68,
     age,
     birthDate,
-    birthDateText: p.birthDateText || formatBirthDateText(birthDate),
+    birthDateText: p.birthDateText || '',
     weightText: p.totalWeight > 0 ? String(Math.round(p.totalWeight)) : '',
     fatPercentText: p.fatPercent > 0 ? String(p.fatPercent) : '',
     fatSource: p.fatPercent > 0 ? 'recent' : '',
