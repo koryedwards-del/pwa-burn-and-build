@@ -439,6 +439,15 @@ function renderFatInput(form, source) {
     </div>`;
 }
 
+function confirmRowValue(value, showEditIcon = false) {
+  if (!showEditIcon) return `<div class="ob-confirm-value">${value}</div>`;
+  return `
+      <div class="ob-confirm-value-wrap">
+        <div class="ob-confirm-value">${value}</div>
+        <span class="ob-confirm-edit-icon" aria-hidden="true"></span>
+      </div>`;
+}
+
 function confirmRow(label, value, subtitle, editTarget, readOnly, accordionEdit) {
   if (accordionEdit) {
     if (!editTarget) {
@@ -448,7 +457,7 @@ function confirmRow(label, value, subtitle, editTarget, readOnly, accordionEdit)
         <div class="ob-confirm-label">${label}</div>
         ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
       </div>
-      <div class="ob-confirm-value">${value}</div>
+      ${confirmRowValue(value)}
     </div>`;
     }
     return `
@@ -459,7 +468,7 @@ function confirmRow(label, value, subtitle, editTarget, readOnly, accordionEdit)
         <div class="ob-confirm-label">${label}</div>
         ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
       </div>
-      <div class="ob-confirm-value">${value}</div>
+      ${confirmRowValue(value, true)}
     </button>`;
   }
   if (readOnly || editTarget == null) {
@@ -487,7 +496,6 @@ function renderConfirmBody(form, isEditMode, options = {}) {
   const readOnly = accordionEdit ? false : !!options.readOnly;
   const weight = Number(form.weightText);
   const fat = Number(form.fatPercentText);
-  const lbm = weight * (1 - fat / 100);
   const hr = heartRates(Number(form.age));
   const phys = WORK_PHYSICAL.find((w) => w.id === form.workPhysical);
   const stress = WORK_STRESS.find((w) => w.id === form.workStress);
@@ -504,7 +512,6 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
-        ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, false, true)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'job', field: 'workPhysical' }, false, true)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'job', field: 'workStress' }, false, true)}
         ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
@@ -525,7 +532,6 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', base + 2, readOnly)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', base + 3, readOnly)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', base + 4, readOnly)}
-        ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, readOnly)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', base + 5, readOnly)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6, readOnly)}
         ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', base + 7, readOnly)}
