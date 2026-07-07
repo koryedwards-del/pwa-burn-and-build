@@ -1,6 +1,6 @@
 /** My Plan PWA service worker */
 
-const CACHE = 'bnb-myplan-v12';
+const CACHE = 'bnb-myplan-v13';
 const ASSETS = [
   './',
   './index.html',
@@ -33,6 +33,7 @@ const ASSETS = [
   '../img/coach/card-5.png',
   '../img/coach/card-6.png',
   '../img/coach/card-7.png',
+  '../icons/apple-touch-icon.png',
   '../icons/icon-192.png',
   '../icons/icon-512.png',
 ];
