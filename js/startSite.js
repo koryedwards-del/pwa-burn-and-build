@@ -498,14 +498,6 @@ function bindOnboardingOnly() {
       store.onboardingForm = form;
       finishIntake();
     },
-    onBeforeReview: () => {
-      const email = (store.email || getAppEmail() || '').trim();
-      if (validEmail(email)) return true;
-      store.phase = 'email-login';
-      persistFlowState();
-      render();
-      return false;
-    },
   });
 }
 
