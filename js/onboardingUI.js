@@ -356,7 +356,6 @@ function renderQuestionBody(index, form) {
 
     case 8:
       return `
-        <div class="ob-divider"></div>
         <div class="ob-section-label">FAT BURNING</div>
         <div class="ob-hr-label ob-hr-label-tight">HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM</div>
         ${renderActivityHoursInput('fatBurningHours', form, 20)}
