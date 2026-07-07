@@ -71,8 +71,12 @@ function renderIntroBody() {
     })}`;
 }
 
+function renderIntroPanel() {
+  return `<div class="acc-intro-panel">${renderIntroBody()}</div>`;
+}
+
 function renderSectionPanel(section, form, open, complete) {
-  if (section.intro) return renderCollapsiblePanel('Getting started', renderIntroBody(), open, complete);
+  if (section.intro) return renderIntroPanel();
   if (section.personal) return renderPersonalDetails(form, open, complete);
   if (section.workActivity) return renderJobLifestyleActivity(form, open, complete);
   if (section.review) {
