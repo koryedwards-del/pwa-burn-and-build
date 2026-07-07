@@ -19,6 +19,7 @@ import {
   wakeTimeFromParts,
 } from './onboardingEngine.js';
 import { computeWhatsPossible } from './previewCalculator.js';
+import { summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
   importProgramPackage,
@@ -861,15 +862,41 @@ function renderPreviousPlansHeader() {
     </div>`;
 }
 
+function localProgramHistoryRows() {
+  if (!store.program?.program?.id) return [];
+  return [summarizeProgram(store.program, {
+    id: store.program.program.id,
+    createdAt: store.program.program.issuedAt || store.program.program.startDate,
+    label: store.program.program.label,
+  })];
+}
+
+function mergeProgramHistory(serverRows, localRows) {
+  const byId = new Map();
+  for (const row of [...(serverRows || []), ...(localRows || [])]) {
+    if (row?.id && !byId.has(row.id)) byId.set(row.id, row);
+  }
+  return [...byId.values()].sort((a, b) => {
+    const ta = new Date(a.createdAt || 0).getTime();
+    const tb = new Date(b.createdAt || 0).getTime();
+    return tb - ta;
+  });
+}
+
 async function loadProgramHistory() {
   store.programHistoryLoading = true;
   store.programHistoryError = null;
   render();
 
+  const localRows = localProgramHistoryRows();
+  if (store.program) {
+    await ensureProgramOnServer(store.program);
+  }
+
   const email = getAppEmail();
   if (!email) {
     store.programHistoryLoading = false;
-    store.programHistory = [];
+    store.programHistory = localRows;
     render();
     return;
   }
@@ -877,16 +904,28 @@ async function loadProgramHistory() {
   const result = await fetchProgramHistoryFromServer(email);
   store.programHistoryLoading = false;
   if (!result.ok) {
-    store.programHistory = [];
+    store.programHistory = localRows;
+    if (!localRows.length) {
+      store.programHistoryError = result.message || 'Could not load food plan history.';
+    }
   } else {
-    store.programHistory = result.programs || [];
+    store.programHistory = mergeProgramHistory(result.programs, localRows);
   }
   render();
 }
 
 async function openHistoryProgram(programId) {
   const email = getAppEmail();
-  if (!email || !programId) return;
+  if (!programId) return;
+
+  if (programId === store.program?.program?.id) {
+    store.expandedNavButton = null;
+    store.screen = 'home';
+    render();
+    return;
+  }
+
+  if (!email) return;
 
   store.programHistoryOpenId = programId;
   store.programHistoryError = null;
@@ -920,11 +959,14 @@ function renderPreviousPlans() {
   }
 
   if (!store.programHistory.length) {
+    const emptyCopy = hasActiveProgram()
+      ? '<p>Your current plan is on this device only.</p><p class="history-empty-sub">Open the app from the creator&rsquo;s &ldquo;Open Burn &amp; Build app&rdquo; button once so it saves to your account.</p>'
+      : '<p>You haven\'t created a food plan.</p>';
     return `
       <div class="screen previous-plans-screen">
         ${renderPreviousPlansHeader()}
         <div class="history-empty">
-          <p>You haven't created a food plan.</p>
+          ${emptyCopy}
         </div>
       </div>`;
   }
