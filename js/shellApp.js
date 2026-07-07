@@ -35,6 +35,7 @@ import {
   getAppEmail,
   isValidEmail,
   persistAppEmail,
+  saveProgramToServer,
 } from './programApi.js';
 
 const store = {
@@ -297,8 +298,27 @@ async function syncProgramFromServer() {
     store.loadError = null;
     return applyImportedProgram(result.package);
   }
-  store.loadError = result.message || 'No food plan found for this email.';
+  store.loadError = result.message || 'No food plan saved for this email yet.';
   return false;
+}
+
+async function ensureProgramOnServer(pkg) {
+  const email = (pkg?.intake?.email || getAppEmail() || '').trim();
+  if (!isValidEmail(email) || !pkg?.program?.id) return false;
+  persistAppEmail(email);
+  const existing = await fetchProgramFromServer(email);
+  if (existing.ok && existing.package) return true;
+  const saved = await saveProgramToServer(email, pkg);
+  if (!saved.ok) {
+    console.error('Could not save plan to server:', saved.message);
+    return false;
+  }
+  if (saved.programId && pkg.program) {
+    pkg.program.id = saved.programId;
+    store.program = pkg;
+    saveProgram();
+  }
+  return true;
 }
 
 async function submitLoadPlan() {
@@ -653,6 +673,7 @@ function renderLoadPlanHome() {
       </div>
       <div class="home-load-plan">
         <p class="home-load-lead">Enter the email you used to create your food plan.</p>
+        <p class="home-load-hint">If your plan works in Safari but not from the home screen icon, open the app once from the creator&rsquo;s &ldquo;Open Burn &amp; Build app&rdquo; button so it saves to your account.</p>
         ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
         ${store.emailError ? `<div class="import-error">${store.emailError}</div>` : ''}
         <label class="home-load-label" for="load-plan-email">Email address</label>
@@ -1576,6 +1597,7 @@ async function init() {
       const pkg = JSON.parse(pendingImport);
       if (applyImportedProgram(pkg)) {
         window.history.replaceState({}, '', window.location.pathname);
+        await ensureProgramOnServer(pkg);
       }
     }
   } catch (err) {
@@ -1602,7 +1624,9 @@ async function init() {
     window.history.replaceState({}, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`);
   }
 
-  if (!hasActiveProgram() && getAppEmail()) {
+  if (hasActiveProgram()) {
+    await ensureProgramOnServer(store.program);
+  } else if (getAppEmail()) {
     await syncProgramFromServer();
   }
 

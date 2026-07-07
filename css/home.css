@@ -132,6 +132,14 @@
   margin: 0 0 8px;
 }
 
+.home-load-hint {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #999;
+  text-align: center;
+  margin: 0 0 12px;
+}
+
 .home-load-label {
   font-size: 12px;
   font-weight: 700;
