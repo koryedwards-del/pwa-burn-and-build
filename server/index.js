@@ -342,7 +342,7 @@ app.get('/config.js', (_req, res) => {
 });
 
 app.get('/', (_req, res) => {
-  res.redirect('/start/');
+  res.redirect('/createyourfoodplan/');
 });
 
 app.use((req, res, next) => {

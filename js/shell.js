@@ -539,7 +539,7 @@ function renderWaiting() {
       <h2 class="ps-empty-title">Get your food plan</h2>
       ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
       <p class="ps-empty-lead">Create your plan on the website first — then open this app and sign in with the same email.</p>
-      <a href="../start/" class="btn-primary ps-empty-cta">Create your program →</a>
+      <a href="../createyourfoodplan/" class="btn-primary ps-empty-cta">Create your food plan →</a>
     </div>`;
 }
 
@@ -557,7 +557,7 @@ function renderEmailLogin() {
       <label class="unlock-label" for="shell-email">Email address</label>
       <input id="shell-email" class="ob-input ob-input-lg" type="email" name="shellEmail" value="${store.email || getAppEmail()}" placeholder="you@example.com" autocomplete="email" />
       <button type="button" class="btn-primary ps-empty-cta" data-shell-email-submit>LOAD MY FOOD PLAN →</button>
-      <a href="../start/" class="unlock-back-link" style="display:block;margin-top:16px;">Create your program →</a>
+      <a href="../createyourfoodplan/" class="unlock-back-link" style="display:block;margin-top:16px;">Create your food plan →</a>
     </div>`;
 }
 

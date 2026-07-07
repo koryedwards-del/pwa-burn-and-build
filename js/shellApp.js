@@ -569,7 +569,7 @@ function canOpenNav(nav) {
 function renderHomeNavButton(nav) {
   const label = NAV_MENU_LABELS[nav];
   if (store.expandedNavButton === nav && !canOpenNav(nav)) {
-    return `<a href="../start/" class="btn-home btn-home-build">Tap here to create your custom food plan</a>`;
+    return `<a href="../createyourfoodplan/" class="btn-home btn-home-build">Tap here to create your custom food plan</a>`;
   }
   if (canOpenNav(nav)) {
     return `<button type="button" class="btn-home" data-nav="${nav}">${label}</button>`;
@@ -846,7 +846,7 @@ function renderImport() {
         <div class="import-divider">or paste JSON</div>
         <textarea class="import-paste" data-import-paste placeholder='{"schemaVersion":"1.0.0","packageType":"burn-and-build-program",...}'></textarea>
         <button type="button" class="btn-primary" data-import-submit style="margin-top:16px">OPEN PROGRAM</button>
-        <p class="import-note">Need a new program? <a href="../start/">Create one on the website →</a></p>
+        <p class="import-note">Need a new program? <a href="../createyourfoodplan/">Create one on the website →</a></p>
       </div>
     </div>`;
 }

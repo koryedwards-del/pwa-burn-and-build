@@ -10,7 +10,7 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 | Path | Host | Role |
 |------|------|------|
 | `landing/` | gettheburnandbuildapp.com (GitHub Pages) | Marketing — hero, calculator, testimonials, $149 CTA |
-| `start/` | Render `/start/` | Program creator — email → intake → Stripe → save plan |
+| `createyourfoodplan/` | Render `/createyourfoodplan/` | Program creator — email → intake → Stripe → save plan |
 | `shell/` | GitHub Pages or Render `/shell/` | Daily app — food plan, grocery, logging |
 | `server/` | Render | API + SQLite for programs/contacts |
 

@@ -13,7 +13,7 @@ const ASSETS = [
   './img/coach/card-5.png',
   './img/coach/card-6.png',
   './img/coach/card-7.png',
-  './start/index.html',
+  './createyourfoodplan/index.html',
 ];
 
 const NETWORK_FIRST = ['/js/', '/css/'];

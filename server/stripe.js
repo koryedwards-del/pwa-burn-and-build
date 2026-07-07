@@ -59,8 +59,8 @@ export async function createCheckoutSession({ email, programId, baseUrl }) {
       email: normalizedEmail,
       ...(programId ? { programId: String(programId) } : {}),
     },
-    success_url: `${origin}/start/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${origin}/start/?checkout=cancel`,
+    success_url: `${origin}/createyourfoodplan/?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/createyourfoodplan/?checkout=cancel`,
   });
 
   return { sessionId: session.id, url: session.url };

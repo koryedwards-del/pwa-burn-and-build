@@ -544,7 +544,7 @@ function renderHome() {
         <button type="button" class="btn-primary" data-nav="grocery">Grocery List</button>
         <button type="button" class="btn-primary" data-nav="coach">Coaching</button>
         <button type="button" class="btn-secondary" data-nav="import">${hasActiveProgram() ? 'Open New Program' : 'Open Program'}</button>
-        ${hasActiveProgram() ? '' : '<a href="start/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Create Your Program →</a>'}
+        ${hasActiveProgram() ? '' : '<a href="createyourfoodplan/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Create Your Food Plan →</a>'}
       </div>
       <p class="home-footer">Stay consistent. Eat on time.${name ? ` — ${name}` : ''}</p>
     </div>`;
@@ -565,7 +565,7 @@ function renderImport() {
         <div class="import-divider">or paste JSON</div>
         <textarea class="import-paste" data-import-paste placeholder='{"schemaVersion":"1.0.0","packageType":"burn-and-build-program",...}'></textarea>
         <button type="button" class="btn-primary" data-import-submit style="margin-top:16px">OPEN PROGRAM</button>
-        <p class="import-note">Need a new program? <a href="start/">Create one on the website →</a></p>
+        <p class="import-note">Need a new program? <a href="createyourfoodplan/">Create one on the website →</a></p>
       </div>
     </div>`;
 }
