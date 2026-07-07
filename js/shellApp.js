@@ -27,6 +27,8 @@ import {
   fetchProgramFromServer,
   fetchProgramHistoryFromServer,
   getAppEmail,
+  isValidEmail,
+  persistAppEmail,
 } from './programApi.js';
 
 const store = {
@@ -255,6 +257,7 @@ function applyImportedProgram(pkg) {
   store.settings = JSON.parse(localStorage.getItem('bnb_settings') || '{}');
   store.importError = null;
   store.expandedNavButton = null;
+  saveProgram();
   return true;
 }
 
@@ -1378,6 +1381,12 @@ async function init() {
     console.error('Food database failed to load', err);
   }
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const emailParam = urlParams.get('email');
+  if (emailParam && isValidEmail(emailParam)) {
+    persistAppEmail(emailParam);
+  }
+
   const urlImport = parseImportFromUrl(window.location.search);
   if (urlImport) {
     if (applyImportedProgram(urlImport)) {
@@ -1388,6 +1397,10 @@ async function init() {
       registerServiceWorker();
       return;
     }
+  } else if (emailParam && isValidEmail(emailParam)) {
+    urlParams.delete('email');
+    const rest = urlParams.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`);
   }
 
   if (!hasActiveProgram() && getAppEmail()) {

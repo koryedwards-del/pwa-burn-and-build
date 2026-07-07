@@ -216,7 +216,21 @@ function restoreBuiltPackage() {
   }
 }
 
+function myplanHandoffUrl() {
+  restoreBuiltPackage();
+  if (store.builtPackage) {
+    return packageToImportUrl(store.builtPackage, '../myplan/');
+  }
+  const email = (store.email || getAppEmail() || '').trim();
+  if (isValidEmail(email)) {
+    return `../myplan/?email=${encodeURIComponent(email)}`;
+  }
+  return '../myplan/';
+}
+
 function renderPlanReady() {
+  restoreBuiltPackage();
+  const appUrl = myplanHandoffUrl();
   const paid = store.accessGranted;
   let lead;
   if (paid) {
@@ -228,7 +242,7 @@ function renderPlanReady() {
   }
 
   const payBlock = paid ? `
-          <a href="../myplan/" class="btn-primary unlock-cta plan-ready-open-app">Open Burn &amp; Build app →</a>
+          <a href="${appUrl}" class="btn-primary unlock-cta plan-ready-open-app">Open Burn &amp; Build app →</a>
           <p class="unlock-tagline">Eat the food. Trust the plan.</p>
           <div class="install-box">
             <h3>Install on your home screen</h3>
