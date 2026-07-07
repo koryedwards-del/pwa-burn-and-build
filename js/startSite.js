@@ -4,7 +4,7 @@ import {
   refreshPersonalDetailFields,
   syncObToStore,
 } from './onboardingUI.js?v=90';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=90';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=97';
 import {
   buildProgramPackage,
   downloadProgramPackage,

@@ -225,6 +225,14 @@ html:has(.start-site .artshow-flow) #app {
   text-align: left;
 }
 
+.artshow-flow .acc-review-lead {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: left;
+}
+
 .artshow-flow .ob-confirm-rows {
   text-align: left;
 }

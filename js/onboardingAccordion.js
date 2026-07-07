@@ -38,7 +38,7 @@ function getActiveIndex(store) {
 }
 
 function sectionCanContinue(section, form, store) {
-  if (section.review) return !!store?.reviewViewed;
+  if (section.review) return true;
   return sectionValid(section, form);
 }
 
@@ -82,7 +82,8 @@ function renderSectionPanel(section, form, open, complete) {
   if (section.review) {
     return renderCollapsiblePanel(
       'Review & approve',
-      `<div class="ob-confirm">${renderConfirmBody(form, false, { accordionEdit: true })}</div>`,
+      `<p class="acc-review-lead">Check your answers below. Tap the pencil on any row to edit.</p>
+        <div class="ob-confirm">${renderConfirmBody(form, false, { accordionEdit: true })}</div>`,
       open,
       complete,
     );
@@ -98,7 +99,9 @@ function continueLabel(section, store) {
   if (store?.accordionEditReturn) return 'Back to review →';
   if (section.intro) return 'Create your food plan';
   if (section.id === 'email') return 'Review & approve →';
-  if (section.review) return 'Build my food plan →';
+  if (section.review) {
+    return store?.reviewViewed ? 'Approve & build my food plan →' : 'I\'ve reviewed my answers →';
+  }
   return 'Continue →';
 }
 
@@ -237,6 +240,8 @@ function syncAccordionButtons() {
 
     const btn = el.querySelector('[data-acc-continue]');
     if (btn) {
+      const section = SECTIONS[idx];
+      if (section) btn.textContent = continueLabel(section, store);
       btn.disabled = !ok || !isActive;
       btn.classList.toggle('disabled', !ok || !isActive);
     }
@@ -269,13 +274,8 @@ function ensureAccordionDelegation() {
 
     const editRow = e.target.closest('[data-acc-edit-section]');
     if (editRow) {
-      markReviewViewed();
       openFieldFromReview(editRow.dataset.accEditSection, editRow.dataset.accEditField);
       return;
-    }
-
-    if (e.target.closest('[data-acc-section="review"]') && !e.target.closest('[data-acc-continue]')) {
-      markReviewViewed();
     }
 
     const pdToggle = e.target.closest('[data-pd-toggle]');
@@ -286,7 +286,6 @@ function ensureAccordionDelegation() {
       if (idx > (store.accordionMax ?? 0)) return;
       if (idx === activeIndex && stackItem.querySelector('.pd-panel')?.classList.contains('is-open')) return;
       store.accordionSection = SECTIONS[idx].id;
-      if (SECTIONS[idx].id === 'review') markReviewViewed();
       accordionCtx.render?.();
       return;
     }
@@ -310,6 +309,11 @@ function ensureAccordionDelegation() {
     }
 
     if (!sectionCanContinue(section, store.onboardingForm, store)) return;
+
+    if (section.review && !store.reviewViewed) {
+      markReviewViewed();
+      return;
+    }
 
     if (section.review) {
       accordionCtx.onConfirm?.(store.onboardingForm);
