@@ -330,18 +330,11 @@ html:has(.start-site .artshow-flow) #app {
   cursor: pointer;
 }
 
-.artshow-flow .pd-value {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-  white-space: nowrap;
-  min-width: 3.5rem;
-}
-
-.artshow-flow .pd-range {
-  flex: 1;
-  margin: 0;
-  accent-color: var(--flame);
+.artshow-flow .pd-input-short {
+  width: 3rem;
+  text-align: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .artshow-flow .pd-unit {
