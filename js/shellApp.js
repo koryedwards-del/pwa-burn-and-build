@@ -1495,6 +1495,20 @@ async function init() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const emailParam = urlParams.get('email');
+
+  try {
+    const pendingImport = sessionStorage.getItem('bnb_pending_import');
+    if (pendingImport) {
+      sessionStorage.removeItem('bnb_pending_import');
+      const pkg = JSON.parse(pendingImport);
+      if (applyImportedProgram(pkg)) {
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
   if (emailParam && isValidEmail(emailParam)) {
     persistAppEmail(emailParam);
   }
@@ -1532,9 +1546,13 @@ async function init() {
 }
 
 function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {});
-  }
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.getRegistrations().then((regs) => {
+    regs.forEach((reg) => {
+      if (!reg.scope.includes('/myplan/')) reg.unregister();
+    });
+  }).catch(() => {});
+  navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {});
 }
 
 init();

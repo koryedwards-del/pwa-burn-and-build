@@ -1,11 +1,10 @@
-const CACHE = 'bnb-v27';
+const CACHE = 'bnb-v28';
 const ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './css/start.css',
   './data/foods.json',
-  './manifest.json',
   './img/coach/card-1.png',
   './img/coach/card-2.png',
   './img/coach/card-3.png',
