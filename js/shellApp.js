@@ -378,6 +378,7 @@ function renderCategorySection(slotLabel, sectionId, title, category, servings, 
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">${title}</span>
+          <span class="cat-header-servings">${fmtServings(servings)} Servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
@@ -409,6 +410,7 @@ function renderProteinSection(slotLabel, servings) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Protein</span>
+          <span class="cat-header-servings">${fmtServings(servings)} Servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
@@ -444,6 +446,7 @@ function renderGrainSection(slotLabel, servings) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Grains / Starches</span>
+          <span class="cat-header-servings">${fmtServings(servings)} Servings</span>
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${logged ? `<div class="cat-header-logged">${logged.foodName} · ${logged.servingLabel}</div>` : ''}
