@@ -87,6 +87,7 @@ const store = {
   showAdvanced: false,
   accordionSection: 'intro',
   reviewViewed: false,
+  accordionEditReturn: null,
 };
 
 function defaultStartDate() {
@@ -427,6 +428,7 @@ function renderOnboardingWrapper() {
     accordionSection: store.accordionSection,
     accordionMax: store.accordionMax,
     reviewViewed: store.reviewViewed,
+    accordionEditReturn: store.accordionEditReturn,
   };
   return `<div class="start-site">${renderAccordion(fakeStore)}</div>`;
 }

@@ -854,4 +854,5 @@ export function syncObToStore(target) {
   if (obCtx.store.accordionSection) target.accordionSection = obCtx.store.accordionSection;
   if (obCtx.store.accordionMax != null) target.accordionMax = obCtx.store.accordionMax;
   if (obCtx.store.reviewViewed != null) target.reviewViewed = obCtx.store.reviewViewed;
+  if (obCtx.store.accordionEditReturn !== undefined) target.accordionEditReturn = obCtx.store.accordionEditReturn;
 }

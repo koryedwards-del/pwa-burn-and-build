@@ -90,18 +90,19 @@ function renderSectionPanel(section, form, open, complete) {
   return renderCollapsiblePanel(section.title, inner, open, complete);
 }
 
-function continueLabel(section) {
+function continueLabel(section, store) {
+  if (store?.accordionEditReturn) return 'Back to review →';
   if (section.intro) return 'Start building →';
   if (section.id === 'rhythm') return 'Review & build →';
   if (section.review) return 'Build my food plan →';
   return 'Continue →';
 }
 
-function renderProgressRail(activeIndex) {
+function renderProgressRail(activeIndex, maxUnlocked) {
   return `
     <div class="acc-rail" aria-label="Section ${activeIndex + 1} of ${SECTIONS.length}">
       ${SECTIONS.map((_, i) => `
-        <span class="acc-dot ${i < activeIndex ? 'is-done' : ''} ${i === activeIndex ? 'is-current' : ''} ${i > activeIndex ? 'is-future' : ''}"></span>`).join('')}
+        <span class="acc-dot ${i < activeIndex ? 'is-done' : ''} ${i === activeIndex ? 'is-current' : ''} ${i > activeIndex && i <= maxUnlocked ? 'is-unlocked' : ''} ${i > maxUnlocked ? 'is-future' : ''}"></span>`).join('')}
     </div>`;
 }
 
@@ -119,39 +120,34 @@ function sectionLabel(section) {
 }
 
 function renderStackItem(section, form, index, activeIndex, store) {
-  const maxUnlocked = store.accordionMax ?? activeIndex;
-  if (index > maxUnlocked) return '';
-
-  const isActive = index === activeIndex;
-  const isDone = index < activeIndex;
+  if (index !== activeIndex) return '';
 
   const complete = section.review
     ? !!store.reviewViewed
-    : (isDone || sectionValid(section, form));
-  const open = isActive;
-  const canContinue = isActive && sectionCanContinue(section, form, store);
+    : sectionValid(section, form);
+  const canContinue = store.accordionEditReturn || sectionCanContinue(section, form, store);
 
   return `
-    <div class="acc-stack-item ${isDone ? 'is-done' : ''} ${isActive ? 'is-active' : ''}"
+    <div class="acc-stack-item is-active"
       data-stack-index="${index}" data-acc-section="${section.id}">
-      ${renderSectionPanel(section, form, open, complete)}
-      ${isActive ? `
+      ${renderSectionPanel(section, form, true, complete)}
       <button type="button" class="acc-continue ${canContinue ? '' : 'disabled'}"
         data-acc-continue="${section.id}"
         ${canContinue ? '' : 'disabled'}>
-        ${continueLabel(section)}
-      </button>` : ''}
+        ${continueLabel(section, store)}
+      </button>
     </div>`;
 }
 
 export function renderAccordion(store) {
   const form = store.onboardingForm;
   const activeIndex = getActiveIndex(store);
+  const maxUnlocked = store.accordionMax ?? activeIndex;
 
   return `
     <div class="accordion-flow artshow-flow">
       <div class="acc-stage">
-        ${renderProgressRail(activeIndex)}
+        ${renderProgressRail(activeIndex, maxUnlocked)}
         <div class="acc-stack">
           ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex, store)).join('')}
         </div>
@@ -221,9 +217,11 @@ function focusAccordionField(sectionId, fieldRef) {
 }
 
 function openFieldFromReview(sectionId, fieldRef) {
-  const index = SECTIONS.findIndex((s) => s.id === sectionId);
-  if (index < 0) return;
-  scrollToStackItem(index);
+  const store = accordionCtx.store;
+  if (!store) return;
+  store.accordionSection = sectionId;
+  store.accordionEditReturn = 'review';
+  accordionCtx.render?.();
   window.requestAnimationFrame(() => {
     focusAccordionField(sectionId, fieldRef);
   });
@@ -235,7 +233,7 @@ function syncAccordionButtons() {
   if (!form) return;
   const activeIndex = getActiveIndex(store);
   const activeSection = SECTIONS[activeIndex];
-  const ok = sectionCanContinue(activeSection, form, store);
+  const ok = store.accordionEditReturn || sectionCanContinue(activeSection, form, store);
 
   document.querySelectorAll('.artshow-flow [data-acc-continue]').forEach((btn) => {
     btn.disabled = !ok;
@@ -244,9 +242,10 @@ function syncAccordionButtons() {
 
   document.querySelectorAll('.artshow-flow .acc-stack-item').forEach((el) => {
     const idx = Number(el.dataset.stackIndex);
-    const section = SECTIONS[idx];  const complete = section.review
+    const section = SECTIONS[idx];
+    const complete = section.review
       ? !!store.reviewViewed
-      : (idx < activeIndex || (idx === activeIndex && sectionValid(section, form)));
+      : sectionValid(section, form);
     el.querySelector('.pd-panel')?.classList.toggle('is-complete', complete);
   });
 
@@ -319,7 +318,16 @@ function ensureAccordionDelegation() {
     const store = accordionCtx.store;
     const activeIndex = getActiveIndex(store);
     const section = SECTIONS[activeIndex];
-    if (cont.dataset.accContinue !== section.id || !sectionCanContinue(section, store.onboardingForm, store)) return;
+    if (cont.dataset.accContinue !== section.id) return;
+
+    if (store.accordionEditReturn) {
+      store.accordionSection = store.accordionEditReturn;
+      store.accordionEditReturn = null;
+      accordionCtx.render?.();
+      return;
+    }
+
+    if (!sectionCanContinue(section, store.onboardingForm, store)) return;
 
     if (section.review) {
       accordionCtx.onConfirm?.(store.onboardingForm);
@@ -353,7 +361,10 @@ export function bindAccordionEvents(store, { render, onConfirm, onBeforeReview }
 
 export function syncAccordionSection(store) {
   if (store.accordionMax == null) store.accordionMax = 0;
-  if (store.accordionSection === 'review') return;
+  if (store.accordionEditReturn) return;
+  const sectionIndex = SECTIONS.findIndex((s) => s.id === store.accordionSection);
+  if (sectionIndex >= 0 && sectionIndex <= store.accordionMax) return;
+  if (store.accordionSection === 'review' && store.accordionMax >= REVIEW_INDEX) return;
   const legacy = { about: 'personal', life: 'work', exercise: 'work' };
   if (legacy[store.accordionSection]) store.accordionSection = legacy[store.accordionSection];
   store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
