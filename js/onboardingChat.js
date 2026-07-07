@@ -16,7 +16,7 @@ import { renderQuestionBody, renderConfirmBody } from './onboardingUI.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const CHAT_PROMPTS = [
-  "What's your first name? Pick your sex too — we'll use your name throughout your program.",
+  "What's your first name? We'll use it throughout your program.",
   'How tall are you? Slide to your height.',
   'What is your date of birth? We use this for your fat-burn and cardio heart-rate targets.',
   "What's your current weight? Best in the morning — after the bathroom, before you eat.",
@@ -32,7 +32,7 @@ function formatUserAnswer(qi, form) {
   const hr = heartRates(Number(form.age));
   switch (qi) {
     case 0:
-      return [form.preferredName, form.sex].filter(Boolean).join(' · ');
+      return form.preferredName || '—';
     case 1:
       return `${heightInchesLabel(form.heightInches)}`;
     case 2:
