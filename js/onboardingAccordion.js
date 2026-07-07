@@ -11,7 +11,7 @@ import {
   emailSectionValid,
   renderCollapsiblePanel,
   openGenderPicker,
-} from './onboardingUI.js?v=91';
+} from './onboardingUI.js?v=92';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [

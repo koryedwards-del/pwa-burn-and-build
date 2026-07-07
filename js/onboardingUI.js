@@ -735,7 +735,7 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         <div class="pd-row">
           <label class="pd-label" for="pd-name">Name</label>
           <div class="pd-box">
-            <input id="pd-name" class="pd-input" name="preferredName" value="${form.preferredName}" placeholder="First name" autocomplete="given-name" />
+            <input id="pd-name" class="pd-input" name="preferredName" value="${form.preferredName}" placeholder="First name" autocomplete="given-name" enterkeyhint="next" />
           </div>
         </div>
         <div class="pd-row">
@@ -1021,6 +1021,7 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'sex' && input.tagName === 'SELECT') {
+      openGenderPicker(input);
       return;
     }
 
@@ -1042,6 +1043,14 @@ function ensureObDelegation() {
     const input = e.target;
     if (!obCtx.store || !input.closest(flowRoot())) return;
     const form = obCtx.store.onboardingForm;
+
+    if (input.name === 'preferredName') {
+      const next = e.relatedTarget;
+      if (next?.name === 'sex' && next.tagName === 'SELECT') {
+        openGenderPicker(next);
+      }
+      return;
+    }
 
     if (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours') {
       syncActivityHoursInput(input, form);
@@ -1111,6 +1120,11 @@ function ensureObDelegation() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.target.closest(`${flowRoot()} input, ${flowRoot()} textarea`)) {
+      if (e.target.name === 'preferredName' && e.target.closest(flowRoot())) {
+        e.preventDefault();
+        focusGenderFromName(e.target);
+        return;
+      }
       e.preventDefault();
     }
   });
