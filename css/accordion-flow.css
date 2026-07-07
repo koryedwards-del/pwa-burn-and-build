@@ -222,8 +222,134 @@ html:has(.start-site .artshow-flow) #app {
 .artshow-flow .ob-confirm-row-readonly:last-child {
   border-bottom: none;
 }
+.artshow-flow .acc-continue.disabled,
 .artshow-flow .acc-continue:disabled {
   background: #7a451f;
   color: rgba(255, 255, 255, 0.5);
   pointer-events: none;
+}
+
+/* Personal details — collapsible field boxes */
+.artshow-flow .acc-frame-personal {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.artshow-flow .pd-panel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+.artshow-flow .pd-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.artshow-flow .pd-trigger-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--flame);
+}
+
+.artshow-flow .pd-chevron {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--flame);
+}
+
+.artshow-flow .pd-fields {
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.artshow-flow .pd-fields[hidden] {
+  display: none;
+}
+
+.artshow-flow .pd-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.artshow-flow .pd-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.artshow-flow .pd-box {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.artshow-flow .pd-box-split {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.artshow-flow .pd-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+  padding: 10px 0;
+  outline: none;
+}
+
+.artshow-flow .pd-select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.artshow-flow .pd-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  min-width: 3.5rem;
+}
+
+.artshow-flow .pd-range {
+  flex: 1;
+  margin: 0;
+  accent-color: var(--flame);
+}
+
+.artshow-flow .pd-unit {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.artshow-flow .acc-frame-personal .acc-continue {
+  margin-top: 14px;
 }

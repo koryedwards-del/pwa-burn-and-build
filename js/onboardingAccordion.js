@@ -2,7 +2,7 @@ import {
   canProceed,
   welcomeScreens,
 } from './onboardingEngine.js';
-import { renderQuestionBody, renderConfirmBody } from './onboardingUI.js';
+import { renderQuestionBody, renderConfirmBody, renderPersonalDetails, personalSectionValid } from './onboardingUI.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -13,16 +13,16 @@ const SECTIONS = [
     intro: true,
   },
   {
-    id: 'about',
-    title: 'About you',
-    frame: 'You',
-    questions: [0, 1, 2],
+    id: 'personal',
+    title: 'Personal details',
+    frame: 'Personal',
+    personal: true,
   },
   {
     id: 'body',
     title: 'Your body',
     frame: 'Body',
-    questions: [3, 4],
+    questions: [4],
   },
   {
     id: 'life',
@@ -52,12 +52,9 @@ const SECTIONS = [
 
 const REVIEW_INDEX = SECTIONS.length - 1;
 
-function sectionIndex(id) {
-  return SECTIONS.findIndex((s) => s.id === id);
-}
-
 function sectionValid(section, form) {
   if (section.intro || section.review) return true;
+  if (section.personal) return personalSectionValid(form);
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
 }
 
@@ -87,6 +84,7 @@ function renderIntroBody() {
 
 function renderSectionBody(section, form) {
   if (section.intro) return renderIntroBody();
+  if (section.personal) return renderPersonalDetails(form, true);
   if (section.review) {
     return `<div class="ob-confirm">${renderConfirmBody(form, false, { readOnly: true })}</div>`;
   }
@@ -114,11 +112,12 @@ function renderFrame(section, form, index) {
   const canContinue = sectionValid(section, form);
 
   return `
-    <article class="acc-frame" data-acc-section="${section.id}">
+    <article class="acc-frame ${section.personal ? 'acc-frame-personal' : ''}" data-acc-section="${section.id}">
+      ${section.personal ? '' : `
       <div class="acc-placard">
         <span class="acc-step">${String(index + 1).padStart(2, '0')}</span>
         <span class="acc-frame-title">${section.frame}</span>
-      </div>
+      </div>`}
       <div class="acc-frame-body">
         ${renderSectionBody(section, form)}
       </div>
@@ -138,9 +137,10 @@ export function renderAccordion(store) {
     <div class="accordion-flow artshow-flow">
       <div class="acc-stage">
         ${renderProgressRail(index)}
+        ${section.personal ? '' : `
         <div class="acc-stage-toolbar">
           <span class="acc-stage-label">${section.title}</span>
-        </div>
+        </div>`}
         ${renderFrame(section, form, index)}
       </div>
     </div>`;
@@ -174,6 +174,21 @@ function ensureAccordionDelegation() {
 
   document.addEventListener('click', (e) => {
     if (!accordionCtx.store || !e.target.closest('.artshow-flow')) return;
+
+    const pdToggle = e.target.closest('[data-pd-toggle]');
+    if (pdToggle) {
+      const panel = pdToggle.closest('.pd-panel');
+      const fields = panel?.querySelector('.pd-fields');
+      if (panel && fields) {
+        const open = panel.classList.toggle('is-open');
+        fields.hidden = !open;
+        pdToggle.setAttribute('aria-expanded', String(open));
+        const chev = pdToggle.querySelector('.pd-chevron');
+        if (chev) chev.textContent = open ? '−' : '+';
+      }
+      return;
+    }
+
     if (e.target.closest('input, select, textarea, label.ob-radio, label.ob-check')) return;
 
     const cont = e.target.closest('[data-acc-continue]');
@@ -209,5 +224,6 @@ export function bindAccordionEvents(store, { render, onConfirm, onBeforeReview }
 export function syncAccordionSection(store) {
   if (store.accordionMax == null) store.accordionMax = 0;
   if (store.accordionSection === 'review') return;
+  if (store.accordionSection === 'about') store.accordionSection = 'personal';
   store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
 }
