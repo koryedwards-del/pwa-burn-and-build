@@ -505,7 +505,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
     return `
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', { section: 'personal', field: 'pd-name' }, false, true)}
-        ${confirmRow('EMAIL', form.email || '—', 'Authorizes and uploads your custom food plan', { section: 'email', field: 'pd-email' }, false, true)}
+        ${confirmRow('EMAIL', form.email || '—', '', { section: 'email', field: 'pd-email' }, false, true)}
         ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', { section: 'email', field: 'newsletterOptIn' }, false, true)}
         ${confirmRow('GENDER', form.sex, '', { section: 'personal', field: 'pd-sex' }, false, true)}
         ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
