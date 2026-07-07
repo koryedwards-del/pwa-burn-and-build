@@ -10,6 +10,7 @@ import {
   renderJobLifestyleActivity,
   jobLifestyleSectionValid,
   renderCollapsiblePanel,
+  renderLockedPanel,
 } from './onboardingUI.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -87,9 +88,31 @@ function renderProgressRail(activeIndex) {
     </div>`;
 }
 
+const SECTION_LABELS = {
+  intro: 'Getting started',
+  personal: 'Personal details',
+  body: 'Your body',
+  work: 'Job, lifestyle & activity',
+  rhythm: 'Daily rhythm',
+  review: 'Review & build',
+};
+
+function sectionLabel(section) {
+  return SECTION_LABELS[section.id] || section.title;
+}
+
 function renderStackItem(section, form, index, activeIndex) {
   const isActive = index === activeIndex;
   const isDone = index < activeIndex;
+  const isLocked = index > activeIndex;
+
+  if (isLocked) {
+    return `
+      <div class="acc-stack-item is-locked" data-stack-index="${index}" data-acc-section="${section.id}">
+        ${renderLockedPanel(sectionLabel(section))}
+      </div>`;
+  }
+
   const complete = isDone || sectionValid(section, form);
   const open = isActive;
   const canContinue = isActive && sectionValid(section, form);
@@ -116,7 +139,7 @@ export function renderAccordion(store) {
       <div class="acc-stage">
         ${renderProgressRail(activeIndex)}
         <div class="acc-stack">
-          ${SECTIONS.slice(0, activeIndex + 1).map((section, i) => renderStackItem(section, form, i, activeIndex)).join('')}
+          ${SECTIONS.map((section, i) => renderStackItem(section, form, i, activeIndex)).join('')}
         </div>
       </div>
     </div>`;
@@ -169,6 +192,7 @@ function ensureAccordionDelegation() {
     const pdToggle = e.target.closest('[data-pd-toggle]');
     if (pdToggle) {
       const panel = pdToggle.closest('.pd-panel');
+      if (panel?.classList.contains('is-locked')) return;
       const fields = panel?.querySelector('.pd-fields');
       if (panel && fields) {
         const open = panel.classList.toggle('is-open');
