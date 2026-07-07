@@ -45,7 +45,7 @@ function stepLead(text = '') {
 const QUESTION_META = [
   { step: 1, prefix: 'YOUR', title: 'NAME', lead: "What's your first name?" },
   { step: 2, prefix: 'YOUR', title: 'HEIGHT', lead: '' },
-  { step: 3, prefix: 'YOUR', title: 'AGE', lead: 'Used to determine your fat burn and cardiovascular training heart rate targets.' },
+  { step: 3, prefix: 'YOUR', title: 'BIRTH DATE', lead: 'Enter as MM/DD/YYYY. Used for your fat burn and cardiovascular training heart rate targets.' },
   { step: 4, prefix: 'YOUR CURRENT', title: 'WEIGHT', lead: '' },
   { step: 5, prefix: 'YOUR', title: 'BODY FAT', lead: 'How do you know your body fat percentage?' },
   { step: 6, prefix: 'YOUR', title: 'WORKDAY', lead: 'How physical is your work?<br>Choose the one that most closely describes your typical work week.' },
@@ -178,6 +178,10 @@ function radioCard(name, value, selected, label, sub) {
     </label>`;
 }
 
+function displayBirthDate(form) {
+  return form.birthDateText || '—';
+}
+
 function renderQuestionBody(index, form) {
   const hr = heartRates(Number(form.age));
   switch (index) {
@@ -203,10 +207,7 @@ function renderQuestionBody(index, form) {
       return `
         <div class="ob-field-label">DATE OF BIRTH</div>
         <input class="ob-input ob-input-birth" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${form.birthDateText}" placeholder="MM/DD/YYYY" autocomplete="bday" />
-        <div class="ob-big-value ob-big-age" data-bind="age">${form.age}</div>
-        <input type="range" class="ob-range ob-range-readonly" name="age" min="13" max="99" step="1" value="${form.age}" tabindex="-1" aria-hidden="true" />
-        <div class="ob-range-labels"><span>13</span><span>99</span></div>
-        ${infoBox('❤️', 'Your age is used to calculate your personal fat burning (60–70%) and cardio training (70–85%) heart rate zones.')}`;
+        ${infoBox('❤️', 'Your birth date is used to calculate your personal fat burning (60–70%) and cardio training (70–85%) heart rate zones.')}`;
 
     case 3:
       return `
@@ -393,7 +394,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', { section: 'personal', field: 'pd-email' }, false, true)}
         ${confirmRow('SEX', form.sex, '', { section: 'personal', field: 'pd-sex' }, false, true)}
         ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
-        ${confirmRow('AGE', String(form.age), '', { section: 'personal', field: 'pd-age' }, false, true)}
+        ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
         ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, false, true)}
@@ -413,7 +414,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', base, readOnly)}
         ${confirmRow('SEX', form.sex, '', base, readOnly)}
         ${confirmRow('HEIGHT', heightDisplay(form.heightInches), '', base + 1, readOnly)}
-        ${confirmRow('AGE', String(form.age), '', base + 2, readOnly)}
+        ${confirmRow('BIRTH DATE', displayBirthDate(form), '', base + 2, readOnly)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', base + 3, readOnly)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', base + 4, readOnly)}
         ${confirmRow('LEAN BODY MASS', lbm > 0 ? `${lbm.toFixed(1)} lbs` : '—', '', null, readOnly)}
@@ -551,10 +552,11 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           </div>
         </div>
         <div class="pd-row">
-          <label class="pd-label" for="pd-age">Age</label>
+          <label class="pd-label" for="pd-age">Birth date</label>
           <div class="pd-box">
             <input id="pd-age" class="pd-input" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${form.birthDateText}" placeholder="MM/DD/YYYY" autocomplete="bday" />
           </div>
+          <p class="pd-hint">MM/DD/YYYY</p>
         </div>
         <div class="pd-row">
           <label class="pd-label" for="pd-height">Height</label>
@@ -646,6 +648,7 @@ function syncAgeFromBirthDate(form, flow) {
   if (age == null) return;
   form.age = Math.min(99, Math.max(13, age));
   updateBoundDisplays('age', form.age);
+  updateBoundDisplays('birthDateText', form.birthDateText);
   const range = flow?.querySelector('input[name="age"]');
   if (range) range.value = form.age;
 }
@@ -772,7 +775,7 @@ function ensureObDelegation() {
       const formatted = formatBirthDateDigits(input.value);
       form.birthDateText = formatted;
       input.value = formatted;
-      syncAgeFromBirthDate(form, input.closest('.ob-flow, .chat-flow, .artshow-flow'));
+      syncAgeFromBirthDate(form, input.closest(flowRoot()));
       syncNextButton(obCtx.store, form);
       return;
     }

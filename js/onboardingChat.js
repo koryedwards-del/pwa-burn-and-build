@@ -34,7 +34,7 @@ function formatUserAnswer(qi, form) {
     case 1:
       return `${heightDisplay(form.heightInches)} (${Math.round(form.heightInches)} in)`;
     case 2:
-      return `${form.birthDateText} · age ${form.age}`;
+      return form.birthDateText || '—';
     case 3:
       return `${form.weightText} lbs`;
     case 4:
