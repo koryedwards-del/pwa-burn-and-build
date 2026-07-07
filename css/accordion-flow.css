@@ -1,4 +1,4 @@
-/** Art-show accordion — one condensed frame at a time, linear progress, no jumping. */
+/** Art-show accordion — stacked sections, collapse on complete, forward only. */
 
 .start-site:has(.artshow-flow) {
   min-height: 100dvh;
@@ -82,6 +82,24 @@ html:has(.start-site .artshow-flow) #app {
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.artshow-flow .acc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.artshow-flow .acc-stack-item.is-done .pd-panel {
+  margin-bottom: 0;
+}
+
+.artshow-flow .acc-stack-item.is-active .acc-continue {
+  margin-top: 14px;
+}
+
+.artshow-flow .acc-stack-item.is-done .acc-continue {
+  display: none;
 }
 
 .artshow-flow .acc-frame {
