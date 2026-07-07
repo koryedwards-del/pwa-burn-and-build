@@ -123,7 +123,7 @@ function composerContent(page, form) {
   const phase = onboardingPhase(page, false);
   if (phase.kind === 'welcome') {
     return `
-      <button type="button" class="ob-next chat-send" data-chat-next>START BUILDING →</button>`;
+      <button type="button" class="ob-next chat-send" data-chat-next>CREATE YOUR FOOD PLAN</button>`;
   }
   if (phase.kind === 'question') {
     const proceed = canProceed(phase, form);
