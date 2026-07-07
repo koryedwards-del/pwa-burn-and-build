@@ -32,7 +32,7 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=85';
+} from './onboardingEngine.js?v=87';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -663,6 +663,16 @@ export function renderEmailDetails(form, open = true, complete = false) {
   return renderCollapsiblePanel('Email address', fields, open, complete);
 }
 
+function renderGenderSelect(form) {
+  const hasValue = !!form.sex;
+  return `
+            <select id="pd-sex" class="pd-input pd-select pd-select-gender${hasValue ? '' : ' is-instruction'}" name="sex" autocomplete="sex" aria-labelledby="pd-sex-label">
+              <option value="" ${hasValue ? '' : 'selected'} disabled hidden>Select gender</option>
+              <option value="Male" ${form.sex === 'Male' ? 'selected' : ''}>Male</option>
+              <option value="Female" ${form.sex === 'Female' ? 'selected' : ''}>Female</option>
+            </select>`;
+}
+
 export function renderPersonalDetails(form, open = true, complete = false) {
   const fields = `
         <div class="pd-row">
@@ -672,16 +682,9 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           </div>
         </div>
         <div class="pd-row">
-          <span class="pd-label" id="pd-sex-label">Gender</span>
-          <div class="pd-box pd-box-gender" id="pd-sex" role="radiogroup" aria-labelledby="pd-sex-label">
-            <label class="pd-radio">
-              <input type="radio" name="sex" value="Male" ${form.sex === 'Male' ? 'checked' : ''} />
-              <span>Male</span>
-            </label>
-            <label class="pd-radio">
-              <input type="radio" name="sex" value="Female" ${form.sex === 'Female' ? 'checked' : ''} />
-              <span>Female</span>
-            </label>
+          <label class="pd-label" for="pd-sex" id="pd-sex-label">Gender</label>
+          <div class="pd-box pd-box-select">
+            ${renderGenderSelect(form)}
           </div>
         </div>
         <div class="pd-row">
@@ -901,6 +904,7 @@ function ensureObDelegation() {
 
     if (input.name === 'sex') {
       form.sex = input.value;
+      input.classList.toggle('is-instruction', !input.value);
       syncNextButton(obCtx.store, form);
       input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
       return;
@@ -950,6 +954,19 @@ function ensureObDelegation() {
 
     if (input.name === 'birthDateText') {
       window.requestAnimationFrame(() => syncBirthDateInput(input, form));
+      return;
+    }
+
+    if (input.name === 'sex' && input.tagName === 'SELECT') {
+      window.requestAnimationFrame(() => {
+        if (typeof input.showPicker === 'function') {
+          try {
+            input.showPicker();
+          } catch {
+            /* Some browsers require a direct user gesture before showPicker. */
+          }
+        }
+      });
       return;
     }
 

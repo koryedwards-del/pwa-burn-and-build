@@ -445,6 +445,32 @@ html:has(.start-site .artshow-flow) #app {
 .artshow-flow .pd-select {
   appearance: none;
   cursor: pointer;
+  width: 100%;
+}
+
+.artshow-flow .pd-box-select {
+  position: relative;
+}
+
+.artshow-flow .pd-box-select::after {
+  content: '▾';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--flame);
+  pointer-events: none;
+  font-size: 14px;
+}
+
+.artshow-flow .pd-select-gender.is-instruction {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.artshow-flow .pd-select-gender:not(.is-instruction) {
+  color: var(--text);
+  font-style: normal;
 }
 
 .artshow-flow .pd-value {

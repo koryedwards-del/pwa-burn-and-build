@@ -1,6 +1,6 @@
 import {
   canProceed,
-} from './onboardingEngine.js?v=85';
+} from './onboardingEngine.js?v=87';
 import {
   renderQuestionBody,
   renderConfirmBody,
@@ -9,7 +9,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=85';
+} from './onboardingUI.js?v=87';
 
 const SECTIONS = [
   { id: 'personal', title: 'Personal', personal: true },
@@ -83,7 +83,7 @@ const SECTION_LABELS = {
   personal: 'Personal',
   job: 'Job & lifestyle',
   activity: 'Exercise & activities',
-  rhythm: 'Daily rhythm',
+  rhythm: 'Wake time',
   body: 'Body composition',
   email: 'Email address',
   review: 'Review & approve',
