@@ -29,7 +29,8 @@ import {
   activityHoursFieldDisplay,
   activityHoursReviewLabel,
   parseActivityHours,
-} from './onboardingEngine.js?v=78';
+  formatActivityHoursNumber,
+} from './onboardingEngine.js?v=79';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -73,7 +74,7 @@ function renderActivityHoursInput(name, form, max) {
 function syncActivityHoursInput(input, form) {
   const max = input.name === 'fatBurningHours' ? 20 : 15;
   const parsed = parseActivityHours(form[input.name], max);
-  const hasValue = parsed != null;
+  const hasValue = parsed !== null;
   input.classList.toggle('is-instruction', !hasValue);
   if (hasValue) {
     form[input.name] = parsed;
@@ -819,10 +820,22 @@ function ensureObDelegation() {
 
     if (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours') {
       if (input.value === ACTIVITY_HOURS_INSTRUCTION) return;
+      const max = input.name === 'fatBurningHours' ? 20 : 15;
       const cleaned = sanitizeActivityHoursInput(input.value);
-      form[input.name] = cleaned;
-      input.classList.toggle('is-instruction', cleaned === '');
-      input.value = cleaned === '' ? ACTIVITY_HOURS_INSTRUCTION : cleaned;
+      const parsed = parseActivityHours(cleaned, max);
+      if (cleaned === '') {
+        form[input.name] = '';
+        input.classList.add('is-instruction');
+        input.value = ACTIVITY_HOURS_INSTRUCTION;
+      } else if (parsed !== null) {
+        form[input.name] = parsed;
+        input.classList.remove('is-instruction');
+        input.value = formatActivityHoursNumber(parsed);
+      } else {
+        form[input.name] = cleaned;
+        input.classList.remove('is-instruction');
+        input.value = cleaned;
+      }
       syncNextButton(obCtx.store, form);
       input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
       return;

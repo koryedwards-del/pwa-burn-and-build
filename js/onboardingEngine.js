@@ -194,6 +194,7 @@ export function formatActivityHoursNumber(hours) {
 
 export function parseActivityHours(value, max = 15) {
   if (value === '' || value == null) return null;
+  if (value === 0 || value === '0') return 0;
   const n = Number(value);
   if (!Number.isFinite(n) || n < 0 || n > max) return null;
   const quarters = Math.round(n * 4);
@@ -202,19 +203,19 @@ export function parseActivityHours(value, max = 15) {
 }
 
 export function activityHoursHasValue(value, max = 15) {
-  return parseActivityHours(value, max) != null;
+  return parseActivityHours(value, max) !== null;
 }
 
 export function activityHoursFieldDisplay(value, max = 15) {
   const parsed = parseActivityHours(value, max);
-  if (parsed != null) return formatActivityHoursNumber(parsed);
+  if (parsed !== null) return formatActivityHoursNumber(parsed);
   if (value === '' || value == null) return ACTIVITY_HOURS_INSTRUCTION;
   return ACTIVITY_HOURS_INSTRUCTION;
 }
 
 export function activityHoursReviewLabel(value, max = 20) {
   const parsed = parseActivityHours(value, max);
-  return parsed != null ? `${formatActivityHoursNumber(parsed)} hrs/week` : '—';
+  return parsed !== null ? `${formatActivityHoursNumber(parsed)} hrs/week` : '—';
 }
 
 export function defaultOnboardingForm(profile) {
@@ -237,7 +238,7 @@ export function defaultOnboardingForm(profile) {
     workStress: p.workStress || work.stress,
     weightTrainingHours: p.weightTrainingHours != null ? p.weightTrainingHours : '',
     cardioHours: p.cardioHours != null ? p.cardioHours : '',
-    fatBurningHours: p.fatBurningHours ?? 3,
+    fatBurningHours: p.fatBurningHours != null ? p.fatBurningHours : '',
     wakeTime: p.wakeTime || '06:00',
     remindersEnabled: p.remindersEnabled !== false,
     lowActivities: p.lowActivities || [],
