@@ -100,7 +100,7 @@ function continueLabel(section, store) {
   if (section.intro) return 'Create your food plan';
   if (section.id === 'email') return 'Review & approve →';
   if (section.review) {
-    return store?.reviewViewed ? 'Approve & create my food plan →' : 'I\'ve reviewed my answers →';
+    return store?.reviewViewed ? 'I approve-create my food plan →' : 'I\'ve reviewed my answers →';
   }
   return 'Continue →';
 }
