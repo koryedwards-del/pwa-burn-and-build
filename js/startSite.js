@@ -246,10 +246,13 @@ function renderPlanReady() {
           <p class="unlock-tagline">Eat the food. Trust the plan.</p>
           <div class="install-box">
             <h3>Install on your home screen</h3>
+            <p class="install-lead">Open the app first — then add <strong>that page</strong> to your home screen (not this creator page).</p>
             <ul class="install-steps">
-              <li><strong>iPhone:</strong> Tap Share → <strong>Add to Home Screen</strong></li>
-              <li><strong>Android:</strong> Tap the menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
+              <li>Tap <strong>Open Burn &amp; Build app</strong> above and wait for your food plan to load</li>
+              <li><strong>iPhone:</strong> Share → <strong>Add to Home Screen</strong></li>
+              <li><strong>Android:</strong> Menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
             </ul>
+            <a href="${appUrl}" class="plan-ready-pwa-link">Open app to install →</a>
           </div>`
     : !store.apiReachable ? `
           <p class="unlock-hint">Could not reach the Burn &amp; Build server. Check your connection and try again.</p>

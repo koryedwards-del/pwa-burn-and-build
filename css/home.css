@@ -104,6 +104,16 @@
   padding-top: 10px;
 }
 
+.home-install-hint {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #888;
+  padding: 0 16px 8px;
+  margin: 0;
+}
+
 .home-loading {
   display: flex;
   align-items: center;
