@@ -424,6 +424,18 @@ html:has(.start-site .artshow-flow) #app {
   color: var(--muted);
 }
 
+.artshow-flow .pd-newsletter {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.artshow-flow .pd-newsletter-check {
+  margin-top: 0;
+  text-align: left;
+}
+
 .artshow-flow .pd-label {
   font-size: 10px;
   font-weight: 700;

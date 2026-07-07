@@ -497,7 +497,8 @@ function renderConfirmBody(form, isEditMode, options = {}) {
     return `
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', { section: 'personal', field: 'pd-name' }, false, true)}
-        ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', { section: 'email', field: 'pd-email' }, false, true)}
+        ${confirmRow('EMAIL', form.email || '—', 'Authorizes and uploads your custom food plan', { section: 'email', field: 'pd-email' }, false, true)}
+        ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', { section: 'email', field: 'newsletterOptIn' }, false, true)}
         ${confirmRow('GENDER', form.sex, '', { section: 'personal', field: 'pd-sex' }, false, true)}
         ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
@@ -517,7 +518,8 @@ function renderConfirmBody(form, isEditMode, options = {}) {
   return `
       <div class="ob-confirm-rows">
         ${confirmRow('NAME', form.preferredName || '—', '', base, readOnly)}
-        ${confirmRow('EMAIL', form.email || '—', 'Connects your food plan to your phone', base, readOnly)}
+        ${confirmRow('EMAIL', form.email || '—', 'Authorizes and uploads your custom food plan', base, readOnly)}
+        ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', base, readOnly)}
         ${confirmRow('GENDER', form.sex, '', base, readOnly)}
         ${confirmRow('HEIGHT', heightInchesLabel(form.heightInches), '', base + 1, readOnly)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', base + 2, readOnly)}
@@ -651,6 +653,10 @@ export function emailSectionValid(form) {
   return isValidEmail(form.email);
 }
 
+const EMAIL_USAGE_HINT = 'Your email is used by the Burn & Build App to authorize and upload your custom food plan.';
+const NEWSLETTER_LEAD = 'Maybe you\'d like a touch of motivation going into every weekend.';
+const NEWSLETTER_CHECK_LABEL = 'Yes, send me the newsletter';
+
 export function renderEmailDetails(form, open = true, complete = false) {
   const fields = `
         <div class="pd-row">
@@ -658,7 +664,14 @@ export function renderEmailDetails(form, open = true, complete = false) {
           <div class="pd-box">
             <input id="pd-email" class="pd-input" type="email" name="email" value="${form.email || ''}" placeholder="you@example.com" autocomplete="email" />
           </div>
-          <p class="pd-hint">Connects your food plan to your phone.</p>
+          <p class="pd-hint">${EMAIL_USAGE_HINT}</p>
+          <div class="pd-newsletter">
+            <p class="pd-hint">${NEWSLETTER_LEAD}</p>
+            <label class="ob-check pd-newsletter-check ${form.newsletterOptIn ? 'selected' : ''}">
+              <input type="checkbox" name="newsletterOptIn" ${form.newsletterOptIn ? 'checked' : ''} />
+              <span>${NEWSLETTER_CHECK_LABEL}</span>
+            </label>
+          </div>
         </div>`;
   return renderCollapsiblePanel('Email address', fields, open, complete);
 }
@@ -954,6 +967,12 @@ function ensureObDelegation() {
       flow.querySelectorAll('input[name="lowActivity"]').forEach((c) => {
         c.closest('.ob-check')?.classList.toggle('selected', c.checked);
       });
+      return;
+    }
+
+    if (input.name === 'newsletterOptIn') {
+      form.newsletterOptIn = input.checked;
+      input.closest('.ob-check')?.classList.toggle('selected', input.checked);
       return;
     }
 
