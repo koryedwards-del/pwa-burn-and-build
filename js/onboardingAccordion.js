@@ -161,18 +161,30 @@ function syncReviewBody(form) {
   confirm.innerHTML = renderConfirmBody(form, false, { accordionEdit: true });
 }
 
-function openAccordionPanel(stackItem) {
-  const panel = stackItem?.querySelector('.pd-panel');
+function setAccordionPanelOpen(panel, open) {
   if (!panel || panel.classList.contains('is-locked')) return;
   const fields = panel.querySelector('.pd-fields');
   const trigger = panel.querySelector('[data-pd-toggle]');
-  panel.classList.add('is-open');
-  if (fields) fields.hidden = false;
+  panel.classList.toggle('is-open', open);
+  if (fields) fields.hidden = !open;
   if (trigger) {
-    trigger.setAttribute('aria-expanded', 'true');
+    trigger.setAttribute('aria-expanded', String(open));
     const chev = trigger.querySelector('.pd-chevron');
-    if (chev) chev.textContent = '−';
+    if (chev) chev.textContent = open ? '−' : '+';
   }
+}
+
+function closeAllAccordionPanels(root = document.querySelector('.artshow-flow')) {
+  root?.querySelectorAll('.pd-panel.is-open').forEach((panel) => {
+    setAccordionPanelOpen(panel, false);
+  });
+}
+
+function openAccordionPanel(stackItem) {
+  const panel = stackItem?.querySelector('.pd-panel');
+  if (!panel || panel.classList.contains('is-locked')) return;
+  closeAllAccordionPanels();
+  setAccordionPanelOpen(panel, true);
 }
 
 function focusAccordionField(sectionId, fieldRef) {
@@ -229,6 +241,18 @@ function syncAccordionButtons() {
   });
 
   syncReviewBody(form);
+  enforceSingleOpenPanel();
+}
+
+function enforceSingleOpenPanel() {
+  const root = document.querySelector('.artshow-flow');
+  if (!root) return;
+  const openPanels = root.querySelectorAll('.pd-panel.is-open');
+  if (openPanels.length <= 1) return;
+  const keep = openPanels[openPanels.length - 1];
+  openPanels.forEach((panel) => {
+    if (panel !== keep) setAccordionPanelOpen(panel, false);
+  });
 }
 
 function scrollToStackItem(index) {
@@ -261,13 +285,12 @@ function ensureAccordionDelegation() {
     if (pdToggle) {
       const panel = pdToggle.closest('.pd-panel');
       if (panel?.classList.contains('is-locked')) return;
-      const fields = panel?.querySelector('.pd-fields');
-      if (panel && fields) {
-        const open = panel.classList.toggle('is-open');
-        fields.hidden = !open;
-        pdToggle.setAttribute('aria-expanded', String(open));
-        const chev = pdToggle.querySelector('.pd-chevron');
-        if (chev) chev.textContent = open ? '−' : '+';
+      const willOpen = !panel.classList.contains('is-open');
+      if (willOpen) {
+        closeAllAccordionPanels();
+        setAccordionPanelOpen(panel, true);
+      } else {
+        setAccordionPanelOpen(panel, false);
       }
       return;
     }
@@ -304,6 +327,7 @@ export function bindAccordionEvents(store, { render, onConfirm, onBeforeReview }
   accordionCtx.onBeforeReview = onBeforeReview;
   ensureAccordionDelegation();
   syncAccordionButtons();
+  enforceSingleOpenPanel();
 }
 
 export function syncAccordionSection(store) {
