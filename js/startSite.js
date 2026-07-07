@@ -1,7 +1,5 @@
 import {
-  bindOnboardingEvents,
   initOnboardingForm,
-  syncObToStore,
 } from './onboardingUI.js';
 import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js';
 import {
@@ -457,41 +455,19 @@ function render() {
   if (store.phase === 'email-login') root.innerHTML = renderEmailLogin();
   else if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
-    bindOnboardingOnly();
+    bindAccordionOnly();
   } else if (store.phase === 'creating') root.innerHTML = renderCreating();
   else if (store.phase === 'plan-ready') root.innerHTML = renderPlanReady();
   afterRender();
 }
 
-function onboardingStore() {
-  return {
-    onboardingForm: store.onboardingForm,
-    onboardingPage: store.onboardingPage,
-    onboardingEditMode: false,
-    profile: null,
-  };
-}
-
-function onboardingCallbacks() {
-  return {
-    render: renderOnboardingStep,
-    onConfirm: (form) => {
-      store.onboardingForm = form;
-      finishIntake();
-    },
-    onComplete: () => {},
-  };
-}
-
 function renderOnboardingStep() {
-  syncObToStore(store);
   document.getElementById('app').innerHTML = renderOnboardingWrapper();
-  bindOnboardingOnly();
+  bindAccordionOnly();
   syncFocusFlow();
 }
 
-function bindOnboardingOnly() {
-  bindOnboardingEvents(onboardingStore(), onboardingCallbacks());
+function bindAccordionOnly() {
   bindAccordionEvents(store, {
     render: renderOnboardingStep,
     onConfirm: (form) => {

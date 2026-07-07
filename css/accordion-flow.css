@@ -1,4 +1,4 @@
-/** Art-show accordion — one condensed frame at a time, linear progress, no jumping. */
+/** Art-show accordion — native acc-* UI, one frame at a time, forward-only. */
 
 .start-site:has(.artshow-flow) {
   min-height: 100dvh;
@@ -24,6 +24,7 @@ html:has(.start-site .artshow-flow) #app {
   flex: 1;
 }
 
+/* ── Stage shell ── */
 .artshow-flow .acc-stage {
   padding: 20px 20px 28px;
   max-width: 480px;
@@ -56,27 +57,12 @@ html:has(.start-site .artshow-flow) #app {
 .artshow-flow .acc-stage-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
   margin-bottom: 14px;
   min-height: 28px;
 }
 
-.artshow-flow .acc-back {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 13px;
-  padding: 0;
-}
-
-.artshow-flow .acc-back-spacer {
-  width: 52px;
-}
-
 .artshow-flow .acc-stage-label {
-  flex: 1;
-  text-align: center;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -84,6 +70,7 @@ html:has(.start-site .artshow-flow) #app {
   color: var(--muted);
 }
 
+/* ── Frame card ── */
 .artshow-flow .acc-frame {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
@@ -121,78 +108,6 @@ html:has(.start-site .artshow-flow) #app {
   padding: 0 2px;
 }
 
-.artshow-flow .acc-art-headline {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.artshow-flow .acc-art-lead {
-  margin: 0 0 14px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #a8a8a8;
-  text-align: center;
-}
-
-.artshow-flow .acc-art-quote,
-.artshow-flow .acc-art-quote.testimony-block {
-  padding: 12px 12px 10px;
-  margin: 0;
-}
-
-.artshow-flow .acc-question + .acc-question {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.artshow-flow .acc-question .ob-step-header {
-  display: none;
-}
-
-.artshow-flow .ob-question,
-.artshow-flow .ob-confirm {
-  text-align: center;
-  width: 100%;
-}
-
-.artshow-flow .ob-confirm-rows {
-  text-align: left;
-}
-
-.artshow-flow .ob-field-label,
-.artshow-flow .ob-section-label {
-  margin-top: 10px;
-  font-size: 11px;
-}
-
-.artshow-flow .ob-info {
-  margin-top: 10px;
-  padding: 10px 12px;
-  text-align: left;
-  font-size: 13px;
-}
-
-.artshow-flow .ob-info p {
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.artshow-flow .ob-big-value {
-  margin-top: 6px;
-}
-
-.artshow-flow .ob-input,
-.artshow-flow .ob-select {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.artshow-flow .ob-radio,
-.artshow-flow .ob-check {
-  padding: 10px 12px;
-}
-
 .artshow-flow .acc-continue {
   width: 100%;
   margin-top: 16px;
@@ -206,24 +121,453 @@ html:has(.start-site .artshow-flow) #app {
   text-transform: uppercase;
 }
 
-.artshow-flow .ob-confirm-row-readonly {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 0;
-  border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: transparent;
-  color: inherit;
-  text-align: left;
-}
-
-.artshow-flow .ob-confirm-row-readonly:last-child {
-  border-bottom: none;
-}
+.artshow-flow .acc-continue.is-disabled,
 .artshow-flow .acc-continue:disabled {
   background: #7a451f;
   color: rgba(255, 255, 255, 0.5);
   pointer-events: none;
+}
+
+/* ── Intro ── */
+.artshow-flow .acc-headline {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.artshow-flow .acc-headline-sm {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.artshow-flow .acc-headline-lg {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(32px, 9vw, 44px);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.05;
+}
+
+.artshow-flow .acc-lead {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #a8a8a8;
+  text-align: center;
+}
+
+.artshow-flow .acc-quote,
+.artshow-flow .acc-quote.testimony-block {
+  padding: 12px 12px 10px;
+  margin: 0;
+}
+
+/* ── Fields ── */
+.artshow-flow .acc-field + .acc-field {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.artshow-flow .acc-prompt {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  text-align: center;
+}
+
+.artshow-flow .acc-label {
+  margin: 12px 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #bfbfbf;
+  text-align: left;
+}
+
+.artshow-flow .acc-note {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+  text-align: left;
+}
+
+.artshow-flow .acc-hr {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #bfbfbf;
+  text-align: center;
+}
+
+.artshow-flow .acc-slider {
+  margin: 10px 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #bfbfbf;
+  text-align: center;
+}
+
+.artshow-flow .acc-slider strong {
+  color: var(--flame);
+}
+
+.artshow-flow .acc-split {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 14px 0;
+}
+
+/* ── Inputs ── */
+.artshow-flow .acc-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #404040;
+  background: var(--card);
+  font-size: 16px;
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.artshow-flow .acc-input-name {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.artshow-flow .acc-input-date {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.artshow-flow .acc-num-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.artshow-flow .acc-num-input {
+  width: 110px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--flame);
+}
+
+.artshow-flow .acc-unit {
+  font-size: 16px;
+  font-weight: 700;
+  color: #bfbfbf;
+}
+
+.artshow-flow .acc-seg {
+  display: flex;
+  border-radius: 10px;
+  border: 1.5px solid #404040;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.artshow-flow .acc-seg button {
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+}
+
+.artshow-flow .acc-seg button.is-active {
+  background: rgba(94, 196, 232, 0.25);
+  color: #fff;
+}
+
+.artshow-flow .acc-big {
+  text-align: center;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--flame);
+  margin-top: 4px;
+  line-height: 1;
+}
+
+.artshow-flow .acc-big-age {
+  font-size: 56px;
+}
+
+.artshow-flow .acc-big-sub {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.artshow-flow .acc-range {
+  width: 100%;
+  accent-color: var(--flame);
+}
+
+.artshow-flow .acc-range-readonly {
+  pointer-events: none;
+}
+
+.artshow-flow .acc-range-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* ── Choices ── */
+.artshow-flow .acc-choice {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 1.5px solid #333;
+  background: var(--card);
+  cursor: pointer;
+  text-align: left;
+}
+
+.artshow-flow .acc-choice.is-selected {
+  border-color: var(--flame);
+  background: var(--flame-dim);
+}
+
+.artshow-flow .acc-choice input {
+  margin-top: 3px;
+  accent-color: var(--flame);
+  flex-shrink: 0;
+}
+
+.artshow-flow .acc-choice-label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.artshow-flow .acc-choice-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+.artshow-flow .acc-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  cursor: pointer;
+  text-align: left;
+}
+
+.artshow-flow .acc-check.is-selected {
+  border-color: var(--flame);
+  background: var(--flame-dim);
+}
+
+.artshow-flow .acc-check input {
+  accent-color: var(--flame);
+}
+
+.artshow-flow .acc-fat-input {
+  margin: 6px 0 8px 8px;
+}
+
+.artshow-flow .acc-fat-input.hidden {
+  display: none;
+}
+
+.artshow-flow .acc-fat-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #bfbfbf;
+  margin-bottom: 6px;
+}
+
+/* ── Hints ── */
+.artshow-flow .acc-hint {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid #262626;
+  text-align: left;
+}
+
+.artshow-flow .acc-hint-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.artshow-flow .acc-hint p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── Wake picker ── */
+.artshow-flow .acc-wake {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.artshow-flow .acc-select {
+  flex: 1;
+  max-width: 80px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.artshow-flow .acc-select-ampm {
+  max-width: 68px;
+  font-size: 14px;
+}
+
+.artshow-flow .acc-wake-colon {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--flame);
+}
+
+.artshow-flow .acc-wake-display {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+/* ── Toggle ── */
+.artshow-flow .acc-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 1.5px solid #333;
+  background: var(--card);
+  text-align: left;
+}
+
+.artshow-flow .acc-toggle.is-on {
+  border-color: var(--flame);
+  background: var(--flame-dim);
+}
+
+.artshow-flow .acc-toggle-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.artshow-flow .acc-toggle-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+.artshow-flow .acc-toggle-pill {
+  width: 46px;
+  height: 28px;
+  border-radius: 14px;
+  background: #404040;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.artshow-flow .acc-toggle.is-on .acc-toggle-pill {
+  background: var(--flame);
+}
+
+.artshow-flow .acc-toggle-pill::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.artshow-flow .acc-toggle.is-on .acc-toggle-pill::after {
+  transform: translateX(18px);
+}
+
+/* ── Review ── */
+.artshow-flow .acc-review {
+  text-align: left;
+}
+
+.artshow-flow .acc-review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.artshow-flow .acc-review-row:last-child {
+  border-bottom: none;
+}
+
+.artshow-flow .acc-review-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #bfbfbf;
+}
+
+.artshow-flow .acc-review-sub {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.artshow-flow .acc-review-value {
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  flex-shrink: 0;
 }
