@@ -208,7 +208,7 @@ function restoreBuiltPackage() {
   if (!raw) return;
   try {
     store.builtPackage = JSON.parse(raw);
-    store.importUrl = packageToImportUrl(store.builtPackage, '../shell/');
+    store.importUrl = packageToImportUrl(store.builtPackage, '../myplan/');
   } catch {
     sessionStorage.removeItem('bnb_built_package');
   }
@@ -222,7 +222,7 @@ function renderPlanReady() {
     : `Your personalized food plan${name ? ` for ${name}` : ''} is saved. Complete checkout to unlock the app.`;
 
   const payBlock = paid ? `
-          <a href="../shell/" class="btn-primary unlock-cta plan-ready-open-app">Open Burn &amp; Build app →</a>
+          <a href="../myplan/" class="btn-primary unlock-cta plan-ready-open-app">Open Burn &amp; Build app →</a>
           <p class="unlock-tagline">Eat the food. Trust the plan.</p>
           <div class="install-box">
             <h3>Install on your home screen</h3>
@@ -296,7 +296,7 @@ function ensureBuiltPackage() {
   store.builtPackage = buildProgramPackage(store.onboardingForm, {
     label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
   });
-  store.importUrl = packageToImportUrl(store.builtPackage, '../shell/');
+  store.importUrl = packageToImportUrl(store.builtPackage, '../myplan/');
   persistBuiltPackage();
   return store.builtPackage;
 }

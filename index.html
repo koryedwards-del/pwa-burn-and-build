@@ -273,28 +273,6 @@
     }
     .btn-cta:active { transform: scale(0.98); }
 
-    /* ── PHONES ── */
-    .phones-section {
-      padding: 20px 20px 30px;
-      display: flex;
-      justify-content: center;
-    }
-    .phones {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      max-width: 480px;
-      width: 100%;
-      align-items: end;
-    }
-    .phone-wrap img {
-      width: 100%;
-      height: auto;
-      border-radius: 0;
-      display: block;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    }
-
     /* ── SECTION SHARED ── */
     .section-eyebrow {
       font-family: 'Open Sans', sans-serif;
@@ -767,7 +745,6 @@
       }
       .nav-links.open { display: flex; }
       .nav-links li { list-style: none; }
-      .phones { grid-template-columns: 1fr; max-width: 280px; margin: 0 auto; }
       .features-grid { grid-template-columns: 1fr; }
       .calc-row { grid-template-columns: 1fr; gap: 16px; }
       .gender-tabs { max-width: 220px; }
@@ -793,9 +770,6 @@
     </button>
     <ul class="nav-links">
       <li><a href="/">Home</a></li>
-      <li><a href="/#features">Features</a></li>
-      <li><a href="/#get-plan">Get Plan</a></li>
-      <li><a href="/#pricing">Pricing</a></li>
       <li><a href="/privacypolicy">Privacy Policy</a></li>
       <li><a href="/support">Support</a></li>
     </ul>
@@ -818,21 +792,6 @@
         <h2 class="cta-title">Create Your Food Plan</h2>
         <div class="cta-price">$149</div>
         <a class="btn-cta" href="/createyourfoodplan/">Create Your Food Plan →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- PHONES -->
-  <section class="phones-section">
-    <div class="phones">
-      <div class="phone-wrap">
-        <img src="images/homeview.png" alt="App Home Screen" />
-      </div>
-      <div class="phone-wrap">
-        <img src="images/customfoodplan.png" alt="Custom Food Plan" />
-      </div>
-      <div class="phone-wrap">
-        <img src="images/grocerylist.png" alt="Grocery List" />
       </div>
     </div>
   </section>

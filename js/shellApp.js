@@ -1,4 +1,4 @@
-/** Shell PWA — duplicate of js/app.js (PWA v2). Path fixes for /shell/ only. */
+/** My Plan PWA — daily food plan app at /myplan/ */
 
 import { computePlan, generateMealSlots } from './burnEngine.js';
 import { getCoachDay } from './coachEngine.js';
