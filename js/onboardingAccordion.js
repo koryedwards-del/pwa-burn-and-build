@@ -2,7 +2,14 @@ import {
   canProceed,
   welcomeScreens,
 } from './onboardingEngine.js';
-import { renderQuestionBody, renderConfirmBody, renderPersonalDetails, personalSectionValid } from './onboardingUI.js';
+import {
+  renderQuestionBody,
+  renderConfirmBody,
+  renderPersonalDetails,
+  personalSectionValid,
+  renderJobLifestyleActivity,
+  jobLifestyleSectionValid,
+} from './onboardingUI.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -25,16 +32,10 @@ const SECTIONS = [
     questions: [4],
   },
   {
-    id: 'life',
-    title: 'Work & life',
-    frame: 'Life',
-    questions: [5, 6],
-  },
-  {
-    id: 'exercise',
-    title: 'Exercise',
-    frame: 'Move',
-    questions: [7, 8],
+    id: 'work',
+    title: 'Job, lifestyle & activity',
+    frame: 'Work',
+    workActivity: true,
   },
   {
     id: 'rhythm',
@@ -52,9 +53,14 @@ const SECTIONS = [
 
 const REVIEW_INDEX = SECTIONS.length - 1;
 
+function isPanelSection(section) {
+  return section.personal || section.workActivity;
+}
+
 function sectionValid(section, form) {
   if (section.intro || section.review) return true;
   if (section.personal) return personalSectionValid(form);
+  if (section.workActivity) return jobLifestyleSectionValid(form);
   return section.questions.every((qi) => canProceed({ kind: 'question', index: qi }, form));
 }
 
@@ -83,8 +89,10 @@ function renderIntroBody() {
 }
 
 function renderSectionBody(section, form) {
+  const complete = sectionValid(section, form);
   if (section.intro) return renderIntroBody();
-  if (section.personal) return renderPersonalDetails(form, true);
+  if (section.personal) return renderPersonalDetails(form, true, complete);
+  if (section.workActivity) return renderJobLifestyleActivity(form, true, complete);
   if (section.review) {
     return `<div class="ob-confirm">${renderConfirmBody(form, false, { readOnly: true })}</div>`;
   }
@@ -93,6 +101,7 @@ function renderSectionBody(section, form) {
       ${renderQuestionBody(qi, form)}
     </div>`).join('');
 }
+
 
 function continueLabel(section) {
   if (section.intro) return 'Start building →';
@@ -110,10 +119,11 @@ function renderProgressRail(currentIndex) {
 
 function renderFrame(section, form, index) {
   const canContinue = sectionValid(section, form);
+  const panel = isPanelSection(section);
 
   return `
-    <article class="acc-frame ${section.personal ? 'acc-frame-personal' : ''}" data-acc-section="${section.id}">
-      ${section.personal ? '' : `
+    <article class="acc-frame ${panel ? 'acc-frame-panel' : ''} ${canContinue && !section.intro && !section.review ? 'is-complete' : ''}" data-acc-section="${section.id}">
+      ${panel ? '' : `
       <div class="acc-placard">
         <span class="acc-step">${String(index + 1).padStart(2, '0')}</span>
         <span class="acc-frame-title">${section.frame}</span>
@@ -137,7 +147,7 @@ export function renderAccordion(store) {
     <div class="accordion-flow artshow-flow">
       <div class="acc-stage">
         ${renderProgressRail(index)}
-        ${section.personal ? '' : `
+        ${isPanelSection(section) ? '' : `
         <div class="acc-stage-toolbar">
           <span class="acc-stage-label">${section.title}</span>
         </div>`}
@@ -155,10 +165,13 @@ function syncAccordionButtons() {
   if (!form) return;
   const { section } = currentSection(store);
   const btn = document.querySelector('.artshow-flow [data-acc-continue]');
-  if (!btn || !section) return;
   const ok = sectionValid(section, form);
-  btn.disabled = !ok;
-  btn.classList.toggle('disabled', !ok);
+  if (btn && section) {
+    btn.disabled = !ok;
+    btn.classList.toggle('disabled', !ok);
+  }
+  document.querySelector('.artshow-flow .pd-panel')?.classList.toggle('is-complete', ok);
+  document.querySelector('.artshow-flow .acc-frame')?.classList.toggle('is-complete', ok && !section.intro && !section.review);
 }
 
 function ensureAccordionDelegation() {
@@ -224,6 +237,11 @@ export function bindAccordionEvents(store, { render, onConfirm, onBeforeReview }
 export function syncAccordionSection(store) {
   if (store.accordionMax == null) store.accordionMax = 0;
   if (store.accordionSection === 'review') return;
-  if (store.accordionSection === 'about') store.accordionSection = 'personal';
+  const legacy = {
+    about: 'personal',
+    life: 'work',
+    exercise: 'work',
+  };
+  if (legacy[store.accordionSection]) store.accordionSection = legacy[store.accordionSection];
   store.accordionSection = SECTIONS[store.accordionMax]?.id || 'intro';
 }

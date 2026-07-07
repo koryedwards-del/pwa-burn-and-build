@@ -475,10 +475,10 @@ export function personalSectionValid(form) {
     && Number(form.weightText) > 0;
 }
 
-export function renderPersonalDetails(form, open = true) {
+export function renderPersonalDetails(form, open = true, complete = false) {
   const { ft, inc } = heightFeetInches(form.heightInches);
   return `
-    <div class="pd-panel ${open ? 'is-open' : ''}">
+    <div class="pd-panel ${open ? 'is-open' : ''} ${complete ? 'is-complete' : ''}">
       <button type="button" class="pd-trigger" data-pd-toggle aria-expanded="${open}">
         <span class="pd-trigger-title">Personal details</span>
         <span class="pd-chevron" aria-hidden="true">${open ? '−' : '+'}</span>
@@ -519,6 +519,66 @@ export function renderPersonalDetails(form, open = true) {
           <div class="pd-box pd-box-split">
             <input id="pd-weight" class="pd-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="000" />
             <span class="pd-unit">lbs</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+export function jobLifestyleSectionValid(form) {
+  return !!form.workPhysical && !!form.workStress;
+}
+
+export function renderJobLifestyleActivity(form, open = true, complete = false) {
+  const jobOpts = WORK_PHYSICAL.map((o) => `
+    <option value="${o.id}" ${form.workPhysical === o.id ? 'selected' : ''}>${o.label}</option>`).join('');
+  const lifeOpts = WORK_STRESS.map((o) => `
+    <option value="${o.id}" ${form.workStress === o.id ? 'selected' : ''}>${o.label}</option>`).join('');
+
+  return `
+    <div class="pd-panel ${open ? 'is-open' : ''} ${complete ? 'is-complete' : ''}">
+      <button type="button" class="pd-trigger" data-pd-toggle aria-expanded="${open}">
+        <span class="pd-trigger-title">Job, lifestyle & activity</span>
+        <span class="pd-chevron" aria-hidden="true">${open ? '−' : '+'}</span>
+      </button>
+      <div class="pd-fields" ${open ? '' : 'hidden'}>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-job">Job</label>
+          <div class="pd-box">
+            <select id="pd-job" class="pd-input pd-select" name="workPhysical">
+              <option value="" disabled ${form.workPhysical ? '' : 'selected'}>Select your job type</option>
+              ${jobOpts}
+            </select>
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-lifestyle">Lifestyle</label>
+          <div class="pd-box">
+            <select id="pd-lifestyle" class="pd-input pd-select" name="workStress">
+              <option value="" disabled ${form.workStress ? '' : 'selected'}>Select your lifestyle</option>
+              ${lifeOpts}
+            </select>
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-weights">Weight training</label>
+          <div class="pd-box pd-box-split">
+            <input id="pd-weights" class="pd-input" name="weightTrainingHours" type="number" inputmode="numeric" min="0" max="15" step="1" value="${form.weightTrainingHours}" />
+            <span class="pd-unit">hrs / wk</span>
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-cardio">Cardio</label>
+          <div class="pd-box pd-box-split">
+            <input id="pd-cardio" class="pd-input" name="cardioHours" type="number" inputmode="numeric" min="0" max="15" step="1" value="${form.cardioHours}" />
+            <span class="pd-unit">hrs / wk</span>
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-fatburn">Fat burning</label>
+          <div class="pd-box pd-box-split">
+            <input id="pd-fatburn" class="pd-input" name="fatBurningHours" type="number" inputmode="numeric" min="0" max="20" step="1" value="${form.fatBurningHours}" />
+            <span class="pd-unit">hrs / wk</span>
           </div>
         </div>
       </div>
@@ -663,6 +723,13 @@ function ensureObDelegation() {
 
     if (input.name === 'heightFeet' || input.name === 'heightInchesPart') {
       syncHeightFromParts(form, input.closest('.ob-flow, .chat-flow, .artshow-flow'));
+      syncNextButton(obCtx.store, form);
+      return;
+    }
+
+    if (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours') {
+      const max = input.name === 'fatBurningHours' ? 20 : 15;
+      form[input.name] = Math.min(max, Math.max(0, Number(input.value) || 0));
       syncNextButton(obCtx.store, form);
       return;
     }

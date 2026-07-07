@@ -229,11 +229,15 @@ html:has(.start-site .artshow-flow) #app {
   pointer-events: none;
 }
 
-/* Personal details — collapsible field boxes */
-.artshow-flow .acc-frame-personal {
+/* Collapsible field panels */
+.artshow-flow .acc-frame-panel {
   border: none;
   background: transparent;
   padding: 0;
+}
+
+.artshow-flow .acc-frame.is-complete:not(.acc-frame-panel) {
+  border-color: rgba(74, 222, 128, 0.55);
 }
 
 .artshow-flow .pd-panel {
@@ -241,6 +245,20 @@ html:has(.start-site .artshow-flow) #app {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
   overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.artshow-flow .pd-panel.is-complete {
+  border-color: rgba(74, 222, 128, 0.65);
+}
+
+.artshow-flow .pd-panel.is-complete .pd-trigger-title {
+  color: #4ade80;
+}
+
+.artshow-flow .pd-panel.is-complete .pd-chevron {
+  border-color: rgba(74, 222, 128, 0.45);
+  color: #4ade80;
 }
 
 .artshow-flow .pd-trigger {
@@ -343,6 +361,6 @@ html:has(.start-site .artshow-flow) #app {
   white-space: nowrap;
 }
 
-.artshow-flow .acc-frame-personal .acc-continue {
+.artshow-flow .acc-frame-panel .acc-continue {
   margin-top: 14px;
 }
