@@ -449,8 +449,64 @@ export function initOnboardingForm(store) {
 
 export { profileFromForm, onboardingPhase, WELCOME_COUNT, renderQuestionBody, renderConfirmBody };
 
+export function personalSectionValid(form) {
+  const iso = parseBirthDateText(form.birthDateText);
+  const age = iso ? ageFromBirthDate(iso) : null;
+  return form.preferredName.trim().length > 0
+    && !!form.sex
+    && age != null && age >= 13 && age <= 99
+    && Number(form.weightText) > 0;
+}
+
+export function renderPersonalDetails(form, open = true) {
+  return `
+    <div class="pd-panel ${open ? 'is-open' : ''}">
+      <button type="button" class="pd-trigger" data-pd-toggle aria-expanded="${open}">
+        <span class="pd-trigger-title">Personal details</span>
+        <span class="pd-chevron" aria-hidden="true">${open ? '−' : '+'}</span>
+      </button>
+      <div class="pd-fields" ${open ? '' : 'hidden'}>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-name">Name</label>
+          <div class="pd-box">
+            <input id="pd-name" class="pd-input" name="preferredName" value="${form.preferredName}" placeholder="First name" autocomplete="given-name" />
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-sex">Sex</label>
+          <div class="pd-box">
+            <select id="pd-sex" class="pd-input pd-select" name="sex">
+              <option value="Male" ${form.sex === 'Male' ? 'selected' : ''}>Male</option>
+              <option value="Female" ${form.sex === 'Female' ? 'selected' : ''}>Female</option>
+            </select>
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-age">Age</label>
+          <div class="pd-box">
+            <input id="pd-age" class="pd-input" type="text" name="birthDateText" inputmode="numeric" maxlength="10" value="${form.birthDateText}" placeholder="MM/DD/YYYY" autocomplete="bday" />
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-height">Height</label>
+          <div class="pd-box pd-box-split">
+            <span class="pd-value" data-bind="heightInches" data-format="height">${heightDisplay(form.heightInches)}</span>
+            <input id="pd-height" class="pd-range" type="range" name="heightInches" min="48" max="84" step="1" value="${form.heightInches}" />
+          </div>
+        </div>
+        <div class="pd-row">
+          <label class="pd-label" for="pd-weight">Weight</label>
+          <div class="pd-box pd-box-split">
+            <input id="pd-weight" class="pd-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="000" />
+            <span class="pd-unit">lbs</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function flowRoot() {
-  return '.ob-flow, .accordion-flow, .chat-flow';
+  return '.ob-flow, .accordion-flow, .chat-flow, .artshow-flow';
 }
 
 function syncNextButton(store, form) {
@@ -477,12 +533,12 @@ function syncAgeFromBirthDate(form, flow) {
 function updateBoundDisplays(name, value) {
   const num = Number(value);
   const sel = `[data-bind="${name}"]`;
-  document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}, .chat-flow ${sel}`).forEach((el) => {
+  document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}, .chat-flow ${sel}, .artshow-flow ${sel}`).forEach((el) => {
     if (el.dataset.format === 'height') el.textContent = heightDisplay(num);
     else el.textContent = value;
   });
   const subSel = `[data-bind-sub="${name}"]`;
-  document.querySelectorAll(`.ob-flow ${subSel}, .accordion-flow ${subSel}, .chat-flow ${subSel}`).forEach((el) => {
+  document.querySelectorAll(`.ob-flow ${subSel}, .accordion-flow ${subSel}, .chat-flow ${subSel}, .artshow-flow ${subSel}`).forEach((el) => {
     if (name === 'heightInches') el.textContent = `${Math.round(num)} inches`;
   });
 }
@@ -589,7 +645,7 @@ function ensureObDelegation() {
       const formatted = formatBirthDateDigits(input.value);
       form.birthDateText = formatted;
       input.value = formatted;
-      syncAgeFromBirthDate(form, input.closest('.ob-flow, .chat-flow'));
+      syncAgeFromBirthDate(form, input.closest('.ob-flow, .chat-flow, .artshow-flow'));
       syncNextButton(obCtx.store, form);
       return;
     }
@@ -603,7 +659,13 @@ function ensureObDelegation() {
     const input = e.target;
     if (!input.closest(flowRoot())) return;
     const form = obCtx.store.onboardingForm;
-    const flow = input.closest('.ob-flow, .chat-flow');
+    const flow = input.closest('.ob-flow, .chat-flow, .artshow-flow');
+
+    if (input.name === 'sex') {
+      form.sex = input.value;
+      syncNextButton(obCtx.store, form);
+      return;
+    }
 
     if (input.name === 'fatSource') {
       form.fatSource = input.value;
