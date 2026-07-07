@@ -10,7 +10,6 @@ import {
   renderJobLifestyleActivity,
   jobLifestyleSectionValid,
   renderCollapsiblePanel,
-  renderLockedPanel,
 } from './onboardingUI.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -120,16 +119,11 @@ function sectionLabel(section) {
 }
 
 function renderStackItem(section, form, index, activeIndex, store) {
+  const maxUnlocked = store.accordionMax ?? activeIndex;
+  if (index > maxUnlocked) return '';
+
   const isActive = index === activeIndex;
   const isDone = index < activeIndex;
-  const isLocked = index > activeIndex;
-
-  if (isLocked) {
-    return `
-      <div class="acc-stack-item is-locked" data-stack-index="${index}" data-acc-section="${section.id}">
-        ${renderLockedPanel(sectionLabel(section))}
-      </div>`;
-  }
 
   const complete = section.review
     ? !!store.reviewViewed
@@ -170,7 +164,7 @@ let accordionCtx = { store: null, render: null, onConfirm: null, onBeforeReview:
 
 function syncReviewBody(form) {
   const stackItem = document.querySelector('.artshow-flow [data-acc-section="review"]');
-  if (!stackItem || stackItem.classList.contains('is-locked')) return;
+  if (!stackItem) return;
   const confirm = stackItem.querySelector('.ob-confirm');
   if (!confirm) return;
   confirm.innerHTML = renderConfirmBody(form, false, { accordionEdit: true });
@@ -250,8 +244,7 @@ function syncAccordionButtons() {
 
   document.querySelectorAll('.artshow-flow .acc-stack-item').forEach((el) => {
     const idx = Number(el.dataset.stackIndex);
-    const section = SECTIONS[idx];
-    const complete = section.review
+    const section = SECTIONS[idx];  const complete = section.review
       ? !!store.reviewViewed
       : (idx < activeIndex || (idx === activeIndex && sectionValid(section, form)));
     el.querySelector('.pd-panel')?.classList.toggle('is-complete', complete);
