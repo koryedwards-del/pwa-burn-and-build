@@ -1,226 +1,214 @@
-/** Accordion questionnaire — one scroll page, grouped sections, inline continue buttons. */
+/** Art-show accordion — one condensed frame at a time, linear progress, no jumping. */
 
-.start-site:has(.accordion-flow) {
-  height: auto;
-  max-height: none;
+.start-site:has(.artshow-flow) {
   min-height: 100dvh;
-  overflow: visible;
+  display: flex;
+  flex-direction: column;
 }
 
-html:has(.start-site .accordion-flow),
-html:has(.start-site .accordion-flow) body {
+html:has(.start-site .artshow-flow),
+html:has(.start-site .artshow-flow) body {
   height: auto;
   overflow-x: hidden;
   overflow-y: auto;
+  background: #000;
 }
 
-html:has(.start-site .accordion-flow) #app {
-  height: auto;
+html:has(.start-site .artshow-flow) #app {
   min-height: 100dvh;
-  padding-bottom: calc(var(--safe-bottom) + var(--dock-bottom, 0px) + 16px);
+  padding-bottom: calc(var(--safe-bottom) + 16px);
 }
 
-.accordion-flow {
+.artshow-flow {
   width: 100%;
-}
-
-.accordion-flow .acc-scroll {
-  padding: 16px 20px 32px;
-}
-
-.accordion-flow .acc-progress-meta {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.accordion-flow .acc-intro-inner {
-  text-align: center;
-  padding-top: 4px;
-}
-
-.accordion-flow .acc-intro-headline {
-  margin-bottom: 12px;
-}
-
-.accordion-flow .acc-intro-body {
-  margin: 0 0 18px;
-  font-size: 15px;
-  line-height: 1.55;
-  color: #b3b3b3;
-}
-
-.accordion-flow .acc-intro-inner .testimony-block {
-  text-align: left;
-}
-
-.accordion-flow .acc-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.accordion-flow .acc-panel {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  background: #111;
-  overflow: hidden;
-}
-
-.accordion-flow .acc-panel.is-open {
-  border-color: rgba(232, 114, 42, 0.45);
-}
-
-.accordion-flow .acc-panel.is-done:not(.is-open) {
-  border-color: rgba(232, 114, 42, 0.25);
-}
-
-.accordion-flow .acc-panel.is-locked {
-  opacity: 0.45;
-}
-
-.accordion-flow .acc-panel.is-locked .acc-trigger {
-  cursor: not-allowed;
-}
-
-.accordion-flow .acc-trigger {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  padding: 16px 18px;
-  text-align: left;
-  background: transparent;
-  color: inherit;
-}
-
-.accordion-flow .acc-step {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--flame);
-}
-
-.accordion-flow .acc-panel.is-open .acc-step {
-  background: rgba(232, 114, 42, 0.15);
-  border-color: rgba(232, 114, 42, 0.45);
-}
-
-.accordion-flow .acc-panel.is-done .acc-step {
-  background: rgba(232, 114, 42, 0.1);
-}
-
-.accordion-flow .acc-panel.is-locked .acc-step {
-  color: var(--muted);
-}
-
-.accordion-flow .acc-trigger-text {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
   flex: 1;
 }
 
-.accordion-flow .acc-title {
-  font-family: 'Oswald', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text);
+.artshow-flow .acc-stage {
+  padding: 20px 20px 28px;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
-.accordion-flow .acc-hint {
+.artshow-flow .acc-rail {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.artshow-flow .acc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.artshow-flow .acc-dot.is-done {
+  background: rgba(232, 114, 42, 0.45);
+}
+
+.artshow-flow .acc-dot.is-current {
+  width: 18px;
+  background: var(--flame);
+}
+
+.artshow-flow .acc-stage-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  min-height: 28px;
+}
+
+.artshow-flow .acc-back {
+  background: none;
+  border: none;
+  color: var(--muted);
   font-size: 13px;
-  line-height: 1.4;
+  padding: 0;
+}
+
+.artshow-flow .acc-back-spacer {
+  width: 52px;
+}
+
+.artshow-flow .acc-stage-label {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
-.accordion-flow .acc-panel.is-done .acc-hint {
-  color: #aaa;
+.artshow-flow .acc-frame {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0) 100%);
+  padding: 16px 16px 14px;
 }
 
-.accordion-flow .acc-chevron {
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1px solid var(--border);
+.artshow-flow .acc-placard {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(232, 114, 42, 0.25);
+}
+
+.artshow-flow .acc-step {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   color: var(--flame);
 }
 
-.accordion-flow .acc-body {
-  padding: 0 18px 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.accordion-flow .acc-body[hidden] {
-  display: none;
-}
-
-.accordion-flow .acc-question + .acc-question {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.accordion-flow .acc-question .ob-step-header {
-  display: none;
-}
-
-.accordion-flow .acc-continue {
-  width: 100%;
-  margin-top: 20px;
-  height: 52px;
-  border-radius: 14px;
-  background: var(--flame);
-  color: var(--btn-on-flame);
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
+.artshow-flow .acc-frame-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
+  color: var(--text);
+  line-height: 1;
 }
 
-.accordion-flow .acc-continue.disabled,
-.accordion-flow .acc-continue:disabled {
-  background: #a85828;
-  color: rgba(255, 255, 255, 0.55);
-  pointer-events: none;
+.artshow-flow .acc-frame-body {
+  padding: 0 2px;
 }
 
-.accordion-flow .ob-question,
-.accordion-flow .ob-confirm {
+.artshow-flow .acc-art-headline {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.artshow-flow .acc-art-lead {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #a8a8a8;
+  text-align: center;
+}
+
+.artshow-flow .acc-art-quote,
+.artshow-flow .acc-art-quote.testimony-block {
+  padding: 12px 12px 10px;
+  margin: 0;
+}
+
+.artshow-flow .acc-question + .acc-question {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.artshow-flow .acc-question .ob-step-header {
+  display: none;
+}
+
+.artshow-flow .ob-question,
+.artshow-flow .ob-confirm {
   text-align: center;
   width: 100%;
 }
 
-.accordion-flow .ob-confirm-rows {
+.artshow-flow .ob-confirm-rows {
   text-align: left;
 }
 
-.accordion-flow .ob-field-label,
-.accordion-flow .ob-section-label {
-  margin-top: 14px;
+.artshow-flow .ob-field-label,
+.artshow-flow .ob-section-label {
+  margin-top: 10px;
+  font-size: 11px;
 }
 
-.accordion-flow .ob-info {
-  margin-top: 12px;
+.artshow-flow .ob-info {
+  margin-top: 10px;
+  padding: 10px 12px;
   text-align: left;
+  font-size: 13px;
+}
+
+.artshow-flow .ob-info p {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.artshow-flow .ob-big-value {
+  margin-top: 6px;
+}
+
+.artshow-flow .ob-input,
+.artshow-flow .ob-select {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.artshow-flow .ob-radio,
+.artshow-flow .ob-check {
+  padding: 10px 12px;
+}
+
+.artshow-flow .acc-continue {
+  width: 100%;
+  margin-top: 16px;
+  height: 46px;
+  border-radius: 10px;
+  background: var(--flame);
+  color: var(--btn-on-flame);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.artshow-flow .acc-continue.disabled,
+.artshow-flow .acc-continue:disabled {
+  background: #7a451f;
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
 }
