@@ -8,6 +8,7 @@ import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './on
 import {
   buildProgramPackage,
   downloadProgramPackage,
+  localDateKey,
   packageToImportUrl,
 } from './programPackage.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail } from './programApi.js';
@@ -109,7 +110,7 @@ const store = {
 function defaultStartDate() {
   const d = new Date();
   d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7));
-  return d.toISOString().slice(0, 10);
+  return localDateKey(d);
 }
 
 function programName() {

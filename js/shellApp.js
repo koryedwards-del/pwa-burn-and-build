@@ -23,6 +23,7 @@ import { sortProgramHistory, summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
   importProgramPackage,
+  localDateKey,
   mealSlotsFromProgram,
   parseImportFromUrl,
   parseProgramPackageJson,
@@ -104,11 +105,7 @@ function hasCompletedOnboarding() {
 }
 
 function todayKey() {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  return localDateKey(new Date());
 }
 
 function sectionKey(slotLabel, sectionId) {
@@ -985,7 +982,6 @@ function localProgramHistoryRows() {
   if (!store.program?.program?.id) return [];
   return [summarizeProgram(store.program, {
     id: store.program.program.id,
-    createdAt: store.program.program.issuedAt || store.program.program.startDate,
     label: store.program.program.label,
   })];
 }

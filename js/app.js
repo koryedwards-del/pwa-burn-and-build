@@ -13,6 +13,7 @@ import { bindOnboardingEvents, initOnboardingForm, renderOnboarding } from './on
 import {
   getProgramDay,
   importProgramPackage,
+  localDateKey,
   mealSlotsFromProgram,
   parseImportFromUrl,
   parseProgramPackageJson,
@@ -55,7 +56,7 @@ function hasCompletedOnboarding() {
 }
 
 function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+  return localDateKey(new Date());
 }
 
 function sectionKey(slotLabel, sectionId) {

@@ -195,8 +195,23 @@ export function parseImportFromUrl(search) {
   }
 }
 
+export function localDateKey(from = new Date()) {
+  if (from == null || from === '') return null;
+  const s = typeof from === 'string' ? from.trim() : from;
+  if (typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const d = from instanceof Date ? from : new Date(from);
+  if (Number.isNaN(d.getTime())) {
+    const m = String(from).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+  }
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 function todayDateKey() {
-  return new Date().toISOString().slice(0, 10);
+  return localDateKey(new Date());
 }
 
 function parseDateKey(key) {

@@ -8,6 +8,7 @@ import {
   WORK_STRESS,
   LOW_ACTIVITIES,
 } from './onboardingEngine.js';
+import { localDateKey } from './programPackage.js';
 
 export function formatActivityCode(intake) {
   if (!intake) return '—';
@@ -18,17 +19,21 @@ export function formatActivityCode(intake) {
 }
 
 export function formatTestDate(isoOrDate) {
-  if (!isoOrDate) return '—';
-  const d = new Date(isoOrDate);
-  if (Number.isNaN(d.getTime())) {
-    const m = String(isoOrDate).match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (m) return `${m[2]}/${m[3]}/${m[1].slice(2)}`;
-    return '—';
-  }
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const yy = String(d.getFullYear()).slice(2);
-  return `${mm}/${dd}/${yy}`;
+  const key = localDateKey(isoOrDate);
+  if (!key) return '—';
+  const [, y, m, d] = key.match(/^(\d{4})-(\d{2})-(\d{2})$/) || [];
+  return `${m}/${d}/${y.slice(2)}`;
+}
+
+function resolveProgramHistoryDateKey(pkg, createdAt) {
+  const raw = pkg?.program?.issuedAt || createdAt || pkg?.program?.startDate;
+  return localDateKey(raw);
+}
+
+function historyTimestamp(isoOrDate) {
+  const key = localDateKey(isoOrDate);
+  if (!key) return 0;
+  return new Date(`${key}T12:00:00`).getTime();
 }
 
 /** Active plan first, then newest by date. */
@@ -40,8 +45,8 @@ export function sortProgramHistory(rows, activeId) {
         if (a.id === activeId && b.id !== activeId) return -1;
         if (b.id === activeId && a.id !== activeId) return 1;
       }
-      const ta = new Date(a.createdAt || 0).getTime();
-      const tb = new Date(b.createdAt || 0).getTime();
+      const ta = historyTimestamp(a.createdAt);
+      const tb = historyTimestamp(b.createdAt);
       if (tb !== ta) return tb - ta;
       return String(b.id).localeCompare(String(a.id));
     });
@@ -103,7 +108,7 @@ export function summarizeProgram(pkg, { createdAt, id, label } = {}) {
   const lbm = Number(intake.leanBodyMass) || 0;
   const fatPct = Number(intake.fatPercent) || 0;
   const fatLbs = weight > 0 && lbm >= 0 ? weight - lbm : 0;
-  const testDate = createdAt || pkg?.program?.issuedAt || pkg?.program?.startDate;
+  const testDate = resolveProgramHistoryDateKey(pkg, createdAt);
 
   return {
     id: id || pkg?.program?.id,
