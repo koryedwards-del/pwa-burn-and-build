@@ -14,7 +14,6 @@ import {
   upsertContact,
 } from './contacts.js';
 import { countPrograms, dbPathForHealth, getLatestProgram, getProgramById, listPrograms, normalizeEmail, saveProgram } from './db.js';
-import { summarizeProgram } from '../js/programHistory.js';
 import { validateProgramPackage } from '../js/programPackage.js';
 import {
   constructStripeWebhookEvent,
@@ -373,10 +372,11 @@ app.get('/api/programs/history', (req, res) => {
   }
 
   const rows = listPrograms(email);
-  const programs = rows.map((row) => summarizeProgram(row.package, {
+  const programs = rows.map((row) => ({
     id: row.id,
-    createdAt: row.createdAt,
     label: row.label,
+    createdAt: row.createdAt,
+    package: row.package,
   }));
 
   res.json({ ok: true, email, programs });

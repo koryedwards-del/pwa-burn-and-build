@@ -25,6 +25,7 @@ export function buildProgramPackage(form, { startDate, programId, label, meta } 
     program: {
       id: programId || crypto.randomUUID(),
       issuedAt: new Date().toISOString(),
+      issuedAtLocalDate: localDateKey(new Date()),
       startDate: startDate || todayDateKey(),
       durationDays: PROGRAM_DURATION_DAYS,
       status: 'active',

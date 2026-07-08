@@ -305,8 +305,16 @@ function getMealSlots(plan) {
   return generateMealSlots(wh, wm, plan.servings);
 }
 
+function stampProgramLocalDate(pkg) {
+  if (!pkg?.program?.issuedAtLocalDate && pkg?.program?.issuedAt) {
+    pkg.program.issuedAtLocalDate = localDateKey(pkg.program.issuedAt);
+  }
+  return pkg;
+}
+
 function applyImportedProgram(pkg) {
   backupLocalAppData();
+  stampProgramLocalDate(pkg);
   const result = importProgramPackage(pkg);
   if (!result.ok) {
     store.importError = result.errors.join(' ');
@@ -337,6 +345,7 @@ async function syncProgramFromServer() {
 }
 
 async function ensureProgramOnServer(pkg) {
+  stampProgramLocalDate(pkg);
   const email = (pkg?.intake?.email || getAppEmail() || '').trim();
   if (!isValidEmail(email) || !pkg?.program?.id) return false;
   persistAppEmail(email);
@@ -360,18 +369,20 @@ async function ensureProgramOnServer(pkg) {
 }
 
 async function refreshProgramHistory() {
-  const localRows = localProgramHistoryRows();
   const activeId = activeProgramId();
   const email = getAppEmail();
   if (!isValidEmail(email)) {
-    store.programHistory = sortProgramHistory(localRows, activeId);
+    store.programHistory = sortProgramHistory(localProgramHistoryRows(), activeId);
     return;
   }
   const result = await fetchProgramHistoryFromServer(email);
   if (result.ok) {
-    store.programHistory = mergeProgramHistory(result.programs, localRows);
+    const rawPrograms = result.programs || [];
+    const serverRows = summarizeProgramHistoryRows(rawPrograms);
+    store.programHistory = mergeProgramHistory(serverRows, localProgramHistoryRows(rawPrograms));
     store.programHistoryError = null;
   } else {
+    const localRows = localProgramHistoryRows();
     store.programHistory = sortProgramHistory(localRows, activeId);
     store.programHistoryError = localRows.length ? null : (result.message || null);
   }
@@ -978,10 +989,27 @@ function renderHistoryCardRows(fieldRows = []) {
     </div>`;
 }
 
-function localProgramHistoryRows() {
+function summarizeProgramHistoryRows(programRows = []) {
+  return programRows.map((row) => {
+    if (row?.package) {
+      return summarizeProgram(row.package, {
+        id: row.id,
+        createdAt: row.createdAt,
+        label: row.label,
+      });
+    }
+    if (row?.fieldRows) return row;
+    return null;
+  }).filter((row) => row?.id);
+}
+
+function localProgramHistoryRows(programRows = []) {
   if (!store.program?.program?.id) return [];
+  const id = store.program.program.id;
+  const meta = programRows.find((row) => row.id === id);
   return [summarizeProgram(store.program, {
-    id: store.program.program.id,
+    id,
+    createdAt: meta?.createdAt,
     label: store.program.program.label,
   })];
 }
