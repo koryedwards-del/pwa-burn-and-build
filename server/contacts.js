@@ -3,16 +3,19 @@ import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { countPrograms, normalizeEmail } from './db.js';
+import { countPrograms, getLatestProgram, normalizeEmail } from './db.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, 'data');
+const defaultDataDir = path.join(__dirname, 'data');
+const configuredPath = process.env.DATABASE_PATH;
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+if (configuredPath) {
+  fs.mkdirSync(path.dirname(configuredPath), { recursive: true });
+} else if (!fs.existsSync(defaultDataDir)) {
+  fs.mkdirSync(defaultDataDir, { recursive: true });
 }
 
-const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'programs.db');
+const dbPath = configuredPath || path.join(defaultDataDir, 'programs.db');
 const db = new Database(dbPath);
 
 function createContactsTable() {
@@ -28,38 +31,14 @@ function createContactsTable() {
   `);
 }
 
-function seedContacts() {
-  const now = new Date().toISOString();
-  const seeds = [
-    { email: 'koryedwards@me.com', displayName: 'Kory Edwards', burnAndBuild: true },
-  ];
-
-  const insert = db.prepare(`
-    INSERT INTO contacts (email, display_name, burn_and_build, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?)
-    ON CONFLICT(email) DO NOTHING
-  `);
-
-  for (const seed of seeds) {
-    insert.run(
-      normalizeEmail(seed.email),
-      seed.displayName,
-      seed.burnAndBuild ? 1 : 0,
-      now,
-      now
-    );
-  }
-}
-
+/** Ensure a contact row exists for every program email — never auto-grants paid access. */
 function backfillContactsFromPrograms() {
   const rows = db.prepare('SELECT DISTINCT email FROM programs').all();
   const now = new Date().toISOString();
   const upsert = db.prepare(`
     INSERT INTO contacts (email, display_name, burn_and_build, created_at, updated_at)
-    VALUES (?, NULL, 1, ?, ?)
-    ON CONFLICT(email) DO UPDATE SET
-      burn_and_build = MAX(contacts.burn_and_build, excluded.burn_and_build),
-      updated_at = excluded.updated_at
+    VALUES (?, NULL, 0, ?, ?)
+    ON CONFLICT(email) DO UPDATE SET updated_at = excluded.updated_at
   `);
 
   for (const row of rows) {
@@ -68,7 +47,6 @@ function backfillContactsFromPrograms() {
 }
 
 createContactsTable();
-seedContacts();
 backfillContactsFromPrograms();
 
 function rowToContact(row) {
@@ -127,18 +105,6 @@ export function upsertContact({ email, displayName, burnAndBuild }) {
   return getContact(key);
 }
 
-function migrateTypoSeedContact() {
-  const typo = getContact('me.koryedwards@me.com');
-  if (!typo?.burnAndBuild) return;
-  upsertContact({
-    email: 'koryedwards@me.com',
-    displayName: typo.displayName || 'Kory Edwards',
-    burnAndBuild: true,
-  });
-}
-
-migrateTypoSeedContact();
-
 export function setBurnAndBuild(email, enabled) {
   const key = normalizeEmail(email);
   const now = new Date().toISOString();
@@ -169,7 +135,7 @@ export function ensureBurnAndBuildAccess(email) {
   return { ok: true, contact };
 }
 
-/** Food plan creation adds or updates Admin contact; access unlocks after payment. */
+/** Food plan creation adds or updates contact; access unlocks after payment. */
 export function enrollContactFromProgramCreation(email, displayName) {
   const name = String(displayName || '').trim();
   const existing = getContact(email);
@@ -180,23 +146,39 @@ export function enrollContactFromProgramCreation(email, displayName) {
   });
 }
 
-export function resolveProgramLoad(email, { getLatestProgram, countPrograms }) {
+export function programSavedForEmail(email) {
   const pkg = getLatestProgram(email);
+  if (!pkg) {
+    return { saved: false, programCount: 0 };
+  }
+  return {
+    saved: true,
+    programId: pkg.program?.id || null,
+    programCount: countPrograms(email),
+  };
+}
+
+export function resolveProgramLoad(email, { getLatestProgram: getLatest, countPrograms: count }) {
+  const pkg = getLatest(email);
   if (!pkg) {
     return { ok: false, status: 404, message: 'No food plan saved for this email yet.' };
   }
-
-  enrollContactFromProgramCreation(email, pkg?.intake?.preferredName);
 
   const access = ensureBurnAndBuildAccess(email);
   if (!access.ok) {
     const message = access.message.includes('not enabled')
       ? 'Your plan is saved. Complete purchase to open it in the app.'
       : access.message;
-    return { ok: false, status: 403, message };
+    return {
+      ok: false,
+      status: 403,
+      saved: true,
+      message,
+      programCount: count(email),
+    };
   }
 
-  return { ok: true, package: pkg, programCount: countPrograms(email) };
+  return { ok: true, package: pkg, programCount: count(email) };
 }
 
 export function deleteContact(email) {

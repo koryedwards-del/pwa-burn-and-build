@@ -33,6 +33,7 @@ import {
   fetchProgramByIdFromServer,
   fetchProgramFromServer,
   fetchProgramHistoryFromServer,
+  fetchProgramSavedStatus,
   getAppEmail,
   isValidEmail,
   persistAppEmail,
@@ -102,7 +103,11 @@ function hasCompletedOnboarding() {
 }
 
 function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 function sectionKey(slotLabel, sectionId) {
@@ -336,8 +341,12 @@ async function ensureProgramOnServer(pkg) {
   const email = (pkg?.intake?.email || getAppEmail() || '').trim();
   if (!isValidEmail(email) || !pkg?.program?.id) return false;
   persistAppEmail(email);
-  const existing = await fetchProgramFromServer(email);
-  if (existing.ok && existing.package) return true;
+
+  const status = await fetchProgramSavedStatus(email);
+  if (status.ok && status.saved && status.programId === pkg.program.id) {
+    return true;
+  }
+
   const saved = await saveProgramToServer(email, pkg);
   if (!saved.ok) {
     console.error('Could not save plan to server:', saved.message);
@@ -384,6 +393,7 @@ async function submitLoadPlan() {
   render();
   const ok = await syncProgramFromServer();
   store.loadBusy = false;
+  if (ok) await refreshProgramHistory();
   if (!ok && !store.loadError) {
     store.loadError = 'No food plan found for this email.';
   }
@@ -959,7 +969,7 @@ function localProgramHistoryRows() {
 
 function mergeProgramHistory(serverRows, localRows) {
   const byId = new Map();
-  for (const row of [...(serverRows || []), ...(localRows || [])]) {
+  for (const row of [...(localRows || []), ...(serverRows || [])]) {
     if (row?.id && !byId.has(row.id)) byId.set(row.id, row);
   }
   return [...byId.values()].sort((a, b) => {
@@ -1688,6 +1698,8 @@ function bindEvents() {
       render();
       return;
     }
+    await ensureProgramOnServer(parsed.pkg);
+    await refreshProgramHistory();
     store.screen = 'home';
     render();
   });
@@ -1707,9 +1719,11 @@ async function init() {
   render();
   try {
     const res = await fetch('../data/foods.json');
+    if (!res.ok) throw new Error(`foods.json ${res.status}`);
     store.foods = await res.json();
   } catch (err) {
     console.error('Food database failed to load', err);
+    store.loadError = store.loadError || 'Food list failed to load. Check your connection and reopen the app.';
   }
 
   const urlParams = new URLSearchParams(window.location.search);

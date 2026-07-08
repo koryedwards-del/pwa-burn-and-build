@@ -353,11 +353,22 @@ function renderTeaching() {
 function ensureBuiltPackage() {
   if (!store.onboardingForm) return null;
   store.builtPackage = buildProgramPackage(store.onboardingForm, {
+    startDate: store.startDate || undefined,
     label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
   });
   store.importUrl = packageToImportUrl(store.builtPackage, '../myplan/');
   persistBuiltPackage();
   return store.builtPackage;
+}
+
+async function runPlanCreation() {
+  ensureBuiltPackage();
+  persistBuiltPackage();
+  const ok = await savePlanToServer();
+  store.phase = 'plan-ready';
+  sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
+  await renderPlanReadyPhase();
+  if (!ok) render();
 }
 
 function renderCreating() {
@@ -874,12 +885,10 @@ function finishIntake() {
   store.email = store.onboardingForm.email;
   store.phase = 'creating';
   store.saveError = '';
+  sessionStorage.setItem('bnb_creator_phase', 'creating');
   render();
-  window.setTimeout(async () => {
-    ensureBuiltPackage();
-    persistBuiltPackage();
-    await savePlanToServer();
-    await renderPlanReadyPhase();
+  window.setTimeout(() => {
+    runPlanCreation().catch((err) => console.error(err));
   }, 900);
 }
 
@@ -889,7 +898,9 @@ initStartSite();
 
 (async () => {
   if (escapeStandaloneToMyplan()) return;
-  if (store.phase === 'plan-ready') {
+  if (store.phase === 'creating') {
+    await runPlanCreation();
+  } else if (store.phase === 'plan-ready') {
     await preparePlanReadyState();
   }
   render();

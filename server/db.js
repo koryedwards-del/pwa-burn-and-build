@@ -5,13 +5,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dataDir = path.join(__dirname, 'data');
+const defaultDataDir = path.join(__dirname, 'data');
+const configuredPath = process.env.DATABASE_PATH;
 
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+if (configuredPath) {
+  fs.mkdirSync(path.dirname(configuredPath), { recursive: true });
+} else if (!fs.existsSync(defaultDataDir)) {
+  fs.mkdirSync(defaultDataDir, { recursive: true });
 }
 
-const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'programs.db');
+const dbPath = configuredPath || path.join(defaultDataDir, 'programs.db');
 const db = new Database(dbPath);
 
 function createCollectionTable() {
@@ -71,21 +74,40 @@ export function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
-/** Add a program to the user's collection — never replaces previous builds. */
+function parsePackage(row) {
+  if (!row?.package_json) return null;
+  try {
+    return JSON.parse(row.package_json);
+  } catch {
+    return null;
+  }
+}
+
+/** Add or update a program for this email — same id updates in place. */
 export function saveProgram(email, pkg) {
   const key = normalizeEmail(email);
   const id = pkg.program?.id || crypto.randomUUID();
   const label = pkg.program?.label || null;
   const now = new Date().toISOString();
-  db.prepare(`
-    INSERT INTO programs (id, email, label, package_json, created_at)
-    VALUES (?, ?, ?, ?, ?)
-    ON CONFLICT(id) DO UPDATE SET
-      email = excluded.email,
-      label = excluded.label,
-      package_json = excluded.package_json,
-      created_at = excluded.created_at
-  `).run(id, key, label, JSON.stringify(pkg), now);
+  const existing = db.prepare('SELECT email FROM programs WHERE id = ?').get(id);
+
+  if (existing && normalizeEmail(existing.email) !== key) {
+    throw new Error('This food plan belongs to another account.');
+  }
+
+  if (existing) {
+    db.prepare(`
+      UPDATE programs
+      SET label = ?, package_json = ?
+      WHERE id = ? AND email = ?
+    `).run(label, JSON.stringify(pkg), id, key);
+  } else {
+    db.prepare(`
+      INSERT INTO programs (id, email, label, package_json, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(id, key, label, JSON.stringify(pkg), now);
+  }
+
   return id;
 }
 
@@ -97,8 +119,18 @@ export function getLatestProgram(email) {
     ORDER BY created_at DESC
     LIMIT 1
   `).get(normalizeEmail(email));
+  return parsePackage(row);
+}
+
+export function getLatestProgramMeta(email) {
+  const row = db.prepare(`
+    SELECT id, created_at FROM programs
+    WHERE email = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+  `).get(normalizeEmail(email));
   if (!row) return null;
-  return JSON.parse(row.package_json);
+  return { id: row.id, createdAt: row.created_at };
 }
 
 export function countPrograms(email) {
@@ -114,16 +146,14 @@ export function listPrograms(email) {
   `).all(normalizeEmail(email));
 
   return rows.map((row) => {
-    try {
-      return {
-        id: row.id,
-        label: row.label,
-        createdAt: row.created_at,
-        package: JSON.parse(row.package_json),
-      };
-    } catch {
-      return null;
-    }
+    const pkg = parsePackage(row);
+    if (!pkg) return null;
+    return {
+      id: row.id,
+      label: row.label,
+      createdAt: row.created_at,
+      package: pkg,
+    };
   }).filter(Boolean);
 }
 
@@ -132,8 +162,7 @@ export function getProgramById(email, programId) {
     SELECT package_json FROM programs
     WHERE email = ? AND id = ?
   `).get(normalizeEmail(email), programId);
-  if (!row) return null;
-  return JSON.parse(row.package_json);
+  return parsePackage(row);
 }
 
 export function dbPathForHealth() {

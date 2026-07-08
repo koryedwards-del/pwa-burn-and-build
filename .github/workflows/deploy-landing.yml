@@ -1,10 +1,24 @@
-name: Deploy landing to GitHub Pages
+name: Deploy site to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
       - 'landing/**'
+      - 'myplan/**'
+      - 'createyourfoodplan/**'
+      - 'css/**'
+      - 'js/**'
+      - 'data/**'
+      - 'img/**'
+      - 'icons/**'
+      - 'contacts/**'
+      - 'shell/**'
+      - 'privacypolicy.html'
+      - 'support.html'
+      - 'sw.js'
+      - 'CNAME'
+      - 'scripts/build-pages.sh'
       - '.github/workflows/deploy-landing.yml'
   workflow_dispatch:
 
@@ -25,8 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Build Pages artifact
+        run: bash scripts/build-pages.sh
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: landing
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

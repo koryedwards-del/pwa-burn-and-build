@@ -1,6 +1,6 @@
 /** My Plan PWA service worker */
 
-const CACHE = 'bnb-myplan-v18';
+const CACHE = 'bnb-myplan-v19';
 const ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const ASSETS = [
   '../img/shell/B%26Blogo.png',
   '../js/shellApp.js',
   '../js/apiConfig.js',
+  '../js/apiFetch.js',
   '../js/programApi.js',
   '../js/localDataBackup.js',
   '../js/contactsApi.js',
@@ -42,7 +43,11 @@ const ASSETS = [
 const NETWORK_FIRST = ['/js/', '/css/'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE).then(async (cache) => {
+      await Promise.allSettled(ASSETS.map((asset) => cache.add(asset)));
+    }).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {

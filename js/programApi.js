@@ -1,6 +1,7 @@
 /** Client API — save/load food plan by email (Creator → DB → Shell PWA) */
 
 import { apiUrl } from './apiConfig.js';
+import { fetchJson } from './apiFetch.js';
 
 export function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -35,26 +36,47 @@ export function getAppEmail() {
     || '';
 }
 
+function apiFailure(res, data, fallback) {
+  return {
+    ok: false,
+    status: res.status,
+    saved: !!data.saved,
+    message: data.message || fallback,
+  };
+}
+
 export async function saveProgramToServer(email, pkg) {
   try {
-    const res = await fetch(apiUrl('/api/programs'), {
+    const { res, data } = await fetchJson(apiUrl('/api/programs'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: normalizeEmail(email), package: pkg }),
     });
-    const data = await res.json();
-    if (!res.ok) return { ok: false, message: data.message || 'Could not save your plan.' };
+    if (!res.ok) return apiFailure(res, data, 'Could not save your plan.');
     return data;
   } catch {
     return { ok: false, message: 'Network error saving your plan.' };
   }
 }
 
+export async function fetchProgramSavedStatus(email) {
+  try {
+    const { res, data } = await fetchJson(
+      apiUrl(`/api/programs/saved?email=${encodeURIComponent(normalizeEmail(email))}`)
+    );
+    if (!res.ok) return apiFailure(res, data, 'Could not check saved plan status.');
+    return data;
+  } catch {
+    return { ok: false, message: 'Network error checking saved plan.' };
+  }
+}
+
 export async function fetchProgramFromServer(email) {
   try {
-    const res = await fetch(apiUrl(`/api/programs?email=${encodeURIComponent(normalizeEmail(email))}`));
-    const data = await res.json();
-    if (!res.ok) return { ok: false, message: data.message || 'No plan found for this email.' };
+    const { res, data } = await fetchJson(
+      apiUrl(`/api/programs?email=${encodeURIComponent(normalizeEmail(email))}`)
+    );
+    if (!res.ok) return apiFailure(res, data, 'No plan found for this email.');
     return data;
   } catch {
     return { ok: false, message: 'Network error loading your plan.' };
@@ -63,9 +85,10 @@ export async function fetchProgramFromServer(email) {
 
 export async function fetchProgramHistoryFromServer(email) {
   try {
-    const res = await fetch(apiUrl(`/api/programs/history?email=${encodeURIComponent(normalizeEmail(email))}`));
-    const data = await res.json();
-    if (!res.ok) return { ok: false, message: data.message || 'Could not load food plan history.' };
+    const { res, data } = await fetchJson(
+      apiUrl(`/api/programs/history?email=${encodeURIComponent(normalizeEmail(email))}`)
+    );
+    if (!res.ok) return apiFailure(res, data, 'Could not load food plan history.');
     return data;
   } catch {
     return { ok: false, message: 'Network error loading food plan history.' };
@@ -74,9 +97,10 @@ export async function fetchProgramHistoryFromServer(email) {
 
 export async function fetchProgramByIdFromServer(email, programId) {
   try {
-    const res = await fetch(apiUrl(`/api/programs/${encodeURIComponent(programId)}?email=${encodeURIComponent(normalizeEmail(email))}`));
-    const data = await res.json();
-    if (!res.ok) return { ok: false, message: data.message || 'Could not load that food plan.' };
+    const { res, data } = await fetchJson(
+      apiUrl(`/api/programs/${encodeURIComponent(programId)}?email=${encodeURIComponent(normalizeEmail(email))}`)
+    );
+    if (!res.ok) return apiFailure(res, data, 'Could not load that food plan.');
     return data;
   } catch {
     return { ok: false, message: 'Network error loading food plan.' };

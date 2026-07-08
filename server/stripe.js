@@ -23,8 +23,8 @@ function getStripe() {
 
 function checkoutEmail(session) {
   const raw = session.client_reference_id
-    || session.customer_email
     || session.metadata?.email
+    || session.customer_email
     || '';
   return normalizeEmail(raw);
 }
@@ -38,7 +38,7 @@ export function grantAccessFromCheckoutSession(session) {
     return { ok: false, message: 'Payment not completed.' };
   }
   const contact = setBurnAndBuild(email, true);
-  return { ok: true, email, contact };
+  return { ok: true, email, contact, programId: session.metadata?.programId || null };
 }
 
 export async function createCheckoutSession({ email, programId, baseUrl }) {
@@ -88,7 +88,10 @@ export function constructStripeWebhookEvent(rawBody, signature) {
 }
 
 export function handleStripeWebhookEvent(event) {
-  if (event.type === 'checkout.session.completed') {
+  if (
+    event.type === 'checkout.session.completed'
+    || event.type === 'checkout.session.async_payment_succeeded'
+  ) {
     return grantAccessFromCheckoutSession(event.data.object);
   }
   return { ok: true, ignored: true, type: event.type };

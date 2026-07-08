@@ -1,13 +1,13 @@
 /** Stripe Checkout — creator site only (no secrets here). */
 
 import { apiUrl } from './apiConfig.js';
+import { fetchJson } from './apiFetch.js';
 import { normalizeEmail } from './programApi.js';
 
 export async function fetchCheckoutStatus() {
   try {
-    const res = await fetch(apiUrl('/api/checkout/status'));
-    const data = await res.json();
-    return { ...data, reachable: true };
+    const { res, data } = await fetchJson(apiUrl('/api/checkout/status'));
+    return { ...data, reachable: res.ok };
   } catch {
     return { ok: false, configured: false, reachable: false };
   }
@@ -15,7 +15,7 @@ export async function fetchCheckoutStatus() {
 
 export async function createCheckoutSession(email, programId) {
   try {
-    const res = await fetch(apiUrl('/api/checkout'), {
+    const { res, data } = await fetchJson(apiUrl('/api/checkout'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -23,7 +23,6 @@ export async function createCheckoutSession(email, programId) {
         programId: programId || undefined,
       }),
     });
-    const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'Could not start checkout.' };
     return data;
   } catch {
@@ -33,8 +32,9 @@ export async function createCheckoutSession(email, programId) {
 
 export async function verifyCheckoutSession(sessionId) {
   try {
-    const res = await fetch(apiUrl(`/api/checkout/verify?session_id=${encodeURIComponent(sessionId)}`));
-    const data = await res.json();
+    const { res, data } = await fetchJson(
+      apiUrl(`/api/checkout/verify?session_id=${encodeURIComponent(sessionId)}`)
+    );
     if (!res.ok) return { ok: false, message: data.message || 'Could not verify payment.' };
     return data;
   } catch {
@@ -44,12 +44,11 @@ export async function verifyCheckoutSession(sessionId) {
 
 export async function completeCheckoutForTest(email) {
   try {
-    const res = await fetch(apiUrl('/api/checkout/test-complete'), {
+    const { res, data } = await fetchJson(apiUrl('/api/checkout/test-complete'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: normalizeEmail(email) }),
     });
-    const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'Test checkout failed.' };
     return data;
   } catch {

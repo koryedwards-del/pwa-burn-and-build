@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   groceryRemoved: 'bnb_grocery_removed',
   groceryExtras: 'bnb_grocery_extras',
   appEmail: 'bnb_app_email',
+  onboardingComplete: 'bnb_onboarding_complete',
 };
 
 export function backupLocalAppData() {

@@ -8,6 +8,7 @@ import {
   enrollContactFromProgramCreation,
   getContact,
   listContacts,
+  programSavedForEmail,
   resolveProgramLoad,
   setBurnAndBuild,
   upsertContact,
@@ -98,6 +99,11 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), (req
     }
     const event = constructStripeWebhookEvent(req.body, signature);
     const result = handleStripeWebhookEvent(event);
+    if (!result.ok && !result.ignored) {
+      console.error('Stripe webhook fulfillment failed:', result.message);
+      res.status(500).json({ ok: false, message: result.message || 'Fulfillment failed.' });
+      return;
+    }
     res.json({ ok: true, ...result });
   } catch (err) {
     console.error('Stripe webhook error:', err.message);
@@ -114,10 +120,14 @@ function isValidEmail(email) {
 function requireContactsAdmin(req, res, next) {
   const configured = process.env.CONTACTS_ADMIN_KEY;
   if (!configured) {
+    if (isProd) {
+      res.status(503).json({ ok: false, message: 'Admin API is not configured.' });
+      return;
+    }
     next();
     return;
   }
-  const key = req.get('x-contacts-admin-key') || req.query.adminKey;
+  const key = req.get('x-contacts-admin-key');
   if (key !== configured) {
     res.status(401).json({ ok: false, message: 'Admin key required.' });
     return;
@@ -286,9 +296,38 @@ app.post('/api/programs', (req, res) => {
     return;
   }
 
-  const programId = saveProgram(email, pkg);
-  const contact = enrollContactFromProgramCreation(email, pkg?.intake?.preferredName);
-  res.json({ ok: true, email, programId, programCount: countPrograms(email), contact });
+  const intakeEmail = normalizeEmail(pkg?.intake?.email);
+  if (intakeEmail && intakeEmail !== email) {
+    res.status(400).json({ ok: false, message: 'Email in the food plan does not match the save request.' });
+    return;
+  }
+
+  try {
+    const programId = saveProgram(email, pkg);
+    const contact = enrollContactFromProgramCreation(email, pkg?.intake?.preferredName);
+    res.json({ ok: true, email, programId, programCount: countPrograms(email), contact });
+  } catch (err) {
+    res.status(403).json({ ok: false, message: err.message || 'Could not save your plan.' });
+  }
+});
+
+app.get('/api/programs/saved', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const saved = programSavedForEmail(email);
+  const contact = getContact(email);
+  res.json({
+    ok: true,
+    email,
+    saved: saved.saved,
+    programId: saved.programId || null,
+    programCount: saved.programCount,
+    accessGranted: !!contact?.burnAndBuild,
+  });
 });
 
 app.get('/api/programs', (req, res) => {
@@ -300,7 +339,11 @@ app.get('/api/programs', (req, res) => {
 
   const result = resolveProgramLoad(email, { getLatestProgram, countPrograms });
   if (!result.ok) {
-    res.status(result.status).json({ ok: false, message: result.message });
+    res.status(result.status).json({
+      ok: false,
+      message: result.message,
+      ...(result.saved ? { saved: true, programCount: result.programCount } : {}),
+    });
     return;
   }
 
@@ -321,7 +364,11 @@ app.get('/api/programs/history', (req, res) => {
 
   const result = resolveProgramLoad(email, { getLatestProgram, countPrograms });
   if (!result.ok) {
-    res.status(result.status).json({ ok: false, message: result.message });
+    res.status(result.status).json({
+      ok: false,
+      message: result.message,
+      ...(result.saved ? { saved: true, programCount: result.programCount } : {}),
+    });
     return;
   }
 
@@ -346,7 +393,11 @@ app.get('/api/programs/:id', (req, res) => {
 
   const accessResult = resolveProgramLoad(email, { getLatestProgram, countPrograms });
   if (!accessResult.ok) {
-    res.status(accessResult.status).json({ ok: false, message: accessResult.message });
+    res.status(accessResult.status).json({
+      ok: false,
+      message: accessResult.message,
+      ...(accessResult.saved ? { saved: true, programCount: accessResult.programCount } : {}),
+    });
     return;
   }
 
