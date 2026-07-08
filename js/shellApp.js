@@ -704,7 +704,7 @@ const NAV_MENU_LABELS = {
   plan: 'Your Custom Food Plan',
   grocery: 'Grocery List',
   projections: 'Projections',
-  'previous-plans': 'Previous Food Plans',
+  'previous-plans': 'Your Food Plans',
 };
 
 function canOpenNav(nav) {
@@ -954,7 +954,7 @@ function renderPreviousPlansHeader() {
   return `
     <div class="plan-header">
       <button type="button" class="back-btn history-back" data-nav="home">←</button>
-      <h1>Previous Food Plans</h1>
+      <h1>Your Food Plans</h1>
     </div>`;
 }
 

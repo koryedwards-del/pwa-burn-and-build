@@ -48,7 +48,7 @@ function formatUserAnswer(qi, form) {
     case 6:
       return WORK_STRESS.find((w) => w.id === form.workStress)?.label || '—';
     case 7:
-      return `Weights ${form.weightTrainingHours} hrs · Cardio ${form.cardioHours} hrs/week`;
+      return `Strength ${form.weightTrainingHours} hrs · Cardio ${form.cardioHours} hrs/week`;
     case 8:
       return `Fat burn ${form.fatBurningHours} hrs/week (${hr.fatBurnLow}–${hr.fatBurnHigh} bpm)`;
     case 9:

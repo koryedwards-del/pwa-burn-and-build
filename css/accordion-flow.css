@@ -567,6 +567,17 @@ html:has(.start-site .artshow-flow) #app {
   color: var(--text);
 }
 
+.artshow-flow .ob-activity-row {
+  align-items: center;
+}
+
+.artshow-flow .ob-input-activity-hours-inline {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--flame);
+  border-radius: 10px;
+}
+
 .artshow-flow .pd-box.is-invalid {
   border-color: rgba(248, 113, 113, 0.75);
 }

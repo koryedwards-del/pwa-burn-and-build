@@ -71,16 +71,30 @@ function heightConfirmLabel(inches) {
   return isValidHeight(inches) ? heightDisplay(inches) : '—';
 }
 
-function renderActivityHoursInput(name, form, max) {
+function renderActivityHoursRow(label, name, form, max, options = {}) {
+  const { sublabel = '' } = options;
   const value = form[name];
   const hasValue = activityHoursHasValue(value, max);
+  const display = hasValue ? activityHoursFieldDisplay(value, max) : '';
   return `
-        <input class="ob-input ob-input-activity-hours${hasValue ? '' : ' is-instruction'}"
-          name="${name}"
-          type="text"
-          inputmode="decimal"
-          value="${activityHoursFieldDisplay(value, max)}"
-          aria-label="Hours per week" />`;
+    <div class="ob-activity-row">
+      <div class="ob-activity-row-label">
+        <div class="ob-section-label ob-section-label-inline">${label}</div>
+        ${sublabel ? `<div class="ob-hr-label ob-hr-label-tight">${sublabel}</div>` : ''}
+      </div>
+      <input class="ob-input ob-input-activity-hours ob-input-activity-hours-inline"
+        name="${name}"
+        type="text"
+        inputmode="decimal"
+        maxlength="7"
+        value="${display}"
+        placeholder="0"
+        aria-label="${label} hours per week" />
+    </div>`;
+}
+
+function isInlineActivityHoursInput(input) {
+  return input?.classList.contains('ob-input-activity-hours-inline');
 }
 
 function syncActivityHoursInput(input, form) {
@@ -93,7 +107,7 @@ function syncActivityHoursInput(input, form) {
     input.value = activityHoursFieldDisplay(parsed, max);
   } else if (form[input.name] === '' || form[input.name] == null) {
     form[input.name] = '';
-    input.value = ACTIVITY_HOURS_INSTRUCTION;
+    input.value = isInlineActivityHoursInput(input) ? '' : ACTIVITY_HOURS_INSTRUCTION;
   }
   syncNextButton(obCtx.store, form);
   input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
@@ -348,19 +362,14 @@ function renderQuestionBody(index, form) {
 
     case 7:
       return `
-        <div class="ob-section-label">WEIGHT TRAINING, RACQUET SPORTS</div>
-        <p class="ob-exercise-desc">Weight training, racquet sports type activity. Count only the time with weight in your hand or actually moving — not the rest between sets.</p>
-        ${renderActivityHoursInput('weightTrainingHours', form, 15)}
+        ${renderActivityHoursRow('STRENGTH TRAINING, RACQUET SPORTS', 'weightTrainingHours', form, 15)}
+        <p class="ob-exercise-desc">Strength training, racquet sports type activity. Count only the time with weight in your hand or actually moving — not the rest between sets.</p>
         <div class="ob-divider"></div>
-        <div class="ob-section-label">CARDIOVASCULAR TRAINING</div>
-        <div class="ob-hr-label ob-hr-label-tight">HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM</div>
-        ${renderActivityHoursInput('cardioHours', form, 15)}`;
+        ${renderActivityHoursRow('CARDIOVASCULAR TRAINING', 'cardioHours', form, 15, { sublabel: `HEART RATE ${hr.cardioLow}–${hr.cardioHigh} BPM` })}`;
 
     case 8:
       return `
-        <div class="ob-section-label">FAT BURNING</div>
-        <div class="ob-hr-label ob-hr-label-tight">HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM</div>
-        ${renderActivityHoursInput('fatBurningHours', form, 20)}
+        ${renderActivityHoursRow('FAT BURNING', 'fatBurningHours', form, 20, { sublabel: `HEART RATE ${hr.fatBurnLow}–${hr.fatBurnHigh} BPM` })}
         ${infoBox('😊', "Everyone does at least 3 hours of something a week. Even housework and carrying groceries count. Don't sell yourself short.")}
         ${LOW_ACTIVITIES.map((a) => `
           <label class="ob-check ${form.lowActivities.includes(a.id) ? 'selected' : ''}">
@@ -516,7 +525,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'job', field: 'workPhysical' }, false, true)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'job', field: 'workStress' }, false, true)}
-        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
+        ${confirmRow('STRENGTH TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
         ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), '', { section: 'activity', field: 'cardioHours' }, false, true)}
         ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), '', { section: 'activity', field: 'fatBurningHours' }, false, true)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', { section: 'rhythm', field: 'wake-hour' }, false, true)}
@@ -536,7 +545,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', base + 4, readOnly)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', base + 5, readOnly)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6, readOnly)}
-        ${confirmRow('WEIGHT TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', base + 7, readOnly)}
+        ${confirmRow('STRENGTH TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', base + 7, readOnly)}
         ${confirmRow('CARDIOVASCULAR TRAINING', activityHoursReviewLabel(form.cardioHours, 15), '', base + 7, readOnly)}
         ${confirmRow('FAT BURNING', activityHoursReviewLabel(form.fatBurningHours, 20), '', base + 8, readOnly)}
         ${confirmRow('WAKE TIME', formatWakeDisplay(form.wakeTime), '', base + 9, readOnly)}
@@ -869,14 +878,19 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours') {
-      if (input.value === ACTIVITY_HOURS_INSTRUCTION) return;
+      if (!isInlineActivityHoursInput(input) && input.value === ACTIVITY_HOURS_INSTRUCTION) return;
       const max = input.name === 'fatBurningHours' ? 20 : 15;
       const cleaned = sanitizeActivityHoursInput(input.value);
       const parsed = parseActivityHours(cleaned, max);
       if (cleaned === '') {
         form[input.name] = '';
-        input.classList.add('is-instruction');
-        input.value = ACTIVITY_HOURS_INSTRUCTION;
+        if (isInlineActivityHoursInput(input)) {
+          input.classList.remove('is-instruction');
+          input.value = '';
+        } else {
+          input.classList.add('is-instruction');
+          input.value = ACTIVITY_HOURS_INSTRUCTION;
+        }
       } else if (parsed !== null) {
         form[input.name] = parsed;
         input.classList.remove('is-instruction');
@@ -968,7 +982,8 @@ function ensureObDelegation() {
     }
 
     if (
-      (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours')
+      !isInlineActivityHoursInput(input)
+      && (input.name === 'weightTrainingHours' || input.name === 'cardioHours' || input.name === 'fatBurningHours')
       && input.value === ACTIVITY_HOURS_INSTRUCTION
     ) {
       input.value = '';
