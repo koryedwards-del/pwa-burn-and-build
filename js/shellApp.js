@@ -19,6 +19,7 @@ import {
   wakeTimeFromParts,
 } from './onboardingEngine.js';
 import { computeWhatsPossible } from './previewCalculator.js';
+import { summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
   importProgramPackage,
@@ -35,7 +36,24 @@ import {
   getAppEmail,
   isValidEmail,
   persistAppEmail,
+  saveProgramToServer,
 } from './programApi.js';
+import {
+  backupLocalAppData,
+  downloadLocalAppData,
+  getLocalBackupDate,
+  hasLocalBackup,
+  restoreLocalAppData,
+} from './localDataBackup.js';
+
+let backupTimer = null;
+function scheduleLocalBackup() {
+  if (backupTimer) return;
+  backupTimer = window.setTimeout(() => {
+    backupTimer = null;
+    backupLocalAppData();
+  }, 1500);
+}
 
 const store = {
   profile: null,
@@ -70,6 +88,7 @@ const store = {
   loadError: null,
   emailError: null,
   loadBusy: false,
+  dataNotice: null,
 };
 
 function hasActiveProgram() {
@@ -118,14 +137,21 @@ function saveGroceryState() {
   localStorage.setItem('bnb_grocery_checked', JSON.stringify(store.groceryChecked));
   localStorage.setItem('bnb_grocery_removed', JSON.stringify(store.groceryRemoved));
   localStorage.setItem('bnb_grocery_extras', JSON.stringify(store.groceryExtras));
+  scheduleLocalBackup();
 }
 
 function saveProgram() {
-  if (store.program) localStorage.setItem('bnb_program', JSON.stringify(store.program));
+  if (store.program) {
+    localStorage.setItem('bnb_program', JSON.stringify(store.program));
+    scheduleLocalBackup();
+  }
 }
 
 function saveSettings() {
-  if (store.settings) localStorage.setItem('bnb_settings', JSON.stringify(store.settings));
+  if (store.settings) {
+    localStorage.setItem('bnb_settings', JSON.stringify(store.settings));
+    scheduleLocalBackup();
+  }
 }
 
 function ensureSettings() {
@@ -154,6 +180,7 @@ function saveProfile() {
 
 function saveEntries() {
   localStorage.setItem('bnb_entries', JSON.stringify(store.entries));
+  scheduleLocalBackup();
 }
 
 function savePickCounts() {
@@ -274,6 +301,7 @@ function getMealSlots(plan) {
 }
 
 function applyImportedProgram(pkg) {
+  backupLocalAppData();
   const result = importProgramPackage(pkg);
   if (!result.ok) {
     store.importError = result.errors.join(' ');
@@ -292,13 +320,33 @@ function applyImportedProgram(pkg) {
 async function syncProgramFromServer() {
   const email = getAppEmail();
   if (!isValidEmail(email)) return false;
+  if (hasActiveProgram()) return true;
   const result = await fetchProgramFromServer(email);
   if (result.ok && result.package) {
     store.loadError = null;
     return applyImportedProgram(result.package);
   }
-  store.loadError = result.message || 'No food plan found for this email.';
+  store.loadError = result.message || 'No food plan saved for this email yet.';
   return false;
+}
+
+async function ensureProgramOnServer(pkg) {
+  const email = (pkg?.intake?.email || getAppEmail() || '').trim();
+  if (!isValidEmail(email) || !pkg?.program?.id) return false;
+  persistAppEmail(email);
+  const existing = await fetchProgramFromServer(email);
+  if (existing.ok && existing.package) return true;
+  const saved = await saveProgramToServer(email, pkg);
+  if (!saved.ok) {
+    console.error('Could not save plan to server:', saved.message);
+    return false;
+  }
+  if (saved.programId && pkg.program) {
+    pkg.program.id = saved.programId;
+    store.program = pkg;
+    saveProgram();
+  }
+  return true;
 }
 
 async function submitLoadPlan() {
@@ -653,6 +701,7 @@ function renderLoadPlanHome() {
       </div>
       <div class="home-load-plan">
         <p class="home-load-lead">Enter the email you used to create your food plan.</p>
+        <p class="home-load-hint">If your plan works in Safari but not from the home screen icon, open the app once from the creator&rsquo;s &ldquo;Open Burn &amp; Build app&rdquo; button so it saves to your account.</p>
         ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
         ${store.emailError ? `<div class="import-error">${store.emailError}</div>` : ''}
         <label class="home-load-label" for="load-plan-email">Email address</label>
@@ -676,6 +725,7 @@ function renderHome() {
         <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>
       <div class="home-btn-stack">
+        ${store.dataNotice ? `<div class="home-data-notice">${store.dataNotice}</div>` : ''}
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
         ${renderHomeNavButton('projections')}
@@ -712,6 +762,10 @@ function renderWakePickerSettings(wakeTime) {
 function renderSettings() {
   const canEdit = canEditWakeTime();
   const wakeTime = currentWakeTime();
+  const backupDate = getLocalBackupDate();
+  const backupLabel = backupDate
+    ? new Date(backupDate).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+    : null;
   return `
     <div class="screen settings-screen">
       <div class="plan-header settings-header">
@@ -727,8 +781,37 @@ function renderSettings() {
           <p class="settings-empty">Open or create a food plan first — wake time controls when your meals are scheduled each day.</p>
           <a href="../createyourfoodplan/" class="btn-primary settings-create-link">Create your food plan</a>
         `}
+        <div class="settings-data-block">
+          <div class="settings-field-label">Your data on this device</div>
+          <p class="settings-field-desc">The home screen app and Safari keep separate storage on iPhone. Saving to your account keeps plans available in both.</p>
+          ${backupLabel ? `<p class="settings-backup-meta">Last on-device backup: ${backupLabel}</p>` : ''}
+          ${hasLocalBackup() ? `<button type="button" class="btn-secondary settings-restore" data-restore-backup>Restore from backup</button>` : ''}
+          <button type="button" class="btn-secondary settings-export" data-export-backup>Download backup file</button>
+        </div>
+        ${store.dataNotice ? `<div class="settings-notice">${store.dataNotice}</div>` : ''}
       </div>
     </div>`;
+}
+
+function restoreFromLocalBackup() {
+  const result = restoreLocalAppData();
+  if (!result.ok) {
+    store.dataNotice = result.message;
+    render();
+    return;
+  }
+  load();
+  store.dataNotice = `Restored backup from ${new Date(result.savedAt).toLocaleString()}.`;
+  store.screen = 'home';
+  render();
+}
+
+function exportLocalBackup() {
+  const result = downloadLocalAppData();
+  if (!result.ok) {
+    store.dataNotice = result.message || 'Could not export backup.';
+    render();
+  }
 }
 
 function renderStubScreen(title, lead) {
@@ -840,15 +923,41 @@ function renderPreviousPlansHeader() {
     </div>`;
 }
 
+function localProgramHistoryRows() {
+  if (!store.program?.program?.id) return [];
+  return [summarizeProgram(store.program, {
+    id: store.program.program.id,
+    createdAt: store.program.program.issuedAt || store.program.program.startDate,
+    label: store.program.program.label,
+  })];
+}
+
+function mergeProgramHistory(serverRows, localRows) {
+  const byId = new Map();
+  for (const row of [...(serverRows || []), ...(localRows || [])]) {
+    if (row?.id && !byId.has(row.id)) byId.set(row.id, row);
+  }
+  return [...byId.values()].sort((a, b) => {
+    const ta = new Date(a.createdAt || 0).getTime();
+    const tb = new Date(b.createdAt || 0).getTime();
+    return tb - ta;
+  });
+}
+
 async function loadProgramHistory() {
   store.programHistoryLoading = true;
   store.programHistoryError = null;
   render();
 
+  const localRows = localProgramHistoryRows();
+  if (store.program) {
+    await ensureProgramOnServer(store.program);
+  }
+
   const email = getAppEmail();
   if (!email) {
     store.programHistoryLoading = false;
-    store.programHistory = [];
+    store.programHistory = localRows;
     render();
     return;
   }
@@ -856,16 +965,28 @@ async function loadProgramHistory() {
   const result = await fetchProgramHistoryFromServer(email);
   store.programHistoryLoading = false;
   if (!result.ok) {
-    store.programHistory = [];
+    store.programHistory = localRows;
+    if (!localRows.length) {
+      store.programHistoryError = result.message || 'Could not load food plan history.';
+    }
   } else {
-    store.programHistory = result.programs || [];
+    store.programHistory = mergeProgramHistory(result.programs, localRows);
   }
   render();
 }
 
 async function openHistoryProgram(programId) {
   const email = getAppEmail();
-  if (!email || !programId) return;
+  if (!programId) return;
+
+  if (programId === store.program?.program?.id) {
+    store.expandedNavButton = null;
+    store.screen = 'home';
+    render();
+    return;
+  }
+
+  if (!email) return;
 
   store.programHistoryOpenId = programId;
   store.programHistoryError = null;
@@ -899,11 +1020,14 @@ function renderPreviousPlans() {
   }
 
   if (!store.programHistory.length) {
+    const emptyCopy = hasActiveProgram()
+      ? '<p>Your current plan is on this device only.</p><p class="history-empty-sub">Open the app from the creator&rsquo;s &ldquo;Open Burn &amp; Build app&rdquo; button once so it saves to your account.</p>'
+      : '<p>You haven\'t created a food plan.</p>';
     return `
       <div class="screen previous-plans-screen">
         ${renderPreviousPlansHeader()}
         <div class="history-empty">
-          <p>You haven't created a food plan.</p>
+          ${emptyCopy}
         </div>
       </div>`;
   }
@@ -1383,6 +1507,9 @@ function bindEvents() {
     render();
   });
 
+  document.querySelector('[data-restore-backup]')?.addEventListener('click', restoreFromLocalBackup);
+  document.querySelector('[data-export-backup]')?.addEventListener('click', exportLocalBackup);
+
   document.querySelectorAll('[data-reveal-fats]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const plan = getPlan();
@@ -1557,6 +1684,25 @@ function bindEvents() {
 
 async function init() {
   load();
+
+  if (!hasActiveProgram() && hasLocalBackup()) {
+    const restored = restoreLocalAppData();
+    if (restored.ok) {
+      load();
+      store.dataNotice = 'Restored your food plan from an on-device backup.';
+    }
+  } else if (hasActiveProgram()) {
+    backupLocalAppData();
+  }
+
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (standalone && !localStorage.getItem('bnb_pwa_storage_warned')) {
+    localStorage.setItem('bnb_pwa_storage_warned', '1');
+    if (!store.dataNotice) {
+      store.dataNotice = 'This home screen app keeps its own storage, separate from Safari. Save your plan to your account from the creator so it stays available everywhere.';
+    }
+  }
+
   store.screen = 'loading';
   render();
   try {
@@ -1576,6 +1722,7 @@ async function init() {
       const pkg = JSON.parse(pendingImport);
       if (applyImportedProgram(pkg)) {
         window.history.replaceState({}, '', window.location.pathname);
+        await ensureProgramOnServer(pkg);
       }
     }
   } catch (err) {
@@ -1602,7 +1749,9 @@ async function init() {
     window.history.replaceState({}, '', `${window.location.pathname}${rest ? `?${rest}` : ''}`);
   }
 
-  if (!hasActiveProgram() && getAppEmail()) {
+  if (hasActiveProgram()) {
+    await ensureProgramOnServer(store.program);
+  } else if (getAppEmail()) {
     await syncProgramFromServer();
   }
 

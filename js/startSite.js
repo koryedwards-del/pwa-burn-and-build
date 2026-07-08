@@ -237,11 +237,26 @@ function escapeStandaloneToMyplan() {
   return true;
 }
 
-function openMyplanApp() {
+async function openMyplanApp() {
   restoreBuiltPackage();
   const email = (store.email || getAppEmail() || store.builtPackage?.intake?.email || '').trim();
   if (isValidEmail(email)) persistAppEmail(email);
   if (store.builtPackage) {
+    if (isValidEmail(email)) {
+      store.saveBusy = true;
+      store.saveError = '';
+      const saved = await saveProgramToServer(email, store.builtPackage);
+      store.saveBusy = false;
+      if (!saved.ok) {
+        store.saveError = saved.message || 'Could not save your plan to your account.';
+        render();
+        return;
+      }
+      if (saved.programId && store.builtPackage?.program) {
+        store.builtPackage.program.id = saved.programId;
+        persistBuiltPackage();
+      }
+    }
     try {
       sessionStorage.setItem('bnb_pending_import', JSON.stringify(store.builtPackage));
     } catch (err) {
@@ -799,7 +814,7 @@ function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-open-myplan]')) {
-      openMyplanApp();
+      openMyplanApp().catch((err) => console.error(err));
       return;
     }
     if (e.target.closest('[data-test-checkout]')) {

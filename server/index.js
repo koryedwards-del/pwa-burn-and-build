@@ -8,6 +8,7 @@ import {
   enrollContactFromProgramCreation,
   getContact,
   listContacts,
+  resolveProgramLoad,
   setBurnAndBuild,
   upsertContact,
 } from './contacts.js';
@@ -297,23 +298,17 @@ app.get('/api/programs', (req, res) => {
     return;
   }
 
-  const access = ensureBurnAndBuildAccess(email);
-  if (!access.ok) {
-    res.status(403).json({ ok: false, message: access.message });
-    return;
-  }
-
-  const pkg = getLatestProgram(email);
-  if (!pkg) {
-    res.status(404).json({ ok: false, message: 'No food plan found for this email yet.' });
+  const result = resolveProgramLoad(email, { getLatestProgram, countPrograms });
+  if (!result.ok) {
+    res.status(result.status).json({ ok: false, message: result.message });
     return;
   }
 
   res.json({
     ok: true,
     email,
-    package: pkg,
-    programCount: countPrograms(email),
+    package: result.package,
+    programCount: result.programCount,
   });
 });
 
@@ -324,9 +319,9 @@ app.get('/api/programs/history', (req, res) => {
     return;
   }
 
-  const access = ensureBurnAndBuildAccess(email);
-  if (!access.ok) {
-    res.status(403).json({ ok: false, message: access.message });
+  const result = resolveProgramLoad(email, { getLatestProgram, countPrograms });
+  if (!result.ok) {
+    res.status(result.status).json({ ok: false, message: result.message });
     return;
   }
 
@@ -349,9 +344,9 @@ app.get('/api/programs/:id', (req, res) => {
     return;
   }
 
-  const access = ensureBurnAndBuildAccess(email);
-  if (!access.ok) {
-    res.status(403).json({ ok: false, message: access.message });
+  const accessResult = resolveProgramLoad(email, { getLatestProgram, countPrograms });
+  if (!accessResult.ok) {
+    res.status(accessResult.status).json({ ok: false, message: accessResult.message });
     return;
   }
 

@@ -31,7 +31,7 @@ function createContactsTable() {
 function seedContacts() {
   const now = new Date().toISOString();
   const seeds = [
-    { email: 'me.koryedwards@me.com', displayName: 'Kory Edwards', burnAndBuild: true },
+    { email: 'koryedwards@me.com', displayName: 'Kory Edwards', burnAndBuild: true },
   ];
 
   const insert = db.prepare(`
@@ -127,6 +127,18 @@ export function upsertContact({ email, displayName, burnAndBuild }) {
   return getContact(key);
 }
 
+function migrateTypoSeedContact() {
+  const typo = getContact('me.koryedwards@me.com');
+  if (!typo?.burnAndBuild) return;
+  upsertContact({
+    email: 'koryedwards@me.com',
+    displayName: typo.displayName || 'Kory Edwards',
+    burnAndBuild: true,
+  });
+}
+
+migrateTypoSeedContact();
+
 export function setBurnAndBuild(email, enabled) {
   const key = normalizeEmail(email);
   const now = new Date().toISOString();
@@ -166,6 +178,25 @@ export function enrollContactFromProgramCreation(email, displayName) {
     displayName: name || undefined,
     burnAndBuild: existing?.burnAndBuild ? true : false,
   });
+}
+
+export function resolveProgramLoad(email, { getLatestProgram, countPrograms }) {
+  const pkg = getLatestProgram(email);
+  if (!pkg) {
+    return { ok: false, status: 404, message: 'No food plan saved for this email yet.' };
+  }
+
+  enrollContactFromProgramCreation(email, pkg?.intake?.preferredName);
+
+  const access = ensureBurnAndBuildAccess(email);
+  if (!access.ok) {
+    const message = access.message.includes('not enabled')
+      ? 'Your plan is saved. Complete purchase to open it in the app.'
+      : access.message;
+    return { ok: false, status: 403, message };
+  }
+
+  return { ok: true, package: pkg, programCount: countPrograms(email) };
 }
 
 export function deleteContact(email) {

@@ -80,6 +80,11 @@ export function saveProgram(email, pkg) {
   db.prepare(`
     INSERT INTO programs (id, email, label, package_json, created_at)
     VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      email = excluded.email,
+      label = excluded.label,
+      package_json = excluded.package_json,
+      created_at = excluded.created_at
   `).run(id, key, label, JSON.stringify(pkg), now);
   return id;
 }

@@ -132,6 +132,14 @@
   margin: 0 0 8px;
 }
 
+.home-load-hint {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #999;
+  text-align: center;
+  margin: 0 0 12px;
+}
+
 .home-load-label {
   font-size: 12px;
   font-weight: 700;
@@ -228,6 +236,45 @@
   margin-top: 20px;
   text-align: center;
   text-decoration: none;
+}
+
+.settings-data-block {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.settings-backup-meta {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 12px;
+}
+
+.settings-restore,
+.settings-export {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.settings-notice {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(232, 114, 42, 0.15);
+  color: #f5c9a8;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.home-data-notice {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(232, 114, 42, 0.12);
+  color: #ddd;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .home-stub {

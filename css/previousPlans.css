@@ -57,6 +57,12 @@
   margin: 0;
 }
 
+.history-empty-sub {
+  margin-top: 12px !important;
+  font-size: 14px;
+  color: #999;
+}
+
 .history-btn-stack {
   max-width: 360px;
   margin: 0 auto;
