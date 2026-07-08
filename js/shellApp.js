@@ -1070,8 +1070,6 @@ function renderPreviousPlans() {
 
       <p class="history-intro">Body composition history — your active plan stays on top. Tap any row to switch plans.</p>
 
-      <div class="history-legend">Activity = weight training / cardio / fat burning hrs per week (e.g. 3/4/3)</div>
-
       ${store.programHistoryError ? `<div class="history-error">${store.programHistoryError}</div>` : ''}
 
       <div class="history-list">
