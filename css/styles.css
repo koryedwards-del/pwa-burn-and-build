@@ -1529,11 +1529,30 @@ a.btn-secondary {
   margin-top: 4px;
 }
 
-.ob-weight-row {
+.ob-weight-row,
+.ob-height-row {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 24px;
+}
+
+.ob-height-row {
+  gap: 20px;
+}
+
+.ob-height-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ob-height-input {
+  width: 80px;
+  text-align: center;
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--flame);
 }
 
 .ob-weight-input {

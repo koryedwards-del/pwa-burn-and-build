@@ -6,7 +6,7 @@ import {
   canProceed,
   formatWakeDisplay,
   formatBirthDateText,
-  heightInchesLabel,
+  heightDisplay,
   heartRates,
   onboardingPhase,
   parseBirthDateText,
@@ -17,7 +17,7 @@ import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const CHAT_PROMPTS = [
   "What's your first name? We'll use it throughout your program.",
-  'How tall are you? Slide to your height.',
+  'How tall are you? Enter feet and inches.',
   'What is your date of birth? We use this for your fat-burn and cardio heart-rate targets.',
   "What's your current weight? Best in the morning — after the bathroom, before you eat.",
   'What is your body fat percentage? Pick how you know it, then enter the number.',
@@ -34,7 +34,7 @@ function formatUserAnswer(qi, form) {
     case 0:
       return form.preferredName || '—';
     case 1:
-      return `${heightInchesLabel(form.heightInches)}`;
+      return heightDisplay(form.heightInches);
     case 2:
       return form.birthDateText && parseBirthDateText(form.birthDateText)
         ? formatBirthDateText(parseBirthDateText(form.birthDateText))

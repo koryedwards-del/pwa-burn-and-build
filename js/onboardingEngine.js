@@ -165,9 +165,29 @@ export function birthDateFieldBounds() {
 }
 
 export function heightDisplay(inches) {
-  const ft = Math.floor(inches / 12);
-  const rem = Math.round(inches % 12);
-  return `${ft}'${rem}"`;
+  const { feet, inches: rem } = heightParts(inches);
+  return `${feet}'${rem}"`;
+}
+
+export function heightParts(totalInches) {
+  const n = Number(totalInches);
+  if (!Number.isFinite(n) || n <= 0) return { feet: '', inches: '' };
+  const rounded = Math.round(n);
+  return {
+    feet: Math.floor(rounded / 12),
+    inches: rounded % 12,
+  };
+}
+
+export function heightFromParts(feet, inches) {
+  const f = feet === '' ? 0 : Math.max(0, Number(feet) || 0);
+  const i = inches === '' ? 0 : Math.max(0, Math.min(11, Number(inches) || 0));
+  return f * 12 + i;
+}
+
+export function isValidHeight(totalInches) {
+  const n = Number(totalInches);
+  return n >= 48 && n <= 84;
 }
 
 export function heightInchesLabel(inches) {
@@ -324,9 +344,8 @@ export function canProceed(phase, form) {
     case 'question':
       switch (phase.index) {
         case 0: return form.preferredName.trim().length > 0;
-        case 2: {
-          return birthDateIsValid(form.birthDateText);
-        }
+        case 1: return isValidHeight(form.heightInches);
+        case 2: return birthDateIsValid(form.birthDateText);
         case 3: return Number(form.weightText) > 0;
         case 4: return Number(form.fatPercentText) > 0 && form.fatSource;
         case 5: return !!form.workPhysical;
