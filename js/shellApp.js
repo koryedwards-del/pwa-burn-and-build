@@ -727,10 +727,12 @@ function renderHomeSiteLink() {
 }
 
 function openBurnAndBuildWebsite() {
+  try { sessionStorage.setItem('bnb_browse_mode', '1'); } catch (e) {}
   window.open(BNB_WEBSITE_URL, '_blank', 'noopener,noreferrer');
 }
 
 function openBurnAndBuildCreator() {
+  try { sessionStorage.setItem('bnb_browse_mode', '1'); } catch (e) {}
   window.open(BNB_CREATOR_URL, '_blank', 'noopener,noreferrer');
 }
 
@@ -1704,6 +1706,7 @@ function bindEvents() {
 }
 
 async function init() {
+  try { sessionStorage.removeItem('bnb_browse_mode'); } catch (e) {}
   load();
 
   if (!hasActiveProgram() && hasLocalBackup()) {

@@ -228,8 +228,24 @@ function myplanHandoffUrl() {
   return '../myplan/';
 }
 
+const BROWSE_MODE_KEY = 'bnb_browse_mode';
+
+function setBrowseModeFlag() {
+  try {
+    sessionStorage.setItem(BROWSE_MODE_KEY, '1');
+  } catch (e) {}
+}
+
 function isBrowseMode() {
-  return new URLSearchParams(location.search).has('browse');
+  if (new URLSearchParams(location.search).has('browse')) {
+    setBrowseModeFlag();
+    return true;
+  }
+  try {
+    return sessionStorage.getItem(BROWSE_MODE_KEY) === '1';
+  } catch (e) {
+    return false;
+  }
 }
 
 function shouldAllowCreatorInStandalone() {
@@ -722,11 +738,19 @@ async function preparePlanReadyState() {
 
 function render() {
   const root = document.getElementById('app');
+  if (!root) return;
   if (store.phase === 'onboarding') {
     root.innerHTML = renderOnboardingWrapper();
     bindOnboardingOnly();
-  } else if (store.phase === 'creating') root.innerHTML = renderCreating();
-  else if (store.phase === 'plan-ready') root.innerHTML = renderPlanReady();
+  } else if (store.phase === 'creating') {
+    root.innerHTML = renderCreating();
+  } else if (store.phase === 'plan-ready') {
+    root.innerHTML = renderPlanReady();
+  } else {
+    store.phase = 'onboarding';
+    root.innerHTML = renderOnboardingWrapper();
+    bindOnboardingOnly();
+  }
   afterRender();
 }
 

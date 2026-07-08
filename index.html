@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script>
     var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    var browse = new URLSearchParams(location.search).has('browse');
+    try {
+      if (new URLSearchParams(location.search).has('browse')) {
+        sessionStorage.setItem('bnb_browse_mode', '1');
+      }
+    } catch (e) {}
+    var browse = new URLSearchParams(location.search).has('browse')
+      || sessionStorage.getItem('bnb_browse_mode') === '1';
     if (standalone && !browse) {
       location.replace('/myplan/');
     }

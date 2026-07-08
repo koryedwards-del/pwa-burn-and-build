@@ -3,6 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function () {
+      try {
+        if (new URLSearchParams(location.search).has('browse')) {
+          sessionStorage.setItem('bnb_browse_mode', '1');
+        }
+      } catch (e) {}
+      var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      var browse = new URLSearchParams(location.search).has('browse')
+        || sessionStorage.getItem('bnb_browse_mode') === '1';
+      if (standalone && !browse) {
+        location.replace('/myplan/');
+      }
+    })();
+  </script>
   <title>Burn & Build — The Fastest Way to Lose Fat and Build Muscle</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
