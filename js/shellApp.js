@@ -1068,7 +1068,7 @@ function renderPreviousPlans() {
     <div class="screen previous-plans-screen">
       ${renderPreviousPlansHeader()}
 
-      <p class="history-intro">Body composition history — your active plan stays on top. Tap any row to switch plans.</p>
+      <p class="history-intro">Tap a food plan to make it ACTIVE</p>
 
       ${store.programHistoryError ? `<div class="history-error">${store.programHistoryError}</div>` : ''}
 
