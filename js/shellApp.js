@@ -349,6 +349,23 @@ async function ensureProgramOnServer(pkg) {
   return true;
 }
 
+async function refreshProgramHistory() {
+  const localRows = localProgramHistoryRows();
+  const email = getAppEmail();
+  if (!isValidEmail(email)) {
+    store.programHistory = localRows;
+    return;
+  }
+  const result = await fetchProgramHistoryFromServer(email);
+  if (result.ok) {
+    store.programHistory = mergeProgramHistory(result.programs, localRows);
+    store.programHistoryError = null;
+  } else {
+    store.programHistory = localRows;
+    store.programHistoryError = localRows.length ? null : (result.message || null);
+  }
+}
+
 async function submitLoadPlan() {
   const input = document.querySelector('[name="loadPlanEmail"]');
   const email = (input?.value || getAppEmail() || '').trim();
@@ -701,7 +718,6 @@ function renderLoadPlanHome() {
       </div>
       <div class="home-load-plan">
         <p class="home-load-lead">Enter the email you used to create your food plan.</p>
-        <p class="home-load-hint">If your plan works in Safari but not from the home screen icon, open the app once from the creator&rsquo;s &ldquo;Open Burn &amp; Build app&rdquo; button so it saves to your account.</p>
         ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
         ${store.emailError ? `<div class="import-error">${store.emailError}</div>` : ''}
         <label class="home-load-label" for="load-plan-email">Email address</label>
@@ -725,7 +741,6 @@ function renderHome() {
         <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>
       <div class="home-btn-stack">
-        ${store.dataNotice ? `<div class="home-data-notice">${store.dataNotice}</div>` : ''}
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
         ${renderHomeNavButton('projections')}
@@ -783,7 +798,7 @@ function renderSettings() {
         `}
         <div class="settings-data-block">
           <div class="settings-field-label">Your data on this device</div>
-          <p class="settings-field-desc">The home screen app and Safari keep separate storage on iPhone. Saving to your account keeps plans available in both.</p>
+          <p class="settings-field-desc">Back up or restore your plan and meal logs on this device.</p>
           ${backupLabel ? `<p class="settings-backup-meta">Last on-device backup: ${backupLabel}</p>` : ''}
           ${hasLocalBackup() ? `<button type="button" class="btn-secondary settings-restore" data-restore-backup>Restore from backup</button>` : ''}
           <button type="button" class="btn-secondary settings-export" data-export-backup>Download backup file</button>
@@ -945,33 +960,16 @@ function mergeProgramHistory(serverRows, localRows) {
 }
 
 async function loadProgramHistory() {
-  store.programHistoryLoading = true;
+  store.programHistory = localProgramHistoryRows();
+  store.programHistoryLoading = store.programHistory.length === 0;
   store.programHistoryError = null;
   render();
 
-  const localRows = localProgramHistoryRows();
   if (store.program) {
     await ensureProgramOnServer(store.program);
   }
-
-  const email = getAppEmail();
-  if (!email) {
-    store.programHistoryLoading = false;
-    store.programHistory = localRows;
-    render();
-    return;
-  }
-
-  const result = await fetchProgramHistoryFromServer(email);
+  await refreshProgramHistory();
   store.programHistoryLoading = false;
-  if (!result.ok) {
-    store.programHistory = localRows;
-    if (!localRows.length) {
-      store.programHistoryError = result.message || 'Could not load food plan history.';
-    }
-  } else {
-    store.programHistory = mergeProgramHistory(result.programs, localRows);
-  }
   render();
 }
 
@@ -1020,14 +1018,12 @@ function renderPreviousPlans() {
   }
 
   if (!store.programHistory.length) {
-    const emptyCopy = hasActiveProgram()
-      ? '<p>Your current plan is on this device only.</p><p class="history-empty-sub">Open the app from the creator&rsquo;s &ldquo;Open Burn &amp; Build app&rdquo; button once so it saves to your account.</p>'
-      : '<p>You haven\'t created a food plan.</p>';
     return `
       <div class="screen previous-plans-screen">
         ${renderPreviousPlansHeader()}
         <div class="history-empty">
-          ${emptyCopy}
+          <p>You haven&rsquo;t created a food plan yet.</p>
+          <a href="../createyourfoodplan/" class="history-create-link">Create your food plan →</a>
         </div>
       </div>`;
   }
@@ -1464,7 +1460,7 @@ function bindEvents() {
         store.showGroceryAdd = false;
       }
       if (nav === 'previous-plans') {
-        loadProgramHistory();
+        if (!store.programHistory.length) loadProgramHistory();
       }
       if (nav === 'import') store.importError = null;
       store.screen = nav;
@@ -1687,20 +1683,9 @@ async function init() {
 
   if (!hasActiveProgram() && hasLocalBackup()) {
     const restored = restoreLocalAppData();
-    if (restored.ok) {
-      load();
-      store.dataNotice = 'Restored your food plan from an on-device backup.';
-    }
+    if (restored.ok) load();
   } else if (hasActiveProgram()) {
     backupLocalAppData();
-  }
-
-  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (standalone && !localStorage.getItem('bnb_pwa_storage_warned')) {
-    localStorage.setItem('bnb_pwa_storage_warned', '1');
-    if (!store.dataNotice) {
-      store.dataNotice = 'This home screen app keeps its own storage, separate from Safari. Save your plan to your account from the creator so it stays available everywhere.';
-    }
   }
 
   store.screen = 'loading';
@@ -1751,8 +1736,10 @@ async function init() {
 
   if (hasActiveProgram()) {
     await ensureProgramOnServer(store.program);
+    await refreshProgramHistory();
   } else if (getAppEmail()) {
-    await syncProgramFromServer();
+    const loaded = await syncProgramFromServer();
+    if (loaded) await refreshProgramHistory();
   }
 
   const hasLegacyPlan = store.profile?.leanBodyMass > 0 && localStorage.getItem('bnb_onboarding_complete') === 'true';
