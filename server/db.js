@@ -1,20 +1,9 @@
 import crypto from 'crypto';
 import Database from 'better-sqlite3';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { prepareDatabasePath, resolveDatabasePath } from './dbPath.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const defaultDataDir = path.join(__dirname, 'data');
-const configuredPath = process.env.DATABASE_PATH;
-
-if (configuredPath) {
-  fs.mkdirSync(path.dirname(configuredPath), { recursive: true });
-} else if (!fs.existsSync(defaultDataDir)) {
-  fs.mkdirSync(defaultDataDir, { recursive: true });
-}
-
-const dbPath = configuredPath || path.join(defaultDataDir, 'programs.db');
+const dbPath = resolveDatabasePath();
+prepareDatabasePath(dbPath);
 const db = new Database(dbPath);
 
 function createCollectionTable() {
