@@ -68,15 +68,15 @@ export function programHistoryFieldRows(pkg) {
 
   const rows = [
     [
-      historyField('Gender', intake.sex),
-      historyField('Height', heightReadable(intake.heightInches) || null),
-      historyField('Age', intake.age > 0 ? intake.age : null),
-    ],
-    [
       historyField('Weight', weight > 0 ? Math.round(weight) : null),
       historyField('Lean', lbm > 0 ? lbm.toFixed(1) : null),
       historyField('Fat', fatLbs > 0 ? fatLbs.toFixed(1) : null),
       historyField('Fat %', fatPct > 0 ? fatPct.toFixed(2) : null, { accent: true }),
+    ],
+    [
+      historyField('Gender', intake.sex),
+      historyField('Height', heightReadable(intake.heightInches) || null),
+      historyField('Age', intake.age > 0 ? intake.age : null),
     ],
     [
       historyField('Workday', phys?.label),
