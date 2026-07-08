@@ -47,21 +47,6 @@
   padding: 0;
 }
 
-.food-plan-screen .plan-fat-hint {
-  width: calc(100% - 40px);
-  margin: 4px 20px 10px;
-  padding: 0;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--plan-gold);
-  background: none;
-}
-
-.food-plan-screen .plan-fat-hint:active {
-  opacity: 0.75;
-}
-
 .food-plan-empty {
   padding: 48px 24px;
   text-align: center;
@@ -99,7 +84,7 @@
 
 /* Daily fat servings bar */
 .food-plan-screen .plan-fat-points {
-  margin: 0 20px 16px;
+  margin: 16px 20px 0;
   padding: 12px 14px;
   background: transparent;
   border: 1px solid var(--plan-accent-dim);

@@ -1160,10 +1160,6 @@ function renderPlan() {
         <h1>Custom Food Plan</h1>
       </div>
 
-      <button type="button" class="plan-fat-hint" data-reveal-fats>Tap here to reveal the Extra Fats list.</button>
-
-      ${renderMealFatPoints(fatTarget, fatUsed, fatPct)}
-
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
         const progress = mealProgress(slot);
@@ -1197,6 +1193,9 @@ function renderPlan() {
           </div>` : ''}
         </div>`;
       }).join('')}
+
+      ${renderMealFatPoints(fatTarget, fatUsed, fatPct)}
+
       <div style="height:32px"></div>
     </div>`;
 }
@@ -1530,19 +1529,6 @@ function bindEvents() {
 
   document.querySelector('[data-restore-backup]')?.addEventListener('click', restoreFromLocalBackup);
   document.querySelector('[data-export-backup]')?.addEventListener('click', exportLocalBackup);
-
-  document.querySelectorAll('[data-reveal-fats]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const plan = getPlan();
-      if (!plan) return;
-      const slots = getMealSlots(plan);
-      const first = slots[0];
-      if (!first) return;
-      store.expandedMeal = first.label;
-      store.expandedSections[sectionKey(first.label, 'Fats')] = true;
-      render();
-    });
-  });
 
   document.querySelectorAll('[data-toggle]').forEach((btn) => {
     btn.addEventListener('click', () => {
