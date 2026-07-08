@@ -52,8 +52,8 @@ function historyField(label, value) {
   return { label, value: String(value) };
 }
 
-/** Intake fields for history cards — no section headers; omits name, email, meal reminders. */
-export function programHistoryFields(pkg) {
+/** Intake field rows for history cards — grouped layout; omits name, email, newsletter, meal reminders. */
+export function programHistoryFieldRows(pkg) {
   const intake = pkg?.intake || {};
   const weight = Number(intake.totalWeight) || 0;
   const lbm = Number(intake.leanBodyMass) || 0;
@@ -66,28 +66,35 @@ export function programHistoryFields(pkg) {
     .filter(Boolean);
   const wakeTime = intake.wakeTime || intake.defaultWakeTime;
 
-  const fields = [
-    historyField('Newsletter', intake.newsletterOptIn ? 'Yes' : 'No'),
-    historyField('Gender', intake.sex),
-    historyField('Height', heightReadable(intake.heightInches) || null),
-    historyField('Age', intake.age > 0 ? intake.age : null),
-    historyField('Weight', weight > 0 ? `${Math.round(weight)} lbs` : null),
-    historyField('Body fat', fatPct > 0 ? `${fatPct.toFixed(2)}%` : null),
-    historyField('Lean', lbm > 0 ? `${lbm.toFixed(1)} lbs` : null),
-    historyField('Fat', fatLbs > 0 ? `${fatLbs.toFixed(1)} lbs` : null),
-    historyField('Workday', phys?.label),
-    historyField('Lifestyle', stress?.label),
-    historyField('Strength training', activityHoursReviewLabel(intake.weightTrainingHours, 15)),
-    historyField('Cardiovascular', activityHoursReviewLabel(intake.cardioHours, 15)),
-    historyField('Fat burning', activityHoursReviewLabel(intake.fatBurningHours, 20)),
-    historyField('Wake time', wakeTime ? formatWakeDisplay(wakeTime) : null),
+  const rows = [
+    [
+      historyField('Gender', intake.sex),
+      historyField('Height', heightReadable(intake.heightInches) || null),
+      historyField('Age', intake.age > 0 ? intake.age : null),
+    ],
+    [
+      historyField('Weight', weight > 0 ? Math.round(weight) : null),
+      historyField('Lean', lbm > 0 ? lbm.toFixed(1) : null),
+      historyField('Fat', fatLbs > 0 ? fatLbs.toFixed(1) : null),
+      historyField('Fat %', fatPct > 0 ? fatPct.toFixed(2) : null),
+    ],
+    [
+      historyField('Workday', phys?.label),
+      historyField('Lifestyle', stress?.label),
+      historyField('Wake time', wakeTime ? formatWakeDisplay(wakeTime) : null),
+    ],
+    [
+      historyField('Strength', activityHoursReviewLabel(intake.weightTrainingHours, 15)),
+      historyField('Cardio', activityHoursReviewLabel(intake.cardioHours, 15)),
+      historyField('Fat burning', activityHoursReviewLabel(intake.fatBurningHours, 20)),
+    ],
   ];
 
   if (lowLabels.length) {
-    fields.push(historyField('Other activities', lowLabels.join(', ')));
+    rows.push([historyField('Other activities', lowLabels.join(', '))]);
   }
 
-  return fields;
+  return rows;
 }
 
 export function summarizeProgram(pkg, { createdAt, id, label } = {}) {
@@ -103,7 +110,7 @@ export function summarizeProgram(pkg, { createdAt, id, label } = {}) {
     createdAt: testDate,
     label: label || pkg?.program?.label || 'Food Plan',
     testDateDisplay: formatTestDate(testDate),
-    fields: programHistoryFields(pkg),
+    fieldRows: programHistoryFieldRows(pkg),
     fatPercentDisplay: fatPct ? fatPct.toFixed(2) : '—',
     weightDisplay: weight ? String(Math.round(weight)) : '—',
     leanDisplay: lbm ? lbm.toFixed(1) : '—',

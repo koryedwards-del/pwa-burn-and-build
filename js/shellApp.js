@@ -967,15 +967,15 @@ function renderPreviousPlansHeader() {
     </div>`;
 }
 
-function renderHistoryCardFields(fields = []) {
-  return `
-    <div class="history-fields">
-      ${fields.map((field) => `
+function renderHistoryCardRows(fieldRows = []) {
+  return fieldRows.map((row) => `
+    <div class="history-fields history-fields--${row.length}">
+      ${row.map((field) => `
         <div class="history-field">
           <span class="history-field-label">${field.label}</span>
           <span class="history-field-value">${field.value}</span>
         </div>`).join('')}
-    </div>`;
+    </div>`).join('');
 }
 
 function localProgramHistoryRows() {
@@ -1095,7 +1095,7 @@ function renderPreviousPlans() {
               <span class="history-chevron">›</span>
             </div>
             <div class="history-card-body">
-              ${renderHistoryCardFields(row.fields)}
+              ${renderHistoryCardRows(row.fieldRows)}
             </div>
           </button>`;
         }).join('')}

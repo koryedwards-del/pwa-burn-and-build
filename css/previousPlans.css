@@ -161,12 +161,24 @@
 .history-card-body {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .history-fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 12px;
+  gap: 8px 10px;
+}
+
+.history-fields--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.history-fields--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.history-fields--1 {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .history-field {
@@ -174,6 +186,7 @@
   flex-direction: column;
   gap: 3px;
   min-width: 0;
+  text-align: center;
 }
 
 .history-field-label {
@@ -190,6 +203,7 @@
   color: #eee;
   line-height: 1.35;
   word-break: break-word;
+  font-variant-numeric: tabular-nums;
 }
 
 .history-footer-note {
