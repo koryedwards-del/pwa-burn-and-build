@@ -967,20 +967,6 @@ function renderPreviousPlansHeader() {
     </div>`;
 }
 
-function renderHistoryCardSections(sections = []) {
-  return sections.map((section) => `
-    <div class="history-section">
-      <div class="history-section-title">${section.title}</div>
-      <div class="history-fields">
-        ${section.fields.map((field) => `
-          <div class="history-field">
-            <span class="history-field-label">${field.label}</span>
-            <span class="history-field-value">${field.value}</span>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
-}
-
 function localProgramHistoryRows() {
   if (!store.program?.program?.id) return [];
   return [summarizeProgram(store.program, {
@@ -1093,16 +1079,29 @@ function renderPreviousPlans() {
           return `
           <button type="button" class="history-card ${isActive ? 'active' : ''} ${isOpening ? 'opening' : ''}" data-open-history="${row.id}">
             <div class="history-card-top">
-              <div class="history-card-heading">
-                <span class="history-date">${row.testDateDisplay}</span>
-                ${row.nameDisplay && row.nameDisplay !== '—' ? `<span class="history-name">${row.nameDisplay}</span>` : ''}
-              </div>
+              <span class="history-date">${row.testDateDisplay}</span>
               ${isActive ? '<span class="history-active-tag">Active</span>' : ''}
               <span class="history-chevron">›</span>
             </div>
-            <div class="history-card-body">
-              ${renderHistoryCardSections(row.sections)}
+            <div class="history-metrics">
+              <div class="history-metric">
+                <span class="history-metric-label">Fat %</span>
+                <span class="history-metric-value accent">${row.fatPercentDisplay}</span>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric-label">Weight</span>
+                <span class="history-metric-value">${row.weightDisplay}</span>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric-label">Lean</span>
+                <span class="history-metric-value">${row.leanDisplay}</span>
+              </div>
+              <div class="history-metric">
+                <span class="history-metric-label">Fat</span>
+                <span class="history-metric-value">${row.fatLbsDisplay}</span>
+              </div>
             </div>
+            <div class="history-activity">Activity<strong>${row.activity}</strong></div>
           </button>`;
         }).join('')}
       </div>
