@@ -46,6 +46,8 @@ import {
   restoreLocalAppData,
 } from './localDataBackup.js';
 
+const BNB_WEBSITE_URL = 'https://gettheburnandbuildapp.com/?browse=1';
+
 let backupTimer = null;
 function scheduleLocalBackup() {
   if (backupTimer) return;
@@ -709,6 +711,14 @@ function renderHomeNavButton(nav) {
   return `<button type="button" class="btn-home" data-expand-nav="${nav}">${label}</button>`;
 }
 
+function renderHomeSiteLink() {
+  return `<p class="home-site-link"><a href="${BNB_WEBSITE_URL}" target="_blank" rel="noopener noreferrer" data-open-website>Burn &amp; Build website</a></p>`;
+}
+
+function openBurnAndBuildWebsite() {
+  window.open(BNB_WEBSITE_URL, '_blank', 'noopener,noreferrer');
+}
+
 function renderLoadPlanHome() {
   return `
     <div class="screen home-dashboard">
@@ -725,7 +735,7 @@ function renderLoadPlanHome() {
         <button type="button" class="btn-home" data-load-plan ${store.loadBusy ? 'disabled' : ''}>${store.loadBusy ? 'Loading…' : 'Load my food plan'}</button>
         <a href="../createyourfoodplan/" class="home-load-create">Need a new plan? Create one →</a>
       </div>
-      <p class="home-site-link"><a href="https://gettheburnandbuildapp.com/">Burn &amp; Build website</a></p>
+      ${renderHomeSiteLink()}
       <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;
 }
@@ -746,7 +756,7 @@ function renderHome() {
         ${renderHomeNavButton('projections')}
         ${renderHomeNavButton('previous-plans')}
       </div>
-      <p class="home-site-link"><a href="https://gettheburnandbuildapp.com/">Burn &amp; Build website</a></p>
+      ${renderHomeSiteLink()}
       <p class="home-footer">Stay consistent. Eat on time.</p>
     </div>`;
 }
@@ -1427,6 +1437,11 @@ function bindCoachCarousel() {
 }
 
 function bindEvents() {
+  document.querySelector('[data-open-website]')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openBurnAndBuildWebsite();
+  });
+
   document.querySelector('[data-load-plan]')?.addEventListener('click', () => {
     submitLoadPlan();
   });

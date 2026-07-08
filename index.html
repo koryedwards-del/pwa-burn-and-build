@@ -4,7 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script>
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    var browse = new URLSearchParams(location.search).has('browse');
+    if (standalone && !browse) {
       location.replace('/myplan/');
     }
   </script>
