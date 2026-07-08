@@ -19,7 +19,7 @@ import {
   wakeTimeFromParts,
 } from './onboardingEngine.js';
 import { computeWhatsPossible } from './previewCalculator.js';
-import { summarizeProgram } from './programHistory.js';
+import { sortProgramHistory, summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
   importProgramPackage,
@@ -322,6 +322,7 @@ function applyImportedProgram(pkg) {
   const email = pkg?.intake?.email || getAppEmail();
   if (isValidEmail(email)) persistAppEmail(email);
   saveProgram();
+  syncProgramHistoryOrder();
   return true;
 }
 
@@ -363,9 +364,10 @@ async function ensureProgramOnServer(pkg) {
 
 async function refreshProgramHistory() {
   const localRows = localProgramHistoryRows();
+  const activeId = activeProgramId();
   const email = getAppEmail();
   if (!isValidEmail(email)) {
-    store.programHistory = localRows;
+    store.programHistory = sortProgramHistory(localRows, activeId);
     return;
   }
   const result = await fetchProgramHistoryFromServer(email);
@@ -373,7 +375,7 @@ async function refreshProgramHistory() {
     store.programHistory = mergeProgramHistory(result.programs, localRows);
     store.programHistoryError = null;
   } else {
-    store.programHistory = localRows;
+    store.programHistory = sortProgramHistory(localRows, activeId);
     store.programHistoryError = localRows.length ? null : (result.message || null);
   }
 }
@@ -974,20 +976,25 @@ function localProgramHistoryRows() {
   })];
 }
 
+function activeProgramId() {
+  return store.program?.program?.id || null;
+}
+
 function mergeProgramHistory(serverRows, localRows) {
   const byId = new Map();
-  for (const row of [...(localRows || []), ...(serverRows || [])]) {
-    if (row?.id && !byId.has(row.id)) byId.set(row.id, row);
+  for (const row of [...(serverRows || []), ...(localRows || [])]) {
+    if (row?.id) byId.set(row.id, row);
   }
-  return [...byId.values()].sort((a, b) => {
-    const ta = new Date(a.createdAt || 0).getTime();
-    const tb = new Date(b.createdAt || 0).getTime();
-    return tb - ta;
-  });
+  return sortProgramHistory([...byId.values()], activeProgramId());
+}
+
+function syncProgramHistoryOrder() {
+  if (!store.programHistory.length) return;
+  store.programHistory = sortProgramHistory(store.programHistory, activeProgramId());
 }
 
 async function loadProgramHistory() {
-  store.programHistory = localProgramHistoryRows();
+  store.programHistory = sortProgramHistory(localProgramHistoryRows(), activeProgramId());
   store.programHistoryLoading = store.programHistory.length === 0;
   store.programHistoryError = null;
   render();
@@ -1027,14 +1034,16 @@ async function openHistoryProgram(programId) {
   }
 
   if (applyImportedProgram(result.package)) {
+    syncProgramHistoryOrder();
     store.expandedNavButton = null;
-    store.screen = 'home';
+    store.screen = 'previous-plans';
     render();
   }
 }
 
 function renderPreviousPlans() {
-  const activeId = store.program?.program?.id;
+  syncProgramHistoryOrder();
+  const activeId = activeProgramId();
 
   if (store.programHistoryLoading) {
     return `
@@ -1059,7 +1068,7 @@ function renderPreviousPlans() {
     <div class="screen previous-plans-screen">
       ${renderPreviousPlansHeader()}
 
-      <p class="history-intro">Body composition history — tap a row to open that food plan.</p>
+      <p class="history-intro">Body composition history — your active plan stays on top. Tap any row to switch plans.</p>
 
       <div class="history-legend">Activity = weight training / cardio / fat burning hrs per week (e.g. 3/4/3)</div>
 

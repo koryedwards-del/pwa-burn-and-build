@@ -10,7 +10,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=99';
+} from './onboardingUI.js?v=100';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -180,42 +180,55 @@ function setAccordionPanelOpen(panel, open) {
   }
 }
 
-function focusAccordionField(sectionId, fieldRef) {
-  const store = accordionCtx.store;
-  if (!store) return;
-  store.accordionSection = sectionId;
-  accordionCtx.render?.();
-  window.requestAnimationFrame(() => {
-    const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
-    if (!stackItem) return;
-    let el = null;
-    if (fieldRef.startsWith('pd-')) {
-      el = stackItem.querySelector(`#${fieldRef}`);
-    } else if (fieldRef.startsWith('wake-')) {
-      el = stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
-    } else if (fieldRef === 'reminders') {
-      el = stackItem.querySelector('[data-ob-reminders]');
-    } else {
-      el = stackItem.querySelector(`[name="${fieldRef}"]`);
-    }
+function resolveAccordionFieldEl(stackItem, fieldRef) {
+  if (!stackItem || !fieldRef) return null;
 
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      if (typeof el.focus === 'function') {
-        el.focus({ preventScroll: true });
-      }
-    }
-  });
+  if (fieldRef === 'pd-sex') {
+    return stackItem.querySelector('#pd-sex .pd-gender-btn.is-active')
+      || stackItem.querySelector('#pd-sex .pd-gender-btn');
+  }
+  if (fieldRef === 'reminders') {
+    return stackItem.querySelector('[data-ob-reminders]');
+  }
+  if (fieldRef.startsWith('wake-')) {
+    return stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
+  }
+
+  const byId = stackItem.querySelector(`#${CSS.escape(fieldRef)}`);
+  if (byId) {
+    if (byId.matches('input, select, textarea, button')) return byId;
+    return byId.querySelector('input, select, textarea, button') || byId;
+  }
+
+  return stackItem.querySelector(`[name="${CSS.escape(fieldRef)}"]`);
+}
+
+function focusAccordionField(sectionId, fieldRef) {
+  const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
+  if (!stackItem) return;
+
+  const panel = stackItem.querySelector('.pd-panel');
+  if (panel) setAccordionPanelOpen(panel, true);
+
+  const el = resolveAccordionFieldEl(stackItem, fieldRef);
+  if (!el) return;
+
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (typeof el.focus === 'function') {
+    el.focus({ preventScroll: true });
+  }
 }
 
 function openFieldFromReview(sectionId, fieldRef) {
   const store = accordionCtx.store;
-  if (!store) return;
+  if (!store || !sectionId || !fieldRef) return;
   store.accordionSection = sectionId;
   store.accordionEditReturn = 'review';
   accordionCtx.render?.();
   window.requestAnimationFrame(() => {
-    focusAccordionField(sectionId, fieldRef);
+    window.requestAnimationFrame(() => {
+      focusAccordionField(sectionId, fieldRef);
+    });
   });
 }
 
@@ -272,9 +285,12 @@ function ensureAccordionDelegation() {
     const store = accordionCtx.store;
     const activeIndex = getActiveIndex(store);
 
-    const editRow = e.target.closest('[data-acc-edit-section]');
+    const editRow = e.target.closest('[data-edit-field]');
     if (editRow) {
-      openFieldFromReview(editRow.dataset.accEditSection, editRow.dataset.accEditField);
+      openFieldFromReview(
+        editRow.getAttribute('data-edit-section'),
+        editRow.getAttribute('data-edit-field'),
+      );
       return;
     }
 

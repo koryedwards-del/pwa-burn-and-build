@@ -22,6 +22,22 @@ export function formatTestDate(isoOrDate) {
   return `${mm}/${dd}/${yy}`;
 }
 
+/** Active plan first, then newest by date. */
+export function sortProgramHistory(rows, activeId) {
+  return [...(rows || [])]
+    .filter((row) => row?.id)
+    .sort((a, b) => {
+      if (activeId) {
+        if (a.id === activeId && b.id !== activeId) return -1;
+        if (b.id === activeId && a.id !== activeId) return 1;
+      }
+      const ta = new Date(a.createdAt || 0).getTime();
+      const tb = new Date(b.createdAt || 0).getTime();
+      if (tb !== ta) return tb - ta;
+      return String(b.id).localeCompare(String(a.id));
+    });
+}
+
 export function summarizeProgram(pkg, { createdAt, id, label } = {}) {
   const intake = pkg?.intake || {};
   const weight = Number(intake.totalWeight) || 0;

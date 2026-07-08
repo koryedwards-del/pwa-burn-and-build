@@ -83,7 +83,7 @@ function renderHeightFields(form, style = 'step') {
   const instructionClass = hasValue ? '' : ' is-instruction';
   if (style === 'panel') {
     return `
-      <input id="pd-height" class="pd-input${instructionClass}" name="heightInches" inputmode="numeric" value="${display}" aria-label="Height in inches" aria-describedby="pd-height-readable" />
+      <input id="pd-height-input" class="pd-input${instructionClass}" name="heightInches" inputmode="numeric" value="${display}" aria-label="Height in inches" aria-describedby="pd-height-readable" />
       <span class="pd-unit pd-height-readable" id="pd-height-readable" data-height-readable aria-live="polite">${readable}</span>`;
   }
   return `
@@ -535,8 +535,8 @@ function confirmRow(label, value, subtitle, editTarget, readOnly, accordionEdit)
     }
     return `
     <button type="button" class="ob-confirm-row ob-confirm-row-edit"
-      data-acc-edit-section="${editTarget.section}"
-      data-acc-edit-field="${editTarget.field}">
+      data-edit-section="${editTarget.section}"
+      data-edit-field="${editTarget.field}">
       <div>
         <div class="ob-confirm-label">${label}</div>
         ${subtitle ? `<div class="ob-confirm-sub">${subtitle}</div>` : ''}
@@ -581,7 +581,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('EMAIL', form.email || '—', '', { section: 'email', field: 'pd-email' }, false, true)}
         ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', { section: 'email', field: 'newsletterOptIn' }, false, true)}
         ${confirmRow('GENDER', form.sex || '—', '', { section: 'personal', field: 'pd-sex' }, false, true)}
-        ${confirmRow('HEIGHT', heightConfirmLabel(form.heightInches), '', { section: 'personal', field: 'pd-height' }, false, true)}
+        ${confirmRow('HEIGHT', heightConfirmLabel(form.heightInches), '', { section: 'personal', field: 'pd-height-input' }, false, true)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
@@ -781,9 +781,9 @@ export function renderPersonalDetails(form, open = true, complete = false) {
           </div>
           <p class="pd-hint pd-hint-error" id="pd-birth-date-error" data-birth-date-error hidden>Enter a valid date (MM/DD/YYYY).</p>
         </div>
-        <div class="pd-row">
+        <div class="pd-row" id="pd-height">
           <span class="pd-label" id="pd-height-label">Height</span>
-          <div class="pd-box pd-box-split" id="pd-height" aria-labelledby="pd-height-label">
+          <div class="pd-box pd-box-split" aria-labelledby="pd-height-label">
             ${renderHeightFields(form, 'panel')}
           </div>
         </div>
