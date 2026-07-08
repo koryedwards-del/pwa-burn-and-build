@@ -47,9 +47,9 @@ export function sortProgramHistory(rows, activeId) {
     });
 }
 
-function historyField(label, value) {
-  if (value === '' || value == null) return { label, value: '—' };
-  return { label, value: String(value) };
+function historyField(label, value, options = {}) {
+  if (value === '' || value == null) return { label, value: '—', accent: !!options.accent };
+  return { label, value: String(value), accent: !!options.accent };
 }
 
 /** Intake field rows for history cards — grouped layout; omits name, email, newsletter, meal reminders. */
@@ -76,7 +76,7 @@ export function programHistoryFieldRows(pkg) {
       historyField('Weight', weight > 0 ? Math.round(weight) : null),
       historyField('Lean', lbm > 0 ? lbm.toFixed(1) : null),
       historyField('Fat', fatLbs > 0 ? fatLbs.toFixed(1) : null),
-      historyField('Fat %', fatPct > 0 ? fatPct.toFixed(2) : null),
+      historyField('Fat %', fatPct > 0 ? fatPct.toFixed(2) : null, { accent: true }),
     ],
     [
       historyField('Workday', phys?.label),

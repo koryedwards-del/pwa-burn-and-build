@@ -968,14 +968,17 @@ function renderPreviousPlansHeader() {
 }
 
 function renderHistoryCardRows(fieldRows = []) {
-  return fieldRows.map((row) => `
-    <div class="history-fields history-fields--${row.length}">
-      ${row.map((field) => `
-        <div class="history-field">
-          <span class="history-field-label">${field.label}</span>
-          <span class="history-field-value">${field.value}</span>
+  return `
+    <div class="history-grid">
+      ${fieldRows.map((row, index) => `
+        <div class="history-grid-row${index > 0 ? ' history-grid-row--divider' : ''}" style="--history-cols: ${row.length}">
+          ${row.map((field) => `
+            <div class="history-field">
+              <span class="history-field-label">${field.label}</span>
+              <span class="history-field-value${field.accent ? ' accent' : ''}">${field.value}</span>
+            </div>`).join('')}
         </div>`).join('')}
-    </div>`).join('');
+    </div>`;
 }
 
 function localProgramHistoryRows() {
