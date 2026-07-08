@@ -44,17 +44,51 @@ function infoBox(icon, text) {
 const HEIGHT_FIELD_PLACEHOLDER = 'enter your height';
 const WEIGHT_FIELD_PLACEHOLDER = 'enter your weight';
 
+function heightFieldHasValue(form) {
+  return !!heightInputValue(form.heightInches);
+}
+
+function heightFieldDisplay(form) {
+  return heightInputValue(form.heightInches) || HEIGHT_FIELD_PLACEHOLDER;
+}
+
+function weightFieldHasValue(form) {
+  const text = form.weightText;
+  if (text === '' || text == null) return false;
+  const n = Number(text);
+  return Number.isFinite(n) && n > 0;
+}
+
+function weightFieldDisplay(form) {
+  return weightFieldHasValue(form) ? String(form.weightText) : WEIGHT_FIELD_PLACEHOLDER;
+}
+
+function applyHeightFieldDisplay(input, form) {
+  const hasValue = heightFieldHasValue(form);
+  input.classList.toggle('is-instruction', !hasValue);
+  input.value = heightFieldDisplay(form);
+  updateHeightReadable(input.closest(flowRoot()), form);
+}
+
+function applyWeightFieldDisplay(input, form) {
+  const hasValue = weightFieldHasValue(form);
+  input.classList.toggle('is-instruction', !hasValue);
+  input.value = weightFieldDisplay(form);
+}
+
 function renderHeightFields(form, style = 'step') {
-  const value = heightInputValue(form.heightInches);
+  const hasValue = heightFieldHasValue(form);
+  const display = heightFieldDisplay(form);
   const readable = heightReadable(form.heightInches);
+  const instructionClass = hasValue ? '' : ' is-instruction';
   if (style === 'panel') {
     return `
-      <input id="pd-height" class="pd-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="${HEIGHT_FIELD_PLACEHOLDER}" aria-label="Height in inches" aria-describedby="pd-height-readable" />
+      <input id="pd-height" class="pd-input${instructionClass}" name="heightInches" inputmode="numeric" value="${display}" aria-label="Height in inches" aria-describedby="pd-height-readable" />
       <span class="pd-unit pd-height-readable" id="pd-height-readable" data-height-readable aria-live="polite">${readable}</span>`;
   }
   return `
     <div class="ob-weight-row">
-      <input class="ob-input ob-weight-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="${HEIGHT_FIELD_PLACEHOLDER}" aria-label="Height in inches" aria-describedby="ob-height-readable" />
+      <input class="ob-input ob-weight-input${instructionClass}" name="heightInches" inputmode="numeric" value="${display}" aria-label="Height in inches" aria-describedby="ob-height-readable" />
       <span class="ob-unit pd-height-readable" id="ob-height-readable" data-height-readable aria-live="polite">${readable}</span>
     </div>`;
 }
@@ -68,11 +102,29 @@ function updateHeightReadable(flow, form) {
 }
 
 function syncHeightInchesInput(input, form) {
-  const raw = input.value.replace(/\D/g, '').slice(0, 3);
+  let raw = input.value;
+  if (raw === HEIGHT_FIELD_PLACEHOLDER) raw = '';
+  raw = raw.replace(/\D/g, '').slice(0, 3);
   form.heightInches = raw === '' ? '' : Number(raw);
-  input.value = raw;
+  const hasValue = raw !== '';
+  input.classList.toggle('is-instruction', !hasValue);
+  input.value = hasValue ? raw : HEIGHT_FIELD_PLACEHOLDER;
   updateHeightReadable(input.closest(flowRoot()), form);
   updateBoundDisplays('heightInches', form.heightInches);
+  syncNextButton(obCtx.store, form);
+  input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function syncWeightInput(input, form) {
+  let raw = input.value;
+  if (raw === WEIGHT_FIELD_PLACEHOLDER) raw = '';
+  raw = raw.replace(/[^\d.]/g, '');
+  const dot = raw.indexOf('.');
+  if (dot !== -1) raw = raw.slice(0, dot + 1) + raw.slice(dot + 1).replace(/\./g, '');
+  const hasValue = raw !== '' && raw !== '.';
+  form.weightText = hasValue ? raw : '';
+  input.classList.toggle('is-instruction', !hasValue);
+  input.value = hasValue ? raw : WEIGHT_FIELD_PLACEHOLDER;
   syncNextButton(obCtx.store, form);
   input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
 }
@@ -345,7 +397,7 @@ function renderQuestionBody(index, form) {
       return `
         ${infoBox('🎯', "For best results, don't guess your weight. Your entire plan depends on the accuracy of this number.")}
         <div class="ob-weight-row">
-          <input class="ob-input ob-weight-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="${WEIGHT_FIELD_PLACEHOLDER}" />
+          <input class="ob-input ob-weight-input${weightFieldHasValue(form) ? '' : ' is-instruction'}" name="weightText" inputmode="decimal" value="${weightFieldDisplay(form)}" />
           <span class="ob-unit">lbs</span>
         </div>
         ${infoBox('⚖️', 'Your best weight is in the morning — after you go to the bathroom and before you eat.')}`;
@@ -639,8 +691,10 @@ export function refreshPersonalDetailFields(form) {
     syncAgeFromBirthDate(form, input.closest(flowRoot()));
   });
   document.querySelectorAll(`${flowRoot()} [name="heightInches"]`).forEach((input) => {
-    input.value = heightInputValue(form.heightInches);
-    updateHeightReadable(input.closest(flowRoot()), form);
+    applyHeightFieldDisplay(input, form);
+  });
+  document.querySelectorAll(`${flowRoot()} [name="weightText"]`).forEach((input) => {
+    applyWeightFieldDisplay(input, form);
   });
 }
 
@@ -736,7 +790,7 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         <div class="pd-row">
           <label class="pd-label" for="pd-weight">Weight</label>
           <div class="pd-box pd-box-split">
-            <input id="pd-weight" class="pd-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="${WEIGHT_FIELD_PLACEHOLDER}" />
+            <input id="pd-weight" class="pd-input${weightFieldHasValue(form) ? '' : ' is-instruction'}" name="weightText" inputmode="decimal" value="${weightFieldDisplay(form)}" />
             <span class="pd-unit">lbs</span>
           </div>
         </div>`;
@@ -919,7 +973,14 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'heightInches') {
+      if (input.value === HEIGHT_FIELD_PLACEHOLDER) return;
       syncHeightInchesInput(input, form);
+      return;
+    }
+
+    if (input.name === 'weightText') {
+      if (input.value === WEIGHT_FIELD_PLACEHOLDER) return;
+      syncWeightInput(input, form);
       return;
     }
 
@@ -994,6 +1055,18 @@ function ensureObDelegation() {
     ) {
       input.value = '';
       input.classList.remove('is-instruction');
+      return;
+    }
+
+    if (input.name === 'heightInches' && input.value === HEIGHT_FIELD_PLACEHOLDER) {
+      input.value = '';
+      input.classList.remove('is-instruction');
+      return;
+    }
+
+    if (input.name === 'weightText' && input.value === WEIGHT_FIELD_PLACEHOLDER) {
+      input.value = '';
+      input.classList.remove('is-instruction');
     }
   });
 
@@ -1011,11 +1084,17 @@ function ensureObDelegation() {
       const n = Number(form.heightInches);
       if (Number.isFinite(n) && n > 0) {
         form.heightInches = Math.min(84, Math.max(48, Math.round(n)));
-        input.value = heightInputValue(form.heightInches);
-        updateHeightReadable(input.closest(flowRoot()), form);
-        updateBoundDisplays('heightInches', form.heightInches);
+      } else {
+        form.heightInches = '';
       }
+      applyHeightFieldDisplay(input, form);
+      updateBoundDisplays('heightInches', form.heightInches);
       syncNextButton(obCtx.store, form);
+      return;
+    }
+
+    if (input.name === 'weightText') {
+      syncWeightInput(input, form);
     }
   });
 

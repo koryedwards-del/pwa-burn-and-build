@@ -1563,7 +1563,7 @@ a.btn-secondary {
   color: var(--flame);
 }
 
-.ob-weight-input::placeholder {
+.ob-weight-input.is-instruction {
   font-style: italic;
   color: var(--muted);
   font-size: 13px;
