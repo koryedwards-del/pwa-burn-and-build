@@ -512,6 +512,12 @@ html:has(.start-site .artshow-flow) #app {
   outline: none;
 }
 
+.artshow-flow .pd-input::placeholder {
+  font-style: italic;
+  color: var(--muted);
+  font-weight: 400;
+}
+
 .artshow-flow .pd-box-gender {
   padding: 4px;
 }

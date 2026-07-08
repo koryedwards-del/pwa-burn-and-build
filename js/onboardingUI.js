@@ -41,17 +41,20 @@ function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
 }
 
+const HEIGHT_FIELD_PLACEHOLDER = 'enter your height';
+const WEIGHT_FIELD_PLACEHOLDER = 'enter your weight';
+
 function renderHeightFields(form, style = 'step') {
   const value = heightInputValue(form.heightInches);
   const readable = heightReadable(form.heightInches);
   if (style === 'panel') {
     return `
-      <input id="pd-height" class="pd-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="66" aria-label="Height in inches" aria-describedby="pd-height-readable" />
+      <input id="pd-height" class="pd-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="${HEIGHT_FIELD_PLACEHOLDER}" aria-label="Height in inches" aria-describedby="pd-height-readable" />
       <span class="pd-unit pd-height-readable" id="pd-height-readable" data-height-readable aria-live="polite">${readable}</span>`;
   }
   return `
     <div class="ob-weight-row">
-      <input class="ob-input ob-weight-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="66" aria-label="Height in inches" aria-describedby="ob-height-readable" />
+      <input class="ob-input ob-weight-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="${HEIGHT_FIELD_PLACEHOLDER}" aria-label="Height in inches" aria-describedby="ob-height-readable" />
       <span class="ob-unit pd-height-readable" id="ob-height-readable" data-height-readable aria-live="polite">${readable}</span>
     </div>`;
 }
@@ -342,7 +345,7 @@ function renderQuestionBody(index, form) {
       return `
         ${infoBox('🎯', "For best results, don't guess your weight. Your entire plan depends on the accuracy of this number.")}
         <div class="ob-weight-row">
-          <input class="ob-input ob-weight-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="000" />
+          <input class="ob-input ob-weight-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="${WEIGHT_FIELD_PLACEHOLDER}" />
           <span class="ob-unit">lbs</span>
         </div>
         ${infoBox('⚖️', 'Your best weight is in the morning — after you go to the bathroom and before you eat.')}`;
@@ -733,7 +736,7 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         <div class="pd-row">
           <label class="pd-label" for="pd-weight">Weight</label>
           <div class="pd-box pd-box-split">
-            <input id="pd-weight" class="pd-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="000" />
+            <input id="pd-weight" class="pd-input" name="weightText" inputmode="decimal" value="${form.weightText}" placeholder="${WEIGHT_FIELD_PLACEHOLDER}" />
             <span class="pd-unit">lbs</span>
           </div>
         </div>`;

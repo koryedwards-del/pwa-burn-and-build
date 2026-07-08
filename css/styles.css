@@ -1563,6 +1563,20 @@ a.btn-secondary {
   color: var(--flame);
 }
 
+.ob-weight-input::placeholder {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.ob-weight-row .ob-weight-input {
+  width: auto;
+  flex: 1;
+  min-width: 140px;
+  max-width: 220px;
+}
+
 .ob-unit {
   font-size: 18px;
   font-weight: 700;
