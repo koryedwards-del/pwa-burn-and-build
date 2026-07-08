@@ -6,7 +6,7 @@ import {
   canProceed,
   formatWakeDisplay,
   formatBirthDateText,
-  heightDisplay,
+  heightReadable,
   heartRates,
   onboardingPhase,
   parseBirthDateText,
@@ -34,7 +34,7 @@ function formatUserAnswer(qi, form) {
     case 0:
       return form.preferredName || '—';
     case 1:
-      return heightDisplay(form.heightInches);
+      return heightReadable(form.heightInches) || '—';
     case 2:
       return form.birthDateText && parseBirthDateText(form.birthDateText)
         ? formatBirthDateText(parseBirthDateText(form.birthDateText))

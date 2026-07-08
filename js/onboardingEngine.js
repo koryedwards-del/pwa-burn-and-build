@@ -185,6 +185,18 @@ export function heightFromParts(feet, inches) {
   return f * 12 + i;
 }
 
+export function heightReadable(totalInches) {
+  const n = Number(totalInches);
+  if (!Number.isFinite(n) || n <= 0) return '';
+  const { feet, inches } = heightParts(n);
+  return `${feet} ft ${inches} in`;
+}
+
+export function heightInputValue(totalInches) {
+  const n = Number(totalInches);
+  return Number.isFinite(n) && n > 0 ? String(Math.round(n)) : '';
+}
+
 export function isValidHeight(totalInches) {
   const n = Number(totalInches);
   return n >= 48 && n <= 84;

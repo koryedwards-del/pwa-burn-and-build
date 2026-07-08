@@ -603,6 +603,12 @@ html:has(.start-site .artshow-flow) #app {
   color: var(--text);
 }
 
+.artshow-flow .pd-height-readable {
+  min-width: 5.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .artshow-flow .pd-box-split .pd-input-birth {
   flex: 1;
   min-width: 0;

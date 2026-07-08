@@ -8,9 +8,8 @@ import {
   defaultOnboardingForm,
   formatWakeDisplay,
   heartRates,
-  heightDisplay,
-  heightFromParts,
-  heightParts,
+  heightInputValue,
+  heightReadable,
   isValidHeight,
   nextLabel,
   onboardingPhase,
@@ -42,33 +41,41 @@ function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
 }
 
-function renderHeightFields(form) {
-  const { feet, inches } = heightParts(form.heightInches);
+function renderHeightFields(form, style = 'step') {
+  const value = heightInputValue(form.heightInches);
+  const readable = heightReadable(form.heightInches);
+  if (style === 'panel') {
+    return `
+      <input id="pd-height" class="pd-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="66" aria-label="Height in inches" aria-describedby="pd-height-readable" />
+      <span class="pd-unit pd-height-readable" id="pd-height-readable" data-height-readable aria-live="polite">${readable}</span>`;
+  }
   return `
-    <div class="ob-height-row">
-      <div class="ob-height-field">
-        <input class="ob-input ob-height-input" name="heightFeet" inputmode="numeric" value="${feet}" aria-label="Feet" />
-        <span class="ob-unit">ft</span>
-      </div>
-      <div class="ob-height-field">
-        <input class="ob-input ob-height-input" name="heightInchesPart" inputmode="numeric" value="${inches}" aria-label="Inches" />
-        <span class="ob-unit">in</span>
-      </div>
+    <div class="ob-weight-row">
+      <input class="ob-input ob-weight-input" name="heightInches" inputmode="numeric" maxlength="3" value="${value}" placeholder="66" aria-label="Height in inches" aria-describedby="ob-height-readable" />
+      <span class="ob-unit pd-height-readable" id="ob-height-readable" data-height-readable aria-live="polite">${readable}</span>
     </div>`;
 }
 
-function syncHeightPartsInput(input, form) {
-  const flow = input.closest(flowRoot());
-  const feetEl = flow?.querySelector('[name="heightFeet"]');
-  const inchesEl = flow?.querySelector('[name="heightInchesPart"]');
-  form.heightInches = heightFromParts(feetEl?.value, inchesEl?.value);
+function updateHeightReadable(flow, form) {
+  if (!flow) return;
+  const readable = heightReadable(form.heightInches);
+  flow.querySelectorAll('[data-height-readable]').forEach((el) => {
+    el.textContent = readable;
+  });
+}
+
+function syncHeightInchesInput(input, form) {
+  const raw = input.value.replace(/\D/g, '').slice(0, 3);
+  form.heightInches = raw === '' ? '' : Number(raw);
+  input.value = raw;
+  updateHeightReadable(input.closest(flowRoot()), form);
   updateBoundDisplays('heightInches', form.heightInches);
   syncNextButton(obCtx.store, form);
-  flow?.dispatchEvent(new Event('input', { bubbles: true }));
+  input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function heightConfirmLabel(inches) {
-  return isValidHeight(inches) ? heightDisplay(inches) : '—';
+  return isValidHeight(inches) ? heightReadable(inches) : '—';
 }
 
 function renderActivityHoursRow(label, name, form, max, options = {}) {
@@ -628,13 +635,9 @@ export function refreshPersonalDetailFields(form) {
     syncBirthDateValidation(input, form);
     syncAgeFromBirthDate(form, input.closest(flowRoot()));
   });
-  document.querySelectorAll(`${flowRoot()} [name="heightFeet"], ${flowRoot()} [name="heightInchesPart"]`).forEach((input) => {
-    const { feet, inches } = heightParts(form.heightInches);
-    const flow = input.closest(flowRoot());
-    const feetEl = flow?.querySelector('[name="heightFeet"]');
-    const inchesEl = flow?.querySelector('[name="heightInchesPart"]');
-    if (feetEl) feetEl.value = feet;
-    if (inchesEl) inchesEl.value = inches;
+  document.querySelectorAll(`${flowRoot()} [name="heightInches"]`).forEach((input) => {
+    input.value = heightInputValue(form.heightInches);
+    updateHeightReadable(input.closest(flowRoot()), form);
   });
 }
 
@@ -723,8 +726,8 @@ export function renderPersonalDetails(form, open = true, complete = false) {
         </div>
         <div class="pd-row">
           <span class="pd-label" id="pd-height-label">Height</span>
-          <div class="pd-box" id="pd-height" aria-labelledby="pd-height-label">
-            ${renderHeightFields(form)}
+          <div class="pd-box pd-box-split" id="pd-height" aria-labelledby="pd-height-label">
+            ${renderHeightFields(form, 'panel')}
           </div>
         </div>
         <div class="pd-row">
@@ -912,8 +915,8 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'heightFeet' || input.name === 'heightInchesPart') {
-      syncHeightPartsInput(input, form);
+    if (input.name === 'heightInches') {
+      syncHeightInchesInput(input, form);
       return;
     }
 
@@ -1001,16 +1004,12 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'heightFeet' || input.name === 'heightInchesPart') {
+    if (input.name === 'heightInches') {
       const n = Number(form.heightInches);
       if (Number.isFinite(n) && n > 0) {
         form.heightInches = Math.min(84, Math.max(48, Math.round(n)));
-        const { feet, inches } = heightParts(form.heightInches);
-        const flow = input.closest(flowRoot());
-        const feetEl = flow?.querySelector('[name="heightFeet"]');
-        const inchesEl = flow?.querySelector('[name="heightInchesPart"]');
-        if (feetEl) feetEl.value = feet;
-        if (inchesEl) inchesEl.value = inches;
+        input.value = heightInputValue(form.heightInches);
+        updateHeightReadable(input.closest(flowRoot()), form);
         updateBoundDisplays('heightInches', form.heightInches);
       }
       syncNextButton(obCtx.store, form);
