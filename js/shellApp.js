@@ -48,6 +48,7 @@ import {
 } from './localDataBackup.js';
 
 const BNB_WEBSITE_URL = 'https://gettheburnandbuildapp.com/?browse=1';
+const BNB_CREATOR_URL = 'https://gettheburnandbuildapp.com/createyourfoodplan/?browse=1';
 
 let backupTimer = null;
 function scheduleLocalBackup() {
@@ -729,6 +730,10 @@ function openBurnAndBuildWebsite() {
   window.open(BNB_WEBSITE_URL, '_blank', 'noopener,noreferrer');
 }
 
+function openBurnAndBuildCreator() {
+  window.open(BNB_CREATOR_URL, '_blank', 'noopener,noreferrer');
+}
+
 function renderLoadPlanHome() {
   return `
     <div class="screen home-dashboard">
@@ -743,7 +748,7 @@ function renderLoadPlanHome() {
         <label class="home-load-label" for="load-plan-email">Email address</label>
         <input id="load-plan-email" class="ob-input ob-input-lg" type="email" name="loadPlanEmail" value="${getAppEmail()}" placeholder="you@example.com" autocomplete="email" inputmode="email" />
         <button type="button" class="btn-home" data-load-plan ${store.loadBusy ? 'disabled' : ''}>${store.loadBusy ? 'Loading…' : 'Load my food plan'}</button>
-        <a href="../createyourfoodplan/" class="home-load-create">Need a new plan? Create one →</a>
+        <a href="${BNB_CREATOR_URL}" class="home-load-create" target="_blank" rel="noopener noreferrer" data-open-creator>Need a new plan? Create one →</a>
       </div>
       ${renderHomeSiteLink()}
       <p class="home-footer">Stay consistent. Eat on time.</p>
@@ -814,7 +819,7 @@ function renderSettings() {
           <p class="settings-note">Wake time is the only setting you can change here. To update servings or activity, create a new food plan.</p>
         ` : `
           <p class="settings-empty">Open or create a food plan first — wake time controls when your meals are scheduled each day.</p>
-          <a href="../createyourfoodplan/" class="btn-primary settings-create-link">Create your food plan</a>
+          <a href="${BNB_CREATOR_URL}" class="btn-primary settings-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your food plan</a>
         `}
         <div class="settings-data-block">
           <div class="settings-field-label">Your data on this device</div>
@@ -1043,7 +1048,7 @@ function renderPreviousPlans() {
         ${renderPreviousPlansHeader()}
         <div class="history-empty">
           <p>You haven&rsquo;t created a food plan yet.</p>
-          <a href="../createyourfoodplan/" class="history-create-link">Create your food plan →</a>
+          <a href="${BNB_CREATOR_URL}" class="history-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your food plan →</a>
         </div>
       </div>`;
   }
@@ -1449,6 +1454,13 @@ function bindEvents() {
   document.querySelector('[data-open-website]')?.addEventListener('click', (e) => {
     e.preventDefault();
     openBurnAndBuildWebsite();
+  });
+
+  document.querySelectorAll('[data-open-creator]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      openBurnAndBuildCreator();
+    });
   });
 
   document.querySelector('[data-load-plan]')?.addEventListener('click', () => {

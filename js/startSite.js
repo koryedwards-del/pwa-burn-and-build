@@ -228,9 +228,21 @@ function myplanHandoffUrl() {
   return '../myplan/';
 }
 
+function isBrowseMode() {
+  return new URLSearchParams(location.search).has('browse');
+}
+
+function shouldAllowCreatorInStandalone() {
+  if (isBrowseMode()) return true;
+  const params = new URLSearchParams(location.search);
+  if (params.has('checkout') || params.has('session_id')) return true;
+  const phase = sessionStorage.getItem('bnb_creator_phase');
+  return phase === 'creating' || phase === 'plan-ready';
+}
+
 function escapeStandaloneToMyplan() {
   const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (!standalone) return false;
+  if (!standalone || shouldAllowCreatorInStandalone()) return false;
   const email = (store.email || getAppEmail() || '').trim();
   const q = isValidEmail(email) ? `?email=${encodeURIComponent(email)}` : '';
   window.location.replace(`../myplan/${q}`);
