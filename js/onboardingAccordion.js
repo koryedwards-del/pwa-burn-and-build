@@ -10,7 +10,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=112';
+} from './onboardingUI.js?v=113';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -181,41 +181,26 @@ function setAccordionPanelOpen(panel, open) {
 }
 
 function resolveAccordionFieldEl(stackItem, fieldRef) {
-  if (!fieldRef) return null;
+  if (!stackItem || !fieldRef) return null;
 
-  if (fieldRef === 'heightDigits') {
-    fieldRef = 'pd-height-input';
-  }
-
-  const globalId = document.getElementById(fieldRef);
-  if (globalId && (!stackItem || stackItem.contains(globalId))) {
-    return globalId;
-  }
+  if (fieldRef === 'heightDigits') fieldRef = 'pd-height-input';
 
   if (fieldRef === 'pd-sex') {
-    const sexScope = stackItem || document;
-    return sexScope.querySelector('#pd-sex .pd-gender-btn.is-active')
-      || sexScope.querySelector('#pd-sex .pd-gender-btn');
+    return stackItem.querySelector('#pd-sex .pd-gender-btn.is-active')
+      || stackItem.querySelector('#pd-sex .pd-gender-btn');
   }
-
-  if (!stackItem) return null;
-
-  const fieldMap = {
-    'pd-name': '[name="preferredName"]',
-    'pd-age': '[name="birthDateText"]',
-    'pd-height-input': '#pd-height input, [name="heightDigits"]',
-    'pd-weight': '[name="weightText"]',
-    'reminders': '[data-ob-reminders]',
-    'newsletterOptIn': '[name="newsletterOptIn"]',
-  };
-
-  if (fieldMap[fieldRef]) {
-    const mapped = stackItem.querySelector(fieldMap[fieldRef]);
-    if (mapped) return mapped;
+  if (fieldRef === 'reminders') {
+    return stackItem.querySelector('[data-ob-reminders]');
   }
-
   if (fieldRef.startsWith('wake-')) {
     return stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
+  }
+
+  const byId = document.getElementById(fieldRef);
+  if (byId && stackItem.contains(byId)) {
+    if (byId.matches('input, select, textarea, button')) return byId;
+    const nested = byId.querySelector('input, select, textarea, button');
+    if (nested) return nested;
   }
 
   return stackItem.querySelector(`[name="${CSS.escape(fieldRef)}"]`);

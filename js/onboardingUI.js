@@ -648,7 +648,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('EMAIL', form.email || '—', '', { section: 'email', field: 'pd-email' }, false, true)}
         ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', { section: 'email', field: 'newsletterOptIn' }, false, true)}
         ${confirmRow('GENDER', form.sex || '—', '', { section: 'personal', field: 'pd-sex' }, false, true)}
-        ${confirmRow('HEIGHT', heightConfirmLabel(resolvedHeightInches(form.heightFeet, form.heightInchesPart) || form.heightInches), '', { section: 'personal', field: 'heightDigits' }, false, true)}
+        ${confirmRow('HEIGHT', heightConfirmLabel(resolvedHeightInches(form.heightFeet, form.heightInchesPart) || form.heightInches), '', { section: 'personal', field: 'pd-height-input' }, false, true)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
