@@ -1859,7 +1859,9 @@ function registerServiceWorker() {
       if (!reg.scope.includes('/myplan/')) reg.unregister();
     });
   }).catch(() => {});
-  navigator.serviceWorker.register('sw.js', { scope: './' }).catch(() => {});
+  navigator.serviceWorker.register('sw.js', { scope: './' }).then((reg) => {
+    reg.update();
+  }).catch(() => {});
 }
 
 init();

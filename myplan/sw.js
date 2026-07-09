@@ -1,6 +1,6 @@
 /** My Plan PWA service worker */
 
-const CACHE = 'bnb-myplan-v20';
+const CACHE = 'bnb-myplan-v21';
 const ASSETS = [
   './',
   './index.html',
@@ -43,6 +43,13 @@ const ASSETS = [
 
 const NETWORK_FIRST = ['/js/', '/css/'];
 
+function isNetworkFirst(url, request) {
+  if (NETWORK_FIRST.some((p) => url.pathname.includes(p))) return true;
+  if (request.mode === 'navigate') return true;
+  if (url.pathname.endsWith('/myplan/') || url.pathname.endsWith('/myplan/index.html')) return true;
+  return url.pathname.endsWith('.html');
+}
+
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE).then(async (cache) => {
@@ -60,7 +67,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  if (NETWORK_FIRST.some((p) => url.pathname.includes(p))) {
+  if (isNetworkFirst(url, e.request)) {
     e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     return;
   }
