@@ -9,7 +9,7 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 
 | Path | Host | Role |
 |------|------|------|
-| `landing/` | gettheburnandbuildapp.com (GitHub Pages) | Marketing — hero, calculator, testimonials, $149 CTA |
+| `landing/` | gettheburnandbuildapp.com (GitHub Pages) | Marketing — Hardkor-style content rebranded as B&B; see `docs/LANDING-MERGE.md` |
 | `createyourfoodplan/` | Render `/createyourfoodplan/` | Program creator — email → intake → Stripe → save plan |
 | `myplan/` | GitHub Pages or Render `/myplan/` | Daily app — food plan, grocery, logging |
 | `server/` | Render | API + SQLite for programs/contacts |
@@ -18,4 +18,4 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 
 **Deploy landing:** push to `main` (changes under `landing/`) → GitHub Actions workflow `deploy-landing.yml`. In repo **Settings → Pages**, source must be **GitHub Actions** (not the old `burnandbuildlandingpage` repo).
 
-**Not connected to Hardkor Diet** or **Signal+** (separate products).
+**Hardkor Diet landing** (`hardkordietlandingpage/`) is being merged into `landing/` (step-by-step; tracker: `docs/LANDING-MERGE.md`). **Signal+** is a separate product.
