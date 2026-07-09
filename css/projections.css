@@ -14,7 +14,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brand-blue);
+  color: #fff;
 }
 
 .body-comp-card {
@@ -30,7 +30,7 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: var(--brand-blue);
+  color: #fff;
 }
 
 .body-comp-grid {
@@ -135,7 +135,7 @@
 .projections-screen .plan-header h1 {
   flex: 1;
   text-align: center;
-  color: var(--brand-blue);
+  color: #fff;
   font-size: 20px;
   margin-right: 36px;
 }

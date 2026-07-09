@@ -28,7 +28,7 @@
   flex: none;
   width: 100%;
   text-align: center;
-  color: var(--plan-accent);
+  color: #fff;
   font-size: 20px;
   font-weight: 600;
   margin: 0 36px;
@@ -135,7 +135,7 @@
 .food-plan-screen .meal-card-header .label {
   font-size: 17px;
   font-weight: 700;
-  color: var(--plan-accent);
+  color: #fff;
 }
 
 .food-plan-screen .meal-card-header .logged {
@@ -202,7 +202,7 @@
 }
 
 .food-plan-screen .fats-section .cat-header-title {
-  color: var(--plan-accent);
+  color: #fff;
 }
 
 .food-plan-screen .cat-header-servings {

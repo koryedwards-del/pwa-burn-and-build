@@ -9,7 +9,7 @@
 .grocery-screen .plan-header h1 {
   flex: 1;
   text-align: center;
-  color: var(--brand-blue);
+  color: #fff;
   font-size: 20px;
   margin-right: 36px;
 }
@@ -25,7 +25,7 @@
 }
 
 .grocery-screen .grocery-section-label {
-  color: var(--brand-blue);
+  color: #fff;
 }
 
 .grocery-screen .grocery-row-qty {
