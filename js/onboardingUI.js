@@ -100,6 +100,7 @@ function applyHeightFieldDisplay(form, flowEl) {
   const roots = flowEl ? [flowEl] : [...document.querySelectorAll(flowRoot())];
   roots.forEach((root) => {
     root.querySelectorAll('[name="heightDigits"]').forEach((input) => {
+      if (document.activeElement === input) return;
       input.classList.toggle('is-instruction', !hasValue);
       input.value = display;
     });
@@ -120,12 +121,12 @@ function renderHeightFields(form, style = 'step') {
   const readable = heightReadable(total) || '';
   if (style === 'panel') {
     return `
-      <input id="pd-height-input" class="pd-input pd-input-height${instructionClass}" name="heightDigits" inputmode="numeric" maxlength="3" value="${display}" aria-label="Height" aria-describedby="pd-height-readable" autocomplete="off" />
+      <input id="pd-height-input" class="pd-input pd-input-height${instructionClass}" name="heightDigits" inputmode="numeric" value="${display}" aria-label="Height" aria-describedby="pd-height-readable" autocomplete="off" />
       <span class="pd-unit pd-height-readable" id="pd-height-readable" data-height-readable aria-live="polite">${readable}</span>`;
   }
   return `
     <div class="ob-height-row ob-height-entry">
-      <input class="ob-input ob-height-input${instructionClass}" name="heightDigits" inputmode="numeric" maxlength="3" value="${display}" aria-label="Height" aria-describedby="ob-height-readable" autocomplete="off" />
+      <input class="ob-input ob-height-input${instructionClass}" name="heightDigits" inputmode="numeric" value="${display}" aria-label="Height" aria-describedby="ob-height-readable" autocomplete="off" />
       <span class="ob-unit pd-height-readable" id="ob-height-readable" data-height-readable aria-live="polite">${readable}</span>
     </div>`;
 }
@@ -175,6 +176,7 @@ function finalizeHeightFields(form, flow) {
     total = 48;
   }
   syncFormHeightInches(form);
+  if (flow) updateHeightReadable(flow, form);
   applyHeightFieldDisplay(form, flow);
   updateBoundDisplays('heightInches', form.heightInches);
   syncNextButton(obCtx.store, form);
@@ -1127,7 +1129,7 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'heightDigits' && input.value === HEIGHT_FIELD_PLACEHOLDER) {
+    if (input.name === 'heightDigits' && (input.classList.contains('is-instruction') || input.value === HEIGHT_FIELD_PLACEHOLDER)) {
       input.value = '';
       input.classList.remove('is-instruction');
     }
@@ -1144,7 +1146,8 @@ function ensureObDelegation() {
     }
 
     if (input.name === 'heightDigits') {
-      finalizeHeightFields(form, input.closest(flowRoot()));
+      const flow = input.closest(flowRoot());
+      window.setTimeout(() => finalizeHeightFields(form, flow), 0);
       return;
     }
 

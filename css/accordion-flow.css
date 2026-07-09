@@ -625,23 +625,27 @@ html:has(.start-site .artshow-flow) #app {
   color: #f87171;
 }
 
-.artshow-flow .pd-input-height.is-instruction {
-  font-style: italic;
-  color: var(--muted);
-  font-size: 13px;
+.artshow-flow .pd-input-height.is-instruction,
+.artshow-flow .pd-input-height:not(.is-instruction) {
   flex: 1;
   min-width: 0;
-}
-
-.artshow-flow .pd-input-height:not(.is-instruction) {
+  width: auto;
   font-style: normal;
   color: var(--text);
 }
 
+.artshow-flow .pd-input-height.is-instruction {
+  font-style: italic;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .artshow-flow .pd-height-readable {
   min-width: 5.5rem;
+  flex: 0 0 auto;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
 
 .artshow-flow .pd-box-split .pd-input-birth {
