@@ -26,9 +26,11 @@ export function formatTestDate(isoOrDate) {
 }
 
 function resolveProgramHistoryDateKey(pkg, createdAt) {
-  const raw = pkg?.program?.issuedAtLocalDate
+  const raw = pkg?.program?.foodPlanCreatedDate
+    || (createdAt ? localDateKey(createdAt) : null)
+    || pkg?.program?.firstSavedAtLocalDate
+    || pkg?.program?.issuedAtLocalDate
     || pkg?.program?.issuedAt
-    || createdAt
     || pkg?.program?.startDate;
   return localDateKey(raw);
 }

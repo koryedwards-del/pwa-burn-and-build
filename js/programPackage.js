@@ -26,6 +26,8 @@ export function buildProgramPackage(form, { startDate, programId, label, meta } 
       id: programId || crypto.randomUUID(),
       issuedAt: new Date().toISOString(),
       issuedAtLocalDate: localDateKey(new Date()),
+      firstSavedAtLocalDate: form.foodPlanCreatedDate || localDateKey(new Date()),
+      foodPlanCreatedDate: form.foodPlanCreatedDate || localDateKey(new Date()),
       startDate: startDate || todayDateKey(),
       durationDays: PROGRAM_DURATION_DAYS,
       status: 'active',

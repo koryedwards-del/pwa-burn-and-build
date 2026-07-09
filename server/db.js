@@ -78,19 +78,32 @@ export function saveProgram(email, pkg) {
   const id = pkg.program?.id || crypto.randomUUID();
   const label = pkg.program?.label || null;
   const now = new Date().toISOString();
-  const existing = db.prepare('SELECT email FROM programs WHERE id = ?').get(id);
+  const existing = db.prepare('SELECT email, package_json FROM programs WHERE id = ?').get(id);
 
   if (existing && normalizeEmail(existing.email) !== key) {
     throw new Error('This food plan belongs to another account.');
   }
 
   if (existing) {
+    const existingPkg = parsePackage(existing);
+    if (existingPkg?.program?.firstSavedAtLocalDate && !pkg.program?.firstSavedAtLocalDate) {
+      pkg.program = { ...pkg.program, firstSavedAtLocalDate: existingPkg.program.firstSavedAtLocalDate };
+    }
+    if (existingPkg?.program?.foodPlanCreatedDate && !pkg.program?.foodPlanCreatedDate) {
+      pkg.program = { ...pkg.program, foodPlanCreatedDate: existingPkg.program.foodPlanCreatedDate };
+    }
     db.prepare(`
       UPDATE programs
       SET label = ?, package_json = ?
       WHERE id = ? AND email = ?
     `).run(label, JSON.stringify(pkg), id, key);
   } else {
+    if (pkg.program && !pkg.program.firstSavedAtLocalDate) {
+      pkg.program.firstSavedAtLocalDate = pkg.program.foodPlanCreatedDate || pkg.program.issuedAtLocalDate || null;
+    }
+    if (pkg.program && !pkg.program.foodPlanCreatedDate) {
+      pkg.program.foodPlanCreatedDate = pkg.program.firstSavedAtLocalDate || pkg.program.issuedAtLocalDate || null;
+    }
     db.prepare(`
       INSERT INTO programs (id, email, label, package_json, created_at)
       VALUES (?, ?, ?, ?, ?)

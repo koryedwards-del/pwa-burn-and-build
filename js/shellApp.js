@@ -90,6 +90,8 @@ const store = {
   programHistoryLoading: false,
   programHistoryError: null,
   programHistoryOpenId: null,
+  programHistoryDateEditId: null,
+  programHistoryDateSaving: false,
   expandedNavButton: null,
   loadError: null,
   emailError: null,
@@ -306,9 +308,22 @@ function getMealSlots(plan) {
   return generateMealSlots(wh, wm, plan.servings);
 }
 
-function stampProgramLocalDate(pkg) {
-  if (!pkg?.program?.issuedAtLocalDate && pkg?.program?.issuedAt) {
+function stampProgramLocalDate(pkg, createdAt) {
+  if (!pkg?.program) return pkg;
+  if (!pkg.program.issuedAtLocalDate && pkg.program.issuedAt) {
     pkg.program.issuedAtLocalDate = localDateKey(pkg.program.issuedAt);
+  }
+  if (!pkg.program.firstSavedAtLocalDate) {
+    pkg.program.firstSavedAtLocalDate = pkg.program.foodPlanCreatedDate
+      || (createdAt ? localDateKey(createdAt) : null)
+      || pkg.program.issuedAtLocalDate
+      || localDateKey(pkg.program.issuedAt);
+  }
+  if (!pkg.program.foodPlanCreatedDate) {
+    pkg.program.foodPlanCreatedDate = pkg.program.firstSavedAtLocalDate
+      || (createdAt ? localDateKey(createdAt) : null)
+      || pkg.program.issuedAtLocalDate
+      || localDateKey(pkg.program.issuedAt);
   }
   return pkg;
 }
@@ -1034,6 +1049,7 @@ function renderHistoryCardRows(fieldRows = []) {
 function summarizeProgramHistoryRows(programRows = []) {
   return programRows.map((row) => {
     if (row?.package) {
+      stampProgramLocalDate(row.package, row.createdAt);
       return summarizeProgram(row.package, {
         id: row.id,
         createdAt: row.createdAt,
@@ -1049,7 +1065,7 @@ function localProgramHistoryRows(programRows = []) {
   if (!store.program?.program?.id) return [];
   const id = store.program.program.id;
   const meta = programRows.find((row) => row.id === id);
-  return [summarizeProgram(store.program, {
+  return [summarizeProgram(stampProgramLocalDate(store.program, meta?.createdAt), {
     id,
     createdAt: meta?.createdAt,
     label: store.program.program.label,
@@ -1085,6 +1101,73 @@ async function loadProgramHistory() {
   await refreshProgramHistory();
   store.programHistoryLoading = false;
   render();
+}
+
+async function saveHistoryProgramDate(programId, dateKey) {
+  const email = getAppEmail();
+  if (!programId || !dateKey || !isValidEmail(email)) return;
+
+  store.programHistoryDateSaving = true;
+  store.programHistoryError = null;
+  render();
+
+  let pkg;
+  if (programId === store.program?.program?.id) {
+    pkg = store.program;
+  } else {
+    const result = await fetchProgramByIdFromServer(email, programId);
+    if (!result.ok) {
+      store.programHistoryDateSaving = false;
+      store.programHistoryError = result.message || 'Could not load that food plan.';
+      render();
+      return;
+    }
+    pkg = result.package;
+  }
+
+  pkg.program = {
+    ...pkg.program,
+    foodPlanCreatedDate: dateKey,
+    firstSavedAtLocalDate: dateKey,
+  };
+
+  const saved = await saveProgramToServer(email, pkg);
+  store.programHistoryDateSaving = false;
+  store.programHistoryDateEditId = null;
+
+  if (!saved.ok) {
+    store.programHistoryError = saved.message || 'Could not save the food plan date.';
+    render();
+    return;
+  }
+
+  if (programId === store.program?.program?.id) {
+    store.program = pkg;
+    saveProgram();
+  }
+
+  await refreshProgramHistory();
+  render();
+}
+
+function renderHistoryCardDate(row) {
+  const isEditing = row.id === store.programHistoryDateEditId;
+  const todayMax = localDateKey(new Date());
+
+  if (isEditing) {
+    return `
+      <label class="history-date-edit-wrap">
+        <span class="visually-hidden">Food plan date</span>
+        <input type="date" class="history-date-input" data-save-history-date="${row.id}"
+          value="${row.createdAt || ''}" max="${todayMax}"
+          ${store.programHistoryDateSaving ? 'disabled' : ''} />
+      </label>`;
+  }
+
+  return `
+    <span class="history-date">${row.testDateDisplay}</span>
+    <button type="button" class="history-date-edit" data-edit-history-date="${row.id}"
+      aria-label="Edit food plan date">✎</button>`;
 }
 
 async function openHistoryProgram(programId) {
@@ -1159,7 +1242,7 @@ function renderPreviousPlans() {
           return `
           <button type="button" class="history-card ${isActive ? 'active' : ''} ${isOpening ? 'opening' : ''}" data-open-history="${row.id}">
             <div class="history-card-top">
-              <span class="history-date">${row.testDateDisplay}</span>
+              <div class="history-card-date">${renderHistoryCardDate(row)}</div>
               ${isActive ? '<span class="history-active-tag">Active</span>' : ''}
               <span class="history-chevron">›</span>
             </div>
@@ -1682,6 +1765,32 @@ function bindEvents() {
 
   document.querySelectorAll('[data-open-history]').forEach((btn) => {
     btn.addEventListener('click', () => openHistoryProgram(btn.dataset.openHistory));
+  });
+
+  document.querySelectorAll('[data-edit-history-date]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      store.programHistoryDateEditId = btn.dataset.editHistoryDate;
+      render();
+      requestAnimationFrame(() => {
+        document.querySelector(`[data-save-history-date="${btn.dataset.editHistoryDate}"]`)?.focus();
+      });
+    });
+  });
+
+  document.querySelectorAll('[data-save-history-date]').forEach((input) => {
+    input.addEventListener('click', (e) => e.stopPropagation());
+    input.addEventListener('change', () => {
+      const dateKey = localDateKey(input.value);
+      if (dateKey) saveHistoryProgramDate(input.dataset.saveHistoryDate, dateKey);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        store.programHistoryDateEditId = null;
+        render();
+      }
+    });
   });
 
   document.querySelector('[data-open-grocery-add]')?.addEventListener('click', () => {

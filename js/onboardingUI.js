@@ -33,8 +33,10 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=90';
+} from './onboardingEngine.js?v=93';
 import { isValidEmail } from './programApi.js';
+import { formatTestDate } from './programHistory.js';
+import { localDateKey } from './programPackage.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 function infoBox(icon, text) {
@@ -409,7 +411,11 @@ function renderQuestionBody(index, form) {
         ${radioCard('fatSource', 'recent', form.fatSource === 'recent', 'Other method', 'Calipers, ultrasound, or BodPod. The more recent the better.')}
         ${renderFatInput(form, 'recent')}
         ${radioCard('fatSource', 'guess', form.fatSource === 'guess', "I'm guessing", "If you guess right, you're golden. If you guess wrong, your plan is wrong.")}
-        ${renderFatInput(form, 'guess')}`;
+        ${renderFatInput(form, 'guess')}
+        <div class="ob-divider"></div>
+        <div class="ob-field-label">FOOD PLAN DATE</div>
+        <input class="ob-input ob-input-date" type="date" name="foodPlanCreatedDate" value="${form.foodPlanCreatedDate || localDateKey(new Date())}" max="${localDateKey(new Date())}" />
+        ${infoBox('🗓️', 'This date appears in your food plan history — usually the day you create the plan, or an earlier check-in if you are entering past results.')}`;
 
     case 5:
       return `
@@ -585,6 +591,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
+        ${confirmRow('FOOD PLAN DATE', form.foodPlanCreatedDate ? formatTestDate(form.foodPlanCreatedDate) : '—', '', { section: 'body', field: 'foodPlanCreatedDate' }, false, true)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', { section: 'job', field: 'workPhysical' }, false, true)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', { section: 'job', field: 'workStress' }, false, true)}
         ${confirmRow('STRENGTH TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', { section: 'activity', field: 'weightTrainingHours' }, false, true)}
@@ -605,6 +612,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', base + 2, readOnly)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', base + 3, readOnly)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', base + 4, readOnly)}
+        ${confirmRow('FOOD PLAN DATE', form.foodPlanCreatedDate ? formatTestDate(form.foodPlanCreatedDate) : '—', '', base + 4, readOnly)}
         ${confirmRow('WORKDAY', phys?.label || '—', '', base + 5, readOnly)}
         ${confirmRow('LIFESTYLE', stress?.label || '—', '', base + 6, readOnly)}
         ${confirmRow('STRENGTH TRAINING, RACQUET SPORTS', activityHoursReviewLabel(form.weightTrainingHours, 15), '', base + 7, readOnly)}
@@ -678,7 +686,13 @@ export function renderOnboarding(store, options = {}) {
 }
 
 export function initOnboardingForm(store) {
-  store.onboardingForm = defaultOnboardingForm(store.profile);
+  const fromProgram = store.program?.intake
+    ? {
+        ...store.program.intake,
+        foodPlanCreatedDate: store.program.program?.foodPlanCreatedDate,
+      }
+    : null;
+  store.onboardingForm = defaultOnboardingForm(fromProgram || store.profile);
 }
 
 export function refreshPersonalDetailFields(form) {
