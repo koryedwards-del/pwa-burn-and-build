@@ -1,7 +1,7 @@
 import {
   canProceed,
   welcomeScreens,
-} from './onboardingEngine.js?v=98';
+} from './onboardingEngine.js?v=99';
 import {
   renderQuestionBody,
   renderConfirmBody,
@@ -10,7 +10,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=108';
+} from './onboardingUI.js?v=109';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
