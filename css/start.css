@@ -474,7 +474,7 @@
 }
 
 .unlock-error {
-  background: rgba(232, 114, 42, 0.15);
+  background: rgba(253, 197, 0, 0.15);
   border: 1px solid var(--flame);
   color: var(--flame);
   padding: 12px 14px;

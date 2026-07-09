@@ -1,14 +1,9 @@
+@import url('tokens.css');
+@import url('wordmark.css');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --flame: #e8722a;
-  --flame-dim: rgba(232, 114, 42, 0.15);
-  --btn-on-flame: #fff;
-  --bg: #000;
-  --card: #141414;
-  --border: #2a2a2a;
-  --text: #f5f5f5;
-  --muted: #888;
   --brand-blue: #007aff;
   --cyan: var(--brand-blue);
   --green: #6ecf8a;
@@ -104,9 +99,11 @@ button {
 }
 
 .logo-block .brand {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-family: Impact, 'Arial Narrow', sans-serif;
+  font-size: clamp(2rem, 10vw, 42px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--flame);
 }
 
@@ -372,11 +369,11 @@ a.btn-secondary {
 }
 
 .cat-section.has-logged {
-  border-color: rgba(232, 114, 42, 0.35);
+  border-color: rgba(253, 197, 0, 0.35);
 }
 
 .cat-section.fats-section {
-  border-color: rgba(232, 114, 42, 0.25);
+  border-color: rgba(253, 197, 0, 0.25);
 }
 
 .cat-header {
@@ -482,7 +479,7 @@ a.btn-secondary {
 
 .food-divider {
   height: 1px;
-  background: rgba(232, 114, 42, 0.2);
+  background: rgba(253, 197, 0, 0.2);
   margin: 6px 0;
 }
 
@@ -560,7 +557,7 @@ a.btn-secondary {
 }
 
 .remove-fat-btn {
-  color: rgba(232, 114, 42, 0.85);
+  color: rgba(253, 197, 0, 0.85);
 }
 
 .home-footer {
@@ -601,8 +598,8 @@ a.btn-secondary {
   margin: 12px 20px 0;
   padding: 12px 16px;
   border-radius: 12px;
-  background: rgba(232, 114, 42, 0.12);
-  border: 1px solid rgba(232, 114, 42, 0.3);
+  background: rgba(253, 197, 0, 0.12);
+  border: 1px solid rgba(253, 197, 0, 0.3);
   text-align: left;
 }
 
@@ -669,7 +666,7 @@ a.btn-secondary {
   padding: 20px;
   border-radius: 16px;
   background: #1f1f1f;
-  border: 1px solid rgba(232, 114, 42, 0.25);
+  border: 1px solid rgba(253, 197, 0, 0.25);
 }
 
 .coach-text-card h2 {
@@ -781,8 +778,8 @@ a.btn-secondary {
   margin: 12px 20px;
   padding: 14px;
   border-radius: 12px;
-  background: rgba(232, 114, 42, 0.12);
-  border: 1px solid rgba(232, 114, 42, 0.3);
+  background: rgba(253, 197, 0, 0.12);
+  border: 1px solid rgba(253, 197, 0, 0.3);
   color: var(--flame);
   font-size: 15px;
   font-weight: 600;
@@ -840,7 +837,7 @@ a.btn-secondary {
   font-size: 11px;
   font-weight: 700;
   color: var(--flame);
-  background: rgba(232, 114, 42, 0.15);
+  background: rgba(253, 197, 0, 0.15);
   padding: 3px 8px;
   border-radius: 999px;
 }
@@ -2025,7 +2022,7 @@ a.btn-secondary {
 }
 
 .import-error {
-  background: rgba(232, 114, 42, 0.15);
+  background: rgba(253, 197, 0, 0.15);
   border: 1px solid var(--flame);
   color: var(--flame);
   padding: 12px 14px;

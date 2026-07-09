@@ -3,7 +3,7 @@
 .food-plan-screen {
   --plan-accent: #5ac8fa;
   --plan-accent-dim: rgba(90, 200, 250, 0.35);
-  --plan-orange: #ff9500;
+  --plan-orange: var(--flame);
   --plan-gold: #ffd60a;
   --plan-muted: #8e8e93;
   --plan-tab-active: #1c2e3a;

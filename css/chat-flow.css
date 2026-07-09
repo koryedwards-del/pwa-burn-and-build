@@ -86,8 +86,8 @@ html:has(.start-site .chat-flow) #app {
 }
 
 .chat-flow .chat-user .chat-bubble {
-  background: rgba(232, 114, 42, 0.18);
-  border: 1px solid rgba(232, 114, 42, 0.35);
+  background: rgba(253, 197, 0, 0.18);
+  border: 1px solid rgba(253, 197, 0, 0.35);
   border-bottom-right-radius: 4px;
   color: #fff;
   font-weight: 600;

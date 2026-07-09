@@ -8,17 +8,11 @@
    Change here, updates everywhere.
    ------------------------------------------------------------ */
 :root {
-  /* Colors */
-  --yellow:        #FDC500;
-  --yellow-dim:    #B8900A;
-  --black:         #0A0A0A;
-  --dark:          #111111;
-  --gray:          #1A1A1A;
-  --gray-mid:      #2A2A2A;
-  --text:          #8A8A8A;
-  --text-dim:      #888888;
-  --text-light:    #D4D4D4;
-  --text-heading:  #8A8A8A;
+  /* Landing text roles (accent + surfaces from css/tokens.css) */
+  --text:          var(--gray-heading);
+  --text-dim:      var(--gray-muted);
+  --text-light:    var(--gray-light);
+  --text-heading:  var(--gray-heading);
 
   /* Fonts */
   --font-display:  Impact, 'Arial Narrow', sans-serif;

@@ -7,7 +7,7 @@
   "scope": "/myplan/",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#e8722a",
+  "theme_color": "#0A0A0A",
   "orientation": "portrait",
   "icons": [
     { "src": "/icons/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },

@@ -18,6 +18,7 @@
       }
     })();
   </script>
+  <meta name="theme-color" content="#0A0A0A" />
   <title>Burn &amp; Build — Keep the Muscle. Lose the Fat.</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
@@ -25,12 +26,19 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/wordmark.css" />
   <link rel="stylesheet" href="hardkor.css" />
   <style>
     .hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 140px 40px 20px; position: relative; overflow: hidden; }
     .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 50% 60%, rgba(253,197,0,0.07) 0%, transparent 70%), repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(253,197,0,0.03) 60px, rgba(253,197,0,0.03) 61px); pointer-events: none; }
 
-    .hero-logo { width: min(320px, 85vw); height: auto; margin-bottom: 8px; opacity: 0; animation: fadeUp 0.7s 0.3s forwards; }
+    .wordmark { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 900px; margin-bottom: 16px; opacity: 0; animation: fadeUp 0.7s 0.3s forwards; }
+    .wordmark-main { font-family: Impact, 'Arial Narrow', sans-serif; font-size: clamp(3rem, 13vw, 9.5rem); color: var(--yellow); letter-spacing: 0.04em; line-height: 0.92; text-transform: uppercase; }
+
+    .hero-mock .hero-eyebrow { animation: none; opacity: 1; }
+    .hero-mock .wordmark-mock { animation: none; opacity: 1; }
+    .hero-mock .hero-headline { animation: none; opacity: 1; }
 
     .hero-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--yellow); margin-bottom: 20px; opacity: 0; animation: fadeUp 0.7s 0.1s forwards; }
     .hero-headline { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: clamp(2rem, 6vw, 4.5rem); line-height: 1.05; text-transform: uppercase; letter-spacing: 0.02em; max-width: 900px; margin: 24px 0 16px; opacity: 0; animation: fadeUp 0.7s 0.6s forwards; color: #8A8A8A; }
@@ -165,9 +173,37 @@
     <a href="/support">Support</a>
   </div>
 
-  <section class="hero">
-    <p class="hero-eyebrow">8-Week Contest Prep Diet Program</p>
-    <img class="hero-logo" src="images/BBclearlogo.png" alt="Burn &amp; Build" />
+  <section class="hero hero-mock">
+    <p class="hero-eyebrow">Wordmark color mock — pick one</p>
+    <div class="wordmark-mock">
+      <p class="wordmark-mock-note">Stacked like the logo · page stays yellow / black / gray</p>
+      <div class="wordmark-mock-grid">
+        <div class="wordmark-mock-card">
+          <p class="wordmark-mock-label">A · Orange + Yellow</p>
+          <div class="wordmark-stack wordmark-a">
+            <span class="wm-burn">Burn</span>
+            <span class="wm-amp">&amp;</span>
+            <span class="wm-build">Build</span>
+          </div>
+        </div>
+        <div class="wordmark-mock-card">
+          <p class="wordmark-mock-label">B · Yellow + Gray</p>
+          <div class="wordmark-stack wordmark-b">
+            <span class="wm-burn">Burn</span>
+            <span class="wm-amp">&amp;</span>
+            <span class="wm-build">Build</span>
+          </div>
+        </div>
+        <div class="wordmark-mock-card">
+          <p class="wordmark-mock-label">C · Orange + Gray</p>
+          <div class="wordmark-stack wordmark-c">
+            <span class="wm-burn">Burn</span>
+            <span class="wm-amp">&amp;</span>
+            <span class="wm-build">Build</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <h1 class="hero-headline">Keep the Muscle.<br /><span>Lose the Fat.</span></h1>
     <a class="btn-cta" href="/createyourfoodplan/?browse=1">Create Your Food Plan &rarr;</a>
   </section>

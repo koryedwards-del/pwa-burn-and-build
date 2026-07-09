@@ -760,13 +760,44 @@ function openBurnAndBuildCreator() {
   window.open(BNB_CREATOR_URL, '_blank', 'noopener,noreferrer');
 }
 
+function renderWordmarkMock() {
+  return `
+      <div class="home-logo-wrap">
+        <p class="wordmark-mock-note">Wordmark mock</p>
+        <div class="home-wordmark-mock">
+          <div class="wordmark-mock-card">
+            <p class="wordmark-mock-label">A · Orange + Yellow</p>
+            <div class="wordmark-stack wordmark-stack--sm wordmark-a">
+              <span class="wm-burn">Burn</span>
+              <span class="wm-amp">&amp;</span>
+              <span class="wm-build">Build</span>
+            </div>
+          </div>
+          <div class="wordmark-mock-card">
+            <p class="wordmark-mock-label">B · Yellow + Gray</p>
+            <div class="wordmark-stack wordmark-stack--sm wordmark-b">
+              <span class="wm-burn">Burn</span>
+              <span class="wm-amp">&amp;</span>
+              <span class="wm-build">Build</span>
+            </div>
+          </div>
+          <div class="wordmark-mock-card">
+            <p class="wordmark-mock-label">C · Orange + Gray</p>
+            <div class="wordmark-stack wordmark-stack--sm wordmark-c">
+              <span class="wm-burn">Burn</span>
+              <span class="wm-amp">&amp;</span>
+              <span class="wm-build">Build</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+}
+
 function renderLoadPlanHome() {
   return `
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
-      <div class="home-logo-wrap">
-        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
-      </div>
+      ${renderWordmarkMock()}
       <div class="home-load-plan">
         <p class="home-load-lead">Enter the email you used to create your food plan.</p>
         ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
@@ -788,9 +819,7 @@ function renderHome() {
   return `
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
-      <div class="home-logo-wrap">
-        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
-      </div>
+      ${renderWordmarkMock()}
       <div class="home-btn-stack">
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
@@ -1460,7 +1489,7 @@ function renderGrocery() {
 function render() {
   const root = document.getElementById('app');
   if (store.screen === 'loading') {
-    root.innerHTML = '<div class="screen home-loading"><img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="240" height="210" /></div>';
+    root.innerHTML = '<div class="screen home-loading"><div class="home-wordmark">Burn &amp; Build</div></div>';
     return;
   }
   if (store.screen === 'onboarding') root.innerHTML = renderOnboarding(store);

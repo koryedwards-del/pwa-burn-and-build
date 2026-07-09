@@ -1,0 +1,29 @@
+/* Burn & Build — shared brand tokens (yellow, black, three grays) */
+
+:root {
+  /* Accent */
+  --yellow: #FDC500;
+  --yellow-dim: #B8900A;
+  --orange: #E8671A;
+  --flame: var(--yellow);
+  --flame-dim: rgba(253, 197, 0, 0.15);
+  --btn-on-flame: #0A0A0A;
+
+  /* Surfaces */
+  --black: #0A0A0A;
+  --dark: #111111;
+  --gray: #1A1A1A;
+  --gray-mid: #2A2A2A;
+
+  /* Three text grays */
+  --gray-heading: #8A8A8A;
+  --gray-muted: #888888;
+  --gray-light: #D4D4D4;
+
+  /* App semantics (creator + myplan) */
+  --bg: var(--black);
+  --card: var(--gray);
+  --border: var(--gray-mid);
+  --text: var(--gray-light);
+  --muted: var(--gray-heading);
+}

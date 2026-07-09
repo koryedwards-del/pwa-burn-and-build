@@ -35,6 +35,17 @@
   padding: 36px 8px 28px;
 }
 
+.home-wordmark {
+  font-family: Impact, 'Arial Narrow', sans-serif;
+  font-size: clamp(2.25rem, 11vw, 3.25rem);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--flame);
+}
+
 .home-logo {
   width: min(280px, 78vw);
   height: auto;
@@ -102,6 +113,11 @@
   font-size: 14px;
   color: #9a9a9a;
   padding-top: 10px;
+}
+
+.home-wordmark-mock .wordmark-mock-note {
+  text-align: center;
+  margin-bottom: 12px;
 }
 
 .home-loading {
@@ -261,7 +277,7 @@
   margin-top: 16px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(232, 114, 42, 0.15);
+  background: rgba(253, 197, 0, 0.15);
   color: #f5c9a8;
   font-size: 14px;
   line-height: 1.45;
@@ -270,7 +286,7 @@
 .home-data-notice {
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(232, 114, 42, 0.12);
+  background: rgba(253, 197, 0, 0.12);
   color: #ddd;
   font-size: 13px;
   line-height: 1.45;
