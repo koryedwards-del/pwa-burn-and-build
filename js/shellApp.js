@@ -763,7 +763,7 @@ function openBurnAndBuildCreator() {
 function renderHomeLogo() {
   return `
       <div class="home-logo-wrap">
-        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
+        <img class="home-logo" src="../img/brand/bnb-logo.png" alt="Burn &amp; Build" width="280" height="245" />
       </div>`;
 }
 
@@ -1463,7 +1463,7 @@ function renderGrocery() {
 function render() {
   const root = document.getElementById('app');
   if (store.screen === 'loading') {
-    root.innerHTML = '<div class="screen home-loading"><img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="240" height="210" /></div>';
+    root.innerHTML = '<div class="screen home-loading"><img class="home-logo" src="../img/brand/bnb-logo.png" alt="Burn &amp; Build" width="240" height="210" /></div>';
     return;
   }
   if (store.screen === 'onboarding') root.innerHTML = renderOnboarding(store);
