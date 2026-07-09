@@ -1,13 +1,14 @@
 /* Burn & Build — shared brand tokens (yellow, black, three grays) */
 
 :root {
-  /* Accent */
-  --yellow: #FDC500;
-  --yellow-dim: #B8900A;
+  /* Accent — flame yellow from logo (replaces Hardkor #FDC500) */
+  --yellow: #FFCC00;
+  --yellow-rgb: 255, 204, 0;
+  --yellow-dim: #C99700;
   --logo-burn: #E8671A;
   --logo-build: #5A7A8A;
   --flame: var(--yellow);
-  --flame-dim: rgba(253, 197, 0, 0.15);
+  --flame-dim: rgba(var(--yellow-rgb), 0.15);
   --btn-on-flame: #0A0A0A;
 
   /* Surfaces */
