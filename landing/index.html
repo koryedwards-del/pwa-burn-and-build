@@ -67,9 +67,10 @@
     .testi { background: var(--gray); padding: 40px 36px; position: relative; border-left: 3px solid transparent; transition: border-color 0.2s; }
     .testi:hover { border-left-color: var(--yellow); }
     .testi::before { content: '"'; font-family: Impact, sans-serif; font-size: 6rem; color: var(--yellow); line-height: 1; opacity: 0.2; position: absolute; top: 16px; left: 28px; }
+    .testi:has(.testi-photo)::before { display: none; }
     .testi-text { color: var(--text); font-size: 0.97rem; line-height: 1.7; margin-bottom: 24px; position: relative; z-index: 1; }
     .testi-author { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--yellow); }
-    .testi-photo { display: block; width: 88px; height: 88px; object-fit: cover; object-position: center 12%; border-radius: 50%; margin-bottom: 20px; border: 2px solid var(--yellow); position: relative; z-index: 1; }
+    .testi-photo { display: block; width: 88px; height: 88px; object-fit: cover; object-position: center 12%; border-radius: 50%; margin: 0 0 20px; border: 2px solid var(--yellow); position: relative; z-index: 1; }
 
     .pricing { padding: 100px 40px; background: var(--black); text-align: center; }
     .pricing-inner { max-width: 560px; margin: 0 auto; }
@@ -258,8 +259,8 @@
           <p class="deliver-body">Your muscle. Your fat. Your roadmap to competition weight.</p>
         </div>
         <div class="deliver-card">
-          <div class="deliver-title">For Best Results</div>
-          <p class="deliver-body">Every tip and insight from 40+ years of coaching — built into the app. The details that turn good results into great ones.</p>
+          <div class="deliver-title">Weekly Newsletter (optional)</div>
+          <p class="deliver-body">Short weekly notes from Coach Kory — prep timing, plateaus, and the small details that turn good results into great ones. Opt in when you create your plan; unsubscribe anytime.</p>
         </div>
       </div>
     </div>
@@ -334,7 +335,7 @@
           <li>Grocery List</li>
           <li>When-to-Eat Reminders</li>
           <li>Lean Body Analysis</li>
-          <li>For Best Results</li>
+          <li>Weekly Newsletter (optional)</li>
         </ul>
         <a class="btn-cta" href="/createyourfoodplan/?browse=1">Create Your Food Plan &rarr;</a>
       </div>
