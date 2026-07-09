@@ -206,6 +206,66 @@ function resolveAccordionFieldEl(stackItem, fieldRef) {
   return stackItem.querySelector(`[name="${CSS.escape(fieldRef)}"]`);
 }
 
+function isCoarsePointer() {
+  return window.matchMedia('(pointer: coarse)').matches;
+}
+
+function clearReviewEditHighlight(el) {
+  if (!el) return;
+  el.classList.remove('is-review-edit');
+  delete el.dataset.reviewEditReplace;
+  el.closest('.pd-box, .pd-box-split, .acc-question')?.classList.remove('is-review-edit');
+}
+
+function clearAllReviewEditHighlights() {
+  document.querySelectorAll('.artshow-flow input[data-review-edit-replace], .artshow-flow textarea[data-review-edit-replace]')
+    .forEach(clearReviewEditHighlight);
+  document.querySelectorAll('.artshow-flow .is-review-edit')
+    .forEach((node) => node.classList.remove('is-review-edit'));
+}
+
+function highlightFieldForReviewEdit(el) {
+  clearAllReviewEditHighlights();
+  if (!el) return;
+
+  if (!el.matches('input:not([type=radio]):not([type=checkbox]), textarea')) {
+    if (typeof el.focus === 'function') {
+      try {
+        el.focus({ preventScroll: true });
+      } catch {
+        el.focus();
+      }
+    }
+    return;
+  }
+
+  el.classList.add('is-review-edit');
+  el.closest('.pd-box, .pd-box-split, .acc-question')?.classList.add('is-review-edit');
+
+  if (typeof el.focus === 'function') {
+    try {
+      el.focus({ preventScroll: true });
+    } catch {
+      el.focus();
+    }
+  }
+
+  if (isCoarsePointer()) {
+    el.dataset.reviewEditReplace = '1';
+    try {
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+    } catch {
+      /* ignore */
+    }
+    return;
+  }
+
+  if (typeof el.select === 'function') {
+    el.select();
+  }
+}
+
 function focusAccordionField(sectionId, fieldRef) {
   const focusTarget = () => {
     const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
@@ -227,16 +287,7 @@ function focusAccordionField(sectionId, fieldRef) {
     row.scrollIntoView({ block: 'center', inline: 'nearest' });
 
     window.setTimeout(() => {
-      if (typeof el.focus === 'function') {
-        try {
-          el.focus({ preventScroll: true });
-        } catch {
-          el.focus();
-        }
-      }
-      if (typeof el.select === 'function' && el.matches('input:not([type=radio]):not([type=checkbox])')) {
-        el.select();
-      }
+      highlightFieldForReviewEdit(el);
     }, 50);
   };
 
@@ -310,6 +361,36 @@ function ensureAccordionDelegation() {
   });
   document.addEventListener('change', (e) => {
     if (e.target.closest('.artshow-flow')) syncAccordionButtons();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    const input = e.target;
+    if (!input?.closest?.('.artshow-flow') || input.dataset.reviewEditReplace !== '1') return;
+    if (!input.matches('input:not([type=radio]):not([type=checkbox]), textarea')) return;
+
+    if (e.key === 'Backspace') {
+      e.preventDefault();
+      input.value = '';
+      clearReviewEditHighlight(input);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+
+    if (e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      input.value = e.key;
+      clearReviewEditHighlight(input);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  });
+
+  document.addEventListener('focusout', (e) => {
+    const input = e.target;
+    if (!input?.closest?.('.artshow-flow') || !input.matches('input, textarea')) return;
+    window.setTimeout(() => {
+      if (document.activeElement === input) return;
+      clearReviewEditHighlight(input);
+    }, 0);
   });
 
   document.addEventListener('click', (e) => {

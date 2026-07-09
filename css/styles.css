@@ -1407,6 +1407,16 @@ a.btn-secondary {
   font-size: 16px;
 }
 
+.ob-input:-webkit-autofill,
+.ob-input:-webkit-autofill:hover,
+.ob-input:-webkit-autofill:focus,
+.ob-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--card) inset;
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  transition: background-color 99999s ease-out 0s;
+}
+
 .ob-input-lg {
   font-size: 22px;
   font-weight: 700;

@@ -547,6 +547,30 @@ html:has(.start-site .artshow-flow) #app {
   font-weight: 400;
 }
 
+.artshow-flow .pd-input.is-review-edit,
+.artshow-flow .acc-question input.is-review-edit:not([type=radio]):not([type=checkbox]),
+.artshow-flow .acc-question textarea.is-review-edit {
+  color: var(--flame);
+  font-weight: 700;
+  background: var(--flame-dim);
+  border-radius: 4px;
+}
+
+.artshow-flow .pd-box.is-review-edit,
+.artshow-flow .pd-box-split.is-review-edit {
+  border-color: rgba(232, 114, 42, 0.55);
+}
+
+.artshow-flow .pd-input:-webkit-autofill,
+.artshow-flow .pd-input:-webkit-autofill:hover,
+.artshow-flow .pd-input:-webkit-autofill:focus,
+.artshow-flow .pd-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.35) inset;
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  transition: background-color 99999s ease-out 0s;
+}
+
 .artshow-flow .pd-box-gender {
   padding: 4px;
 }
