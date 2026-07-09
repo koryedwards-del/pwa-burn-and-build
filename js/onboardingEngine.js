@@ -1,11 +1,6 @@
 export const WELCOME_COUNT = 1;
 export const QUESTION_COUNT = 10;
 
-function todayLocalDateKey() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 export const WORK_PHYSICAL = [
   { id: 'sitting', label: 'Mostly sitting', sub: 'Desk, computer, driving, reception.' },
   { id: 'feet', label: 'On your feet', sub: 'Retail, teaching, nursing, restaurant.' },
@@ -288,7 +283,6 @@ export function defaultOnboardingForm(profile) {
     weightText: p.totalWeight > 0 ? String(Math.round(p.totalWeight)) : '',
     fatPercentText: p.fatPercent > 0 ? String(p.fatPercent) : '',
     fatSource: p.fatPercent > 0 ? 'recent' : '',
-    foodPlanCreatedDate: p.foodPlanCreatedDate || todayLocalDateKey(),
     workPhysical: p.workPhysical || (work?.physical ?? ''),
     workStress: p.workStress || (work?.stress ?? ''),
     weightTrainingHours: p.weightTrainingHours != null ? p.weightTrainingHours : '',
@@ -365,7 +359,7 @@ export function canProceed(phase, form) {
         case 1: return isValidHeight(form.heightInches);
         case 2: return birthDateIsValid(form.birthDateText);
         case 3: return Number(form.weightText) > 0;
-        case 4: return Number(form.fatPercentText) > 0 && form.fatSource && !!form.foodPlanCreatedDate;
+        case 4: return Number(form.fatPercentText) > 0 && form.fatSource;
         case 5: return !!form.workPhysical;
         case 6: return !!form.workStress;
         case 7:

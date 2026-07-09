@@ -167,6 +167,15 @@ export function getProgramById(email, programId) {
   return parsePackage(row);
 }
 
+/** Delete one food plan for this email. Returns true if a row was removed. */
+export function deleteProgram(email, programId) {
+  const result = db.prepare(`
+    DELETE FROM programs
+    WHERE email = ? AND id = ?
+  `).run(normalizeEmail(email), programId);
+  return result.changes > 0;
+}
+
 export function dbPathForHealth() {
   return dbPath;
 }

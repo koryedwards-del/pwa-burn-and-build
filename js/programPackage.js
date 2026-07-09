@@ -18,6 +18,7 @@ export function buildProgramPackage(form, { startDate, programId, label, meta } 
   });
   const [wh, wm] = (intake.wakeTime || '06:00').split(':').map(Number);
   const mealSlots = generateMealSlots(wh, wm, plan.servings);
+  const createdDate = localDateKey(new Date());
 
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -26,8 +27,8 @@ export function buildProgramPackage(form, { startDate, programId, label, meta } 
       id: programId || crypto.randomUUID(),
       issuedAt: new Date().toISOString(),
       issuedAtLocalDate: localDateKey(new Date()),
-      firstSavedAtLocalDate: form.foodPlanCreatedDate || localDateKey(new Date()),
-      foodPlanCreatedDate: form.foodPlanCreatedDate || localDateKey(new Date()),
+      firstSavedAtLocalDate: createdDate,
+      foodPlanCreatedDate: createdDate,
       startDate: startDate || todayDateKey(),
       durationDays: PROGRAM_DURATION_DAYS,
       status: 'active',

@@ -13,7 +13,7 @@ import {
   setBurnAndBuild,
   upsertContact,
 } from './contacts.js';
-import { countPrograms, dbPathForHealth, getLatestProgram, getProgramById, listPrograms, normalizeEmail, saveProgram } from './db.js';
+import { countPrograms, dbPathForHealth, deleteProgram, getLatestProgram, getProgramById, listPrograms, normalizeEmail, saveProgram } from './db.js';
 import { validateProgramPackage } from '../js/programPackage.js';
 import {
   constructStripeWebhookEvent,
@@ -408,6 +408,33 @@ app.get('/api/programs/:id', (req, res) => {
   }
 
   res.json({ ok: true, email, package: pkg });
+});
+
+app.delete('/api/programs/:id', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  const { id } = req.params;
+
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const accessResult = resolveProgramLoad(email, { getLatestProgram, countPrograms });
+  if (!accessResult.ok) {
+    res.status(accessResult.status).json({
+      ok: false,
+      message: accessResult.message,
+      ...(accessResult.saved ? { saved: true, programCount: accessResult.programCount } : {}),
+    });
+    return;
+  }
+
+  if (!deleteProgram(email, id)) {
+    res.status(404).json({ ok: false, message: 'Food plan not found.' });
+    return;
+  }
+
+  res.json({ ok: true, email, programId: id, programCount: countPrograms(email) });
 });
 
 /** Public config for client — never put secrets here. */

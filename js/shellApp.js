@@ -90,8 +90,6 @@ const store = {
   programHistoryLoading: false,
   programHistoryError: null,
   programHistoryOpenId: null,
-  programHistoryDateEditId: null,
-  programHistoryDateSaving: false,
   expandedNavButton: null,
   loadError: null,
   emailError: null,
@@ -1103,73 +1101,6 @@ async function loadProgramHistory() {
   render();
 }
 
-async function saveHistoryProgramDate(programId, dateKey) {
-  const email = getAppEmail();
-  if (!programId || !dateKey || !isValidEmail(email)) return;
-
-  store.programHistoryDateSaving = true;
-  store.programHistoryError = null;
-  render();
-
-  let pkg;
-  if (programId === store.program?.program?.id) {
-    pkg = store.program;
-  } else {
-    const result = await fetchProgramByIdFromServer(email, programId);
-    if (!result.ok) {
-      store.programHistoryDateSaving = false;
-      store.programHistoryError = result.message || 'Could not load that food plan.';
-      render();
-      return;
-    }
-    pkg = result.package;
-  }
-
-  pkg.program = {
-    ...pkg.program,
-    foodPlanCreatedDate: dateKey,
-    firstSavedAtLocalDate: dateKey,
-  };
-
-  const saved = await saveProgramToServer(email, pkg);
-  store.programHistoryDateSaving = false;
-  store.programHistoryDateEditId = null;
-
-  if (!saved.ok) {
-    store.programHistoryError = saved.message || 'Could not save the food plan date.';
-    render();
-    return;
-  }
-
-  if (programId === store.program?.program?.id) {
-    store.program = pkg;
-    saveProgram();
-  }
-
-  await refreshProgramHistory();
-  render();
-}
-
-function renderHistoryCardDate(row) {
-  const isEditing = row.id === store.programHistoryDateEditId;
-  const todayMax = localDateKey(new Date());
-
-  if (isEditing) {
-    return `
-      <label class="history-date-edit-wrap">
-        <span class="visually-hidden">Food plan date</span>
-        <input type="date" class="history-date-input" data-save-history-date="${row.id}"
-          value="${row.createdAt || ''}" max="${todayMax}"
-          ${store.programHistoryDateSaving ? 'disabled' : ''} />
-      </label>`;
-  }
-
-  return `
-    <span class="history-date">${row.testDateDisplay}</span>
-    <button type="button" class="history-date-edit" data-edit-history-date="${row.id}"
-      aria-label="Edit food plan date">✎</button>`;
-}
-
 async function openHistoryProgram(programId) {
   const email = getAppEmail();
   if (!programId) return;
@@ -1242,7 +1173,7 @@ function renderPreviousPlans() {
           return `
           <button type="button" class="history-card ${isActive ? 'active' : ''} ${isOpening ? 'opening' : ''}" data-open-history="${row.id}">
             <div class="history-card-top">
-              <div class="history-card-date">${renderHistoryCardDate(row)}</div>
+              <span class="history-date">${row.testDateDisplay}</span>
               ${isActive ? '<span class="history-active-tag">Active</span>' : ''}
               <span class="history-chevron">›</span>
             </div>
@@ -1765,32 +1696,6 @@ function bindEvents() {
 
   document.querySelectorAll('[data-open-history]').forEach((btn) => {
     btn.addEventListener('click', () => openHistoryProgram(btn.dataset.openHistory));
-  });
-
-  document.querySelectorAll('[data-edit-history-date]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      store.programHistoryDateEditId = btn.dataset.editHistoryDate;
-      render();
-      requestAnimationFrame(() => {
-        document.querySelector(`[data-save-history-date="${btn.dataset.editHistoryDate}"]`)?.focus();
-      });
-    });
-  });
-
-  document.querySelectorAll('[data-save-history-date]').forEach((input) => {
-    input.addEventListener('click', (e) => e.stopPropagation());
-    input.addEventListener('change', () => {
-      const dateKey = localDateKey(input.value);
-      if (dateKey) saveHistoryProgramDate(input.dataset.saveHistoryDate, dateKey);
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        e.stopPropagation();
-        store.programHistoryDateEditId = null;
-        render();
-      }
-    });
   });
 
   document.querySelector('[data-open-grocery-add]')?.addEventListener('click', () => {

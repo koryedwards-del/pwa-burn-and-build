@@ -13,7 +13,6 @@ import {
   welcomeScreens,
 } from './onboardingEngine.js';
 import { renderQuestionBody, renderConfirmBody } from './onboardingUI.js';
-import { formatTestDate } from './programHistory.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const CHAT_PROMPTS = [
@@ -21,7 +20,7 @@ const CHAT_PROMPTS = [
   'How tall are you? Enter feet and inches.',
   'What is your date of birth? We use this for your fat-burn and cardio heart-rate targets.',
   "What's your current weight? Best in the morning — after the bathroom, before you eat.",
-  'What is your body fat percentage? Pick how you know it, enter the number, and set the food plan date.',
+  'What is your body fat percentage? Pick how you know it, then enter the number.',
   'How physical is your work? Choose what best matches a typical week.',
   'How would you describe your lifestyle stress? Be honest — it affects your plan.',
   'What exercise will you commit to for the next 8 weeks? Be realistic — you can always update later.',
@@ -43,9 +42,7 @@ function formatUserAnswer(qi, form) {
     case 3:
       return `${form.weightText} lbs`;
     case 4:
-      return form.foodPlanCreatedDate
-        ? `${form.fatPercentText}% body fat (food plan date ${formatTestDate(form.foodPlanCreatedDate)})`
-        : `${form.fatPercentText}% body fat`;
+      return `${form.fatPercentText}% body fat`;
     case 5:
       return WORK_PHYSICAL.find((w) => w.id === form.workPhysical)?.label || '—';
     case 6:
