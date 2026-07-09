@@ -767,48 +767,11 @@ function renderHomeLogo() {
       </div>`;
 }
 
-function renderWordmarkMock() {
-  return `
-      <div class="home-wordmark-mock-section">
-        <p class="wordmark-mock-note">Text color mock</p>
-        <div class="home-wordmark-mock">
-          <div class="wordmark-mock-card">
-            <p class="wordmark-mock-label">A · Orange + Yellow</p>
-            <img class="wordmark-mock-logo" src="../img/shell/B%26Blogo.png" alt="" width="120" height="105" />
-            <div class="wordmark-stack wordmark-stack--sm wordmark-a">
-              <span class="wm-burn">Burn</span>
-              <span class="wm-amp">&amp;</span>
-              <span class="wm-build">Build</span>
-            </div>
-          </div>
-          <div class="wordmark-mock-card">
-            <p class="wordmark-mock-label">B · Yellow + Gray</p>
-            <img class="wordmark-mock-logo" src="../img/shell/B%26Blogo.png" alt="" width="120" height="105" />
-            <div class="wordmark-stack wordmark-stack--sm wordmark-b">
-              <span class="wm-burn">Burn</span>
-              <span class="wm-amp">&amp;</span>
-              <span class="wm-build">Build</span>
-            </div>
-          </div>
-          <div class="wordmark-mock-card">
-            <p class="wordmark-mock-label">C · Orange + Gray</p>
-            <img class="wordmark-mock-logo" src="../img/shell/B%26Blogo.png" alt="" width="120" height="105" />
-            <div class="wordmark-stack wordmark-stack--sm wordmark-c">
-              <span class="wm-burn">Burn</span>
-              <span class="wm-amp">&amp;</span>
-              <span class="wm-build">Build</span>
-            </div>
-          </div>
-        </div>
-      </div>`;
-}
-
 function renderLoadPlanHome() {
   return `
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       ${renderHomeLogo()}
-      ${renderWordmarkMock()}
       <div class="home-load-plan">
         <p class="home-load-lead">Enter the email you used to create your food plan.</p>
         ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
@@ -831,7 +794,6 @@ function renderHome() {
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       ${renderHomeLogo()}
-      ${renderWordmarkMock()}
       <div class="home-btn-stack">
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
