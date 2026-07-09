@@ -1,5 +1,131 @@
 /** Projections — timeline lean body analysis styling */
 
+.projections-section {
+  margin: 0 20px 16px;
+}
+
+.projections-screen .projections-section:first-of-type {
+  margin-top: 8px;
+}
+
+.projections-section-label {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-blue);
+}
+
+.body-comp-card {
+  padding: 14px 16px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.body-comp-today {
+  margin-bottom: 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--brand-blue);
+}
+
+.body-comp-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.body-comp-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1.2fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.body-comp-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.body-comp-pct {
+  text-align: center;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.body-comp-lbs {
+  text-align: right;
+}
+
+.body-comp-row--lean .body-comp-label,
+.body-comp-row--lean .body-comp-lbs {
+  color: var(--green);
+}
+
+.body-comp-row--fat .body-comp-label,
+.body-comp-row--fat .body-comp-lbs {
+  color: var(--flame);
+}
+
+.body-comp-row--total {
+  color: var(--text);
+}
+
+.lbm-analysis-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.lbm-analysis-card--good .lbm-analysis-icon,
+.lbm-analysis-card--good .lbm-analysis-message {
+  color: var(--green);
+}
+
+.lbm-analysis-card--warn .lbm-analysis-icon,
+.lbm-analysis-card--warn .lbm-analysis-message {
+  color: var(--flame);
+}
+
+.lbm-analysis-icon {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.lbm-analysis-message {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.lbm-analysis-chevron {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+
 .projections-screen .plan-header {
   position: relative;
   justify-content: center;
@@ -33,45 +159,6 @@
   color: #ccc;
   line-height: 1.6;
   margin-bottom: 24px;
-}
-
-.projections-lead {
-  padding: 0 20px 16px;
-  font-size: 14px;
-  line-height: 1.55;
-  color: #aaa;
-  text-align: center;
-}
-
-.lbm-card {
-  margin: 0 20px 16px;
-  padding: 18px 16px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  text-align: center;
-}
-
-.lbm-card-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-
-.lbm-card-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--brand-blue);
-  line-height: 1.1;
-}
-
-.lbm-card-sub {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #ccc;
 }
 
 .projections-table-wrap {

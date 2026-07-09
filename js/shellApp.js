@@ -19,6 +19,7 @@ import {
   wakeTimeFromParts,
 } from './onboardingEngine.js';
 import { computeWhatsPossible } from './previewCalculator.js';
+import { analyzeLeanBodyMass, computeTodayBodyComposition } from './bodyCompositionAnalysis.js';
 import { sortProgramHistory, summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
@@ -888,6 +889,53 @@ function intakeGender(intake) {
   return s.startsWith('f') ? 'female' : 'male';
 }
 
+function renderBodyCompositionToday(intake) {
+  const comp = computeTodayBodyComposition(intake);
+  return `
+    <section class="projections-section">
+      <h2 class="projections-section-label">Body composition</h2>
+      <div class="body-comp-card">
+        <div class="body-comp-today">— TODAY —</div>
+        <div class="body-comp-grid">
+          <div class="body-comp-row body-comp-row--lean">
+            <span class="body-comp-label">Lean</span>
+            <span class="body-comp-pct">${comp.leanPct} %</span>
+            <span class="body-comp-lbs">${comp.leanLbs} lbs</span>
+          </div>
+          <div class="body-comp-row body-comp-row--fat">
+            <span class="body-comp-label">Fat</span>
+            <span class="body-comp-pct">${comp.fatPct} %</span>
+            <span class="body-comp-lbs">${comp.fatLbs} lbs</span>
+          </div>
+          <div class="body-comp-row body-comp-row--total">
+            <span class="body-comp-label">Total</span>
+            <span class="body-comp-pct">${comp.totalPct} %</span>
+            <span class="body-comp-lbs">${comp.totalLbs} lbs</span>
+          </div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function renderLeanBodyMassAnalysis(intake) {
+  const analysis = analyzeLeanBodyMass({
+    gender: intakeGender(intake),
+    heightInches: intake.heightInches,
+    leanBodyMass: intake.leanBodyMass,
+  });
+  const tone = analysis.atOrAbove ? 'good' : 'warn';
+
+  return `
+    <section class="projections-section">
+      <h2 class="projections-section-label">Lean body mass analysis</h2>
+      <div class="lbm-analysis-card lbm-analysis-card--${tone}">
+        <span class="lbm-analysis-icon" aria-hidden="true">${analysis.atOrAbove ? '✓' : '!'}</span>
+        <span class="lbm-analysis-message">${analysis.message}</span>
+        <span class="lbm-analysis-chevron" aria-hidden="true">⌄</span>
+      </div>
+    </section>`;
+}
+
 function renderProjectionsHeader() {
   return `
     <div class="plan-header">
@@ -924,18 +972,12 @@ function renderProjections() {
       </div>`;
   }
 
-  const name = displayName();
   return `
     <div class="screen projections-screen">
       ${renderProjectionsHeader()}
 
-      <p class="projections-lead">Lean body analysis${name ? ` for ${name}` : ''} — based on your program intake.</p>
-
-      <div class="lbm-card">
-        <div class="lbm-card-label">Lean body mass</div>
-        <div class="lbm-card-value">${intake.leanBodyMass.toFixed(1)} lbs</div>
-        <div class="lbm-card-sub">Current ${intake.totalWeight.toFixed(0)} lbs · ${intake.fatPercent.toFixed(0)}% body fat</div>
-      </div>
+      ${renderBodyCompositionToday(intake)}
+      ${renderLeanBodyMassAnalysis(intake)}
 
       <div class="projections-table-wrap">
         <table class="projections-table">
