@@ -61,9 +61,35 @@
     .how-header { text-align: center; margin-bottom: 72px; }
 
     .testimonials { padding: 100px 40px; background: var(--black); }
-    .testimonials-inner { max-width: 1000px; margin: 0 auto; }
+    .testimonials-inner { max-width: 1100px; margin: 0 auto; }
     .testimonials-header { text-align: center; margin-bottom: 64px; }
-    .testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .testi-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-areas:
+        "linda . ."
+        "featured featured featured"
+        ". . scott";
+      gap: 24px;
+    }
+    .testi-linda { grid-area: linda; }
+    .testi-scott { grid-area: scott; }
+    .testi-featured {
+      grid-area: featured;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .testi-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "linda"
+          "featured"
+          "scott";
+      }
+      .testi-featured { grid-template-columns: 1fr; }
+    }
     .testi { background: var(--gray); padding: 40px 36px; position: relative; border-left: 3px solid transparent; transition: border-color 0.2s; }
     .testi:hover { border-left-color: var(--yellow); }
     .testi::before { content: '"'; font-family: Impact, sans-serif; font-size: 6rem; color: var(--yellow); line-height: 1; opacity: 0.2; position: absolute; top: 16px; left: 28px; }
@@ -220,6 +246,37 @@
   </section>
   <div class="divider"></div>
 
+  <section class="testimonials" id="testimonials">
+    <div class="testimonials-inner">
+      <div class="testimonials-header">
+        <p class="section-label">Real People. Real Results.</p>
+        <h2 class="section-title">What They're <span>Saying</span></h2>
+      </div>
+      <div class="testi-layout">
+        <div class="testi testi-linda"><p class="testi-text">I learned this program in 1992 and it has been invaluable. I almost bought into the chatter that you just have to eat less as you get older — and then I remembered what I learned all those years ago. At 67, I am confident I can maintain and even build muscle and lose fat.</p><div class="testi-author">Linda Kay — Client Since 1992</div></div>
+        <div class="testi-featured">
+          <div class="testi">
+            <img class="testi-photo" src="images/testimonials/dave-mcaferty.png" alt="Dave McAferty" width="88" height="88" />
+            <p class="testi-text">If you want to see real results like you never thought possible, this is the plan to be on. It dials everything in for each person. It's not a cookie-cutter diet.</p>
+            <div class="testi-author">Dave McAferty — Client Since 1990</div>
+          </div>
+          <div class="testi">
+            <img class="testi-photo" src="images/testimonials/coach-kory.png" alt="Coach Kory Edwards" width="88" height="88" />
+            <p class="testi-text">I've spent decades helping people make sense of nutrition, strength, and aging. This system is what I've used with competitors for years — now it's in your pocket.</p>
+            <div class="testi-author">Coach Kory Edwards — SNS</div>
+          </div>
+          <div class="testi">
+            <img class="testi-photo" src="images/testimonials/paul.png" alt="Paul" width="88" height="88" />
+            <p class="testi-text">Nutrition is everything. You got the science figured out years before anyone else. At 62, I still weigh and measure every meal every day — 40 years and counting.</p>
+            <div class="testi-author">Paul — 40 Years on the Plan</div>
+          </div>
+        </div>
+        <div class="testi testi-scott"><p class="testi-text">First impressions are everything, and my first impression is a 10 out of 10. This is exactly what I've been looking for — precision, not guesswork.</p><div class="testi-author">Scott Horan</div></div>
+      </div>
+    </div>
+  </section>
+  <div class="divider"></div>
+
   <section class="philosophy">
     <h2 class="section-title">Most Diets Get It <span>Wrong.</span></h2>
     <p class="section-body">Most diets promise fast weight loss — and deliver it by destroying your muscle in the process. When the muscle goes, the metabolism goes with it. You hit a plateau, you stall, and you're back where you started. Burn &amp; Build is different. This system has been producing real results since 1982. The principle is simple: keep your lean body mass, and your body burns fat around the clock. Lose the lean, and you lose everything.</p>
@@ -296,30 +353,6 @@
             <li>Done Making Excuses</li>
           </ul>
         </div>
-      </div>
-    </div>
-  </section>
-  <div class="divider"></div>
-
-  <section class="testimonials">
-    <div class="testimonials-inner">
-      <div class="testimonials-header">
-        <p class="section-label">Real People. Real Results.</p>
-        <h2 class="section-title">What They're <span>Saying</span></h2>
-      </div>
-      <div class="testi-grid">
-        <div class="testi"><p class="testi-text">I learned this program in 1992 and it has been invaluable. I almost bought into the chatter that you just have to eat less as you get older — and then I remembered what I learned all those years ago. At 67, I am confident I can maintain and even build muscle and lose fat.</p><div class="testi-author">Linda Kay — Client Since 1992</div></div>
-        <div class="testi">
-          <img class="testi-photo" src="images/testimonials/dave-mcaferty.png" alt="Dave McAferty" width="88" height="88" />
-          <p class="testi-text">If you want to see real results like you never thought possible, this is the plan to be on. It dials everything in for each person. It's not a cookie-cutter diet.</p>
-          <div class="testi-author">Dave McAferty — Client Since 1990</div>
-        </div>
-        <div class="testi">
-          <img class="testi-photo" src="images/testimonials/paul.png" alt="Paul" width="88" height="88" />
-          <p class="testi-text">Nutrition is everything. You got the science figured out years before anyone else. At 62, I still weigh and measure every meal every day — 40 years and counting.</p>
-          <div class="testi-author">Paul — 40 Years on the Plan</div>
-        </div>
-        <div class="testi"><p class="testi-text">First impressions are everything, and my first impression is a 10 out of 10. This is exactly what I've been looking for — precision, not guesswork.</p><div class="testi-author">Scott Horan</div></div>
       </div>
     </div>
   </section>
