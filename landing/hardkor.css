@@ -1,0 +1,329 @@
+/* ============================================================
+   Burn & Build — Landing design system (from Hardkor layout)
+   hardkor.css
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   DESIGN TOKENS
+   Change here, updates everywhere.
+   ------------------------------------------------------------ */
+:root {
+  /* Colors */
+  --yellow:        #FDC500;
+  --yellow-dim:    #B8900A;
+  --black:         #0A0A0A;
+  --dark:          #111111;
+  --gray:          #1A1A1A;
+  --gray-mid:      #2A2A2A;
+  --text:          #8A8A8A;
+  --text-dim:      #888888;
+  --text-light:    #D4D4D4;
+  --text-heading:  #8A8A8A;
+
+  /* Fonts */
+  --font-display:  Impact, 'Arial Narrow', sans-serif;
+  --font-heading:  'Barlow Condensed', sans-serif;
+  --font-body:     'Barlow', sans-serif;
+
+  /* Type scale */
+  --text-wordmark:  clamp(4.5rem, 17vw, 13rem);   /* Hero wordmark */
+  --text-h1:        clamp(2.5rem, 6vw, 5rem);      /* Page hero headlines */
+  --text-h2:        clamp(2rem, 5vw, 3.5rem);      /* Section titles */
+  --text-h3:        clamp(1.8rem, 3vw, 2.6rem);    /* Sub-section titles */
+  --text-h4:        1.25rem;                        /* Card / step titles */
+  --text-h5:        1.15rem;                        /* Small card titles */
+  --text-label:     0.8rem;                         /* Eyebrow labels */
+  --text-nav:       0.95rem;                        /* Nav links */
+  --text-body:      1.05rem;                        /* Body copy */
+  --text-small:     0.92rem;                        /* Small body */
+  --text-meta:      0.8rem;                         /* Footer copy, disclaimers */
+
+  /* Letter spacing */
+  --tracking-wide:   0.1em;
+  --tracking-wider:  0.2em;
+  --tracking-widest: 0.3em;
+  --tracking-display: 0.04em;
+  --tracking-label:  0.25em;
+
+  /* Spacing */
+  --nav-height:     64px;
+  --section-v:      100px;
+  --section-h:      40px;
+  --page-max:       1100px;
+  --page-max-narrow: 760px;
+  --card-pad:       48px 36px;
+  --card-pad-sm:    36px 32px;
+}
+
+/* ------------------------------------------------------------
+   RESET
+   ------------------------------------------------------------ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+/* ------------------------------------------------------------
+   BASE
+   ------------------------------------------------------------ */
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--yellow); text-decoration: none; }
+
+/* ------------------------------------------------------------
+   DIVIDER
+   ------------------------------------------------------------ */
+.divider {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--yellow), transparent);
+}
+
+/* ------------------------------------------------------------
+   NAV
+   ------------------------------------------------------------ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid var(--yellow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: var(--nav-height);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: 0.06em;
+  color: var(--yellow);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text);
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-nav);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--yellow); }
+
+/* ------------------------------------------------------------
+   HAMBURGER
+   ------------------------------------------------------------ */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--yellow);
+  transition: all 0.25s;
+}
+
+/* ------------------------------------------------------------
+   MOBILE NAV
+   ------------------------------------------------------------ */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: var(--nav-height);
+  left: 0; right: 0;
+  background: rgba(10,10,10,0.98);
+  border-bottom: 2px solid var(--yellow);
+  z-index: 99;
+  flex-direction: column;
+  padding: 16px 0;
+}
+
+.mobile-nav.open { display: flex; }
+
+.mobile-nav a {
+  color: var(--text);
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  padding: 14px 40px;
+  transition: color 0.2s;
+}
+
+.mobile-nav a:hover { color: var(--yellow); }
+
+/* ------------------------------------------------------------
+   SECTION SHARED ELEMENTS
+   ------------------------------------------------------------ */
+.section-label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--yellow);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: var(--text-h2);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  color: var(--text-heading);
+}
+
+.section-title span { color: var(--yellow); }
+
+.section-body {
+  color: var(--text-light);
+  max-width: 680px;
+  margin: 0 auto;
+  font-size: var(--text-body);
+}
+
+/* Page hero headline used on inner pages (privacy, support, affiliates) */
+.page-h1 {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: var(--text-h1);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-light);
+  margin-bottom: 8px;
+  line-height: 1.05;
+}
+
+.page-h1 span { color: var(--yellow); }
+
+/* Section h2 used on inner pages */
+.page-h2 {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  margin: 40px 0 12px;
+}
+
+.eyebrow {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-label);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--yellow);
+  margin-bottom: 20px;
+}
+
+/* ------------------------------------------------------------
+   FOOTER
+   ------------------------------------------------------------ */
+footer {
+  background: var(--black);
+  border-top: 2px solid var(--gray-mid);
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.footer-logo {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: var(--tracking-wide);
+  color: var(--yellow);
+  text-transform: uppercase;
+}
+
+.footer-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: var(--text-meta);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--yellow); }
+
+.footer-copy {
+  color: var(--text-dim);
+  font-size: var(--text-meta);
+}
+
+/* ------------------------------------------------------------
+   INNER PAGE LAYOUT (privacy, support, affiliates)
+   ------------------------------------------------------------ */
+.page {
+  max-width: var(--page-max-narrow);
+  margin: 0 auto;
+  padding: 120px 40px 80px;
+}
+
+.page p {
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE
+   ------------------------------------------------------------ */
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-links { gap: 20px; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+}
+
+@media (max-width: 600px) {
+  nav { padding: 0 16px; }
+  .page { padding: 100px 20px 60px; }
+}

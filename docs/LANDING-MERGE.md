@@ -88,7 +88,7 @@ From current `landing/index.html`:
 | Step | Description | Status |
 |------|-------------|--------|
 | **1** | Inventory + locked decisions (this doc) | ✅ Done |
-| **2** | Port `index.html` + `hardkor.css`; rebrand; $149; logo; CTA; PWA script | ⬜ Pending Kory |
+| **2** | Port `index.html` + `hardkor.css`; rebrand; $149; logo; CTA; PWA script | ✅ Done |
 | **3** | Wire calculator to `previewCalculator.js` (optional cleanup) | ⬜ |
 | **4** | Support: Hardkor FAQs + B&B app steps + rebrand | ⬜ |
 | **5** | Privacy: B&B legal content + Hardkor/B&B shell | ⬜ |
