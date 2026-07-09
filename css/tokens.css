@@ -4,6 +4,8 @@
   /* Accent */
   --yellow: #FDC500;
   --yellow-dim: #B8900A;
+  --logo-burn: #E8671A;
+  --logo-build: #5A7A8A;
   --flame: var(--yellow);
   --flame-dim: rgba(253, 197, 0, 0.15);
   --btn-on-flame: #0A0A0A;
