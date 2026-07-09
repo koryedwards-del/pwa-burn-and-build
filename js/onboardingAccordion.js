@@ -10,7 +10,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=111';
+} from './onboardingUI.js?v=112';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -181,14 +181,30 @@ function setAccordionPanelOpen(panel, open) {
 }
 
 function resolveAccordionFieldEl(stackItem, fieldRef) {
-  if (!stackItem || !fieldRef) return null;
+  if (!fieldRef) return null;
+
+  if (fieldRef === 'heightDigits') {
+    fieldRef = 'pd-height-input';
+  }
+
+  const globalId = document.getElementById(fieldRef);
+  if (globalId && (!stackItem || stackItem.contains(globalId))) {
+    return globalId;
+  }
+
+  if (fieldRef === 'pd-sex') {
+    const sexScope = stackItem || document;
+    return sexScope.querySelector('#pd-sex .pd-gender-btn.is-active')
+      || sexScope.querySelector('#pd-sex .pd-gender-btn');
+  }
+
+  if (!stackItem) return null;
 
   const fieldMap = {
-    'pd-sex': '#pd-sex .pd-gender-btn.is-active, #pd-sex .pd-gender-btn',
-    'pd-name': '#pd-name, [name="preferredName"]',
-    'pd-age': '#pd-age, [name="birthDateText"]',
-    'pd-height-input': '#pd-height-input, #pd-height input, [name="heightDigits"]',
-    'pd-weight': '#pd-weight, [name="weightText"]',
+    'pd-name': '[name="preferredName"]',
+    'pd-age': '[name="birthDateText"]',
+    'pd-height-input': '#pd-height input, [name="heightDigits"]',
+    'pd-weight': '[name="weightText"]',
     'reminders': '[data-ob-reminders]',
     'newsletterOptIn': '[name="newsletterOptIn"]',
   };
@@ -202,28 +218,29 @@ function resolveAccordionFieldEl(stackItem, fieldRef) {
     return stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
   }
 
-  const byId = stackItem.querySelector(`#${CSS.escape(fieldRef)}`);
-  if (byId) {
-    if (byId.matches('input, select, textarea, button')) return byId;
-    const nested = byId.querySelector('input, select, textarea, button');
-    if (nested) return nested;
-  }
-
   return stackItem.querySelector(`[name="${CSS.escape(fieldRef)}"]`);
 }
 
 function focusAccordionField(sectionId, fieldRef) {
-  const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
-  if (!stackItem) return;
-
-  const panel = stackItem.querySelector('.pd-panel');
-  if (panel) setAccordionPanelOpen(panel, true);
-
   const focusTarget = () => {
+    const stackItem = document.querySelector(`.artshow-flow [data-acc-section="${sectionId}"]`);
+    if (!stackItem) return;
+
+    const panel = stackItem.querySelector('.pd-panel');
+    if (panel) setAccordionPanelOpen(panel, true);
+
     const el = resolveAccordionFieldEl(stackItem, fieldRef);
     if (!el) return;
-    const row = el.closest('.pd-row, .acc-question, .ob-activity-row, .ob-weight-row, .ob-height-row') || el;
+
+    const scrollRowId = {
+      'pd-height-input': 'pd-height',
+      'heightDigits': 'pd-height',
+    }[fieldRef];
+    const row = (scrollRowId && document.getElementById(scrollRowId))
+      || el.closest('.pd-row, .acc-question, .ob-activity-row, .ob-weight-row, .ob-height-row')
+      || el;
     row.scrollIntoView({ block: 'center', inline: 'nearest' });
+
     window.setTimeout(() => {
       if (typeof el.focus === 'function') {
         try {
@@ -248,9 +265,18 @@ function openFieldFromReview(sectionId, fieldRef) {
   if (!store || !sectionId || !fieldRef) return;
   store.accordionSection = sectionId;
   store.accordionEditReturn = 'review';
+  store.accordionPendingFocus = { sectionId, fieldRef };
   accordionCtx.render?.();
+}
+
+export function applyPendingAccordionFocus(store) {
+  const pending = store?.accordionPendingFocus;
+  if (!pending) return;
+  delete store.accordionPendingFocus;
   syncAccordionButtons();
-  focusAccordionField(sectionId, fieldRef);
+  window.setTimeout(() => {
+    focusAccordionField(pending.sectionId, pending.fieldRef);
+  }, 120);
 }
 
 function syncAccordionButtons() {

@@ -3,8 +3,8 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=111';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection } from './onboardingAccordion.js?v=111';
+} from './onboardingUI.js?v=112';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection, applyPendingAccordionFocus } from './onboardingAccordion.js?v=112';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -97,6 +97,7 @@ const store = {
   accordionSection: 'intro',
   reviewViewed: false,
   accordionEditReturn: null,
+  accordionPendingFocus: null,
   accessGranted: false,
   apiReachable: true,
   stripeConfigured: false,
@@ -798,6 +799,7 @@ function bindOnboardingOnly() {
     },
   });
   refreshPersonalDetailFields(store.onboardingForm);
+  applyPendingAccordionFocus(store);
 }
 
 function sendMagicLink() {
