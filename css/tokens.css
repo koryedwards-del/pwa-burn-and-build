@@ -6,7 +6,7 @@
   --yellow-rgb: 255, 204, 0;
   --yellow-dim: #C99700;
   --logo-burn: #E8671A;
-  --logo-build: #5A7A8A;
+  --logo-build: #5A9AAA;
   --flame: var(--yellow);
   --flame-dim: rgba(var(--yellow-rgb), 0.15);
   --btn-on-flame: #0A0A0A;
