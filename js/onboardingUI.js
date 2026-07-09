@@ -945,6 +945,8 @@ function ensureObDelegation() {
     const form = store.onboardingForm;
     const flow = e.target.closest(flowRoot());
 
+    if (e.target.closest('.ob-confirm-row-edit')) return;
+
     const sexBtn = e.target.closest('[data-pd-sex]');
     if (sexBtn) {
       form.sex = sexBtn.dataset.pdSex;

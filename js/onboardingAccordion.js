@@ -10,7 +10,7 @@ import {
   personalSectionValid,
   emailSectionValid,
   renderCollapsiblePanel,
-} from './onboardingUI.js?v=110';
+} from './onboardingUI.js?v=111';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
 const SECTIONS = [
@@ -183,13 +183,21 @@ function setAccordionPanelOpen(panel, open) {
 function resolveAccordionFieldEl(stackItem, fieldRef) {
   if (!stackItem || !fieldRef) return null;
 
-  if (fieldRef === 'pd-sex') {
-    return stackItem.querySelector('#pd-sex .pd-gender-btn.is-active')
-      || stackItem.querySelector('#pd-sex .pd-gender-btn');
+  const fieldMap = {
+    'pd-sex': '#pd-sex .pd-gender-btn.is-active, #pd-sex .pd-gender-btn',
+    'pd-name': '#pd-name, [name="preferredName"]',
+    'pd-age': '#pd-age, [name="birthDateText"]',
+    'pd-height-input': '#pd-height-input, #pd-height input, [name="heightDigits"]',
+    'pd-weight': '#pd-weight, [name="weightText"]',
+    'reminders': '[data-ob-reminders]',
+    'newsletterOptIn': '[name="newsletterOptIn"]',
+  };
+
+  if (fieldMap[fieldRef]) {
+    const mapped = stackItem.querySelector(fieldMap[fieldRef]);
+    if (mapped) return mapped;
   }
-  if (fieldRef === 'reminders') {
-    return stackItem.querySelector('[data-ob-reminders]');
-  }
+
   if (fieldRef.startsWith('wake-')) {
     return stackItem.querySelector(`[data-wake-part="${fieldRef.slice(5)}"]`);
   }
@@ -197,7 +205,8 @@ function resolveAccordionFieldEl(stackItem, fieldRef) {
   const byId = stackItem.querySelector(`#${CSS.escape(fieldRef)}`);
   if (byId) {
     if (byId.matches('input, select, textarea, button')) return byId;
-    return byId.querySelector('input, select, textarea, button') || byId;
+    const nested = byId.querySelector('input, select, textarea, button');
+    if (nested) return nested;
   }
 
   return stackItem.querySelector(`[name="${CSS.escape(fieldRef)}"]`);
@@ -210,13 +219,28 @@ function focusAccordionField(sectionId, fieldRef) {
   const panel = stackItem.querySelector('.pd-panel');
   if (panel) setAccordionPanelOpen(panel, true);
 
-  const el = resolveAccordionFieldEl(stackItem, fieldRef);
-  if (!el) return;
+  const focusTarget = () => {
+    const el = resolveAccordionFieldEl(stackItem, fieldRef);
+    if (!el) return;
+    const row = el.closest('.pd-row, .acc-question, .ob-activity-row, .ob-weight-row, .ob-height-row') || el;
+    row.scrollIntoView({ block: 'center', inline: 'nearest' });
+    window.setTimeout(() => {
+      if (typeof el.focus === 'function') {
+        try {
+          el.focus({ preventScroll: true });
+        } catch {
+          el.focus();
+        }
+      }
+      if (typeof el.select === 'function' && el.matches('input:not([type=radio]):not([type=checkbox])')) {
+        el.select();
+      }
+    }, 50);
+  };
 
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  if (typeof el.focus === 'function') {
-    el.focus({ preventScroll: true });
-  }
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(focusTarget);
+  });
 }
 
 function openFieldFromReview(sectionId, fieldRef) {
@@ -225,11 +249,8 @@ function openFieldFromReview(sectionId, fieldRef) {
   store.accordionSection = sectionId;
   store.accordionEditReturn = 'review';
   accordionCtx.render?.();
-  window.requestAnimationFrame(() => {
-    window.requestAnimationFrame(() => {
-      focusAccordionField(sectionId, fieldRef);
-    });
-  });
+  syncAccordionButtons();
+  focusAccordionField(sectionId, fieldRef);
 }
 
 function syncAccordionButtons() {
@@ -285,11 +306,11 @@ function ensureAccordionDelegation() {
     const store = accordionCtx.store;
     const activeIndex = getActiveIndex(store);
 
-    const editRow = e.target.closest('[data-edit-field]');
+    const editRow = e.target.closest('.ob-confirm-row-edit');
     if (editRow) {
       openFieldFromReview(
-        editRow.getAttribute('data-edit-section'),
-        editRow.getAttribute('data-edit-field'),
+        editRow.dataset.editSection,
+        editRow.dataset.editField,
       );
       return;
     }
