@@ -8,8 +8,11 @@ import {
   defaultOnboardingForm,
   formatWakeDisplay,
   heartRates,
-  heightInputValue,
   heightReadable,
+  heightFormParts,
+  parseHeightDigits,
+  parseHeightExpression,
+  resolvedHeightInches,
   isValidHeight,
   nextLabel,
   onboardingPhase,
@@ -33,7 +36,7 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=94';
+} from './onboardingEngine.js?v=98';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -41,15 +44,22 @@ function infoBox(icon, text) {
   return `<div class="ob-info"><span class="ob-info-icon">${icon}</span><p>${text}</p></div>`;
 }
 
-const HEIGHT_FIELD_PLACEHOLDER = 'enter your height';
 const WEIGHT_FIELD_PLACEHOLDER = 'enter your weight';
 
-function heightFieldHasValue(form) {
-  return !!heightInputValue(form.heightInches);
+function heightFieldValues(form) {
+  const fromParts = heightFormParts(form.heightInches);
+  return {
+    feet: form.heightFeet !== undefined && form.heightFeet !== '' ? String(form.heightFeet) : fromParts.heightFeet,
+    inches: form.heightInchesPart !== undefined && form.heightInchesPart !== '' ? String(form.heightInchesPart) : fromParts.heightInchesPart,
+  };
 }
 
-function heightFieldDisplay(form) {
-  return heightInputValue(form.heightInches) || HEIGHT_FIELD_PLACEHOLDER;
+function syncFormHeightInches(form) {
+  form.heightInches = resolvedHeightInches(form.heightFeet, form.heightInchesPart);
+}
+
+function heightFieldHasValue(form) {
+  return isValidHeight(resolvedHeightInches(form.heightFeet, form.heightInchesPart));
 }
 
 function weightFieldHasValue(form) {
@@ -63,11 +73,13 @@ function weightFieldDisplay(form) {
   return weightFieldHasValue(form) ? String(form.weightText) : WEIGHT_FIELD_PLACEHOLDER;
 }
 
-function applyHeightFieldDisplay(input, form) {
-  const hasValue = heightFieldHasValue(form);
-  input.classList.toggle('is-instruction', !hasValue);
-  input.value = heightFieldDisplay(form);
-  updateHeightReadable(input.closest(flowRoot()), form);
+function applyHeightFieldDisplay(form, flowEl) {
+  const { feet, inches } = heightFieldValues(form);
+  const roots = flowEl ? [flowEl] : [...document.querySelectorAll(flowRoot())];
+  roots.forEach((root) => {
+    root.querySelectorAll('[name="heightFeet"]').forEach((input) => { input.value = feet; });
+    root.querySelectorAll('[name="heightInchesPart"]').forEach((input) => { input.value = inches; });
+  });
 }
 
 function applyWeightFieldDisplay(input, form) {
@@ -77,42 +89,82 @@ function applyWeightFieldDisplay(input, form) {
 }
 
 function renderHeightFields(form, style = 'step') {
-  const hasValue = heightFieldHasValue(form);
-  const display = heightFieldDisplay(form);
-  const readable = heightReadable(form.heightInches);
-  const instructionClass = hasValue ? '' : ' is-instruction';
-  if (style === 'panel') {
-    return `
-      <input id="pd-height-input" class="pd-input${instructionClass}" name="heightInches" inputmode="numeric" value="${display}" aria-label="Height in inches" aria-describedby="pd-height-readable" />
-      <span class="pd-unit pd-height-readable" id="pd-height-readable" data-height-readable aria-live="polite">${readable}</span>`;
-  }
-  return `
-    <div class="ob-weight-row">
-      <input class="ob-input ob-weight-input${instructionClass}" name="heightInches" inputmode="numeric" value="${display}" aria-label="Height in inches" aria-describedby="ob-height-readable" />
-      <span class="ob-unit pd-height-readable" id="ob-height-readable" data-height-readable aria-live="polite">${readable}</span>
+  const { feet, inches } = heightFieldValues(form);
+  const inputClass = style === 'panel' ? 'pd-input ob-height-input' : 'ob-input ob-height-input';
+  const fields = `
+    <div class="ob-height-field">
+      <input id="pd-height-feet" class="${inputClass}" name="heightFeet" inputmode="numeric" maxlength="1" value="${feet}" aria-label="Feet" autocomplete="off" />
+      <span class="ob-unit">ft</span>
+    </div>
+    <div class="ob-height-field">
+      <input class="${inputClass}" name="heightInchesPart" inputmode="numeric" maxlength="2" value="${inches}" aria-label="Inches" autocomplete="off" />
+      <span class="ob-unit">in</span>
     </div>`;
+
+  if (style === 'panel') {
+    return `<div class="pd-height-split">${fields}</div>`;
+  }
+  return `<div class="ob-height-row">${fields}</div>`;
 }
 
-function updateHeightReadable(flow, form) {
-  if (!flow) return;
-  const readable = heightReadable(form.heightInches);
-  flow.querySelectorAll('[data-height-readable]').forEach((el) => {
-    el.textContent = readable;
-  });
+function syncHeightFeetInput(input, form) {
+  let raw = input.value.replace(/\D/g, '');
+  if (raw.length > 1) {
+    applyParsedHeight(form, parseHeightDigits(raw), input.closest(flowRoot()));
+    return;
+  }
+  raw = raw.slice(0, 1);
+  form.heightFeet = raw;
+  input.value = raw;
+  syncFormHeightInches(form);
+  updateBoundDisplays('heightInches', form.heightInches);
+  syncNextButton(obCtx.store, form);
+  if (raw !== '') {
+    const flow = input.closest(flowRoot());
+    const inchesEl = flow?.querySelector('[name="heightInchesPart"]');
+    if (inchesEl && document.activeElement === input && form.heightInchesPart === '') {
+      window.requestAnimationFrame(() => inchesEl.focus());
+    }
+  }
+  input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
-function syncHeightInchesInput(input, form) {
-  let raw = input.value;
-  if (raw === HEIGHT_FIELD_PLACEHOLDER) raw = '';
-  raw = raw.replace(/\D/g, '').slice(0, 3);
-  form.heightInches = raw === '' ? '' : Number(raw);
-  const hasValue = raw !== '';
-  input.classList.toggle('is-instruction', !hasValue);
-  input.value = hasValue ? raw : HEIGHT_FIELD_PLACEHOLDER;
-  updateHeightReadable(input.closest(flowRoot()), form);
+function syncHeightInchesPartInput(input, form) {
+  const raw = input.value.replace(/\D/g, '').slice(0, 2);
+  form.heightInchesPart = raw;
+  input.value = raw;
+  syncFormHeightInches(form);
   updateBoundDisplays('heightInches', form.heightInches);
   syncNextButton(obCtx.store, form);
   input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function applyParsedHeight(form, parsed, flowEl) {
+  if (!parsed) return false;
+  form.heightFeet = parsed.feet !== '' ? String(parsed.feet) : '';
+  form.heightInchesPart = parsed.inches !== '' ? String(parsed.inches) : '';
+  finalizeHeightFields(form, flowEl);
+  return true;
+}
+
+function finalizeHeightFields(form, flow) {
+  if (form.heightInchesPart !== '') {
+    form.heightInchesPart = String(Math.min(11, Math.max(0, Number(form.heightInchesPart) || 0)));
+  }
+  let total = resolvedHeightInches(form.heightFeet, form.heightInchesPart);
+  if (total !== '' && total > 84) {
+    form.heightFeet = '7';
+    form.heightInchesPart = '0';
+    total = 84;
+  } else if (total !== '' && total < 48) {
+    form.heightFeet = '4';
+    form.heightInchesPart = '0';
+    total = 48;
+  }
+  syncFormHeightInches(form);
+  applyHeightFieldDisplay(form, flow);
+  updateBoundDisplays('heightInches', form.heightInches);
+  syncNextButton(obCtx.store, form);
 }
 
 function syncWeightInput(input, form) {
@@ -581,7 +633,7 @@ function renderConfirmBody(form, isEditMode, options = {}) {
         ${confirmRow('EMAIL', form.email || '—', '', { section: 'email', field: 'pd-email' }, false, true)}
         ${confirmRow('NEWSLETTER', form.newsletterOptIn ? 'Yes' : 'No', '', { section: 'email', field: 'newsletterOptIn' }, false, true)}
         ${confirmRow('GENDER', form.sex || '—', '', { section: 'personal', field: 'pd-sex' }, false, true)}
-        ${confirmRow('HEIGHT', heightConfirmLabel(form.heightInches), '', { section: 'personal', field: 'pd-height-input' }, false, true)}
+        ${confirmRow('HEIGHT', heightConfirmLabel(resolvedHeightInches(form.heightFeet, form.heightInchesPart) || form.heightInches), '', { section: 'personal', field: 'pd-height-feet' }, false, true)}
         ${confirmRow('BIRTH DATE', displayBirthDate(form), '', { section: 'personal', field: 'pd-age' }, false, true)}
         ${confirmRow('WEIGHT', weight > 0 ? `${form.weightText} lbs` : '—', '', { section: 'personal', field: 'pd-weight' }, false, true)}
         ${confirmRow('BODY FAT', fat > 0 ? `${form.fatPercentText}%` : '—', '', { section: 'body', field: 'fatPercentText' }, false, true)}
@@ -683,15 +735,13 @@ export function initOnboardingForm(store) {
 
 export function refreshPersonalDetailFields(form) {
   if (!form) return;
+  applyHeightFieldDisplay(form);
   document.querySelectorAll(`${flowRoot()} [name="birthDateText"]`).forEach((input) => {
     const digits = birthDateDigits(form.birthDateText);
     form.birthDateText = formatBirthDateDigits(digits);
     input.value = birthDateMaskDisplay(form.birthDateText);
     syncBirthDateValidation(input, form);
     syncAgeFromBirthDate(form, input.closest(flowRoot()));
-  });
-  document.querySelectorAll(`${flowRoot()} [name="heightInches"]`).forEach((input) => {
-    applyHeightFieldDisplay(input, form);
   });
   document.querySelectorAll(`${flowRoot()} [name="weightText"]`).forEach((input) => {
     applyWeightFieldDisplay(input, form);
@@ -725,7 +775,7 @@ export function personalSectionValid(form) {
   return form.preferredName.trim().length > 0
     && (form.sex === 'Male' || form.sex === 'Female')
     && birthDateIsValid(form.birthDateText)
-    && isValidHeight(form.heightInches)
+    && isValidHeight(resolvedHeightInches(form.heightFeet, form.heightInchesPart))
     && Number(form.weightText) > 0;
 }
 
@@ -972,9 +1022,13 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'heightInches') {
-      if (input.value === HEIGHT_FIELD_PLACEHOLDER) return;
-      syncHeightInchesInput(input, form);
+    if (input.name === 'heightFeet') {
+      syncHeightFeetInput(input, form);
+      return;
+    }
+
+    if (input.name === 'heightInchesPart') {
+      syncHeightInchesPartInput(input, form);
       return;
     }
 
@@ -1058,12 +1112,6 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'heightInches' && input.value === HEIGHT_FIELD_PLACEHOLDER) {
-      input.value = '';
-      input.classList.remove('is-instruction');
-      return;
-    }
-
     if (input.name === 'weightText' && input.value === WEIGHT_FIELD_PLACEHOLDER) {
       input.value = '';
       input.classList.remove('is-instruction');
@@ -1080,22 +1128,25 @@ function ensureObDelegation() {
       return;
     }
 
-    if (input.name === 'heightInches') {
-      const n = Number(form.heightInches);
-      if (Number.isFinite(n) && n > 0) {
-        form.heightInches = Math.min(84, Math.max(48, Math.round(n)));
-      } else {
-        form.heightInches = '';
-      }
-      applyHeightFieldDisplay(input, form);
-      updateBoundDisplays('heightInches', form.heightInches);
-      syncNextButton(obCtx.store, form);
+    if (input.name === 'heightFeet' || input.name === 'heightInchesPart') {
+      finalizeHeightFields(form, input.closest(flowRoot()));
       return;
     }
 
     if (input.name === 'weightText') {
       syncWeightInput(input, form);
     }
+  });
+
+  document.addEventListener('paste', (e) => {
+    const input = e.target;
+    if (!obCtx.store || !input.closest(flowRoot())) return;
+    if (input.name !== 'heightFeet' && input.name !== 'heightInchesPart') return;
+    const form = obCtx.store.onboardingForm;
+    const parsed = parseHeightExpression(e.clipboardData?.getData('text') || '');
+    if (!parsed) return;
+    e.preventDefault();
+    applyParsedHeight(form, parsed, input.closest(flowRoot()));
   });
 
   document.addEventListener('keydown', (e) => {

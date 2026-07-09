@@ -497,6 +497,29 @@ html:has(.start-site .artshow-flow) #app {
   padding: 0 12px;
 }
 
+.artshow-flow .pd-height-split {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.artshow-flow .pd-height-split .ob-height-input {
+  width: 2.4rem;
+  flex: 0 0 auto;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--flame);
+  padding: 10px 0;
+}
+
+.artshow-flow .pd-height-split .ob-unit {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .artshow-flow .pd-box-split {
   justify-content: space-between;
   gap: 10px;

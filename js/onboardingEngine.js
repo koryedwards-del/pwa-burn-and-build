@@ -185,6 +185,22 @@ export function heightFromParts(feet, inches) {
   return f * 12 + i;
 }
 
+/** Total inches from ft/in form fields — empty inches counts as 0 when feet is set. */
+export function resolvedHeightInches(feet, inchesPart) {
+  const f = feet === '' || feet == null ? '' : String(feet).trim();
+  const i = inchesPart === '' || inchesPart == null ? '' : String(inchesPart).trim();
+  if (f === '' && i === '') return '';
+  return heightFromParts(f, i === '' ? 0 : i);
+}
+
+export function heightFormParts(totalInches) {
+  const parts = heightParts(totalInches);
+  return {
+    heightFeet: parts.feet !== '' ? String(parts.feet) : '',
+    heightInchesPart: parts.inches !== '' ? String(parts.inches) : '',
+  };
+}
+
 export function heightReadable(totalInches) {
   const n = Number(totalInches);
   if (!Number.isFinite(n) || n <= 0) return '';
@@ -205,6 +221,37 @@ export function isValidHeight(totalInches) {
 export function heightInchesLabel(inches) {
   const n = Math.round(Number(inches));
   return Number.isFinite(n) && n > 0 ? `${n} inches` : '—';
+}
+
+/** Bare digits are feet then inches — "56" means 5 ft 6 in, not 56 total inches. */
+export function parseHeightDigits(digits) {
+  const d = String(digits || '').replace(/\D/g, '');
+  if (!d) return null;
+  if (d.length === 1) return { feet: d, inches: '' };
+  if (d.length === 2) return { feet: d[0], inches: d[1] };
+  const feet = d[0];
+  const inches = Math.min(11, Number(d.slice(1)) || 0);
+  return { feet, inches: String(inches) };
+}
+
+/** Parse common height phrases: 5'6, 5 ft 6 in, 56, 511. */
+export function parseHeightExpression(text) {
+  const raw = String(text || '').trim().toLowerCase();
+  if (!raw) return null;
+
+  let m = raw.match(/^(\d)\s*['\u2032]\s*(\d{1,2})\s*["\u2033]?$/);
+  if (m) return { feet: m[1], inches: String(Math.min(11, Number(m[2]))) };
+
+  m = raw.match(/^(\d)\s*(?:ft|feet|foot)\.?\s*(\d{1,2})\s*(?:in|inches|inch)?\.?$/);
+  if (m) return { feet: m[1], inches: String(Math.min(11, Number(m[2]))) };
+
+  m = raw.match(/^(\d)\s*[- ]\s*(\d{1,2})$/);
+  if (m) return { feet: m[1], inches: String(Math.min(11, Number(m[2]))) };
+
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length >= 1) return parseHeightDigits(digits);
+
+  return null;
 }
 
 export function formatWakeDisplay(wakeTime) {
@@ -272,10 +319,13 @@ export function defaultOnboardingForm(profile) {
   const age = p.age ?? 35;
   const birthDate = p.birthDate || (p.birthDateText ? parseBirthDateText(p.birthDateText) : null) || defaultBirthDateFromAge(age);
   const work = p.workIntensity != null ? reverseWorkIntensity(p.workIntensity) : null;
+  const heightPartsInit = heightFormParts(p.heightInches);
   return {
     preferredName: p.preferredName || '',
     email: p.email || '',
     sex: p.sex || '',
+    heightFeet: heightPartsInit.heightFeet,
+    heightInchesPart: heightPartsInit.heightInchesPart,
     heightInches: p.heightInches ?? '',
     age,
     birthDate,
@@ -305,7 +355,7 @@ export function profileFromForm(form) {
     email: String(form.email || '').trim().toLowerCase(),
     sex: form.sex,
     age: Number(form.age),
-    heightInches: Number(form.heightInches),
+    heightInches: resolvedHeightInches(form.heightFeet, form.heightInchesPart) || Number(form.heightInches) || 0,
     totalWeight: weight,
     fatPercent,
     leanBodyMass: lbm,
@@ -356,7 +406,7 @@ export function canProceed(phase, form) {
     case 'question':
       switch (phase.index) {
         case 0: return form.preferredName.trim().length > 0;
-        case 1: return isValidHeight(form.heightInches);
+        case 1: return isValidHeight(resolvedHeightInches(form.heightFeet, form.heightInchesPart));
         case 2: return birthDateIsValid(form.birthDateText);
         case 3: return Number(form.weightText) > 0;
         case 4: return Number(form.fatPercentText) > 0 && form.fatSource;

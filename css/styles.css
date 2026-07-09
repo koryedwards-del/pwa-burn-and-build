@@ -1556,6 +1556,24 @@ a.btn-secondary {
   color: var(--flame);
 }
 
+.ob-height-entry {
+  gap: 16px;
+}
+
+.ob-height-entry .ob-height-input {
+  width: 96px;
+  letter-spacing: 0.06em;
+}
+
+.ob-height-entry .pd-height-readable,
+.ob-height-entry .ob-unit.pd-height-readable {
+  flex: 1;
+  text-align: right;
+  font-size: 15px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .ob-weight-input {
   width: 120px;
   text-align: center;
