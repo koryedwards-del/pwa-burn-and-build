@@ -84,6 +84,25 @@
   margin-bottom: 16px;
 }
 
+.wordmark-mock-logo {
+  width: min(120px, 32vw);
+  height: auto;
+  margin: 0 auto 10px;
+  display: block;
+}
+
+.home-wordmark-mock-section {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  padding-bottom: 8px;
+}
+
+.home-wordmark-mock-section .wordmark-mock-note {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
 .home-wordmark-mock {
   display: flex;
   flex-direction: column;

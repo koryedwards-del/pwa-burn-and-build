@@ -760,13 +760,21 @@ function openBurnAndBuildCreator() {
   window.open(BNB_CREATOR_URL, '_blank', 'noopener,noreferrer');
 }
 
-function renderWordmarkMock() {
+function renderHomeLogo() {
   return `
       <div class="home-logo-wrap">
-        <p class="wordmark-mock-note">Wordmark mock</p>
+        <img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="280" height="245" />
+      </div>`;
+}
+
+function renderWordmarkMock() {
+  return `
+      <div class="home-wordmark-mock-section">
+        <p class="wordmark-mock-note">Text color mock</p>
         <div class="home-wordmark-mock">
           <div class="wordmark-mock-card">
             <p class="wordmark-mock-label">A · Orange + Yellow</p>
+            <img class="wordmark-mock-logo" src="../img/shell/B%26Blogo.png" alt="" width="120" height="105" />
             <div class="wordmark-stack wordmark-stack--sm wordmark-a">
               <span class="wm-burn">Burn</span>
               <span class="wm-amp">&amp;</span>
@@ -775,6 +783,7 @@ function renderWordmarkMock() {
           </div>
           <div class="wordmark-mock-card">
             <p class="wordmark-mock-label">B · Yellow + Gray</p>
+            <img class="wordmark-mock-logo" src="../img/shell/B%26Blogo.png" alt="" width="120" height="105" />
             <div class="wordmark-stack wordmark-stack--sm wordmark-b">
               <span class="wm-burn">Burn</span>
               <span class="wm-amp">&amp;</span>
@@ -783,6 +792,7 @@ function renderWordmarkMock() {
           </div>
           <div class="wordmark-mock-card">
             <p class="wordmark-mock-label">C · Orange + Gray</p>
+            <img class="wordmark-mock-logo" src="../img/shell/B%26Blogo.png" alt="" width="120" height="105" />
             <div class="wordmark-stack wordmark-stack--sm wordmark-c">
               <span class="wm-burn">Burn</span>
               <span class="wm-amp">&amp;</span>
@@ -797,6 +807,7 @@ function renderLoadPlanHome() {
   return `
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
+      ${renderHomeLogo()}
       ${renderWordmarkMock()}
       <div class="home-load-plan">
         <p class="home-load-lead">Enter the email you used to create your food plan.</p>
@@ -819,6 +830,7 @@ function renderHome() {
   return `
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
+      ${renderHomeLogo()}
       ${renderWordmarkMock()}
       <div class="home-btn-stack">
         ${renderHomeNavButton('plan')}
@@ -1489,7 +1501,7 @@ function renderGrocery() {
 function render() {
   const root = document.getElementById('app');
   if (store.screen === 'loading') {
-    root.innerHTML = '<div class="screen home-loading"><div class="home-wordmark">Burn &amp; Build</div></div>';
+    root.innerHTML = '<div class="screen home-loading"><img class="home-logo" src="../img/shell/B%26Blogo.png" alt="Burn &amp; Build" width="240" height="210" /></div>';
     return;
   }
   if (store.screen === 'onboarding') root.innerHTML = renderOnboarding(store);
