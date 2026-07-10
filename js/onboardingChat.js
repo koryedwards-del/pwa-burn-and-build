@@ -11,7 +11,7 @@ import {
   onboardingPhase,
   parseBirthDateText,
   welcomeScreens,
-} from './onboardingEngine.js';
+} from './onboardingEngine.js?v=100';
 import { renderQuestionBody, renderConfirmBody } from './onboardingUI.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 

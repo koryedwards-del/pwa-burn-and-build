@@ -36,7 +36,7 @@ import {
   activityHoursReviewLabel,
   parseActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=99';
+} from './onboardingEngine.js?v=100';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 

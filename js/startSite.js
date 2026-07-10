@@ -3,8 +3,8 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=113';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection, applyPendingAccordionFocus } from './onboardingAccordion.js?v=115';
+} from './onboardingUI.js?v=114';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection, applyPendingAccordionFocus } from './onboardingAccordion.js?v=116';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -19,7 +19,7 @@ import {
   fetchCheckoutStatus,
   verifyCheckoutSession,
 } from './checkoutApi.js';
-import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js';
+import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js?v=100';
 import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
 const LANDING_URL = 'https://gettheburnandbuildapp.com';
