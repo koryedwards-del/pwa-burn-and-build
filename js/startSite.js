@@ -19,7 +19,7 @@ import {
   fetchCheckoutStatus,
   verifyCheckoutSession,
 } from './checkoutApi.js';
-import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js?v=101';
+import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js?v=102';
 import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
 const LANDING_URL = 'https://gettheburnandbuildapp.com';

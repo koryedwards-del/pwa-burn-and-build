@@ -347,7 +347,7 @@ export function defaultOnboardingForm(profile) {
     workStress: p.workStress || (work?.stress ?? ''),
     weightTrainingHours: p.weightTrainingHours != null && p.weightTrainingHours !== '' ? p.weightTrainingHours : '',
     cardioHours: p.cardioHours != null && p.cardioHours !== '' ? p.cardioHours : '',
-    fatBurningHours: p.fatBurningHours != null && p.fatBurningHours !== '' ? p.fatBurningHours : '',
+    fatBurningHours: p.fatBurningHours != null && p.fatBurningHours !== '' ? p.fatBurningHours : 3,
     wakeTime: p.wakeTime || '06:00',
     remindersEnabled: p.remindersEnabled !== false,
     newsletterOptIn: !!p.newsletterOptIn,
