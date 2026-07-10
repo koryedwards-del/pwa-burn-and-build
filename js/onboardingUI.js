@@ -35,8 +35,9 @@ import {
   activityHoursFieldDisplay,
   activityHoursReviewLabel,
   parseActivityHours,
+  finalizeActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=100';
+} from './onboardingEngine.js?v=101';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -217,7 +218,6 @@ function renderActivityHoursRow(label, name, form, max, options = {}) {
         inputmode="decimal"
         maxlength="7"
         value="${display}"
-        placeholder="0"
         aria-label="${label} hours per week" />
     </div>`;
 }
@@ -228,7 +228,7 @@ function isInlineActivityHoursInput(input) {
 
 function syncActivityHoursInput(input, form) {
   const max = input.name === 'fatBurningHours' ? 20 : 15;
-  const parsed = parseActivityHours(form[input.name], max);
+  const parsed = finalizeActivityHours(form[input.name], max);
   const hasValue = parsed !== null;
   input.classList.toggle('is-instruction', !hasValue);
   if (hasValue) {
@@ -237,6 +237,10 @@ function syncActivityHoursInput(input, form) {
   } else if (form[input.name] === '' || form[input.name] == null) {
     form[input.name] = '';
     input.value = isInlineActivityHoursInput(input) ? '' : ACTIVITY_HOURS_INSTRUCTION;
+  } else {
+    form[input.name] = '';
+    input.value = isInlineActivityHoursInput(input) ? '' : ACTIVITY_HOURS_INSTRUCTION;
+    input.classList.add('is-instruction');
   }
   syncNextButton(obCtx.store, form);
   input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));
@@ -1018,14 +1022,14 @@ function ensureObDelegation() {
           input.classList.add('is-instruction');
           input.value = ACTIVITY_HOURS_INSTRUCTION;
         }
-      } else if (parsed !== null) {
-        form[input.name] = parsed;
-        input.classList.remove('is-instruction');
-        input.value = formatActivityHoursNumber(parsed);
-      } else {
+      } else if (cleaned.endsWith('.') || parsed === null) {
         form[input.name] = cleaned;
         input.classList.remove('is-instruction');
         input.value = cleaned;
+      } else {
+        form[input.name] = parsed;
+        input.classList.remove('is-instruction');
+        input.value = formatActivityHoursNumber(parsed);
       }
       syncNextButton(obCtx.store, form);
       input.closest(flowRoot())?.dispatchEvent(new Event('input', { bubbles: true }));

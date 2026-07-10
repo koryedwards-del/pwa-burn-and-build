@@ -1362,8 +1362,8 @@ a.btn-secondary {
 
 .start-site .ob-next.disabled,
 .start-site .ob-next:disabled {
-  background: #a85828;
-  color: rgba(255, 255, 255, 0.55);
+  background: #333;
+  color: #666;
   pointer-events: none;
 }
 

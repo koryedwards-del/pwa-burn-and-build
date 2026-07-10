@@ -291,11 +291,21 @@ export function formatActivityHoursNumber(hours) {
 export function parseActivityHours(value, max = 15) {
   if (value === '' || value == null) return null;
   if (value === 0 || value === '0') return 0;
-  const n = Number(value);
+  const raw = String(value).trim();
+  if (raw.endsWith('.')) return null;
+  const n = Number(raw);
   if (!Number.isFinite(n) || n < 0 || n > max) return null;
   const quarters = Math.round(n * 4);
   if (Math.abs(n * 4 - quarters) > 0.001) return null;
   return quarters / 4;
+}
+
+/** On blur, treat a trailing decimal point as the number before it (e.g. "6." → 6). */
+export function finalizeActivityHours(value, max = 15) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+  if (raw.endsWith('.')) return parseActivityHours(raw.slice(0, -1), max);
+  return parseActivityHours(raw, max);
 }
 
 export function activityHoursHasValue(value, max = 15) {
@@ -335,9 +345,9 @@ export function defaultOnboardingForm(profile) {
     fatSource: p.fatPercent > 0 ? 'recent' : '',
     workPhysical: p.workPhysical || (work?.physical ?? ''),
     workStress: p.workStress || (work?.stress ?? ''),
-    weightTrainingHours: p.weightTrainingHours != null ? p.weightTrainingHours : '',
-    cardioHours: p.cardioHours != null ? p.cardioHours : '',
-    fatBurningHours: p.fatBurningHours != null ? p.fatBurningHours : '',
+    weightTrainingHours: p.weightTrainingHours != null && p.weightTrainingHours !== '' ? p.weightTrainingHours : '',
+    cardioHours: p.cardioHours != null && p.cardioHours !== '' ? p.cardioHours : '',
+    fatBurningHours: p.fatBurningHours != null && p.fatBurningHours !== '' ? p.fatBurningHours : '',
     wakeTime: p.wakeTime || '06:00',
     remindersEnabled: p.remindersEnabled !== false,
     newsletterOptIn: !!p.newsletterOptIn,

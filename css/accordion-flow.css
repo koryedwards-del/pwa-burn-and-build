@@ -370,8 +370,8 @@ html:has(.start-site .artshow-flow) #app {
 
 .artshow-flow .acc-continue.disabled,
 .artshow-flow .acc-continue:disabled {
-  background: #7a451f;
-  color: rgba(255, 255, 255, 0.5);
+  background: #333;
+  color: #666;
   pointer-events: none;
 }
 
