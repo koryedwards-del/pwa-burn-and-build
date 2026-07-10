@@ -68,7 +68,7 @@ const TEACHING = [
       'An 8-week program is not arbitrary. It gives your body time to adapt, your habits time to stick, and your results time to show up on the scale and in the mirror.',
       'When the 8 weeks are done — or when your body composition changes significantly — you come back here for a new personalized program. That is by design.',
     ],
-    quote: { text: 'I learned this program in 1992 and it has been invaluable. At 67, I am confident I can maintain and even build muscle and lose fat.', by: 'Linda Kay, client since 1992' },
+    quote: { text: 'Nutrition is everything. You got the science figured out years before anyone else. At 62, I still weigh and measure every meal every day — 40 years and counting.', by: 'Paul, 40 years on the plan' },
   },
   {
     kicker: 'Website + App',

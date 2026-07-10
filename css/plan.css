@@ -3,7 +3,7 @@
 .food-plan-screen {
   --plan-accent: #5ac8fa;
   --plan-accent-dim: rgba(90, 200, 250, 0.35);
-  --plan-orange: var(--flame);
+  --plan-flame: var(--flame);
   --plan-gold: #ffd60a;
   --plan-muted: #8e8e93;
   --plan-tab-active: #1c2e3a;
@@ -105,7 +105,7 @@
 }
 
 .food-plan-screen .plan-fat-points .fat-bar-fill.over {
-  background: var(--plan-orange);
+  background: var(--plan-flame);
 }
 
 .food-plan-screen .plan-fat-points .fat-bar-meta {
@@ -154,7 +154,7 @@
 .food-plan-screen .meal-card-header .expand {
   font-size: 13px;
   font-weight: 500;
-  color: var(--plan-orange);
+  color: var(--plan-flame);
   margin-top: 4px;
 }
 
@@ -163,7 +163,7 @@
 }
 
 .food-plan-screen .meal-card-header .meal-check {
-  color: var(--plan-accent);
+  color: var(--plan-flame);
 }
 
 .food-plan-screen .meal-body {
@@ -319,6 +319,6 @@
 
 .food-plan-screen .none-btn,
 .food-plan-screen .remove-fat-btn {
-  color: var(--plan-orange);
+  color: var(--plan-flame);
   border-color: var(--plan-accent-dim);
 }

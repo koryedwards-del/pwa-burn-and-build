@@ -379,9 +379,9 @@ export function welcomeScreens() {
       line1: 'READY?',
       line2: "LET'S BUILD.",
       body: "This takes a few minutes. It's worth it. We'll use your answers to create a diet that's yours — not a generic template.",
-      quote: "I learned this program in 1992 and it has been invaluable. At 67, I am confident I can maintain and even build muscle and lose fat. Let's go!",
-      quoteName: 'Linda Kay',
-      quoteMeta: 'Client since 1992',
+      quote: "Nutrition is everything. You got the science figured out years before anyone else. At 62, I still weigh and measure every meal every day — 40 years and counting.",
+      quoteName: 'Paul',
+      quoteMeta: '40 years on the plan',
     },
   ];
 }
