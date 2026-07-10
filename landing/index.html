@@ -139,8 +139,8 @@
     .price-includes li { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 1.05rem; letter-spacing: 0.05em; text-transform: uppercase; color: #D4D4D4; padding: 10px 0; border-bottom: 1px solid var(--gray-mid); }
 
     .calculator { padding: 100px 40px 80px; background: var(--black); }
+    .calc-header { text-align: center; margin-bottom: 12px; }
     .calc-inner { max-width: 680px; margin: 0 auto; }
-    .calc-heading { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: clamp(1.4rem, 2.5vw, 2rem); text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.1; color: #8A8A8A; margin-bottom: 16px; text-align: center; }
     .calc-intro { color: #D4D4D4; font-size: 1rem; line-height: 1.65; margin-bottom: 36px; }
     .calc-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; align-items: end; }
     .calc-col { display: flex; flex-direction: column; }
@@ -269,7 +269,10 @@
 
   <section class="calculator" id="calculator">
     <div class="calc-inner">
-      <h2 class="calc-heading">What Can Burn &amp; Build Do for You?</h2>
+      <div class="calc-header">
+        <p class="section-label">What's Possible</p>
+        <h2 class="section-title">What Can <span>Burn &amp; Build</span> Do for You?</h2>
+      </div>
       <p class="calc-intro">A precision diet built to maximize fat loss and preserve every ounce of muscle. Based on thousands of clients over 40 years, the average person on Burn &amp; Build loses approximately 3% body fat per month — while increasing strength and energy.</p>
 
       <div class="calc-row">
