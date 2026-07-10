@@ -83,6 +83,17 @@
     .guide-creds { list-style: none; display: flex; flex-direction: column; gap: 10px; }
     .guide-creds li { font-size: 0.92rem; color: #D4D4D4; padding-left: 22px; position: relative; line-height: 1.5; }
     .guide-creds li::before { content: '✓'; position: absolute; left: 0; color: var(--yellow); font-weight: 700; }
+    .guide-photo-label { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .guide-photo-label .testi-photo { margin-bottom: 0; }
+    .guide-wordmark {
+      font-family: Impact, 'Arial Narrow', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .guide-wordmark--burn { color: var(--yellow); }
+    .guide-wordmark--build { color: var(--gray-heading); }
 
     .how { padding: 100px 40px; background: var(--black); }
     .how-inner { max-width: 1100px; margin: 0 auto; }
@@ -211,9 +222,12 @@
       <p class="section-label" style="text-align:center;">Your Burn &amp; Build Guide</p>
       <div class="guide-row">
         <div class="testi">
-          <img class="testi-photo" src="images/testimonials/dave-mcaferty.png" alt="Dave McAferty" width="88" height="88" />
-          <p class="testi-text">If you want to see real results like you never thought possible, this is the plan to be on. It dials everything in for each person. It's not a cookie-cutter diet.</p>
-          <div class="testi-author">Dave McAferty — Client Since 1990</div>
+          <div class="guide-photo-label">
+            <img class="testi-photo" src="images/testimonials/paul.png" alt="Paul" width="88" height="88" />
+            <span class="guide-wordmark guide-wordmark--burn">Burn</span>
+          </div>
+          <p class="testi-text">Nutrition is everything. You got the science figured out years before anyone else. At 62, I still weigh and measure every meal every day — 40 years and counting.</p>
+          <div class="testi-author">Paul — 40 Years on the Plan</div>
         </div>
         <div class="testi guide-coach">
           <div class="guide-photo-wrap">
@@ -228,9 +242,12 @@
           </ul>
         </div>
         <div class="testi">
-          <img class="testi-photo" src="images/testimonials/paul.png" alt="Paul" width="88" height="88" />
-          <p class="testi-text">Nutrition is everything. You got the science figured out years before anyone else. At 62, I still weigh and measure every meal every day — 40 years and counting.</p>
-          <div class="testi-author">Paul — 40 Years on the Plan</div>
+          <div class="guide-photo-label">
+            <img class="testi-photo" src="images/testimonials/dave-mcaferty.png" alt="Dave McAferty" width="88" height="88" />
+            <span class="guide-wordmark guide-wordmark--build">Build</span>
+          </div>
+          <p class="testi-text">If you want to see real results like you never thought possible, this is the plan to be on. It dials everything in for each person. It's not a cookie-cutter diet.</p>
+          <div class="testi-author">Dave McAferty — Client Since 1990</div>
         </div>
       </div>
     </div>
