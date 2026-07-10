@@ -297,7 +297,7 @@ app.post('/api/programs', (req, res) => {
 
   const intakeEmail = normalizeEmail(pkg?.intake?.email);
   if (intakeEmail && intakeEmail !== email) {
-    res.status(400).json({ ok: false, message: 'Email in the food plan does not match the save request.' });
+    res.status(400).json({ ok: false, message: 'Email in the diet does not match the save request.' });
     return;
   }
 
@@ -403,7 +403,7 @@ app.get('/api/programs/:id', (req, res) => {
 
   const pkg = getProgramById(email, id);
   if (!pkg) {
-    res.status(404).json({ ok: false, message: 'Food plan not found.' });
+    res.status(404).json({ ok: false, message: 'Diet not found.' });
     return;
   }
 
@@ -430,7 +430,7 @@ app.delete('/api/programs/:id', (req, res) => {
   }
 
   if (!deleteProgram(email, id)) {
-    res.status(404).json({ ok: false, message: 'Food plan not found.' });
+    res.status(404).json({ ok: false, message: 'Diet not found.' });
     return;
   }
 

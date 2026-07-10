@@ -106,7 +106,7 @@ function renderCurrentBotMessage(page, form) {
   if (phase.kind === 'confirm') {
     return renderBotBubble(`
       <p class="chat-prompt">Almost there — are these answers correct?</p>
-      <p class="chat-confirm-lead">Tap any row to edit. When everything looks right, create your food plan.</p>`);
+      <p class="chat-confirm-lead">Tap any row to edit. When everything looks right, create your diet.</p>`);
   }
   return '';
 }
@@ -123,7 +123,7 @@ function composerContent(page, form) {
   const phase = onboardingPhase(page, false);
   if (phase.kind === 'welcome') {
     return `
-      <button type="button" class="ob-next chat-send" data-chat-next>CREATE YOUR FOOD PLAN</button>`;
+      <button type="button" class="ob-next chat-send" data-chat-next>CREATE YOUR DIET</button>`;
   }
   if (phase.kind === 'question') {
     const proceed = canProceed(phase, form);
@@ -134,7 +134,7 @@ function composerContent(page, form) {
   if (phase.kind === 'confirm') {
     return `
       <div class="chat-confirm">${renderConfirmBody(form, false)}</div>
-      <button type="button" class="ob-next chat-send" data-chat-next>CREATE MY FOOD PLAN →</button>`;
+      <button type="button" class="ob-next chat-send" data-chat-next>CREATE MY DIET →</button>`;
   }
   return '';
 }

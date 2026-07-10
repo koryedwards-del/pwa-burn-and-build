@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="280" height="520" viewBox="0 0 280 520" role="img" aria-label="Burn and Build Food Plan app preview">
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="520" viewBox="0 0 280 520" role="img" aria-label="Burn and Build Diet app preview">
   <rect width="280" height="520" rx="32" fill="#111"/>
   <rect x="8" y="8" width="264" height="504" rx="26" fill="#000"/>
   <text x="20" y="36" fill="#e8722a" font-family="system-ui,sans-serif" font-size="9" font-weight="700" letter-spacing="1.1">BURN &amp; BUILD</text>
-  <text x="20" y="62" fill="#f5f5f5" font-family="system-ui,sans-serif" font-size="17" font-weight="700">Food Plan</text>
-  <text x="168" y="62" fill="#888" font-family="system-ui,sans-serif" font-size="10">Day 1 of 56 ∑ Kory</text>
+  <text x="20" y="62" fill="#f5f5f5" font-family="system-ui,sans-serif" font-size="17" font-weight="700">Diet</text>
+  <text x="168" y="62" fill="#888" font-family="system-ui,sans-serif" font-size="10">Day 1 of 56 ù Kory</text>
 
   <rect x="16" y="76" width="248" height="118" rx="14" fill="#141414" stroke="#2a2a2a"/>
   <text x="28" y="98" fill="#f5f5f5" font-family="system-ui,sans-serif" font-size="12" font-weight="700">Daily targets</text>
@@ -37,7 +37,7 @@
   <text x="218" y="404" fill="#888" font-family="system-ui,sans-serif" font-size="10">12:00 PM</text>
 
   <rect x="16" y="452" width="118" height="40" rx="12" fill="#e8722a"/>
-  <text x="75" y="477" fill="#000" font-family="system-ui,sans-serif" font-size="10" font-weight="700" text-anchor="middle">FOOD PLAN</text>
+  <text x="75" y="477" fill="#000" font-family="system-ui,sans-serif" font-size="10" font-weight="700" text-anchor="middle">DIET</text>
   <rect x="146" y="452" width="118" height="40" rx="12" fill="#141414" stroke="#2a2a2a"/>
   <text x="205" y="477" fill="#888" font-family="system-ui,sans-serif" font-size="10" font-weight="700" text-anchor="middle">GROCERY</text>
 </svg>

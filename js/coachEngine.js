@@ -1,13 +1,13 @@
 /** Coach Kory card series — port of CoachEngine.swift */
 
 function day1Cards() {
-  const title = 'How to Use Your Custom Food Plan';
+  const title = 'How to Use Your Custom Diet';
   return [
     {
       dayNumber: 1,
       title,
       image: 'img/coach/card-1.png',
-      text: "When you tap on your custom food plan button, you'll see this screen at the top. You see new message from Coach Kory. This is where you'll receive messages from the coach.\n\nBelow that you see three meals and three snacks — Breakfast, Lunch, Dinner, Morning Snack, Afternoon Snack and Evening Snack.",
+      text: "When you tap on your custom diet button, you'll see this screen at the top. You see new message from Coach Kory. This is where you'll receive messages from the coach.\n\nBelow that you see three meals and three snacks — Breakfast, Lunch, Dinner, Morning Snack, Afternoon Snack and Evening Snack.",
     },
     {
       dayNumber: 1,
@@ -37,7 +37,7 @@ function day1Cards() {
       dayNumber: 1,
       title,
       image: 'img/coach/card-6.png',
-      text: "The morning snack, afternoon snack, and evening snack are all whole fresh fruit snacks — no dried fruit, no juice. And again in this program 1.3 servings, and the apples, apricots, bananas, blackberries are all measured to give 1.3 servings.\n\nYou are probably starting to realize — for probably the first time — you have a truly accurate food plan to follow. No guessing.",
+      text: "The morning snack, afternoon snack, and evening snack are all whole fresh fruit snacks — no dried fruit, no juice. And again in this program 1.3 servings, and the apples, apricots, bananas, blackberries are all measured to give 1.3 servings.\n\nYou are probably starting to realize — for probably the first time — you have a truly accurate diet to follow. No guessing.",
     },
     {
       dayNumber: 1,
@@ -57,7 +57,7 @@ export function getCoachDay(dayNumber) {
   if (dayNumber !== 1) return null;
   return {
     dayNumber: 1,
-    title: 'How to Use Your Custom Food Plan',
+    title: 'How to Use Your Custom Diet',
     cards: day1Cards(),
   };
 }

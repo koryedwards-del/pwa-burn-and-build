@@ -97,10 +97,10 @@ function renderSectionPanel(section, form, open, complete) {
 
 function continueLabel(section, store) {
   if (store?.accordionEditReturn) return 'Back to review →';
-  if (section.intro) return 'Create your food plan';
+  if (section.intro) return 'Create your diet';
   if (section.id === 'email') return 'Review & approve →';
   if (section.review) {
-    return store?.reviewViewed ? 'I approve-create my food plan →' : 'I\'ve reviewed my answers →';
+    return store?.reviewViewed ? 'I approve-create my diet →' : 'I\'ve reviewed my answers →';
   }
   return 'Continue →';
 }

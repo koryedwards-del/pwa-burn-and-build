@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Ops helper — list or delete food plans in SQLite (run on Render shell or locally). */
+/** Ops helper — list or delete diets in SQLite (run on Render shell or locally). */
 
 import Database from 'better-sqlite3';
 import path from 'path';

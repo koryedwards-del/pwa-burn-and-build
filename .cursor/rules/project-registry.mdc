@@ -11,7 +11,7 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 |------|------|------|
 | `landing/` | gettheburnandbuildapp.com (GitHub Pages) | Marketing — Hardkor-style content rebranded as B&B; see `docs/LANDING-MERGE.md` |
 | `createyourfoodplan/` | Render `/createyourfoodplan/` | Program creator — email → intake → Stripe → save plan |
-| `myplan/` | GitHub Pages or Render `/myplan/` | Daily app — food plan, grocery, logging |
+| `myplan/` | GitHub Pages or Render `/myplan/` | Daily app — diet, grocery, logging |
 | `server/` | Render | API + SQLite for programs/contacts |
 
 **Flow:** Landing CTA → creator → myplan app.

@@ -1,4 +1,4 @@
-/** Client API — save/load food plan by email (Creator → DB → Shell PWA) */
+/** Client API — save/load diet by email (Creator → DB → Shell PWA) */
 
 import { apiUrl } from './apiConfig.js';
 import { fetchJson } from './apiFetch.js';
@@ -88,10 +88,10 @@ export async function fetchProgramHistoryFromServer(email) {
     const { res, data } = await fetchJson(
       apiUrl(`/api/programs/history?email=${encodeURIComponent(normalizeEmail(email))}`)
     );
-    if (!res.ok) return apiFailure(res, data, 'Could not load food plan history.');
+    if (!res.ok) return apiFailure(res, data, 'Could not load diet history.');
     return data;
   } catch {
-    return { ok: false, message: 'Network error loading food plan history.' };
+    return { ok: false, message: 'Network error loading diet history.' };
   }
 }
 
@@ -100,9 +100,9 @@ export async function fetchProgramByIdFromServer(email, programId) {
     const { res, data } = await fetchJson(
       apiUrl(`/api/programs/${encodeURIComponent(programId)}?email=${encodeURIComponent(normalizeEmail(email))}`)
     );
-    if (!res.ok) return apiFailure(res, data, 'Could not load that food plan.');
+    if (!res.ok) return apiFailure(res, data, 'Could not load that diet.');
     return data;
   } catch {
-    return { ok: false, message: 'Network error loading food plan.' };
+    return { ok: false, message: 'Network error loading diet.' };
   }
 }

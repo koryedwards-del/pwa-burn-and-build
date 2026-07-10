@@ -55,7 +55,7 @@ export function restoreLocalAppData() {
     const raw = localStorage.getItem(BACKUP_KEY);
     if (!raw) return { ok: false, message: 'No backup found on this device.' };
     const snap = JSON.parse(raw);
-    if (!snap.program) return { ok: false, message: 'Backup has no food plan.' };
+    if (!snap.program) return { ok: false, message: 'Backup has no diet.' };
 
     for (const [field, key] of Object.entries(STORAGE_KEYS)) {
       const value = snap[field];

@@ -378,7 +378,7 @@ export function welcomeScreens() {
       type: 'intro',
       line1: 'READY?',
       line2: "LET'S BUILD.",
-      body: "This takes a few minutes. It's worth it. We'll use your answers to create a food plan that's yours — not a generic template.",
+      body: "This takes a few minutes. It's worth it. We'll use your answers to create a diet that's yours — not a generic template.",
       quote: "I learned this program in 1992 and it has been invaluable. At 67, I am confident I can maintain and even build muscle and lose fat. Let's go!",
       quoteName: 'Linda Kay',
       quoteMeta: 'Client since 1992',
@@ -424,9 +424,9 @@ export function canProceed(phase, form) {
 }
 
 export function nextLabel(phase, isEditMode) {
-  if (phase.kind === 'welcome' && phase.index === 0) return 'CREATE YOUR FOOD PLAN';
+  if (phase.kind === 'welcome' && phase.index === 0) return 'CREATE YOUR DIET';
   if (phase.kind === 'welcome') return 'NEXT  →';
-  if (phase.kind === 'confirm') return isEditMode ? 'UPDATE MY PLAN  →' : 'Create my food plan';
-  if (phase.kind === 'done') return isEditMode ? 'DONE  →' : 'SEE YOUR FOOD PLAN  →';
+  if (phase.kind === 'confirm') return isEditMode ? 'UPDATE MY PLAN  →' : 'Create my diet';
+  if (phase.kind === 'done') return isEditMode ? 'DONE  →' : 'SEE YOUR DIET  →';
   return 'NEXT  →';
 }

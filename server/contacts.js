@@ -124,7 +124,7 @@ export function ensureBurnAndBuildAccess(email) {
   return { ok: true, contact };
 }
 
-/** Food plan creation adds or updates contact; access unlocks after payment. */
+/** Diet creation adds or updates contact; access unlocks after payment. */
 export function enrollContactFromProgramCreation(email, displayName) {
   const name = String(displayName || '').trim();
   const existing = getContact(email);
@@ -150,7 +150,7 @@ export function programSavedForEmail(email) {
 export function resolveProgramLoad(email, { getLatestProgram: getLatest, countPrograms: count }) {
   const pkg = getLatest(email);
   if (!pkg) {
-    return { ok: false, status: 404, message: 'No food plan saved for this email yet.' };
+    return { ok: false, status: 404, message: 'No diet saved for this email yet.' };
   }
 
   const access = ensureBurnAndBuildAccess(email);

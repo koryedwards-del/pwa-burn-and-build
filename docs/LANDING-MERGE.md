@@ -79,7 +79,7 @@ From current `landing/index.html`:
 
 ## Hardkor-only gaps to fix when merging home
 
-- Pricing section has **no buy button** today → add **Create Your Food Plan →**
+- Pricing section has **no buy button** today → add **Create Your Diet →**
 - Calculator is **inline JS** in Hardkor → optionally wire `previewCalculator.js` (same math)
 - Nav links: Hardkor uses `#pricing`; add explicit CTA
 

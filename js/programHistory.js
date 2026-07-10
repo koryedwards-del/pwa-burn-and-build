@@ -118,7 +118,7 @@ export function summarizeProgram(pkg, { createdAt, id, label } = {}) {
   return {
     id: id || pkg?.program?.id,
     createdAt: testDate,
-    label: label || pkg?.program?.label || 'Food Plan',
+    label: label || pkg?.program?.label || 'Diet',
     testDateDisplay: formatTestDate(testDate),
     fieldRows: programHistoryFieldRows(pkg),
     fatPercentDisplay: fatPct ? fatPct.toFixed(2) : '—',

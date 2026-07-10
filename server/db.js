@@ -81,7 +81,7 @@ export function saveProgram(email, pkg) {
   const existing = db.prepare('SELECT email, package_json FROM programs WHERE id = ?').get(id);
 
   if (existing && normalizeEmail(existing.email) !== key) {
-    throw new Error('This food plan belongs to another account.');
+    throw new Error('This diet belongs to another account.');
   }
 
   if (existing) {
@@ -167,7 +167,7 @@ export function getProgramById(email, programId) {
   return parsePackage(row);
 }
 
-/** Delete one food plan for this email. Returns true if a row was removed. */
+/** Delete one diet for this email. Returns true if a row was removed. */
 export function deleteProgram(email, programId) {
   const result = db.prepare(`
     DELETE FROM programs

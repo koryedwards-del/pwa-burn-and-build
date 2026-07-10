@@ -509,7 +509,7 @@ function renderQuestionBody(index, form) {
 
     case 9:
       return `
-        <p class="ob-exercise-desc">Your wake time sets breakfast, lunch, dinner, and snack times for each day of your food plan.</p>
+        <p class="ob-exercise-desc">Your wake time sets breakfast, lunch, dinner, and snack times for each day of your diet.</p>
         ${renderWakePicker(form)}
         <div class="ob-divider"></div>
         <div class="ob-section-label">MEAL REMINDERS</div>
@@ -691,14 +691,14 @@ function renderDone(isEditMode) {
     return `
       <div class="ob-done">
         <div class="ob-done-check">✓</div>
-        <p class="ob-done-body">Your food plan has been recalculated based on your updated numbers.</p>
+        <p class="ob-done-body">Your diet has been recalculated based on your updated numbers.</p>
         <p class="ob-done-sub">New servings. Same system.<br>Keep going.</p>
       </div>`;
   }
   return `
     <div class="ob-done">
       <div class="ob-done-check">✓</div>
-      <p class="ob-done-body">Your custom food plan is calculated from your lean body mass, job, lifestyle, and activities.</p>
+      <p class="ob-done-body">Your custom diet is calculated from your lean body mass, job, lifestyle, and activities.</p>
       <p class="ob-done-sub">Eat the food. Trust the plan.</p>
     </div>`;
 }
@@ -798,7 +798,7 @@ export function emailSectionValid(form) {
   return isValidEmail(form.email);
 }
 
-const EMAIL_USAGE_HINT = 'Your email is used by the Burn & Build App to authorize and upload your custom food plan.';
+const EMAIL_USAGE_HINT = 'Your email is used by the Burn & Build App to authorize and upload your custom diet.';
 const NEWSLETTER_LEAD = 'Maybe you\'d like a touch of motivation going into every weekend.';
 const NEWSLETTER_CHECK_LABEL = 'Yes, send me the newsletter';
 

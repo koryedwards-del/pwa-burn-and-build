@@ -1,4 +1,4 @@
-/** My Plan PWA — daily food plan app at /myplan/ */
+/** My Plan PWA — daily diet app at /myplan/ */
 
 import { computePlan, generateMealSlots } from './burnEngine.js';
 import { getCoachDay } from './coachEngine.js';
@@ -354,7 +354,7 @@ async function syncProgramFromServer() {
     store.loadError = null;
     return applyImportedProgram(result.package);
   }
-  store.loadError = result.message || 'No food plan saved for this email yet.';
+  store.loadError = result.message || 'No diet saved for this email yet.';
   return false;
 }
 
@@ -420,7 +420,7 @@ async function submitLoadPlan() {
   store.loadBusy = false;
   if (ok) await refreshProgramHistory();
   if (!ok && !store.loadError) {
-    store.loadError = 'No food plan found for this email.';
+    store.loadError = 'No diet found for this email.';
   }
   store.expandedNavButton = null;
   render();
@@ -726,10 +726,10 @@ function mealProgress(slot) {
 }
 
 const NAV_MENU_LABELS = {
-  plan: 'Your Custom Food Plan',
+  plan: 'Your Custom Diet',
   grocery: 'Grocery List',
   projections: 'Projections',
-  'previous-plans': 'Your Food Plans',
+  'previous-plans': 'Your Diets',
 };
 
 function canOpenNav(nav) {
@@ -773,12 +773,12 @@ function renderLoadPlanHome() {
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       ${renderHomeLogo()}
       <div class="home-load-plan">
-        <p class="home-load-lead">Enter the email you used to create your food plan.</p>
+        <p class="home-load-lead">Enter the email you used to create your diet.</p>
         ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
         ${store.emailError ? `<div class="import-error">${store.emailError}</div>` : ''}
         <label class="home-load-label" for="load-plan-email">Email address</label>
         <input id="load-plan-email" class="ob-input ob-input-lg" type="email" name="loadPlanEmail" value="${getAppEmail()}" placeholder="you@example.com" autocomplete="email" inputmode="email" />
-        <button type="button" class="btn-home" data-load-plan ${store.loadBusy ? 'disabled' : ''}>${store.loadBusy ? 'Loading…' : 'Load my food plan'}</button>
+        <button type="button" class="btn-home" data-load-plan ${store.loadBusy ? 'disabled' : ''}>${store.loadBusy ? 'Loading…' : 'Load my diet'}</button>
         <a href="${BNB_CREATOR_URL}" class="home-load-create" target="_blank" rel="noopener noreferrer" data-open-creator>Need a new plan? Create one →</a>
       </div>
       ${renderHomeSiteLink()}
@@ -814,7 +814,7 @@ function renderWakePickerSettings(wakeTime) {
   return `
     <div class="settings-wake-block">
       <div class="settings-field-label">Wake time</div>
-      <p class="settings-field-desc">Sets breakfast, lunch, dinner, and snack times on your daily food plan.</p>
+      <p class="settings-field-desc">Sets breakfast, lunch, dinner, and snack times on your daily diet.</p>
       <div class="ob-wake-picker">
         <select class="ob-select" data-wake-part="hour" aria-label="Wake hour">${hourOpts}</select>
         <span class="ob-wake-colon">:</span>
@@ -845,10 +845,10 @@ function renderSettings() {
         ${canEdit ? `
           ${renderWakePickerSettings(wakeTime)}
           <button type="button" class="btn-primary settings-save" data-save-wake>Save wake time</button>
-          <p class="settings-note">Wake time is the only setting you can change here. To update servings or activity, create a new food plan.</p>
+          <p class="settings-note">Wake time is the only setting you can change here. To update servings or activity, create a new diet.</p>
         ` : `
-          <p class="settings-empty">Open or create a food plan first — wake time controls when your meals are scheduled each day.</p>
-          <a href="${BNB_CREATOR_URL}" class="btn-primary settings-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your food plan</a>
+          <p class="settings-empty">Open or create a diet first — wake time controls when your meals are scheduled each day.</p>
+          <a href="${BNB_CREATOR_URL}" class="btn-primary settings-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your diet</a>
         `}
         <div class="settings-data-block">
           <div class="settings-field-label">Your data on this device</div>
@@ -1029,7 +1029,7 @@ function renderPreviousPlansHeader() {
   return `
     <div class="plan-header">
       <button type="button" class="back-btn history-back" data-nav="home">←</button>
-      <h1>Your Food Plans</h1>
+      <h1>Your Diets</h1>
     </div>`;
 }
 
@@ -1146,7 +1146,7 @@ function renderPreviousPlans() {
     return `
       <div class="screen previous-plans-screen">
         ${renderPreviousPlansHeader()}
-        <div class="history-loading">Loading food plan history…</div>
+        <div class="history-loading">Loading diet history…</div>
       </div>`;
   }
 
@@ -1155,8 +1155,8 @@ function renderPreviousPlans() {
       <div class="screen previous-plans-screen">
         ${renderPreviousPlansHeader()}
         <div class="history-empty">
-          <p>You haven&rsquo;t created a food plan yet.</p>
-          <a href="${BNB_CREATOR_URL}" class="history-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your food plan →</a>
+          <p>You haven&rsquo;t created a diet yet.</p>
+          <a href="${BNB_CREATOR_URL}" class="history-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your diet →</a>
         </div>
       </div>`;
   }
@@ -1165,7 +1165,7 @@ function renderPreviousPlans() {
     <div class="screen previous-plans-screen">
       ${renderPreviousPlansHeader()}
 
-      <p class="history-intro">Tap a food plan to make it ACTIVE</p>
+      <p class="history-intro">Tap a diet to make it ACTIVE</p>
 
       ${store.programHistoryError ? `<div class="history-error">${store.programHistoryError}</div>` : ''}
 
@@ -1252,7 +1252,7 @@ function renderPlan() {
     <div class="screen food-plan-screen">
       <div class="plan-header">
         <button type="button" class="back-btn plan-back" data-nav="home" aria-label="Back">‹</button>
-        <h1>Custom Food Plan</h1>
+        <h1>Custom Diet</h1>
       </div>
 
       ${slots.map((slot) => {
@@ -1429,7 +1429,7 @@ function renderGrocery() {
       ${!store.groceryItems.length ? `
       <div class="grocery-empty">
         <h2>No items yet</h2>
-        <p>Start logging meals in your Custom Food Plan. Your grocery list builds from what you actually eat.</p>
+        <p>Start logging meals in your Custom Diet. Your grocery list builds from what you actually eat.</p>
       </div>` : ''}
 
       ${groups.map(({ section, items }) => `

@@ -1,5 +1,5 @@
 /**
- * Plan Support UI (shell) — Food Plan + Grocery List only.
+ * Plan Support UI (shell) — Diet + Grocery List only.
  * Reference: js/app.js (PWA v2 — do not modify).
  * Receives servings from the Creator via program package import.
  */
@@ -479,11 +479,11 @@ function validEmail(email) {
 async function loadProgramFromServer(email) {
   const result = await fetchProgramFromServer(email);
   if (!result.ok || !result.package) {
-    store.loadError = result.message || 'No food plan found for this email.';
+    store.loadError = result.message || 'No diet found for this email.';
     return false;
   }
   if (!applyImportedProgram(result.package)) {
-    store.loadError = store.importError || 'Could not load your food plan.';
+    store.loadError = store.importError || 'Could not load your diet.';
     return false;
   }
   store.loadError = null;
@@ -537,10 +537,10 @@ function renderWaiting() {
       <div class="logo-block ps-empty-logo">
         <div class="brand">BURN &amp; BUILD</div>
       </div>
-      <h2 class="ps-empty-title">Get your food plan</h2>
+      <h2 class="ps-empty-title">Get your diet</h2>
       ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
       <p class="ps-empty-lead">Create your plan on the website first — then open this app and sign in with the same email.</p>
-      <a href="../createyourfoodplan/" class="btn-primary ps-empty-cta">Create your food plan →</a>
+      <a href="../createyourfoodplan/" class="btn-primary ps-empty-cta">Create your diet →</a>
     </div>`;
 }
 
@@ -552,13 +552,13 @@ function renderEmailLogin() {
       </div>
       <div class="ob-welcome-line1">YOUR EMAIL</div>
       <div class="ob-welcome-line2">IS YOUR LOGIN</div>
-      <p class="ps-empty-lead">Enter the same email you used when you built your food plan.</p>
+      <p class="ps-empty-lead">Enter the same email you used when you built your diet.</p>
       ${store.emailError ? `<div class="import-error">${store.emailError}</div>` : ''}
       ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
       <label class="unlock-label" for="shell-email">Email address</label>
       <input id="shell-email" class="ob-input ob-input-lg" type="email" name="shellEmail" value="${store.email || getAppEmail()}" placeholder="you@example.com" autocomplete="email" />
-      <button type="button" class="btn-primary ps-empty-cta" data-shell-email-submit>LOAD MY FOOD PLAN →</button>
-      <a href="../createyourfoodplan/" class="unlock-back-link" style="display:block;margin-top:16px;">Create your food plan →</a>
+      <button type="button" class="btn-primary ps-empty-cta" data-shell-email-submit>LOAD MY DIET →</button>
+      <a href="../createyourfoodplan/" class="unlock-back-link" style="display:block;margin-top:16px;">Create your diet →</a>
     </div>`;
 }
 
@@ -709,7 +709,7 @@ function renderGroceryContent() {
       ${!store.groceryItems.length ? `
       <div class="grocery-empty">
         <h2>No items yet</h2>
-        <p>Start logging meals in your Custom Food Plan. Your grocery list builds from what you actually eat.</p>
+        <p>Start logging meals in your Custom Diet. Your grocery list builds from what you actually eat.</p>
       </div>` : ''}
 
       ${groups.map(({ section, items }) => `
@@ -742,7 +742,7 @@ function renderGroceryContent() {
 
 function screenTitle() {
   if (store.screen === 'grocery') return 'Grocery List';
-  return 'Food Plan';
+  return 'Diet';
 }
 
 function renderShell(content, { showTabs = true, empty = false } = {}) {
@@ -765,7 +765,7 @@ function renderShell(content, { showTabs = true, empty = false } = {}) {
       <div class="ps-main">${content}</div>
       ${showTabs && hasActiveProgram() ? `
       <nav class="ps-tabs" aria-label="Plan support">
-        <button type="button" class="ps-tab ${store.screen === 'plan' ? 'active' : ''}" data-screen="plan">Food Plan</button>
+        <button type="button" class="ps-tab ${store.screen === 'plan' ? 'active' : ''}" data-screen="plan">Diet</button>
         <button type="button" class="ps-tab ${store.screen === 'grocery' ? 'active' : ''}" data-screen="grocery">Grocery</button>
       </nav>` : ''}
     </div>`;

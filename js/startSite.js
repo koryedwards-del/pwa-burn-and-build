@@ -26,7 +26,7 @@ const LANDING_URL = 'https://gettheburnandbuildapp.com';
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
-  'Daily food plan in the app',
+  'Daily diet in the app',
   'Meal logging',
   'Grocery lists',
   'Progress tracking',
@@ -75,7 +75,7 @@ const TEACHING = [
     title: 'Two parts. One system.',
     body: [
       'This website is where your personalized program is created — the same role the live seminar played for decades. Teaching, intake, and the Burn Engine all happen here.',
-      'The Burn & Build app is where you live your program every day: food plan, logging, grocery list, and progress tracking. It executes the program you create here.',
+      'The Burn & Build app is where you live your program every day: diet, logging, grocery list, and progress tracking. It executes the program you create here.',
       'You can revisit this site anytime for deeper teaching. The app stays focused on doing the work every day.',
     ],
   },
@@ -302,11 +302,11 @@ function renderPlanReady() {
   const paid = store.accessGranted;
   let lead;
   if (paid) {
-    lead = 'Your personalized food plan is ready in the Burn &amp; Build app.';
+    lead = 'Your personalized diet is ready in the Burn &amp; Build app.';
   } else if (store.saveError) {
-    lead = 'Your food plan is ready on this device. Save it to your account, then complete checkout.';
+    lead = 'Your diet is ready on this device. Save it to your account, then complete checkout.';
   } else {
-    lead = 'Your personalized food plan is saved. Complete checkout to unlock the app.';
+    lead = 'Your personalized diet is saved. Complete checkout to unlock the app.';
   }
 
   const payBlock = paid ? `
@@ -334,7 +334,7 @@ function renderPlanReady() {
       <div class="screen unlock-screen">
         <div class="start-success">
           <div class="check">✓</div>
-          <div class="ob-welcome-line1">YOUR FOOD PLAN</div>
+          <div class="ob-welcome-line1">YOUR DIET</div>
           <div class="ob-welcome-line2">IS READY</div>
         </div>
         <div class="unlock-panel">
@@ -409,7 +409,7 @@ function renderCreating() {
         <div class="unlock-panel creating-panel">
           <div class="ob-welcome-line1">CREATING</div>
           <div class="ob-welcome-line2">YOUR PLAN</div>
-          <p class="unlock-lead">${name ? `Creating a personalized food plan for ${name}…` : 'Creating your personalized food plan…'}</p>
+          <p class="unlock-lead">${name ? `Creating a personalized diet for ${name}…` : 'Creating your personalized diet…'}</p>
           <div class="creating-bar" aria-hidden="true"><span></span></div>
         </div>
       </div>
@@ -477,12 +477,12 @@ function renderUnlockEmail() {
       <div class="screen unlock-screen">
         <div class="start-success compact">
           <div class="check">✓</div>
-          <div class="ob-welcome-line1">YOUR FOOD PLAN</div>
+          <div class="ob-welcome-line1">YOUR DIET</div>
           <div class="ob-welcome-line2">IS READY.</div>
         </div>
         <div class="unlock-panel">
           <div class="teach-kicker">Step 1 of 3 · Unlock</div>
-          <h2 class="unlock-title">Get your custom food plan</h2>
+          <h2 class="unlock-title">Get your custom diet</h2>
           <p class="unlock-lead">Your 8-week Burn &amp; Build program has been created${name ? ` for ${name}` : ''}${lbm ? ` from ${lbm.toFixed(1)} lbs of lean body mass` : ''}. Enter your email to connect it to your phone and continue.</p>
           ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
           <label class="unlock-label" for="unlock-email">Email address</label>
@@ -614,7 +614,7 @@ async function savePlanToServer() {
   }
   ensureBuiltPackage();
   if (!store.builtPackage) {
-    store.saveError = 'No food plan to save.';
+    store.saveError = 'No diet to save.';
     return false;
   }
   store.saveBusy = true;

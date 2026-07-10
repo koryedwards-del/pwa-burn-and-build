@@ -87,7 +87,7 @@ export async function deleteContact(email) {
 }
 
 export function burnAndBuildAccessMessage() {
-  return 'Create your food plan first, or ask Coach Kory to enable Burn & Build on your contact.';
+  return 'Create your diet first, or ask Coach Kory to enable Burn & Build on your contact.';
 }
 
 export async function ensureBurnAndBuildContact(email) {

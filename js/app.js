@@ -541,11 +541,11 @@ function renderHome() {
       </div>
       ${programDay ? `<p class="home-program-day">Day ${programDay} of ${store.program.program.durationDays}</p>` : ''}
       <div class="btn-stack">
-        <button type="button" class="btn-primary" data-nav="plan">Your Custom Food Plan</button>
+        <button type="button" class="btn-primary" data-nav="plan">Your Custom Diet</button>
         <button type="button" class="btn-primary" data-nav="grocery">Grocery List</button>
         <button type="button" class="btn-primary" data-nav="coach">Coaching</button>
         <button type="button" class="btn-secondary" data-nav="import">${hasActiveProgram() ? 'Open New Program' : 'Open Program'}</button>
-        ${hasActiveProgram() ? '' : '<a href="createyourfoodplan/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Create Your Food Plan →</a>'}
+        ${hasActiveProgram() ? '' : '<a href="createyourfoodplan/" class="btn-secondary" style="display:block;text-align:center;text-decoration:none;">Create Your Diet →</a>'}
       </div>
       <p class="home-footer">Stay consistent. Eat on time.${name ? ` — ${name}` : ''}</p>
     </div>`;
@@ -594,7 +594,7 @@ function renderPlan() {
     <div class="screen">
       <div class="plan-header">
         <button type="button" class="back-btn" data-nav="home">← Home</button>
-        <h1>Custom Food Plan</h1>
+        <h1>Custom Diet</h1>
       </div>
 
       ${showCoachBanner() ? `
@@ -795,7 +795,7 @@ function renderGrocery() {
       ${!store.groceryItems.length ? `
       <div class="grocery-empty">
         <h2>No items yet</h2>
-        <p>Start logging meals in your Custom Food Plan. Your grocery list builds from what you actually eat.</p>
+        <p>Start logging meals in your Custom Diet. Your grocery list builds from what you actually eat.</p>
       </div>` : ''}
 
       ${groups.map(({ section, items }) => `
