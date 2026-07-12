@@ -115,6 +115,12 @@
   border-top: 1px solid var(--border);
 }
 
+.projected-results-pro-tip {
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
 .eight-week-hero {
   display: flex;
   flex-direction: column;
