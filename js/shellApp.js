@@ -918,7 +918,7 @@ function renderProjectedResults(intake, projection) {
     <section class="projections-section">
       <h2 class="projections-section-label">Your projected results</h2>
       <div class="projected-results-card">
-        <p>Your food plan is calculated from your lean body mass and activity-driven projections. It is personalized to help you lose fat and increase your energy levels.</p>
+        <p>Your diet is calculated using your LBM, job, life, exercise and activities.</p>
         <p>How much food you need each day depends on how much lean body mass you have. It also depends on your activity level and the type and amount of exercise you participate in.</p>
         <p>Your body needs a certain amount of protein to repair and replace lean body mass (muscle), and a certain amount of complex carbohydrates to provide energy for your busy days and to protect muscle mass. While all that is going on, your body will burn <strong>${fatServings} tsp of fat</strong> to balance out the equation.</p>
         <p>Here's how losing fat works: <strong>${fatServings} tsp a day</strong> that you don't eat in the form of fat, sugar, and alcohol adds up to you losing <strong>${projection.fatLostLbs.toFixed(1)} pounds of body fat</strong> over the next 8 weeks.</p>
