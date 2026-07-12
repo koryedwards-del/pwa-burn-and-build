@@ -19,7 +19,7 @@ import {
   wakeTimeFromParts,
 } from './onboardingEngine.js';
 import { computeWhatsPossible } from './previewCalculator.js';
-import { analyzeLeanBodyMass, computeDietEightWeekProjection, computeTodayBodyComposition } from './bodyCompositionAnalysis.js';
+import { analyzeLeanBodyMass, computeDietEightWeekProjection, computeDietProjectionTimeline, computeTodayBodyComposition } from './bodyCompositionAnalysis.js';
 import { sortProgramHistory, summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
@@ -1000,11 +1000,25 @@ function renderProjections() {
       </div>`;
   }
 
-  const result = computeWhatsPossible({
-    gender: intakeGender(intake),
-    weightLbs: intake.totalWeight,
-    bodyFatPercent: intake.fatPercent,
-  });
+  const plan = getPlan();
+  const fatServings = plan?.servings?.fatMaintain;
+  const dietTimeline = fatServings
+    ? computeDietProjectionTimeline({
+        gender: intakeGender(intake),
+        weightLbs: intake.totalWeight,
+        leanBodyMass: intake.leanBodyMass,
+        bodyFatPercent: intake.fatPercent,
+        fatServingsPerDay: fatServings,
+      })
+    : null;
+
+  const result = dietTimeline?.valid
+    ? dietTimeline
+    : computeWhatsPossible({
+        gender: intakeGender(intake),
+        weightLbs: intake.totalWeight,
+        bodyFatPercent: intake.fatPercent,
+      });
 
   if (!result.valid) {
     return `
@@ -1016,12 +1030,11 @@ function renderProjections() {
       </div>`;
   }
 
-  const plan = getPlan();
-  const eightWeek = plan?.servings?.fatMaintain
+  const eightWeek = fatServings
     ? computeDietEightWeekProjection({
         weightLbs: intake.totalWeight,
         leanBodyMass: intake.leanBodyMass,
-        fatServingsPerDay: plan.servings.fatMaintain,
+        fatServingsPerDay: fatServings,
       })
     : null;
 

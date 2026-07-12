@@ -4,6 +4,18 @@ import { fatLossPoundsFromDailyServings } from './burnEngine.js';
 
 const EIGHT_WEEK_CYCLE = 8;
 const WEEKS_PER_MONTH = 4;
+const TARGET_BF = { male: 4.68, female: 8.95 };
+
+function aceBadge(bf, gender, isFloor) {
+  if (isFloor) return { label: 'Showtime', cls: 'showtime' };
+  if (gender === 'male' && bf <= 24 && bf > 13) return { label: 'Average', cls: 'average' };
+  if (gender === 'female' && bf <= 31 && bf > 20) return { label: 'Average', cls: 'average' };
+  return null;
+}
+
+function targetFatLbs(lbm, targetBf) {
+  return (lbm / (1 - targetBf / 100)) - lbm;
+}
 
 function projectFatComposition({ weight, lbm, fatServingsPerDay, days }) {
   const startFatLbs = weight - lbm;
@@ -62,6 +74,93 @@ export function computeDietEightWeekProjection({ weightLbs, leanBodyMass, fatSer
     weeklyFatLossLbs: Math.round((eightWeek.fatLostLbs / weeks) * 10) / 10,
     fatServingsPerDay: servings,
     maxBfChangePerMonth: Math.round(maxBfChangePerMonth * 10) / 10,
+  };
+}
+
+/** Full timeline from daily fat servings (8-week cycles, constant LBM). */
+export function computeDietProjectionTimeline({
+  gender,
+  weightLbs,
+  leanBodyMass,
+  bodyFatPercent,
+  fatServingsPerDay,
+}) {
+  const weight = Number(weightLbs);
+  const lbm = Number(leanBodyMass);
+  const bf = Number(bodyFatPercent);
+  const servings = Number(fatServingsPerDay);
+  const g = gender === 'female' ? 'female' : 'male';
+  const targetBf = TARGET_BF[g];
+
+  if (!weight || weight <= 0 || !lbm || lbm <= 0 || lbm >= weight || !bf || bf <= targetBf || bf > 70 || !servings || servings <= 0) {
+    return { valid: false };
+  }
+
+  const cycleFatLossLbs = fatLossPoundsFromDailyServings(servings, EIGHT_WEEK_CYCLE * 7);
+  const goalFatLbs = targetFatLbs(lbm, targetBf);
+  const finalWeight = lbm + goalFatLbs;
+
+  const rows = [];
+  const shownBadges = {};
+  let curWeight = weight;
+  let curFatLbs = weight - lbm;
+  let cycleWeeks = 0;
+
+  rows.push({
+    timeline: 'Current',
+    bodyFat: bf,
+    bodyFatDisplay: `${bf.toFixed(0)}%`,
+    weight,
+    weightDisplay: `${weight.toFixed(0)} lbs`,
+    isCurrent: true,
+    badge: null,
+  });
+
+  while (curFatLbs > goalFatLbs + 0.05) {
+    const remaining = curFatLbs - goalFatLbs;
+    const isFloor = remaining <= cycleFatLossLbs;
+    const lostThisCycle = isFloor ? remaining : cycleFatLossLbs;
+    const weeksThisCycle = isFloor
+      ? (lostThisCycle > 0 ? (lostThisCycle / cycleFatLossLbs) * EIGHT_WEEK_CYCLE : 0)
+      : EIGHT_WEEK_CYCLE;
+
+    curFatLbs -= lostThisCycle;
+    curWeight = lbm + curFatLbs;
+    const newBf = isFloor ? targetBf : (curFatLbs / curWeight) * 100;
+    cycleWeeks += weeksThisCycle;
+
+    const badge = aceBadge(newBf, g, isFloor);
+    let badgeLabel = null;
+    if (badge && !shownBadges[badge.label]) {
+      shownBadges[badge.label] = true;
+      badgeLabel = badge.label;
+    }
+
+    rows.push({
+      timeline: isFloor ? `${Math.round(cycleWeeks)} weeks` : `${cycleWeeks} weeks`,
+      bodyFat: newBf,
+      bodyFatDisplay: isFloor ? `${targetBf}%` : `${newBf.toFixed(0)}%`,
+      weight: curWeight,
+      weightDisplay: `${curWeight.toFixed(1)} lbs`,
+      isCurrent: false,
+      badge: badgeLabel,
+    });
+
+    if (isFloor) break;
+  }
+
+  const wholeWeeks = Math.round(cycleWeeks);
+  const narrative = `<strong>Pro Tip:</strong> Transforming your body is a balance of lean body mass (muscle shape) and how much body fat is covering it up. Based on your current weight and body fat, Burn &amp; Build can take you from <strong>${weight.toFixed(0)} lbs at ${bf.toFixed(0)}%</strong> to <strong>${finalWeight.toFixed(1)} lbs at ${targetBf}%</strong> in <strong>${wholeWeeks} weeks</strong> — while increasing your strength and energy. If the projected body weight at your desired body fat seems too low, it means you need more muscle. Participate in weight training and follow your personalized Burn &amp; Build program for fastest results.`;
+
+  return {
+    valid: true,
+    gender: g,
+    lbm: Math.round(lbm * 10) / 10,
+    targetBf,
+    finalWeight: Math.round(finalWeight * 10) / 10,
+    totalWeeks: wholeWeeks,
+    narrative,
+    rows,
   };
 }
 
