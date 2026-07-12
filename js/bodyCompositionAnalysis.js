@@ -150,7 +150,6 @@ export function computeDietProjectionTimeline({
   }
 
   const wholeWeeks = Math.round(cycleWeeks);
-  const narrative = `<strong>Pro Tip:</strong> Transforming your body is a balance of lean body mass (muscle shape) and how much body fat is covering it up. Based on your current weight and body fat, Burn &amp; Build can take you from <strong>${weight.toFixed(0)} lbs at ${bf.toFixed(0)}%</strong> to <strong>${finalWeight.toFixed(1)} lbs at ${targetBf}%</strong> in <strong>${wholeWeeks} weeks</strong> — while increasing your strength and energy. If the projected body weight at your desired body fat seems too low, it means you need more muscle. Participate in weight training and follow your personalized Burn &amp; Build program for fastest results.`;
 
   return {
     valid: true,
@@ -159,7 +158,6 @@ export function computeDietProjectionTimeline({
     targetBf,
     finalWeight: Math.round(finalWeight * 10) / 10,
     totalWeeks: wholeWeeks,
-    narrative,
     rows,
   };
 }

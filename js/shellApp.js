@@ -18,7 +18,7 @@ import {
   totalOnboardingPages,
   wakeTimeFromParts,
 } from './onboardingEngine.js';
-import { analyzeLeanBodyMass, computeDietEightWeekProjection, computeDietProjectionTimeline } from './bodyCompositionAnalysis.js';
+import { computeDietEightWeekProjection, computeDietProjectionTimeline } from './bodyCompositionAnalysis.js';
 import { sortProgramHistory, summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
@@ -904,49 +904,26 @@ function intakeGender(intake) {
   return s.startsWith('f') ? 'female' : 'male';
 }
 
-function formatExerciseHours(value) {
-  return (Number(value) || 0).toFixed(2);
+function formatFatServingsDisplay(servings) {
+  const n = Number(servings);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
 function renderProjectedResults(intake, projection) {
   if (!projection) return '';
 
-  const weightTraining = formatExerciseHours(intake.weightTrainingHours);
-  const cardio = formatExerciseHours(intake.cardioHours);
-  const fatBurning = formatExerciseHours(intake.fatBurningHours);
-  const exerciseTotal = (
-    (Number(intake.weightTrainingHours) || 0)
-    + (Number(intake.cardioHours) || 0)
-    + (Number(intake.fatBurningHours) || 0)
-  ).toFixed(2);
+  const fatServings = formatFatServingsDisplay(projection.fatServingsPerDay);
 
   return `
     <section class="projections-section">
       <h2 class="projections-section-label">Your projected results</h2>
       <div class="projected-results-card">
         <p>Your food plan is calculated from your lean body mass and activity-driven projections. It is personalized to help you lose fat and increase your energy levels.</p>
-        <p>Your goal is to lose <strong>${projection.fatLostLbs.toFixed(1)} pounds of fat</strong> in eight weeks. Your exercise totals <strong>${exerciseTotal} hours per week</strong> — weight training <strong>${weightTraining} hours</strong>, cardiovascular <strong>${cardio} hours</strong>, and fat-burning <strong>${fatBurning} hours</strong>.</p>
+        <p>Here's how losing fat works: <strong>${fatServings} tsp a day</strong> that you don't eat in the form of fat, sugar, and alcohol adds up to you losing <strong>${projection.fatLostLbs.toFixed(1)} pounds of body fat</strong> over the next 8 weeks.</p>
         <p>How much food you need each day depends on how much lean body mass you have. It also depends on your activity level and the type and amount of exercise you participate in.</p>
+        <p>Your body needs a certain amount of protein to repair and replace lean body mass (muscle), and a certain amount of complex carbohydrates to provide energy for your busy days and to protect muscle mass. While all that is going on, your body will burn <strong>${fatServings} tsp of fat</strong> to balance out the equation.</p>
+        <p>Every day you decide: will my body burn diet fat or body fat?</p>
         <p class="projected-results-note">You project to lose an average of ${projection.weeklyFatLossLbs.toFixed(1)} pounds of fat per week. In addition, you could gain lean weight. Gaining lean weight will increase your strength and energy and offset your fat loss.</p>
-      </div>
-    </section>`;
-}
-
-function renderLeanBodyMassAnalysis(intake) {
-  const analysis = analyzeLeanBodyMass({
-    gender: intakeGender(intake),
-    heightInches: intake.heightInches,
-    leanBodyMass: intake.leanBodyMass,
-  });
-  const tone = analysis.atOrAbove ? 'good' : 'warn';
-
-  return `
-    <section class="projections-section">
-      <h2 class="projections-section-label">Lean body mass analysis</h2>
-      <div class="lbm-analysis-card lbm-analysis-card--${tone}">
-        <span class="lbm-analysis-icon" aria-hidden="true">${analysis.atOrAbove ? '✓' : '!'}</span>
-        <span class="lbm-analysis-message">${analysis.message}</span>
-        <span class="lbm-analysis-chevron" aria-hidden="true">⌄</span>
       </div>
     </section>`;
 }
@@ -1001,7 +978,6 @@ function renderProjections() {
       ${renderProjectionsHeader()}
 
       ${eightWeek ? renderProjectedResults(intake, eightWeek) : ''}
-      ${renderLeanBodyMassAnalysis(intake)}
 
       <div class="projections-table-wrap">
         <table class="projections-table">
@@ -1022,8 +998,6 @@ function renderProjections() {
           </tbody>
         </table>
       </div>
-
-      <div class="projections-narrative">${result.narrative}</div>
 
       <p class="projections-disclaimer">Results may vary. For informational purposes only — not medical advice. Individual results depend on adherence, diet, exercise, and other factors.</p>
     </div>`;
