@@ -916,7 +916,6 @@ function renderProjectedResults(intake, projection) {
 
   return `
     <section class="projections-section">
-      <h2 class="projections-section-label">Your projected results</h2>
       <div class="projected-results-card">
         <p>Your diet is calculated using your LBM, job, life, exercise and activities.</p>
         <p>How much food you need each day depends on how much lean body mass you have. It also depends on your activity level and the type and amount of exercise you participate in.</p>
