@@ -931,7 +931,7 @@ function renderProjectionsHeader() {
   return `
     <div class="plan-header">
       <button type="button" class="back-btn projections-back" data-nav="home">←</button>
-      <h1>Projections</h1>
+      <h1>Your Plan Explained</h1>
     </div>`;
 }
 
