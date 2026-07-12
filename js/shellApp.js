@@ -19,7 +19,7 @@ import {
   wakeTimeFromParts,
 } from './onboardingEngine.js';
 import { computeWhatsPossible } from './previewCalculator.js';
-import { analyzeLeanBodyMass, computeTodayBodyComposition } from './bodyCompositionAnalysis.js';
+import { analyzeLeanBodyMass, computeDietEightWeekProjection, computeTodayBodyComposition } from './bodyCompositionAnalysis.js';
 import { sortProgramHistory, summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
@@ -933,25 +933,30 @@ function renderBodyCompositionToday(intake) {
     </section>`;
 }
 
-function renderEightWeekGoal(projection) {
+function formatExerciseHours(value) {
+  return (Number(value) || 0).toFixed(2);
+}
+
+function renderProjectedResults(intake, projection) {
   if (!projection) return '';
+
+  const weightTraining = formatExerciseHours(intake.weightTrainingHours);
+  const cardio = formatExerciseHours(intake.cardioHours);
+  const fatBurning = formatExerciseHours(intake.fatBurningHours);
+  const exerciseTotal = (
+    (Number(intake.weightTrainingHours) || 0)
+    + (Number(intake.cardioHours) || 0)
+    + (Number(intake.fatBurningHours) || 0)
+  ).toFixed(2);
 
   return `
     <section class="projections-section">
-      <h2 class="projections-section-label">8 week goal</h2>
-      <div class="eight-week-card">
-        <div class="eight-week-hero">
-          <span class="eight-week-value">${projection.fatLostLbs.toFixed(1)}</span>
-          <span class="eight-week-unit">lbs projected fat loss</span>
-        </div>
-        <div class="eight-week-detail">
-          <span class="eight-week-fat">${projection.startFatLbs.toFixed(1)} lbs fat</span>
-          <span class="eight-week-arrow" aria-hidden="true">→</span>
-          <span class="eight-week-fat">${projection.endFatLbs.toFixed(1)} lbs fat</span>
-        </div>
-        <div class="eight-week-bf">
-          ${projection.startBf.toFixed(0)}% → ${projection.endBf.toFixed(1)}% body fat
-        </div>
+      <h2 class="projections-section-label">Your projected results</h2>
+      <div class="projected-results-card">
+        <p>Your food plan is calculated from your lean body mass and activity-driven projections. It is personalized to help you lose fat and increase your energy levels.</p>
+        <p>Your goal is to lose <strong>${projection.fatLostLbs.toFixed(1)} pounds of fat</strong> in eight weeks. Your exercise totals <strong>${exerciseTotal} hours per week</strong> — weight training <strong>${weightTraining} hours</strong>, cardiovascular <strong>${cardio} hours</strong>, and fat-burning <strong>${fatBurning} hours</strong>.</p>
+        <p>How much food you need each day depends on how much lean body mass you have. It also depends on your activity level and the type and amount of exercise you participate in.</p>
+        <p class="projected-results-note">You project to lose an average of ${projection.weeklyFatLossLbs.toFixed(1)} pounds of fat per week. In addition, you could gain lean weight. Gaining lean weight will increase your strength and energy and offset your fat loss.</p>
       </div>
     </section>`;
 }
@@ -1011,12 +1016,20 @@ function renderProjections() {
       </div>`;
   }
 
+  const plan = getPlan();
+  const eightWeek = plan?.servings?.fatMaintain
+    ? computeDietEightWeekProjection({
+        weightLbs: intake.totalWeight,
+        leanBodyMass: intake.leanBodyMass,
+        fatServingsPerDay: plan.servings.fatMaintain,
+      })
+    : null;
+
   return `
     <div class="screen projections-screen">
       ${renderProjectionsHeader()}
 
-      ${renderBodyCompositionToday(intake)}
-      ${renderEightWeekGoal(result.eightWeek)}
+      ${eightWeek ? renderProjectedResults(intake, eightWeek) : renderBodyCompositionToday(intake)}
       ${renderLeanBodyMassAnalysis(intake)}
 
       <div class="projections-table-wrap">

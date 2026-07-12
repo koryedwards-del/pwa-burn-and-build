@@ -1,5 +1,12 @@
 /** Burn & Build BurnEngine — port of BurnEngine.swift (PHP-validated) */
 
+export const FAT_SERVING_CALORIES = 45;
+
+/** Body fat burned (lbs) when extra-fat servings are left unused. */
+export function fatLossPoundsFromDailyServings(fatServingsPerDay, days) {
+  return (Number(fatServingsPerDay) * FAT_SERVING_CALORIES * Number(days)) / 3500;
+}
+
 function nf1(x) {
   return Math.round(x * 10) / 10;
 }
