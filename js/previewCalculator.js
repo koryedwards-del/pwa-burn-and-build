@@ -11,6 +11,33 @@ function aceBadge(bf, gender, isFloor) {
   return null;
 }
 
+/** Fat mass change over one 8-week cycle (6% BF drop, constant LBM). */
+export function computeEightWeekFatProjection({ gender, weightLbs, bodyFatPercent }) {
+  const weight = Number(weightLbs);
+  const bf = Number(bodyFatPercent);
+  const g = gender === 'female' ? 'female' : 'male';
+  const targetBf = TARGET_BF[g];
+
+  if (!weight || weight <= 0 || !bf || bf <= targetBf || bf > 70) return null;
+
+  const lbm = weight * (1 - bf / 100);
+  const startFatLbs = weight - lbm;
+  const endBf = Math.max(bf - DROP_PER_CYCLE, targetBf);
+  const endWeight = lbm / (1 - endBf / 100);
+  const endFatLbs = endWeight - lbm;
+  const fatLostLbs = startFatLbs - endFatLbs;
+
+  return {
+    weeks: WEEKS_PER_CYCLE,
+    startFatLbs: Math.round(startFatLbs * 10) / 10,
+    endFatLbs: Math.round(endFatLbs * 10) / 10,
+    fatLostLbs: Math.round(fatLostLbs * 10) / 10,
+    startBf: bf,
+    endBf,
+    endWeight: Math.round(endWeight * 10) / 10,
+  };
+}
+
 export function computeWhatsPossible({ gender, weightLbs, bodyFatPercent }) {
   const weight = Number(weightLbs);
   const bf = Number(bodyFatPercent);
@@ -103,6 +130,7 @@ export function computeWhatsPossible({ gender, weightLbs, bodyFatPercent }) {
     targetBf,
     finalWeight: Math.round(finalWeight * 10) / 10,
     totalWeeks: wholeWeeks,
+    eightWeek: computeEightWeekFatProjection({ gender, weightLbs, bodyFatPercent }),
     narrative,
     rows,
   };

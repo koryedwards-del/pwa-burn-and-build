@@ -933,6 +933,29 @@ function renderBodyCompositionToday(intake) {
     </section>`;
 }
 
+function renderEightWeekGoal(projection) {
+  if (!projection) return '';
+
+  return `
+    <section class="projections-section">
+      <h2 class="projections-section-label">8 week goal</h2>
+      <div class="eight-week-card">
+        <div class="eight-week-hero">
+          <span class="eight-week-value">${projection.fatLostLbs.toFixed(1)}</span>
+          <span class="eight-week-unit">lbs projected fat loss</span>
+        </div>
+        <div class="eight-week-detail">
+          <span class="eight-week-fat">${projection.startFatLbs.toFixed(1)} lbs fat</span>
+          <span class="eight-week-arrow" aria-hidden="true">→</span>
+          <span class="eight-week-fat">${projection.endFatLbs.toFixed(1)} lbs fat</span>
+        </div>
+        <div class="eight-week-bf">
+          ${projection.startBf.toFixed(0)}% → ${projection.endBf.toFixed(1)}% body fat
+        </div>
+      </div>
+    </section>`;
+}
+
 function renderLeanBodyMassAnalysis(intake) {
   const analysis = analyzeLeanBodyMass({
     gender: intakeGender(intake),
@@ -993,6 +1016,7 @@ function renderProjections() {
       ${renderProjectionsHeader()}
 
       ${renderBodyCompositionToday(intake)}
+      ${renderEightWeekGoal(result.eightWeek)}
       ${renderLeanBodyMassAnalysis(intake)}
 
       <div class="projections-table-wrap">

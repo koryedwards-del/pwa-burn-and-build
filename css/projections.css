@@ -78,6 +78,66 @@
   color: var(--text);
 }
 
+.eight-week-card {
+  padding: 18px 16px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.eight-week-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.eight-week-value {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--flame);
+  font-variant-numeric: tabular-nums;
+}
+
+.eight-week-unit {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.eight-week-detail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.eight-week-fat {
+  color: var(--flame);
+}
+
+.eight-week-arrow {
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.eight-week-bf {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .lbm-analysis-card {
   display: flex;
   align-items: center;
