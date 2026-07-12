@@ -727,7 +727,7 @@ function mealProgress(slot) {
 const NAV_MENU_LABELS = {
   plan: 'Your Custom Diet',
   grocery: 'Grocery List',
-  projections: 'Projections',
+  projections: 'Your Plan Explained',
   'previous-plans': 'Your Diets',
 };
 
