@@ -727,7 +727,7 @@ function mealProgress(slot) {
 const NAV_MENU_LABELS = {
   plan: 'Your Custom Diet',
   grocery: 'Grocery List',
-  projections: 'This Plan Explained',
+  projections: 'Why This Works',
   'previous-plans': 'Your Diets',
 };
 
@@ -931,7 +931,7 @@ function renderProjectionsHeader() {
   return `
     <div class="plan-header">
       <button type="button" class="back-btn projections-back" data-nav="home">←</button>
-      <h1>This Plan Explained</h1>
+      <h1>Why This Works</h1>
     </div>`;
 }
 
