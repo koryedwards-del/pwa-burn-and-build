@@ -44,7 +44,7 @@ export function computeWhatsPossible({ gender, weightLbs, bodyFatPercent }) {
   rows.push({
     timeline: 'Current',
     bodyFat: bf,
-    bodyFatDisplay: `${bf.toFixed(0)}%`,
+    bodyFatDisplay: `${bf.toFixed(2)}%`,
     weight: weight,
     weightDisplay: `${weight.toFixed(0)} lbs`,
     isCurrent: true,
@@ -74,7 +74,7 @@ export function computeWhatsPossible({ gender, weightLbs, bodyFatPercent }) {
       rows.push({
         timeline: `${Math.round(cycleWeeks)} weeks`,
         bodyFat: targetBf,
-        bodyFatDisplay: `${targetBf}%`,
+        bodyFatDisplay: `${targetBf.toFixed(2)}%`,
         weight: newWeight,
         weightDisplay: `${newWeight.toFixed(1)} lbs`,
         isCurrent: false,
@@ -85,7 +85,7 @@ export function computeWhatsPossible({ gender, weightLbs, bodyFatPercent }) {
       rows.push({
         timeline: `${cycleWeeks} weeks`,
         bodyFat: newBf,
-        bodyFatDisplay: `${newBf.toFixed(0)}%`,
+        bodyFatDisplay: `${newBf.toFixed(2)}%`,
         weight: newWeight,
         weightDisplay: `${newWeight.toFixed(1)} lbs`,
         isCurrent: false,

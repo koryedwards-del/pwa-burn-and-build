@@ -18,8 +18,7 @@ import {
   totalOnboardingPages,
   wakeTimeFromParts,
 } from './onboardingEngine.js';
-import { computeWhatsPossible } from './previewCalculator.js';
-import { analyzeLeanBodyMass, computeDietEightWeekProjection, computeDietProjectionTimeline, computeTodayBodyComposition } from './bodyCompositionAnalysis.js';
+import { analyzeLeanBodyMass, computeDietEightWeekProjection, computeDietProjectionTimeline } from './bodyCompositionAnalysis.js';
 import { sortProgramHistory, summarizeProgram } from './programHistory.js';
 import {
   getProgramDay,
@@ -734,7 +733,7 @@ const NAV_MENU_LABELS = {
 
 function canOpenNav(nav) {
   if (nav === 'plan') return !!getPlan();
-  if (nav === 'projections') return !!getUserIntake();
+  if (nav === 'projections') return !!getPlan()?.servings?.fatMaintain;
   return true;
 }
 
@@ -905,34 +904,6 @@ function intakeGender(intake) {
   return s.startsWith('f') ? 'female' : 'male';
 }
 
-function renderBodyCompositionToday(intake) {
-  const comp = computeTodayBodyComposition(intake);
-  return `
-    <section class="projections-section">
-      <h2 class="projections-section-label">Body composition</h2>
-      <div class="body-comp-card">
-        <div class="body-comp-today">— TODAY —</div>
-        <div class="body-comp-grid">
-          <div class="body-comp-row body-comp-row--lean">
-            <span class="body-comp-label">Lean</span>
-            <span class="body-comp-pct">${comp.leanPct} %</span>
-            <span class="body-comp-lbs">${comp.leanLbs} lbs</span>
-          </div>
-          <div class="body-comp-row body-comp-row--fat">
-            <span class="body-comp-label">Fat</span>
-            <span class="body-comp-pct">${comp.fatPct} %</span>
-            <span class="body-comp-lbs">${comp.fatLbs} lbs</span>
-          </div>
-          <div class="body-comp-row body-comp-row--total">
-            <span class="body-comp-label">Total</span>
-            <span class="body-comp-pct">${comp.totalPct} %</span>
-            <span class="body-comp-lbs">${comp.totalLbs} lbs</span>
-          </div>
-        </div>
-      </div>
-    </section>`;
-}
-
 function formatExerciseHours(value) {
   return (Number(value) || 0).toFixed(2);
 }
@@ -990,7 +961,8 @@ function renderProjectionsHeader() {
 
 function renderProjections() {
   const intake = getUserIntake();
-  if (!intake) {
+  const fatServings = getPlan()?.servings?.fatMaintain;
+  if (!intake || !fatServings) {
     return `
       <div class="screen projections-screen">
         ${renderProjectionsHeader()}
@@ -1000,49 +972,35 @@ function renderProjections() {
       </div>`;
   }
 
-  const plan = getPlan();
-  const fatServings = plan?.servings?.fatMaintain;
-  const dietTimeline = fatServings
-    ? computeDietProjectionTimeline({
-        gender: intakeGender(intake),
-        weightLbs: intake.totalWeight,
-        leanBodyMass: intake.leanBodyMass,
-        bodyFatPercent: intake.fatPercent,
-        fatServingsPerDay: fatServings,
-      })
-    : null;
-
-  const result = dietTimeline?.valid
-    ? dietTimeline
-    : computeWhatsPossible({
-        gender: intakeGender(intake),
-        weightLbs: intake.totalWeight,
-        bodyFatPercent: intake.fatPercent,
-      });
+  const result = computeDietProjectionTimeline({
+    gender: intakeGender(intake),
+    weightLbs: intake.totalWeight,
+    leanBodyMass: intake.leanBodyMass,
+    bodyFatPercent: intake.fatPercent,
+    fatServingsPerDay: fatServings,
+  });
 
   if (!result.valid) {
     return `
       <div class="screen projections-screen">
         ${renderProjectionsHeader()}
         <div class="projections-empty">
-          <p>${result.error}</p>
+          <p>No program data yet.</p>
         </div>
       </div>`;
   }
 
-  const eightWeek = fatServings
-    ? computeDietEightWeekProjection({
-        weightLbs: intake.totalWeight,
-        leanBodyMass: intake.leanBodyMass,
-        fatServingsPerDay: fatServings,
-      })
-    : null;
+  const eightWeek = computeDietEightWeekProjection({
+    weightLbs: intake.totalWeight,
+    leanBodyMass: intake.leanBodyMass,
+    fatServingsPerDay: fatServings,
+  });
 
   return `
     <div class="screen projections-screen">
       ${renderProjectionsHeader()}
 
-      ${eightWeek ? renderProjectedResults(intake, eightWeek) : renderBodyCompositionToday(intake)}
+      ${eightWeek ? renderProjectedResults(intake, eightWeek) : ''}
       ${renderLeanBodyMassAnalysis(intake)}
 
       <div class="projections-table-wrap">

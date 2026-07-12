@@ -109,7 +109,7 @@ export function computeDietProjectionTimeline({
   rows.push({
     timeline: 'Current',
     bodyFat: bf,
-    bodyFatDisplay: `${bf.toFixed(0)}%`,
+    bodyFatDisplay: `${bf.toFixed(2)}%`,
     weight,
     weightDisplay: `${weight.toFixed(0)} lbs`,
     isCurrent: true,
@@ -139,7 +139,7 @@ export function computeDietProjectionTimeline({
     rows.push({
       timeline: isFloor ? `${Math.round(cycleWeeks)} weeks` : `${cycleWeeks} weeks`,
       bodyFat: newBf,
-      bodyFatDisplay: isFloor ? `${targetBf}%` : `${newBf.toFixed(0)}%`,
+      bodyFatDisplay: isFloor ? `${targetBf.toFixed(2)}%` : `${newBf.toFixed(2)}%`,
       weight: curWeight,
       weightDisplay: `${curWeight.toFixed(1)} lbs`,
       isCurrent: false,
