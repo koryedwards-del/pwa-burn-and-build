@@ -604,7 +604,7 @@ a.btn-secondary {
 
 .coach-banner-wrap {
   width: calc(100% - 40px);
-  margin: 16px 20px 6px;
+  margin: 16px 20px 16px;
 }
 
 .coach-banner-wrap .coach-banner {
@@ -754,6 +754,45 @@ a.btn-secondary {
   font-size: 14px;
   font-weight: 600;
   text-align: left;
+}
+
+.coach-tomorrow-teaser {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px dashed rgba(255, 204, 0, 0.35);
+}
+
+.coach-tomorrow-teaser--finale {
+  border-style: solid;
+  border-color: rgba(255, 204, 0, 0.45);
+}
+
+.coach-tomorrow-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 180, 0, 0.8);
+  margin-bottom: 6px;
+}
+
+.coach-tomorrow-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+
+.coach-tomorrow-preview {
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+  font-style: italic;
 }
 
 .coach-banner {

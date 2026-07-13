@@ -234,6 +234,26 @@ function clampProgramDay(dayNumber) {
   return Math.max(1, Math.min(day, COACH_PROGRAM_DAYS));
 }
 
+function coachTeaserPreview(text) {
+  if (text.length <= 110) return text;
+  const cut = text.slice(0, 110);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > 60 ? cut.slice(0, lastSpace) : cut).trim()}…`;
+}
+
+/** Preview of the next day's insight — hooks them to come back tomorrow. */
+export function getCoachTomorrowTeaser(dayNumber) {
+  const day = clampProgramDay(dayNumber);
+  if (day >= COACH_PROGRAM_DAYS) return { finale: true };
+  const entry = COACH_DAYS[day];
+  if (!entry) return null;
+  return {
+    dayNumber: day + 1,
+    title: entry.title,
+    preview: coachTeaserPreview(entry.text),
+  };
+}
+
 /** @returns {{ dayNumber: number, title: string, cards: Array<{ dayNumber: number, title: string, text: string, image?: string }> } | null} */
 export function getCoachDay(dayNumber) {
   const day = clampProgramDay(dayNumber);

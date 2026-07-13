@@ -1,7 +1,7 @@
 /** My Plan PWA — daily diet app at /myplan/ */
 
 import { computePlan, generateMealSlots } from './burnEngine.js';
-import { COACH_PROGRAM_DAYS, getCoachArchive, getCoachDay, normalizeCoachProgress } from './coachEngine.js';
+import { COACH_PROGRAM_DAYS, getCoachArchive, getCoachDay, getCoachTomorrowTeaser, normalizeCoachProgress } from './coachEngine.js';
 import {
   buildGroceryFromEntries,
   createManualGroceryItem,
@@ -1240,6 +1240,24 @@ function formatCoachParagraphs(text) {
     .join('');
 }
 
+function renderCoachTomorrowTeaser(dayNumber) {
+  const teaser = getCoachTomorrowTeaser(dayNumber);
+  if (!teaser) return '';
+  if (teaser.finale) {
+    return `
+      <div class="coach-tomorrow-teaser coach-tomorrow-teaser--finale">
+        <span class="coach-tomorrow-label">Final day</span>
+        <p class="coach-tomorrow-preview">You crossed the finish line. Own what you built.</p>
+      </div>`;
+  }
+  return `
+    <div class="coach-tomorrow-teaser">
+      <span class="coach-tomorrow-label">Tomorrow · Day ${teaser.dayNumber}</span>
+      <span class="coach-tomorrow-title">${teaser.title}</span>
+      <p class="coach-tomorrow-preview">${teaser.preview}</p>
+    </div>`;
+}
+
 function renderCoachPlanSection(programDay) {
   const day = getCoachDay(programDay);
   if (!day) return '';
@@ -1267,6 +1285,7 @@ function renderCoachPlanSection(programDay) {
           <h3 class="coach-day-title">${card.title}</h3>
         </div>
         <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
+        ${renderCoachTomorrowTeaser(programDay)}
         <button type="button" class="coach-archive-link" data-nav="coach">View all messages</button>
       </div>` : ''}
     </div>`;
@@ -1344,6 +1363,7 @@ function renderCoachDayEntry(day, programDay) {
         <h3 class="coach-day-title">${day.title}</h3>
       </div>
       <div class="coach-body">${formatCoachParagraphs(day.text)}</div>
+      ${renderCoachTomorrowTeaser(day.dayNumber)}
     </article>`;
 }
 
