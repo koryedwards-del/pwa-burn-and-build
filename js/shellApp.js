@@ -1250,13 +1250,18 @@ function renderCoachPlanSection(programDay) {
 
   return `
     <div class="coach-banner-wrap${open ? ' coach-banner-wrap--open' : ''}">
-      <button type="button" class="coach-banner${open ? ' coach-banner--attached' : ''}${unread ? '' : ' coach-banner--read'}" data-toggle-coach-banner aria-expanded="${open}">
-        ${unread ? '<span class="coach-banner-icon">🔥</span>' : ''}
-        <span class="coach-banner-text">${unread ? `New message from Coach Kory · Day ${programDay}` : `Coach Kory · Day ${programDay} of ${COACH_PROGRAM_DAYS}`}</span>
+      <button type="button" class="coach-banner coach-banner--premium${open ? ' coach-banner--attached' : ''}${unread ? ' coach-banner--unread' : ''}" data-toggle-coach-banner aria-expanded="${open}">
+        <span class="coach-badge" aria-hidden="true">🔥</span>
+        <span class="coach-banner-copy">
+          <span class="coach-banner-name">Coach Kory</span>
+          <span class="coach-banner-tag">${unread ? "Today's insight is ready" : 'Insights only Burn & Build gives you'}</span>
+        </span>
+        <span class="coach-day-pill">Day ${programDay}<span class="coach-day-total"> / ${COACH_PROGRAM_DAYS}</span></span>
         <span class="coach-banner-chevron" aria-hidden="true">›</span>
       </button>
       ${open ? `
       <div class="coach-banner-panel">
+        <div class="coach-panel-intro">Your daily edge</div>
         <div class="coach-day-head">
           <span class="coach-day-number">Day ${programDay}</span>
           <h3 class="coach-day-title">${card.title}</h3>
