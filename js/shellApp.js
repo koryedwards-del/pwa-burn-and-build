@@ -1,7 +1,7 @@
 /** My Plan PWA — daily diet app at /myplan/ */
 
 import { computePlan, generateMealSlots } from './burnEngine.js';
-import { COACH_PROGRAM_DAYS, getCoachDay, normalizeCoachProgress } from './coachEngine.js';
+import { COACH_PROGRAM_DAYS, getCoachArchive, getCoachDay, normalizeCoachProgress } from './coachEngine.js';
 import {
   buildGroceryFromEntries,
   createManualGroceryItem,
@@ -74,6 +74,7 @@ const store = {
   foodSearch: {},
   coachCardIndex: 0,
   coachProgress: { lastViewedDay: 0 },
+  coachReturnNav: 'plan',
   groceryItems: [],
   groceryChecked: {},
   groceryRemoved: {},
@@ -809,7 +810,6 @@ function renderHome() {
       <div class="home-btn-stack">
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
-        ${renderHomeNavButton('coach')}
         ${renderHomeNavButton('projections')}
         ${renderHomeNavButton('previous-plans')}
       </div>
@@ -1244,6 +1244,7 @@ function renderPlan() {
   const fatTarget = plan.servings.fatMaintain;
   const fatUsed = fatPointsConsumed();
   const fatPct = fatTarget ? Math.min(fatUsed / fatTarget, 1) : 0;
+  const programDay = currentProgramDay();
 
   return `
     <div class="screen food-plan-screen">
@@ -1255,9 +1256,10 @@ function renderPlan() {
       ${showCoachBanner() ? `
       <button type="button" class="coach-banner" data-nav="coach">
         <span class="coach-banner-icon">🔥</span>
-        <span class="coach-banner-text">New message from Coach Kory</span>
+        <span class="coach-banner-text">New message from Coach Kory · Day ${programDay}</span>
         <span class="coach-banner-chevron">›</span>
-      </button>` : ''}
+      </button>` : `
+      <button type="button" class="coach-plan-link" data-nav="coach">Coach Kory · Day ${programDay} of ${COACH_PROGRAM_DAYS}</button>`}
 
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
@@ -1306,13 +1308,26 @@ function formatCoachParagraphs(text) {
     .join('');
 }
 
+function renderCoachDayEntry(day, programDay) {
+  const isToday = day.dayNumber === programDay;
+  return `
+    <article class="coach-day-entry${isToday ? ' coach-day-entry--today' : ''}"${isToday ? ' id="coach-today"' : ''}>
+      <div class="coach-day-head">
+        <span class="coach-day-number">Day ${day.dayNumber}</span>
+        <h3 class="coach-day-title">${day.title}</h3>
+      </div>
+      <div class="coach-body">${formatCoachParagraphs(day.text)}</div>
+    </article>`;
+}
+
 function renderCoach() {
-  const day = getCoachDay(currentProgramDay());
-  if (!day) {
+  const programDay = currentProgramDay();
+  const archive = getCoachArchive(programDay);
+  if (!archive.length) {
     return `
       <div class="screen coach-screen">
         <div class="plan-header">
-          <button type="button" class="back-btn" data-nav="home">← Home</button>
+          <button type="button" class="back-btn" data-nav="${store.coachReturnNav || 'plan'}">← Diet</button>
           <h1>Coach Kory</h1>
         </div>
         <div class="coach-empty">
@@ -1322,52 +1337,19 @@ function renderCoach() {
       </div>`;
   }
 
-  const singleCard = day.cards.length === 1;
-  const idx = store.coachCardIndex;
-  const dayLabel = `Day ${day.dayNumber} of ${COACH_PROGRAM_DAYS}`;
-
-  if (singleCard) {
-    const card = day.cards[0];
-    return `
-    <div class="screen coach-screen coach-screen--message">
-      <div class="plan-header">
-        <button type="button" class="back-btn" data-nav="home">← Home</button>
-        <h1>Coach Kory</h1>
-        <span class="coach-counter">${dayLabel}</span>
-      </div>
-      <div class="coach-message">
-        <div class="coach-text-card">
-          <h2>${card.title}</h2>
-          <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
-        </div>
-      </div>
-    </div>`;
-  }
-
   return `
-    <div class="screen coach-screen">
+    <div class="screen coach-screen coach-screen--archive">
       <div class="plan-header">
-        <button type="button" class="back-btn" data-nav="home">← Home</button>
+        <button type="button" class="back-btn" data-nav="${store.coachReturnNav || 'plan'}">← Diet</button>
         <h1>Coach Kory</h1>
-        <span class="coach-counter">${idx + 1} / ${day.cards.length}</span>
+        <span class="coach-counter">Day ${programDay} of ${COACH_PROGRAM_DAYS}</span>
       </div>
-
-      <div class="coach-carousel" id="coachCarousel">
-        ${day.cards.map((card, i) => `
-          <div class="coach-slide" data-slide="${i}">
-            <div class="coach-text-card">
-              <h2>${card.title}</h2>
-              <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
-            </div>
-            ${card.image ? `<img class="coach-screenshot" src="../${card.image}" alt="Coach Kory day ${day.dayNumber} — card ${i + 1}" loading="lazy" />` : ''}
-          </div>`).join('')}
-      </div>
-
-      <div class="coach-footer">
-        <div class="coach-dots">
-          ${day.cards.map((_, i) => `<span class="coach-dot ${i === idx ? 'active' : ''}" data-coach-dot="${i}"></span>`).join('')}
-        </div>
-        <p class="coach-swipe-hint">Swipe for next card</p>
+      <div class="coach-archive">
+        ${archive.map((week) => `
+          <section class="coach-week">
+            <h2 class="coach-week-label">Week ${week.week}</h2>
+            ${week.days.map((day) => renderCoachDayEntry(day, programDay)).join('')}
+          </section>`).join('')}
       </div>
     </div>`;
 }
@@ -1515,58 +1497,14 @@ function render() {
   }
 }
 
-function updateCoachDots(idx, total) {
-  document.querySelectorAll('.coach-dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === idx);
-  });
-  const counter = document.querySelector('.coach-counter');
-  if (counter) counter.textContent = `${idx + 1} / ${total}`;
-}
+function bindCoachScreen() {
+  const programDay = currentProgramDay();
+  if (!getCoachDay(programDay)) return;
 
-let coachScrollHandler = null;
-
-function bindCoachCarousel() {
-  const day = getCoachDay(currentProgramDay());
-  if (!day) return;
-
-  if (day.cards.length === 1) {
-    markCoachDayComplete(day.dayNumber);
-    return;
-  }
-
-  const carousel = document.getElementById('coachCarousel');
-  if (!carousel) return;
-
-  const total = day.cards.length;
-
-  if (coachScrollHandler) {
-    carousel.removeEventListener('scroll', coachScrollHandler);
-  }
-
-  coachScrollHandler = () => {
-    const width = carousel.clientWidth || 1;
-    const next = Math.min(Math.round(carousel.scrollLeft / width), total - 1);
-    if (next !== store.coachCardIndex) {
-      store.coachCardIndex = next;
-      updateCoachDots(next, total);
-      if (next === total - 1) markCoachDayComplete(day.dayNumber);
-    }
-  };
-
-  carousel.addEventListener('scroll', coachScrollHandler, { passive: true });
+  markCoachDayComplete(programDay);
 
   requestAnimationFrame(() => {
-    carousel.scrollLeft = store.coachCardIndex * carousel.clientWidth;
-  });
-
-  document.querySelectorAll('[data-coach-dot]').forEach((dot) => {
-    dot.addEventListener('click', () => {
-      const i = Number(dot.dataset.coachDot);
-      store.coachCardIndex = i;
-      carousel.scrollTo({ left: i * carousel.clientWidth, behavior: 'smooth' });
-      updateCoachDots(i, total);
-      if (i === total - 1) markCoachDayComplete(day.dayNumber);
-    });
+    document.getElementById('coach-today')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   });
 }
 
@@ -1610,7 +1548,10 @@ function bindEvents() {
         return;
       }
       if (nav === 'plan') store.expandedMeal = null;
-      if (nav === 'coach') store.coachCardIndex = 0;
+      if (nav === 'coach') {
+        store.coachCardIndex = 0;
+        store.coachReturnNav = store.screen === 'home' ? 'home' : 'plan';
+      }
       if (nav === 'grocery') {
         refreshGroceryList();
         store.showGroceryAdd = false;
@@ -1725,7 +1666,7 @@ function bindEvents() {
     });
   });
 
-  bindCoachCarousel();
+  bindCoachScreen();
 
   document.querySelectorAll('[data-open-history]').forEach((btn) => {
     btn.addEventListener('click', () => openHistoryProgram(btn.dataset.openHistory));

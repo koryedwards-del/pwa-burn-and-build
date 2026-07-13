@@ -632,6 +632,82 @@ a.btn-secondary {
   font-weight: 700;
 }
 
+.coach-plan-link {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 12px 20px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.coach-screen--archive {
+  min-height: 100vh;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.coach-archive {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px 32px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.coach-week + .coach-week {
+  margin-top: 8px;
+}
+
+.coach-week-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 16px 0 10px;
+  padding-left: 4px;
+}
+
+.coach-day-entry {
+  margin-bottom: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #1f1f1f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.coach-day-entry--today {
+  border-color: rgba(255, 204, 0, 0.45);
+  background: rgba(255, 204, 0, 0.06);
+}
+
+.coach-day-head {
+  margin-bottom: 10px;
+}
+
+.coach-day-number {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--flame);
+  margin-bottom: 4px;
+}
+
+.coach-day-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
 .coach-screen .plan-header {
   position: relative;
 }

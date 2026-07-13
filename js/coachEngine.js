@@ -251,6 +251,28 @@ export function getCoachDay(dayNumber) {
   };
 }
 
+/** Messages from day 1 through the current program day, grouped by week. */
+export function getCoachArchive(throughDay) {
+  const end = clampProgramDay(throughDay);
+  const weeks = [];
+  for (let day = 1; day <= end; day++) {
+    const weekNum = Math.floor((day - 1) / 7) + 1;
+    let week = weeks.find((w) => w.week === weekNum);
+    if (!week) {
+      week = { week: weekNum, days: [] };
+      weeks.push(week);
+    }
+    const entry = COACH_DAYS[day - 1];
+    if (!entry) continue;
+    week.days.push({
+      dayNumber: day,
+      title: entry.title,
+      text: `${entry.text}\n\n— Coach Kory`,
+    });
+  }
+  return weeks;
+}
+
 export function normalizeCoachProgress(raw) {
   if (!raw || typeof raw !== 'object') return { lastViewedDay: 0 };
   if (raw.lastViewedDay != null) return { lastViewedDay: Math.max(0, Number(raw.lastViewedDay) || 0) };
