@@ -1,12 +1,12 @@
-/** Custom Diet screen — reference design (dark, light-blue borders) */
+/** Custom Diet screen — dark, muted gray borders */
 
 .food-plan-screen {
-  --plan-accent: #5ac8fa;
-  --plan-accent-dim: rgba(90, 200, 250, 0.35);
+  --plan-accent: rgba(255, 255, 255, 0.2);
+  --plan-accent-dim: rgba(255, 255, 255, 0.1);
   --plan-flame: var(--flame);
   --plan-gold: #ffd60a;
   --plan-muted: #8e8e93;
-  --plan-tab-active: #1c2e3a;
+  --plan-tab-active: #2c2c2e;
   --plan-back-bg: #1c1c1e;
   --plan-meal-incomplete: #ff453a;
   --plan-meal-complete: #34c759;
@@ -299,8 +299,8 @@
 }
 
 .food-plan-screen .food-row.logged .food-row-indicator {
-  border-color: var(--plan-accent);
-  background: radial-gradient(circle at center, var(--plan-accent) 0 5px, transparent 6px);
+  border-color: rgba(255, 255, 255, 0.45);
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.75) 0 5px, transparent 6px);
 }
 
 .food-plan-screen .food-row-name {

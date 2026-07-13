@@ -736,6 +736,20 @@ function mealProgress(slot) {
   return { required: required.length, logged: logged.length };
 }
 
+const MEAL_LOG_CATEGORY_ORDER = ['Protein', 'Grains / Starches', 'Vegetables', 'Fruits', 'Fats'];
+
+function mealLoggedDisplay(slotLabel) {
+  return todayEntries()
+    .filter((e) => e.mealSlotLabel === slotLabel)
+    .slice()
+    .sort((a, b) => {
+      const orderDiff = MEAL_LOG_CATEGORY_ORDER.indexOf(a.category) - MEAL_LOG_CATEGORY_ORDER.indexOf(b.category);
+      if (orderDiff !== 0) return orderDiff;
+      return a.foodName.localeCompare(b.foodName);
+    })
+    .map((e) => `${e.foodName} ${e.servingLabel}`);
+}
+
 const NAV_MENU_LABELS = {
   plan: 'Your Custom Diet',
   grocery: 'Grocery List',
@@ -1339,9 +1353,7 @@ function renderPlan() {
         const expanded = store.expandedMeal === slot.label;
         const progress = mealProgress(slot);
         const complete = progress.required > 0 && progress.logged === progress.required;
-        const logged = todayEntries()
-          .filter((e) => e.mealSlotLabel === slot.label)
-          .map((e) => `${e.foodName} ${e.servingLabel}`);
+        const logged = mealLoggedDisplay(slot.label);
         return `
         <div class="meal-card ${complete ? 'meal-complete' : ''}">
           <button type="button" class="meal-card-header" data-toggle="${slot.label}">
