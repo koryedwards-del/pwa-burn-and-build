@@ -1362,7 +1362,7 @@ function renderPlan() {
                 <span class="label">${slot.label}</span>
                 ${complete ? '<span class="meal-check">✓</span>' : ''}
               </div>
-              ${!expanded && !complete && logged.length ? logged.map((l) => `<div class="logged">${l}</div>`).join('') : ''}
+              ${!expanded && logged.length ? logged.map((l) => `<div class="logged">${l}</div>`).join('') : ''}
               ${!expanded && progress.required ? `<div class="meal-progress">${progress.logged}/${progress.required} logged</div>` : ''}
             </div>
             <div class="meta">
