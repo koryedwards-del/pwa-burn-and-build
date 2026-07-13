@@ -8,6 +8,8 @@
   --plan-muted: #8e8e93;
   --plan-tab-active: #1c2e3a;
   --plan-back-bg: #1c1c1e;
+  --plan-meal-incomplete: #ff453a;
+  --plan-meal-complete: #34c759;
   background: #000;
 }
 
@@ -113,19 +115,17 @@
   font-size: 12px;
 }
 
-/* Meal cards */
+/* Meal cards — red until all choices logged, green when complete */
 .food-plan-screen .meal-card {
   margin: 0 16px 16px;
   background: transparent;
-  border: 1px solid var(--plan-accent);
-  border-left: 1px solid var(--plan-accent);
+  border: 1px solid var(--plan-meal-incomplete);
   border-radius: 12px;
   overflow: hidden;
 }
 
 .food-plan-screen .meal-card.meal-complete {
-  border-color: var(--plan-accent);
-  border-left-color: var(--plan-accent);
+  border-color: var(--plan-meal-complete);
 }
 
 .food-plan-screen .meal-card-header {

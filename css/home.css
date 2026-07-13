@@ -58,9 +58,9 @@
   width: 100%;
   padding: 16px 20px;
   border-radius: 16px;
-  border: none;
-  background: var(--flame);
-  color: var(--btn-on-flame);
+  border: 1.5px solid var(--flame);
+  background: #000;
+  color: #fff;
   font-size: 17px;
   font-weight: 600;
   text-align: center;
@@ -68,7 +68,8 @@
 }
 
 .home-btn-stack .btn-home:active {
-  opacity: 0.88;
+  background: rgba(255, 204, 0, 0.1);
+  opacity: 1;
 }
 
 .home-btn-stack .btn-home-build {
