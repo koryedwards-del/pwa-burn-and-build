@@ -75,6 +75,7 @@ const store = {
   coachCardIndex: 0,
   coachProgress: { lastViewedDay: 0 },
   coachReturnNav: 'plan',
+  coachBannerOpen: false,
   groceryItems: [],
   groceryChecked: {},
   groceryRemoved: {},
@@ -1232,6 +1233,45 @@ function renderMealFatPoints(fatTarget, fatUsed, fatPct) {
     </div>`;
 }
 
+function formatCoachParagraphs(text) {
+  return text
+    .split('\n\n')
+    .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+    .join('');
+}
+
+function renderCoachPlanSection(programDay) {
+  const day = getCoachDay(programDay);
+  if (!day) return '';
+
+  const unread = showCoachBanner();
+  const open = store.coachBannerOpen;
+  const card = day.cards[0];
+
+  if (unread || open) {
+    return `
+      <div class="coach-banner-wrap${open ? ' coach-banner-wrap--open' : ''}">
+        <button type="button" class="coach-banner${open ? ' coach-banner--attached' : ''}" data-toggle-coach-banner aria-expanded="${open}">
+          <span class="coach-banner-icon">🔥</span>
+          <span class="coach-banner-text">${unread ? `New message from Coach Kory · Day ${programDay}` : `Coach Kory · Day ${programDay}`}</span>
+          <span class="coach-banner-chevron" aria-hidden="true">›</span>
+        </button>
+        ${open ? `
+        <div class="coach-banner-panel">
+          <div class="coach-day-head">
+            <span class="coach-day-number">Day ${programDay}</span>
+            <h3 class="coach-day-title">${card.title}</h3>
+          </div>
+          <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
+          <button type="button" class="coach-archive-link" data-nav="coach">View all messages</button>
+        </div>` : ''}
+      </div>`;
+  }
+
+  return `
+    <button type="button" class="coach-plan-link" data-nav="coach">Coach Kory · Day ${programDay} of ${COACH_PROGRAM_DAYS}</button>`;
+}
+
 function renderPlan() {
   const plan = getPlan();
   if (!plan) {
@@ -1253,13 +1293,7 @@ function renderPlan() {
         <h1>Custom Diet</h1>
       </div>
 
-      ${showCoachBanner() ? `
-      <button type="button" class="coach-banner" data-nav="coach">
-        <span class="coach-banner-icon">🔥</span>
-        <span class="coach-banner-text">New message from Coach Kory · Day ${programDay}</span>
-        <span class="coach-banner-chevron">›</span>
-      </button>` : `
-      <button type="button" class="coach-plan-link" data-nav="coach">Coach Kory · Day ${programDay} of ${COACH_PROGRAM_DAYS}</button>`}
+      ${renderCoachPlanSection(programDay)}
 
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
@@ -1299,13 +1333,6 @@ function renderPlan() {
 
       <div style="height:32px"></div>
     </div>`;
-}
-
-function formatCoachParagraphs(text) {
-  return text
-    .split('\n\n')
-    .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
-    .join('');
 }
 
 function renderCoachDayEntry(day, programDay) {
@@ -1548,6 +1575,7 @@ function bindEvents() {
         return;
       }
       if (nav === 'plan') store.expandedMeal = null;
+      if (store.screen === 'plan' && nav !== 'plan') store.coachBannerOpen = false;
       if (nav === 'coach') {
         store.coachCardIndex = 0;
         store.coachReturnNav = store.screen === 'home' ? 'home' : 'plan';
@@ -1664,6 +1692,13 @@ function bindEvents() {
     btn.addEventListener('click', () => {
       removeOneFat(btn.dataset.removeFatSlot, decodeURIComponent(btn.dataset.removeFatName));
     });
+  });
+
+  document.querySelector('[data-toggle-coach-banner]')?.addEventListener('click', () => {
+    const opening = !store.coachBannerOpen;
+    store.coachBannerOpen = opening;
+    if (opening) markCoachDayComplete(currentProgramDay());
+    render();
   });
 
   bindCoachScreen();
