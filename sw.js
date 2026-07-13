@@ -1,4 +1,4 @@
-const CACHE = 'bnb-v28';
+const CACHE = 'bnb-v29';
 const ASSETS = [
   './',
   './index.html',
@@ -12,10 +12,9 @@ const ASSETS = [
   './img/coach/card-5.png',
   './img/coach/card-6.png',
   './img/coach/card-7.png',
-  './createyourfoodplan/index.html',
 ];
 
-const NETWORK_FIRST = ['/js/', '/css/'];
+const NETWORK_FIRST = ['/js/', '/css/', '/createyourfoodplan/'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
