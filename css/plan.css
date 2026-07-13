@@ -89,7 +89,7 @@
 
 /* Daily fat servings bar */
 .food-plan-screen .plan-fat-points {
-  margin: 16px 20px 0;
+  margin: 16px 16px 0;
   padding: 12px 14px;
   background: transparent;
   border: 1px solid var(--plan-accent-dim);
@@ -115,7 +115,7 @@
 
 /* Meal cards */
 .food-plan-screen .meal-card {
-  margin: 0 16px 12px;
+  margin: 0 16px 16px;
   background: transparent;
   border: 1px solid var(--plan-accent);
   border-left: 1px solid var(--plan-accent);
