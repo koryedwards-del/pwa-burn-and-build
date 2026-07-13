@@ -58,7 +58,7 @@
   width: 100%;
   padding: 16px 20px;
   border-radius: 16px;
-  border: 1.5px solid var(--flame);
+  border: 1px solid var(--flame);
   background: #000;
   color: #fff;
   font-size: 17px;
