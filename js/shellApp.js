@@ -785,12 +785,17 @@ function isStandaloneDisplay() {
 }
 
 function renderHomeInstallHint() {
-  if (isStandaloneDisplay() || localStorage.getItem('bnb_install_hint_dismissed') === '1') return '';
+  if (isStandaloneDisplay()) return '';
+  try {
+    if (sessionStorage.getItem('bnb_install_hint_dismissed') === '1') return '';
+  } catch (e) {
+    return '';
+  }
   return `
       <div class="home-install-hint">
         <div class="home-install-title">Install on your home screen</div>
         <p class="home-install-body"><strong>iPhone:</strong> Share → Add to Home Screen<br><strong>Android:</strong> Install app or Add to Home Screen</p>
-        <button type="button" class="home-install-dismiss" data-dismiss-install>Got it</button>
+        <button type="button" class="home-install-dismiss" data-dismiss-install>Dismiss for now</button>
       </div>`;
 }
 
@@ -1573,7 +1578,7 @@ function bindCoachScreen() {
 
 function bindEvents() {
   document.querySelector('[data-dismiss-install]')?.addEventListener('click', () => {
-    localStorage.setItem('bnb_install_hint_dismissed', '1');
+    try { sessionStorage.setItem('bnb_install_hint_dismissed', '1'); } catch (e) {}
     render();
   });
 

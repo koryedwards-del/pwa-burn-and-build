@@ -105,6 +105,7 @@ const store = {
   checkoutError: '',
   checkoutMessage: '',
   checkoutBusy: false,
+  checkoutVerified: false,
   saveBusy: false,
 };
 
@@ -323,15 +324,20 @@ function renderPwaInstallBox() {
               <li><strong>iPhone:</strong> Share → <strong>Add to Home Screen</strong></li>
               <li><strong>Android:</strong> Menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
             </ol>
-            <button type="button" class="plan-ready-pwa-link" data-open-myplan>Open app to install →</button>
           </div>`;
+}
+
+function renderPlanReadyAppHandoff(unlocked) {
+  return `
+          <button type="button" class="btn-primary unlock-cta plan-ready-open-app" data-open-myplan>Open Burn &amp; Build app →</button>
+          <p class="unlock-tagline">${unlocked ? 'Eat the food. Trust the plan.' : 'Open your diet, then follow the install steps below.'}</p>`;
 }
 
 function renderPlanReady() {
   restoreBuiltPackage();
-  const paid = store.accessGranted;
+  const unlocked = store.accessGranted || store.checkoutVerified;
   let lead;
-  if (paid) {
+  if (unlocked) {
     lead = 'Your personalized diet is ready in the Burn &amp; Build app.';
   } else if (store.saveError) {
     lead = 'Your diet is ready on this device. Save it to your account, then complete checkout.';
@@ -339,24 +345,22 @@ function renderPlanReady() {
     lead = 'Your personalized diet is saved. Complete checkout to unlock the app.';
   }
 
-  const payBlock = paid ? `
-          <button type="button" class="btn-primary unlock-cta plan-ready-open-app" data-open-myplan>Open Burn &amp; Build app →</button>
-          <p class="unlock-tagline">Eat the food. Trust the plan.</p>
-          ${renderPwaInstallBox()}`
-    : !store.apiReachable ? `
+  const checkoutBlock = !unlocked
+    ? !store.apiReachable ? `
           <p class="unlock-hint">Could not reach the Burn &amp; Build server. Check your connection and try again.</p>
           ${store.saveError ? `<button type="button" class="btn-secondary unlock-cta-secondary" data-retry-save ${store.saveBusy ? 'disabled' : ''}>${store.saveBusy ? 'SAVING…' : 'Retry save'}</button>` : ''}`
-    : store.stripeConfigured ? `
+      : store.stripeConfigured ? `
           <button type="button" class="btn-primary unlock-cta" data-start-checkout ${store.checkoutBusy ? 'disabled' : ''}>
             ${store.checkoutBusy ? 'OPENING CHECKOUT…' : 'COMPLETE PURCHASE — $149'}
           </button>
           <p class="unlock-hint">Secure checkout · Promo codes accepted · One-time · Yours for life</p>
           ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
-    : `
+      : `
           <p class="unlock-hint">Checkout is not available yet. Contact support@gettheburnandbuildapp.com if you need help.</p>
-          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`;
+          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
+    : '';
 
-  const saveActions = !paid && store.saveError && store.apiReachable
+  const saveActions = !unlocked && store.saveError && store.apiReachable
     ? `<button type="button" class="btn-secondary unlock-cta-secondary" data-retry-save ${store.saveBusy ? 'disabled' : ''}>${store.saveBusy ? 'SAVING…' : 'Retry save'}</button>`
     : '';
 
@@ -371,8 +375,10 @@ function renderPlanReady() {
         <div class="unlock-panel">
           <p class="unlock-lead">${lead}</p>
           ${store.checkoutMessage ? `<div class="ob-info"><span class="ob-info-icon">ℹ️</span><p>${store.checkoutMessage}</p></div>` : ''}
-          ${payBlock}
+          ${checkoutBlock}
           ${saveActions}
+          ${renderPlanReadyAppHandoff(unlocked)}
+          ${renderPwaInstallBox()}
           ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
@@ -720,6 +726,7 @@ async function handleCheckoutReturn() {
   await restoreBuiltPackageFromServer(store.email);
 
   store.checkoutMessage = 'Payment complete. Your Burn & Build app access is unlocked.';
+  store.checkoutVerified = true;
   await refreshAccessState();
 }
 
