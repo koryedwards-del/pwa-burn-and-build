@@ -119,7 +119,7 @@
 .food-plan-screen .meal-card {
   margin: 0 16px 16px;
   background: transparent;
-  border: 1px solid var(--plan-meal-incomplete);
+  border: 0.25px solid var(--plan-meal-incomplete);
   border-radius: 12px;
   overflow: hidden;
 }
