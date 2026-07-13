@@ -8,7 +8,7 @@
   --plan-muted: #8e8e93;
   --plan-tab-active: #2c2c2e;
   --plan-back-bg: #1c1c1e;
-  --plan-meal-incomplete: #ff453a;
+  --plan-meal-incomplete: rgba(255, 255, 255, 0.14);
   --plan-meal-complete: #34c759;
   background: #000;
 }
@@ -89,13 +89,14 @@
   margin-bottom: 24px;
 }
 
-/* Daily fat servings bar */
+/* Daily fat servings — quiet footer strip */
 .food-plan-screen .plan-fat-points {
-  margin: 16px 16px 0;
-  padding: 12px 14px;
+  margin: 4px 16px 20px;
+  padding: 10px 0 0;
   background: transparent;
-  border: 0.1px solid var(--plan-accent-dim);
-  border-radius: 12px;
+  border: none;
+  border-top: 0.1px solid var(--plan-accent-dim);
+  border-radius: 0;
 }
 
 .food-plan-screen .plan-fat-points .fat-bar {
@@ -103,7 +104,7 @@
 }
 
 .food-plan-screen .plan-fat-points .fat-bar-fill {
-  background: var(--plan-gold);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .food-plan-screen .plan-fat-points .fat-bar-fill.over {
@@ -111,17 +112,22 @@
 }
 
 .food-plan-screen .plan-fat-points .fat-bar-meta {
-  color: var(--plan-gold);
-  font-size: 12px;
+  color: var(--plan-muted);
+  font-size: 11px;
+  font-weight: 500;
 }
 
-/* Meal cards — red until all choices logged, green when complete */
+/* Meal cards — gray until complete, green when done */
 .food-plan-screen .meal-card {
   margin: 0 16px 16px;
   background: transparent;
   border: 0.1px solid var(--plan-meal-incomplete);
   border-radius: 12px;
   overflow: hidden;
+}
+
+.food-plan-screen .meal-card.meal-expanded {
+  border-color: rgba(255, 255, 255, 0.22);
 }
 
 .food-plan-screen .meal-card.meal-complete {
@@ -140,13 +146,13 @@
 
 .food-plan-screen .meal-card-header .logged {
   font-size: 14px;
-  color: #fff;
+  color: rgba(255, 255, 255, 0.72);
   margin-top: 6px;
   line-height: 1.35;
 }
 
 .food-plan-screen .meal-card-header .meta {
-  color: #fff;
+  color: var(--plan-muted);
   font-size: 14px;
   font-weight: 500;
 }
@@ -154,7 +160,7 @@
 .food-plan-screen .meal-card-header .expand {
   font-size: 13px;
   font-weight: 500;
-  color: var(--plan-flame);
+  color: var(--plan-muted);
   margin-top: 4px;
 }
 
@@ -163,16 +169,30 @@
 }
 
 .food-plan-screen .meal-card-header .meal-check {
-  color: var(--plan-flame);
+  color: var(--plan-meal-complete);
 }
 
 .food-plan-screen .meal-body {
-  padding: 0 12px 14px;
+  padding: 0 4px 10px;
   border-top: 0.1px solid var(--plan-accent-dim);
-  gap: 10px;
+  gap: 0;
 }
 
-/* Category sections */
+/* Category sections — flat list inside expanded meals */
+.food-plan-screen .meal-body .cat-section {
+  border: none;
+  border-radius: 0;
+}
+
+.food-plan-screen .meal-body .cat-section + .cat-section {
+  border-top: 0.1px solid rgba(255, 255, 255, 0.08);
+}
+
+.food-plan-screen .meal-body .cat-body {
+  border-top: none;
+  padding: 0 10px 10px;
+}
+
 .food-plan-screen .cat-section {
   border: 0.1px solid var(--plan-accent);
   border-radius: 10px;
@@ -239,8 +259,6 @@
   border-top: 0.1px solid var(--plan-accent-dim);
   padding: 0 12px 12px;
 }
-
-/* Tabs (Starches / Grains, Protein / Dairy) */
 .food-plan-screen .cat-tabs {
   background: transparent;
   padding: 0;
@@ -275,7 +293,8 @@
 }
 
 .food-plan-screen .top-picks-label {
-  color: var(--plan-gold);
+  color: var(--plan-muted);
+  font-weight: 600;
 }
 
 .food-plan-screen .food-divider {
@@ -319,20 +338,65 @@
 
 .food-plan-screen .none-btn,
 .food-plan-screen .remove-fat-btn {
-  color: var(--plan-flame);
-  border: 0.1px solid var(--plan-accent-dim);
+  color: var(--plan-muted);
+  border: none;
 }
 
-/* Coach Kory card on Custom Diet */
-.food-plan-screen .coach-banner--premium {
-  border: 0.1px solid rgba(255, 180, 0, 0.45);
+/* Coach Kory — quiet when read, gold when unread */
+.food-plan-screen .coach-banner-wrap {
+  margin: 12px 16px 12px;
+}
+
+.food-plan-screen .coach-banner--read {
+  padding: 10px 12px;
+  border: 0.1px solid rgba(255, 255, 255, 0.12);
+  background: #141414;
+  box-shadow: none;
+}
+
+.food-plan-screen .coach-banner--read::before {
+  display: none;
+}
+
+.food-plan-screen .coach-banner--read .coach-badge {
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
+  background: #2c2c2e;
+  box-shadow: none;
+}
+
+.food-plan-screen .coach-banner--read .coach-banner-tag {
+  display: none;
+}
+
+.food-plan-screen .coach-banner--read .coach-day-pill {
+  border: 0.1px solid rgba(255, 255, 255, 0.12);
+  color: var(--plan-muted);
+  background: transparent;
+}
+
+.food-plan-screen .coach-banner--read .coach-day-total {
+  color: rgba(142, 142, 147, 0.7);
+}
+
+.food-plan-screen .coach-banner--read.coach-banner--attached {
+  border-bottom: none;
+}
+
+.food-plan-screen .coach-banner-wrap--open .coach-banner--read + .coach-banner-panel {
+  border: 0.1px solid rgba(255, 255, 255, 0.12);
+  border-top: none;
+  background: #141414;
+  box-shadow: none;
 }
 
 .food-plan-screen .coach-banner--unread {
-  border-color: rgba(255, 200, 0, 0.65);
+  border: 0.1px solid rgba(255, 180, 0, 0.45);
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.12);
 }
 
-.food-plan-screen .coach-day-pill {
+.food-plan-screen .coach-banner--unread .coach-day-pill {
   border: 0.1px solid rgba(255, 204, 0, 0.35);
 }
 
@@ -342,5 +406,10 @@
 }
 
 .food-plan-screen .coach-tomorrow-teaser {
-  border: 0.1px dashed rgba(255, 204, 0, 0.35);
+  border: 0.1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.food-plan-screen .coach-tomorrow-teaser--finale {
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.14);
 }

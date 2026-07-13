@@ -1303,7 +1303,7 @@ function renderCoachPlanSection(programDay) {
 
   return `
     <div class="coach-banner-wrap${open ? ' coach-banner-wrap--open' : ''}">
-      <button type="button" class="coach-banner coach-banner--premium${open ? ' coach-banner--attached' : ''}${unread ? ' coach-banner--unread' : ''}" data-toggle-coach-banner aria-expanded="${open}">
+      <button type="button" class="coach-banner coach-banner--premium${open ? ' coach-banner--attached' : ''}${unread ? ' coach-banner--unread' : ' coach-banner--read'}" data-toggle-coach-banner aria-expanded="${open}">
         <span class="coach-badge" aria-hidden="true">🔥</span>
         <span class="coach-banner-copy">
           <span class="coach-banner-name">Coach Kory</span>
@@ -1355,14 +1355,14 @@ function renderPlan() {
         const complete = progress.required > 0 && progress.logged === progress.required;
         const logged = mealLoggedDisplay(slot.label);
         return `
-        <div class="meal-card ${complete ? 'meal-complete' : ''}">
+        <div class="meal-card${complete ? ' meal-complete' : ''}${expanded ? ' meal-expanded' : ''}">
           <button type="button" class="meal-card-header" data-toggle="${slot.label}">
             <div>
               <div class="label-row">
                 <span class="label">${slot.label}</span>
                 ${complete ? '<span class="meal-check">✓</span>' : ''}
               </div>
-              ${!expanded && logged.length ? logged.map((l) => `<div class="logged">${l}</div>`).join('') : ''}
+              ${!expanded && !complete && logged.length ? logged.map((l) => `<div class="logged">${l}</div>`).join('') : ''}
               ${!expanded && progress.required ? `<div class="meal-progress">${progress.logged}/${progress.required} logged</div>` : ''}
             </div>
             <div class="meta">
