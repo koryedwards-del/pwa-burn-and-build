@@ -646,6 +646,17 @@ a.btn-secondary {
   text-align: left;
 }
 
+.coach-banner--read {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.coach-banner--read .coach-banner-text {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+}
+
 .coach-banner {
   display: flex;
   align-items: center;
