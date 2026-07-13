@@ -270,7 +270,7 @@ function shouldAllowCreatorInStandalone() {
 }
 
 function escapeStandaloneToMyplan() {
-  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  const standalone = isStandaloneDisplay();
   if (!standalone || shouldAllowCreatorInStandalone()) return false;
   const email = (store.email || getAppEmail() || '').trim();
   const q = isValidEmail(email) ? `?email=${encodeURIComponent(email)}` : '';
@@ -308,6 +308,25 @@ async function openMyplanApp() {
   window.location.href = `../myplan/${q}`;
 }
 
+function isStandaloneDisplay() {
+  return window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
+}
+
+function renderPwaInstallBox() {
+  if (isStandaloneDisplay()) return '';
+  return `
+          <div class="install-box">
+            <h3>Add to your home screen</h3>
+            <p class="install-lead">Open the app first — then add <strong>that page</strong> to your home screen (not this creator page).</p>
+            <ol class="install-steps">
+              <li>Tap <strong>Open Burn &amp; Build app</strong> above and wait for your diet to load</li>
+              <li><strong>iPhone:</strong> Share → <strong>Add to Home Screen</strong></li>
+              <li><strong>Android:</strong> Menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
+            </ol>
+            <button type="button" class="plan-ready-pwa-link" data-open-myplan>Open app to install →</button>
+          </div>`;
+}
+
 function renderPlanReady() {
   restoreBuiltPackage();
   const paid = store.accessGranted;
@@ -322,7 +341,8 @@ function renderPlanReady() {
 
   const payBlock = paid ? `
           <button type="button" class="btn-primary unlock-cta plan-ready-open-app" data-open-myplan>Open Burn &amp; Build app →</button>
-          <p class="unlock-tagline">Eat the food. Trust the plan.</p>`
+          <p class="unlock-tagline">Eat the food. Trust the plan.</p>
+          ${renderPwaInstallBox()}`
     : !store.apiReachable ? `
           <p class="unlock-hint">Could not reach the Burn &amp; Build server. Check your connection and try again.</p>
           ${store.saveError ? `<button type="button" class="btn-secondary unlock-cta-secondary" data-retry-save ${store.saveBusy ? 'disabled' : ''}>${store.saveBusy ? 'SAVING…' : 'Retry save'}</button>` : ''}`

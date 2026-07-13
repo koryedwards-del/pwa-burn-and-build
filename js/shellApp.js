@@ -780,11 +780,26 @@ function renderHomeLogo() {
       </div>`;
 }
 
+function isStandaloneDisplay() {
+  return window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
+}
+
+function renderHomeInstallHint() {
+  if (isStandaloneDisplay() || localStorage.getItem('bnb_install_hint_dismissed') === '1') return '';
+  return `
+      <div class="home-install-hint">
+        <div class="home-install-title">Install on your home screen</div>
+        <p class="home-install-body"><strong>iPhone:</strong> Share → Add to Home Screen<br><strong>Android:</strong> Install app or Add to Home Screen</p>
+        <button type="button" class="home-install-dismiss" data-dismiss-install>Got it</button>
+      </div>`;
+}
+
 function renderLoadPlanHome() {
   return `
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       ${renderHomeLogo()}
+      ${renderHomeInstallHint()}
       <div class="home-load-plan">
         <p class="home-load-lead">Enter the email you used to create your diet.</p>
         ${store.loadError ? `<div class="import-error">${store.loadError}</div>` : ''}
@@ -808,6 +823,7 @@ function renderHome() {
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       ${renderHomeLogo()}
       ${hasActiveProgram() ? `<p class="home-program-day">Day ${currentProgramDay()} of ${COACH_PROGRAM_DAYS}</p>` : ''}
+      ${renderHomeInstallHint()}
       <div class="home-btn-stack">
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
@@ -1556,6 +1572,11 @@ function bindCoachScreen() {
 }
 
 function bindEvents() {
+  document.querySelector('[data-dismiss-install]')?.addEventListener('click', () => {
+    localStorage.setItem('bnb_install_hint_dismissed', '1');
+    render();
+  });
+
   document.querySelector('[data-open-website]')?.addEventListener('click', (e) => {
     e.preventDefault();
     openBurnAndBuildWebsite();

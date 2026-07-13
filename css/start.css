@@ -540,7 +540,7 @@
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px;
-  margin-bottom: 24px;
+  margin-top: 20px;
 }
 
 .install-box h3 {
@@ -562,38 +562,52 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  counter-reset: install-step;
 }
 
 .install-steps li {
   position: relative;
-  padding-left: 18px;
+  padding-left: 28px;
   margin-bottom: 12px;
   font-size: 15px;
   line-height: 1.45;
   color: #ddd;
+  counter-increment: install-step;
+}
+
+.install-steps li::before {
+  content: counter(install-step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 204, 0, 0.15);
+  color: var(--flame);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
 }
 
 .plan-ready-pwa-link {
   display: block;
-  margin-top: 20px;
-  font-size: 17px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  text-align: center;
-  text-decoration: none;
+  text-align: left;
   color: var(--flame);
 }
 
 .plan-ready-pwa-link:active {
   opacity: 0.85;
-}
-
-.install-steps li::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: var(--flame);
 }
 
 .app-preview {
