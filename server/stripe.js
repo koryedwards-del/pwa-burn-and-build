@@ -34,7 +34,11 @@ export function grantAccessFromCheckoutSession(session) {
   if (!email) {
     return { ok: false, message: 'Checkout session is missing customer email.' };
   }
-  if (session.payment_status !== 'paid') {
+  if (session.status !== 'complete') {
+    return { ok: false, message: 'Checkout session not complete.' };
+  }
+  const paid = session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
+  if (!paid) {
     return { ok: false, message: 'Payment not completed.' };
   }
   const contact = setBurnAndBuild(email, true);

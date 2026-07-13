@@ -11,7 +11,7 @@ import {
   localDateKey,
   packageToImportUrl,
 } from './programPackage.js';
-import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail } from './programApi.js';
+import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail, fetchProgramFromServer } from './programApi.js';
 import { lookupContact } from './contactsApi.js';
 import {
   completeCheckoutForTest,
@@ -216,6 +216,17 @@ function restoreBuiltPackage() {
   } catch {
     sessionStorage.removeItem('bnb_built_package');
   }
+}
+
+async function restoreBuiltPackageFromServer(email) {
+  if (store.builtPackage) return true;
+  if (!isValidEmail(email)) return false;
+  const result = await fetchProgramFromServer(email);
+  if (!result.ok || !result.package) return false;
+  store.builtPackage = result.package;
+  store.importUrl = packageToImportUrl(store.builtPackage, '../myplan/');
+  persistBuiltPackage();
+  return true;
 }
 
 function myplanHandoffUrl() {
@@ -683,6 +694,11 @@ async function handleCheckoutReturn() {
     return;
   }
 
+  if (result.email) {
+    store.email = persistAppEmail(result.email);
+  }
+  await restoreBuiltPackageFromServer(store.email);
+
   store.checkoutMessage = 'Payment complete. Your Burn & Build app access is unlocked.';
   await refreshAccessState();
 }
@@ -937,7 +953,10 @@ initStartSite();
 
 (async () => {
   if (escapeStandaloneToMyplan()) return;
-  if (store.phase === 'creating') {
+  const checkoutParams = new URLSearchParams(location.search);
+  if (checkoutParams.has('checkout')) {
+    await preparePlanReadyState();
+  } else if (store.phase === 'creating') {
     await runPlanCreation();
   } else if (store.phase === 'plan-ready') {
     await preparePlanReadyState();
