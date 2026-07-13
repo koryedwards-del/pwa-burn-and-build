@@ -1,5 +1,5 @@
 import { computePlan, generateMealSlots } from './burnEngine.js';
-import { getCoachDay } from './coachEngine.js';
+import { COACH_PROGRAM_DAYS, getCoachDay, normalizeCoachProgress } from './coachEngine.js';
 import {
   buildGroceryFromEntries,
   createManualGroceryItem,
@@ -33,7 +33,7 @@ const store = {
   sectionTabs: {},
   foodSearch: {},
   coachCardIndex: 0,
-  coachProgress: { day1Complete: false },
+  coachProgress: { lastViewedDay: 0 },
   groceryItems: [],
   groceryChecked: {},
   groceryRemoved: {},
@@ -76,7 +76,7 @@ function load() {
     const c = localStorage.getItem('bnb_pick_counts');
     if (c) store.pickCounts = JSON.parse(c);
     const cp = localStorage.getItem('bnb_coach_progress');
-    if (cp) store.coachProgress = JSON.parse(cp);
+    if (cp) store.coachProgress = normalizeCoachProgress(JSON.parse(cp));
   } catch (err) {
     console.error(err);
   }
@@ -111,8 +111,10 @@ function saveCoachProgress() {
 }
 
 function showCoachBanner() {
-  const day = getCoachDay(currentProgramDay());
-  return day && !store.coachProgress.day1Complete;
+  const programDay = currentProgramDay();
+  const day = getCoachDay(programDay);
+  const lastViewed = store.coachProgress?.lastViewedDay || 0;
+  return !!day && programDay > lastViewed;
 }
 
 function currentProgramDay() {
@@ -121,8 +123,11 @@ function currentProgramDay() {
 }
 
 function markCoachDayComplete(dayNumber) {
-  if (dayNumber === 1 && !store.coachProgress.day1Complete) {
-    store.coachProgress.day1Complete = true;
+  const day = Math.floor(Number(dayNumber) || 0);
+  if (!day) return;
+  const lastViewed = store.coachProgress?.lastViewedDay || 0;
+  if (day > lastViewed) {
+    store.coachProgress = { lastViewedDay: day };
     saveCoachProgress();
   }
 }
@@ -539,7 +544,7 @@ function renderHome() {
         <div class="brand">BURN &amp; BUILD</div>
         <div class="tagline">Your effort defines you</div>
       </div>
-      ${programDay ? `<p class="home-program-day">Day ${programDay} of ${store.program.program.durationDays}</p>` : ''}
+      ${programDay ? `<p class="home-program-day">Day ${programDay} of ${COACH_PROGRAM_DAYS}</p>` : ''}
       <div class="btn-stack">
         <button type="button" class="btn-primary" data-nav="plan">Your Custom Diet</button>
         <button type="button" class="btn-primary" data-nav="grocery">Grocery List</button>
@@ -684,7 +689,28 @@ function renderCoach() {
       </div>`;
   }
 
+  const singleCard = day.cards.length === 1;
   const idx = store.coachCardIndex;
+  const dayLabel = `Day ${day.dayNumber} of ${COACH_PROGRAM_DAYS}`;
+
+  if (singleCard) {
+    const card = day.cards[0];
+    return `
+    <div class="screen coach-screen coach-screen--message">
+      <div class="plan-header">
+        <button type="button" class="back-btn" data-nav="home">← Home</button>
+        <h1>Coach Kory</h1>
+        <span class="coach-counter">${dayLabel}</span>
+      </div>
+      <div class="coach-message">
+        <div class="coach-text-card">
+          <h2>${card.title}</h2>
+          <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
   return `
     <div class="screen coach-screen">
       <div class="plan-header">
@@ -700,7 +726,7 @@ function renderCoach() {
               <h2>${card.title}</h2>
               <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
             </div>
-            <img class="coach-screenshot" src="${card.image}" alt="Coach Kory day ${day.dayNumber} — card ${i + 1}" loading="lazy" />
+            ${card.image ? `<img class="coach-screenshot" src="${card.image}" alt="Coach Kory day ${day.dayNumber} — card ${i + 1}" loading="lazy" />` : ''}
           </div>`).join('')}
       </div>
 
@@ -863,11 +889,16 @@ function updateCoachDots(idx, total) {
 let coachScrollHandler = null;
 
 function bindCoachCarousel() {
-  const carousel = document.getElementById('coachCarousel');
-  if (!carousel) return;
-
   const day = getCoachDay(currentProgramDay());
   if (!day) return;
+
+  if (day.cards.length === 1) {
+    markCoachDayComplete(day.dayNumber);
+    return;
+  }
+
+  const carousel = document.getElementById('coachCarousel');
+  if (!carousel) return;
 
   const total = day.cards.length;
 

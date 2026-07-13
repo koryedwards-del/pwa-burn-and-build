@@ -1,7 +1,7 @@
 /** My Plan PWA — daily diet app at /myplan/ */
 
 import { computePlan, generateMealSlots } from './burnEngine.js';
-import { getCoachDay } from './coachEngine.js';
+import { COACH_PROGRAM_DAYS, getCoachDay, normalizeCoachProgress } from './coachEngine.js';
 import {
   buildGroceryFromEntries,
   createManualGroceryItem,
@@ -73,7 +73,7 @@ const store = {
   sectionTabs: {},
   foodSearch: {},
   coachCardIndex: 0,
-  coachProgress: { day1Complete: false },
+  coachProgress: { lastViewedDay: 0 },
   groceryItems: [],
   groceryChecked: {},
   groceryRemoved: {},
@@ -126,7 +126,7 @@ function load() {
     const c = localStorage.getItem('bnb_pick_counts');
     if (c) store.pickCounts = JSON.parse(c);
     const cp = localStorage.getItem('bnb_coach_progress');
-    if (cp) store.coachProgress = JSON.parse(cp);
+    if (cp) store.coachProgress = normalizeCoachProgress(JSON.parse(cp));
     const gc = localStorage.getItem('bnb_grocery_checked');
     if (gc) store.groceryChecked = JSON.parse(gc);
     const gr = localStorage.getItem('bnb_grocery_removed');
@@ -201,9 +201,19 @@ function currentProgramDay() {
   return 1;
 }
 
+function showCoachBanner() {
+  const programDay = currentProgramDay();
+  const day = getCoachDay(programDay);
+  const lastViewed = store.coachProgress?.lastViewedDay || 0;
+  return !!day && programDay > lastViewed;
+}
+
 function markCoachDayComplete(dayNumber) {
-  if (dayNumber === 1 && !store.coachProgress.day1Complete) {
-    store.coachProgress.day1Complete = true;
+  const day = Math.floor(Number(dayNumber) || 0);
+  if (!day) return;
+  const lastViewed = store.coachProgress?.lastViewedDay || 0;
+  if (day > lastViewed) {
+    store.coachProgress = { lastViewedDay: day };
     saveCoachProgress();
   }
 }
@@ -727,12 +737,14 @@ function mealProgress(slot) {
 const NAV_MENU_LABELS = {
   plan: 'Your Custom Diet',
   grocery: 'Grocery List',
+  coach: 'Coach Kory',
   projections: 'Why This Works',
   'previous-plans': 'Your Diets',
 };
 
 function canOpenNav(nav) {
   if (nav === 'plan') return !!getPlan();
+  if (nav === 'coach') return !!getPlan();
   if (nav === 'projections') return !!getPlan()?.servings?.fatMaintain;
   return true;
 }
@@ -793,9 +805,11 @@ function renderHome() {
     <div class="screen home-dashboard">
       <button type="button" class="home-settings" data-nav="settings" aria-label="Settings">⚙</button>
       ${renderHomeLogo()}
+      ${hasActiveProgram() ? `<p class="home-program-day">Day ${currentProgramDay()} of ${COACH_PROGRAM_DAYS}</p>` : ''}
       <div class="home-btn-stack">
         ${renderHomeNavButton('plan')}
         ${renderHomeNavButton('grocery')}
+        ${renderHomeNavButton('coach')}
         ${renderHomeNavButton('projections')}
         ${renderHomeNavButton('previous-plans')}
       </div>
@@ -1238,6 +1252,13 @@ function renderPlan() {
         <h1>Custom Diet</h1>
       </div>
 
+      ${showCoachBanner() ? `
+      <button type="button" class="coach-banner" data-nav="coach">
+        <span class="coach-banner-icon">🔥</span>
+        <span class="coach-banner-text">New message from Coach Kory</span>
+        <span class="coach-banner-chevron">›</span>
+      </button>` : ''}
+
       ${slots.map((slot) => {
         const expanded = store.expandedMeal === slot.label;
         const progress = mealProgress(slot);
@@ -1301,7 +1322,28 @@ function renderCoach() {
       </div>`;
   }
 
+  const singleCard = day.cards.length === 1;
   const idx = store.coachCardIndex;
+  const dayLabel = `Day ${day.dayNumber} of ${COACH_PROGRAM_DAYS}`;
+
+  if (singleCard) {
+    const card = day.cards[0];
+    return `
+    <div class="screen coach-screen coach-screen--message">
+      <div class="plan-header">
+        <button type="button" class="back-btn" data-nav="home">← Home</button>
+        <h1>Coach Kory</h1>
+        <span class="coach-counter">${dayLabel}</span>
+      </div>
+      <div class="coach-message">
+        <div class="coach-text-card">
+          <h2>${card.title}</h2>
+          <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
   return `
     <div class="screen coach-screen">
       <div class="plan-header">
@@ -1317,7 +1359,7 @@ function renderCoach() {
               <h2>${card.title}</h2>
               <div class="coach-body">${formatCoachParagraphs(card.text)}</div>
             </div>
-            <img class="coach-screenshot" src="../${card.image}" alt="Coach Kory day ${day.dayNumber} — card ${i + 1}" loading="lazy" />
+            ${card.image ? `<img class="coach-screenshot" src="../${card.image}" alt="Coach Kory day ${day.dayNumber} — card ${i + 1}" loading="lazy" />` : ''}
           </div>`).join('')}
       </div>
 
@@ -1484,11 +1526,16 @@ function updateCoachDots(idx, total) {
 let coachScrollHandler = null;
 
 function bindCoachCarousel() {
-  const carousel = document.getElementById('coachCarousel');
-  if (!carousel) return;
-
   const day = getCoachDay(currentProgramDay());
   if (!day) return;
+
+  if (day.cards.length === 1) {
+    markCoachDayComplete(day.dayNumber);
+    return;
+  }
+
+  const carousel = document.getElementById('coachCarousel');
+  if (!carousel) return;
 
   const total = day.cards.length;
 
