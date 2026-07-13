@@ -921,7 +921,10 @@ function renderProjectedResults(intake, projection) {
         <p>How much food you need each day depends on how much lean body mass you have. It also depends on your activity level and the type and amount of exercise you participate in.</p>
         <p>Your body needs a certain amount of protein to repair and replace lean body mass (build muscle), and a certain amount of complex carbohydrates to provide energy for your busy days and to protect muscle mass. While all that is going on, your body will burn <strong>${fatServings} tsp of fat</strong> to balance out the equation.</p>
         <p>Here's how losing fat works: those <strong>${fatServings} tsp</strong> (fat servings on the menu plan) that you don't eat in the form of fat, sugar, and alcohol adds up to you losing <strong>${projection.fatLostLbs.toFixed(1)} pounds of body fat</strong> over the next 8 weeks.</p>
-        <p class="projected-results-pro-tip"><strong>PRO TIP:</strong> You can't speed it up, but you can slow it down. Every day you decide: will my body burn diet fat or body fat?</p>
+        <div class="projected-results-pro-tip">
+          <div class="projections-block-header">PRO TIP</div>
+          <p>You can't speed it up, but you can slow it down. Every day you decide: will my body burn diet fat or body fat?</p>
+        </div>
       </div>
     </section>`;
 }

@@ -122,6 +122,24 @@
   border-top: 1px solid var(--border);
 }
 
+.projected-results-pro-tip p {
+  margin: 0;
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.65;
+}
+
+.projections-block-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  padding-bottom: 10pt;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10pt;
+}
+
 .eight-week-hero {
   display: flex;
   flex-direction: column;
@@ -226,6 +244,8 @@
   position: relative;
   justify-content: center;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10pt;
 }
 
 .projections-screen .plan-header h1 {
@@ -233,6 +253,7 @@
   text-align: center;
   color: #fff;
   font-size: 20px;
+  font-weight: 700;
   margin-right: 36px;
 }
 
@@ -276,10 +297,14 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
-  padding: 0 0 12px;
+  color: #fff;
+  padding: 0 0 10pt;
   text-align: left;
   border-bottom: 1px solid var(--border);
+}
+
+.projections-table tbody tr:first-child td {
+  padding-top: 10pt;
 }
 
 .projections-table td {
