@@ -94,7 +94,7 @@
   margin: 16px 16px 0;
   padding: 12px 14px;
   background: transparent;
-  border: 1px solid var(--plan-accent-dim);
+  border: 0.1px solid var(--plan-accent-dim);
   border-radius: 12px;
 }
 
@@ -119,7 +119,7 @@
 .food-plan-screen .meal-card {
   margin: 0 16px 16px;
   background: transparent;
-  border: 0.25px solid var(--plan-meal-incomplete);
+  border: 0.1px solid var(--plan-meal-incomplete);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -168,13 +168,13 @@
 
 .food-plan-screen .meal-body {
   padding: 0 12px 14px;
-  border-top: 1px solid var(--plan-accent-dim);
+  border-top: 0.1px solid var(--plan-accent-dim);
   gap: 10px;
 }
 
 /* Category sections */
 .food-plan-screen .cat-section {
-  border: 1px solid var(--plan-accent);
+  border: 0.1px solid var(--plan-accent);
   border-radius: 10px;
   background: transparent;
 }
@@ -236,7 +236,7 @@
 }
 
 .food-plan-screen .cat-body {
-  border-top: 1px solid var(--plan-accent-dim);
+  border-top: 0.1px solid var(--plan-accent-dim);
   padding: 0 12px 12px;
 }
 
@@ -264,7 +264,7 @@
 }
 
 .food-plan-screen .food-search {
-  border-color: var(--plan-accent-dim);
+  border: 0.1px solid var(--plan-accent-dim);
   background: #000;
   color: #fff;
 }
@@ -285,7 +285,7 @@
 /* Food rows — radio-style circles */
 .food-plan-screen .food-row {
   padding: 10px 2px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 0.1px solid rgba(255, 255, 255, 0.06);
   gap: 12px;
 }
 
@@ -293,7 +293,7 @@
   width: 22px;
   height: 22px;
   flex-shrink: 0;
-  border: 2px solid #fff;
+  border: 0.1px solid #fff;
   border-radius: 50%;
   box-sizing: border-box;
 }
@@ -320,5 +320,27 @@
 .food-plan-screen .none-btn,
 .food-plan-screen .remove-fat-btn {
   color: var(--plan-flame);
-  border-color: var(--plan-accent-dim);
+  border: 0.1px solid var(--plan-accent-dim);
+}
+
+/* Coach Kory card on Custom Diet */
+.food-plan-screen .coach-banner--premium {
+  border: 0.1px solid rgba(255, 180, 0, 0.45);
+}
+
+.food-plan-screen .coach-banner--unread {
+  border-color: rgba(255, 200, 0, 0.65);
+}
+
+.food-plan-screen .coach-day-pill {
+  border: 0.1px solid rgba(255, 204, 0, 0.35);
+}
+
+.food-plan-screen .coach-banner-panel {
+  border: 0.1px solid rgba(255, 180, 0, 0.45);
+  border-top: 0.1px solid rgba(255, 204, 0, 0.2);
+}
+
+.food-plan-screen .coach-tomorrow-teaser {
+  border: 0.1px dashed rgba(255, 204, 0, 0.35);
 }
