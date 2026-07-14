@@ -1,6 +1,6 @@
 /** My Plan PWA service worker */
 
-const CACHE = 'bnb-myplan-v51';
+const CACHE = 'bnb-myplan-v52';
 const ASSETS = [
   './',
   './index.html',
@@ -28,6 +28,7 @@ const ASSETS = [
   '../js/onboardingEngine.js',
   '../js/onboardingUI.js',
   '../js/coachEngine.js',
+  '../js/reminderScheduler.js',
   '../data/foods.json',
   '../img/coach/card-1.png',
   '../img/coach/card-2.png',
@@ -61,6 +62,57 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())
+  );
+});
+
+let reminderTimers = [];
+
+function clearReminderTimers() {
+  reminderTimers.forEach((id) => clearTimeout(id));
+  reminderTimers = [];
+}
+
+self.addEventListener('message', (e) => {
+  const data = e.data;
+  if (!data || typeof data !== 'object') return;
+
+  if (data.type === 'CLEAR_REMINDERS') {
+    clearReminderTimers();
+    return;
+  }
+
+  if (data.type === 'SCHEDULE_REMINDERS' && Array.isArray(data.reminders)) {
+    clearReminderTimers();
+    const now = Date.now();
+    reminderTimers = data.reminders.map((reminder) => {
+      const delay = Math.max(0, Number(reminder.at) - now);
+      return setTimeout(() => {
+        self.registration.showNotification(reminder.title || 'Time to Burn & Build', {
+          body: reminder.body || '',
+          tag: reminder.tag || 'bnb-meal-reminder',
+          icon: '../icons/icon-192.png',
+          badge: '../icons/icon-192.png',
+          data: { screen: 'plan' },
+        });
+      }, delay);
+    });
+  }
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) {
+          client.focus();
+          client.postMessage({ type: 'OPEN_PLAN' });
+          return;
+        }
+      }
+      if (self.clients.openWindow) return self.clients.openWindow('./');
+      return undefined;
+    })
   );
 });
 

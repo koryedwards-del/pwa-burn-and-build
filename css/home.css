@@ -256,6 +256,22 @@
   margin-bottom: 28px;
 }
 
+.settings-reminder-block {
+  margin: 28px 0 20px;
+}
+
+.settings-reminder-toggle {
+  margin-top: 12px;
+}
+
+.settings-reminder-blocked,
+.settings-reminder-install {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
 .settings-save {
   width: 100%;
   margin-bottom: 16px;

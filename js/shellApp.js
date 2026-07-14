@@ -47,6 +47,13 @@ import {
   hasLocalBackup,
   restoreLocalAppData,
 } from './localDataBackup.js';
+import {
+  clearScheduledReminders,
+  reminderPermission,
+  remindersAreSupported,
+  requestReminderPermission,
+  syncMealReminders,
+} from './reminderScheduler.js';
 
 const BNB_WEBSITE_URL = 'https://gettheburnandbuildapp.com/?browse=1';
 const BNB_CREATOR_URL = 'https://gettheburnandbuildapp.com/createyourfoodplan/?browse=1';
@@ -165,6 +172,67 @@ function ensureSettings() {
   if (!store.settings || typeof store.settings !== 'object') {
     store.settings = {};
   }
+}
+
+function remindersEnabledSetting() {
+  ensureSettings();
+  if (typeof store.settings.remindersEnabled === 'boolean') return store.settings.remindersEnabled;
+  return store.program?.intake?.remindersEnabled !== false;
+}
+
+function reminderSettingsCopy() {
+  if (!remindersAreSupported()) {
+    return 'Notifications are not supported in this browser.';
+  }
+  if (!remindersEnabledSetting()) return 'No reminders set.';
+  if (reminderPermission() === 'denied') {
+    return 'Notifications are blocked. Allow them in your browser or device settings.';
+  }
+  if (reminderPermission() === 'granted') {
+    return 'You\'ll get a "Time to Burn & Build" alert every 3 hours from your wake time.';
+  }
+  return 'Turn on to get "Time to Burn & Build" alerts every 3 hours from your wake time.';
+}
+
+function syncRemindersFromStore() {
+  if (!hasActiveProgram() && !getPlan()) {
+    clearScheduledReminders();
+    return;
+  }
+  const plan = getPlan();
+  if (!plan) {
+    clearScheduledReminders();
+    return;
+  }
+  syncMealReminders({
+    enabled: remindersEnabledSetting(),
+    wakeTime: currentWakeTime(),
+    mealSlots: getMealSlots(plan),
+  });
+}
+
+async function ensureReminderPermissionIfEnabled() {
+  if (!remindersEnabledSetting() || !remindersAreSupported()) return;
+  if (Notification.permission !== 'default') return;
+  await requestReminderPermission();
+  syncRemindersFromStore();
+}
+
+async function setRemindersEnabled(enabled) {
+  ensureSettings();
+  if (enabled) {
+    const permission = await requestReminderPermission();
+    if (permission !== 'granted') {
+      store.settings.remindersEnabled = false;
+      saveSettings();
+      render();
+      return;
+    }
+  }
+  store.settings.remindersEnabled = !!enabled;
+  saveSettings();
+  syncRemindersFromStore();
+  render();
 }
 
 function canEditWakeTime() {
@@ -353,6 +421,7 @@ function applyImportedProgram(pkg) {
   if (isValidEmail(email)) persistAppEmail(email);
   saveProgram();
   syncProgramHistoryOrder();
+  syncRemindersFromStore();
   return true;
 }
 
@@ -877,6 +946,26 @@ function renderWakePickerSettings(wakeTime) {
     </div>`;
 }
 
+function renderReminderSettings() {
+  const enabled = remindersEnabledSetting();
+  const permission = reminderPermission();
+  const blocked = permission === 'denied';
+  return `
+    <div class="settings-reminder-block">
+      <div class="settings-field-label">Meal reminders</div>
+      <p class="settings-field-desc">Every 3 hours from your wake time — breakfast through evening snack.</p>
+      <button type="button" class="ob-reminder-toggle settings-reminder-toggle ${enabled ? 'on' : ''}" data-settings-reminders>
+        <div>
+          <div class="ob-reminder-title">Time to Burn &amp; Build</div>
+          <div class="ob-reminder-sub">${reminderSettingsCopy()}</div>
+        </div>
+        <span class="ob-toggle-pill"></span>
+      </button>
+      ${blocked ? '<p class="settings-reminder-blocked">To enable reminders, allow notifications for Burn &amp; Build in your device settings.</p>' : ''}
+      <p class="settings-reminder-install">For the best experience on iPhone, add the app to your Home Screen and allow notifications when prompted.</p>
+    </div>`;
+}
+
 function renderSettings() {
   const canEdit = canEditWakeTime();
   const wakeTime = currentWakeTime();
@@ -894,7 +983,8 @@ function renderSettings() {
         ${canEdit ? `
           ${renderWakePickerSettings(wakeTime)}
           <button type="button" class="btn-primary settings-save" data-save-wake>Save wake time</button>
-          <p class="settings-note">Wake time is the only setting you can change here. To update servings or activity, create a new diet.</p>
+          ${renderReminderSettings()}
+          <p class="settings-note">Wake time sets when your meals and reminders fire each day. To update servings or activity, create a new diet.</p>
         ` : `
           <p class="settings-empty">Open or create a diet first — wake time controls when your meals are scheduled each day.</p>
           <a href="${BNB_CREATOR_URL}" class="btn-primary settings-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your diet</a>
@@ -921,6 +1011,7 @@ function restoreFromLocalBackup() {
   load();
   store.dataNotice = `Restored backup from ${new Date(result.savedAt).toLocaleString()}.`;
   store.screen = 'home';
+  syncRemindersFromStore();
   render();
 }
 
@@ -1682,9 +1773,16 @@ function bindEvents() {
     ensureSettings();
     store.settings.wakeTime = wakeTimeFromParts(hour, minute, ampm);
     saveSettings();
+    syncRemindersFromStore();
     store.expandedMeal = null;
     store.screen = 'home';
     render();
+  });
+
+  document.querySelector('[data-settings-reminders]')?.addEventListener('click', () => {
+    const next = !remindersEnabledSetting();
+    if (next && reminderPermission() === 'denied') return;
+    setRemindersEnabled(next);
   });
 
   document.querySelector('[data-restore-backup]')?.addEventListener('click', restoreFromLocalBackup);
@@ -1932,6 +2030,19 @@ async function init() {
   store.screen = hasActiveProgram() || hasLegacyPlan ? 'home' : 'home';
   render();
   registerServiceWorker();
+  await ensureReminderPermissionIfEnabled();
+  syncRemindersFromStore();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncRemindersFromStore();
+  });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.addEventListener('message', (e) => {
+      if (e.data?.type === 'OPEN_PLAN') {
+        store.screen = 'plan';
+        render();
+      }
+    });
+  }
 }
 
 function registerServiceWorker() {
@@ -1943,6 +2054,14 @@ function registerServiceWorker() {
   }).catch(() => {});
   navigator.serviceWorker.register('sw.js', { scope: './' }).then((reg) => {
     reg.update();
+    if (reg.active) syncRemindersFromStore();
+    reg.addEventListener('updatefound', () => {
+      const worker = reg.installing;
+      if (!worker) return;
+      worker.addEventListener('statechange', () => {
+        if (worker.state === 'activated') syncRemindersFromStore();
+      });
+    });
   }).catch(() => {});
 }
 
