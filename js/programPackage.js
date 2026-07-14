@@ -45,6 +45,8 @@ export function buildProgramPackage(form, { startDate, programId, label, meta } 
         reduceTotalCals: plan.reduceTotalCals,
         maintainProteinGrams: plan.maintainProteinGrams,
         reduceFatGrams: plan.reduceFatGrams,
+        maintainFatCalories: plan.maintainFatCalories,
+        reduceFatCalories: plan.reduceFatCalories,
         weeklyFatLossPounds: plan.weeklyFatLossPounds,
       },
       formula: plan.formula,
@@ -120,6 +122,8 @@ export function planFromPackage(pkg) {
     reduceTotalCals: pkg.plan.summary.reduceTotalCals,
     maintainProteinGrams: pkg.plan.summary.maintainProteinGrams,
     reduceFatGrams: pkg.plan.summary.reduceFatGrams,
+    maintainFatCalories: pkg.plan.summary.maintainFatCalories ?? pkg.plan.formula?.FD,
+    reduceFatCalories: pkg.plan.summary.reduceFatCalories ?? pkg.plan.formula?.FG,
     weeklyFatLossPounds: pkg.plan.summary.weeklyFatLossPounds,
     formula: pkg.plan.formula,
   };

@@ -830,7 +830,7 @@ const NAV_MENU_LABELS = {
 function canOpenNav(nav) {
   if (nav === 'plan') return !!getPlan();
   if (nav === 'coach') return !!getPlan();
-  if (nav === 'projections') return !!getPlan()?.servings?.fatMaintain;
+  if (nav === 'projections') return !!projectionPlanCalories(getPlan());
   return true;
 }
 
@@ -1050,10 +1050,18 @@ function formatFatServingsDisplay(servings) {
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
+function projectionPlanCalories(plan) {
+  if (!plan) return null;
+  const maintain = plan.maintainTotalCals ?? plan.formula?.T7;
+  const reduce = plan.reduceTotalCals ?? plan.formula?.T1;
+  if (!maintain || !reduce || maintain <= reduce) return null;
+  return { maintainTotalCalories: maintain, reduceTotalCalories: reduce };
+}
+
 function renderProjectedResults(intake, projection) {
   if (!projection) return '';
 
-  const fatServings = formatFatServingsDisplay(projection.fatServingsPerDay);
+  const fatServings = formatFatServingsDisplay(getPlan()?.servings?.fatMaintain);
 
   return `
     <section class="projections-section">
@@ -1061,7 +1069,7 @@ function renderProjectedResults(intake, projection) {
         <p>Your diet is calculated using your LBM, job, life, exercise and activities.</p>
         <p>How much food you need each day depends on how much lean body mass you have. It also depends on your activity level and the type and amount of exercise you participate in.</p>
         <p>Your body needs a certain amount of protein to repair and replace lean body mass (build muscle), and a certain amount of complex carbohydrates to provide energy for your busy days and to protect muscle mass. While all that is going on, your body will burn <strong>${fatServings} tsp of fat</strong> to balance out the equation.</p>
-        <p>Here's how losing fat works: those <strong>${fatServings} tsp</strong> (fat servings on the menu plan) that you don't eat in the form of fat, sugar, and alcohol adds up to you losing <strong>${projection.fatLostLbs.toFixed(1)} pounds of body fat</strong> over the next 8 weeks.</p>
+        <p>Here's how losing fat works: in eight weeks, you could safely lose <strong>${projection.fatLostLbs.toFixed(1)} pounds of fat</strong>. You project to lose an average of <strong>${projection.weeklyFatLossLbs.toFixed(1)} pounds of fat per week</strong>.</p>
         <div class="projected-results-pro-tip">
           <div class="projections-block-header">PRO TIP</div>
           <p>You can't speed it up, but you can slow it down. Every day you decide: will my body burn diet fat or body fat?</p>
@@ -1080,8 +1088,9 @@ function renderProjectionsHeader() {
 
 function renderProjections() {
   const intake = getUserIntake();
-  const fatServings = getPlan()?.servings?.fatMaintain;
-  if (!intake || !fatServings) {
+  const plan = getPlan();
+  const fatCals = projectionPlanCalories(plan);
+  if (!intake || !fatCals) {
     return `
       <div class="screen projections-screen">
         ${renderProjectionsHeader()}
@@ -1096,7 +1105,8 @@ function renderProjections() {
     weightLbs: intake.totalWeight,
     leanBodyMass: intake.leanBodyMass,
     bodyFatPercent: intake.fatPercent,
-    fatServingsPerDay: fatServings,
+    maintainTotalCalories: fatCals.maintainTotalCalories,
+    reduceTotalCalories: fatCals.reduceTotalCalories,
   });
 
   if (!result.valid) {
@@ -1112,7 +1122,10 @@ function renderProjections() {
   const eightWeek = computeDietEightWeekProjection({
     weightLbs: intake.totalWeight,
     leanBodyMass: intake.leanBodyMass,
-    fatServingsPerDay: fatServings,
+    bodyFatPercent: intake.fatPercent,
+    maintainTotalCalories: fatCals.maintainTotalCalories,
+    reduceTotalCalories: fatCals.reduceTotalCalories,
+    gender: intakeGender(intake),
   });
 
   return `

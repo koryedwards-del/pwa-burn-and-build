@@ -1,10 +1,26 @@
 /** Body composition + LBM analysis — projections screen (DXA-style). */
 
-import { fatLossPoundsFromDailyServings } from './burnEngine.js';
+import {
+  computeEightWeekFatProjection,
+  fatLossPoundsFromCalorieGap,
+  PROJECTION_BF_FLOOR,
+  PROJECTION_CYCLE_DAYS,
+} from './burnEngine.js';
 
-const EIGHT_WEEK_CYCLE = 8;
-const WEEKS_PER_MONTH = 4;
-const TARGET_BF = { male: 4.68, female: 8.95 };
+const PROJECTION_CYCLE_WEEKS = 8;
+const TARGET_BF = PROJECTION_BF_FLOOR;
+
+/** Desirable LBM by height (in) — PHP createsankorplan.php lookup table. */
+const DESIRABLE_LBM_BY_HEIGHT = {
+  female: {
+    58: 90, 59: 92, 60: 94, 61: 96, 62: 98, 63: 100, 64: 102, 65: 104, 66: 106, 67: 108,
+    68: 110, 69: 112, 70: 115, 71: 118, 72: 121, 73: 124, 74: 128, 75: 132, 76: 136, 77: 140,
+  },
+  male: {
+    58: 113, 59: 116, 60: 119, 61: 122, 62: 125, 63: 128, 64: 131, 65: 135, 66: 139, 67: 145,
+    68: 151, 69: 156, 70: 161, 71: 166, 72: 171, 73: 176, 74: 181, 75: 187, 76: 192, 77: 197,
+  },
+};
 
 function aceBadge(bf, gender, isFloor) {
   if (isFloor) return { label: 'Showtime', cls: 'showtime' };
@@ -13,91 +29,60 @@ function aceBadge(bf, gender, isFloor) {
   return null;
 }
 
-function targetFatLbs(lbm, targetBf) {
-  return (lbm / (1 - targetBf / 100)) - lbm;
+
+function round1(x) {
+  return Math.round(Number(x) * 10) / 10;
 }
 
-function projectFatComposition({ weight, lbm, fatServingsPerDay, days }) {
-  const startFatLbs = weight - lbm;
-  const startBf = (startFatLbs / weight) * 100;
-  const fatLostLbs = fatLossPoundsFromDailyServings(fatServingsPerDay, days);
-  const endFatLbs = Math.max(0, startFatLbs - fatLostLbs);
-  const endWeight = lbm + endFatLbs;
-  const endBf = endWeight > 0 ? (endFatLbs / endWeight) * 100 : 0;
-
-  return {
-    startFatLbs,
-    startBf,
-    endFatLbs,
-    endBf,
-    endWeight,
-    fatLostLbs: Math.min(fatLostLbs, startFatLbs),
-  };
+function round2(x) {
+  return Math.round(Number(x) * 100) / 100;
 }
 
-/** 8-week fat projection from daily fat servings on the diet (dialed in, no extra fat). */
-export function computeDietEightWeekProjection({ weightLbs, leanBodyMass, fatServingsPerDay, weeks = EIGHT_WEEK_CYCLE }) {
-  const weight = Number(weightLbs);
-  const lbm = Number(leanBodyMass);
-  const servings = Number(fatServingsPerDay);
-
-  if (!weight || weight <= 0 || !lbm || lbm <= 0 || lbm >= weight || !servings || servings <= 0) return null;
-
-  const eightWeek = projectFatComposition({
-    weight,
-    lbm,
-    fatServingsPerDay: servings,
-    days: weeks * 7,
+/** Eight-week fat projection — PHP printout math with gender BF% guardrail. */
+export function computeDietEightWeekProjection({
+  weightLbs,
+  leanBodyMass,
+  bodyFatPercent,
+  maintainTotalCalories,
+  reduceTotalCalories,
+  gender = 'male',
+}) {
+  return computeEightWeekFatProjection({
+    weightLbs,
+    leanBodyMass,
+    bodyFatPercent,
+    maintainTotalCalories,
+    reduceTotalCalories,
+    gender: gender === 'female' ? 'female' : 'male',
   });
-  const oneMonth = projectFatComposition({
-    weight,
-    lbm,
-    fatServingsPerDay: servings,
-    days: WEEKS_PER_MONTH * 7,
-  });
-  const maxBfChangePerMonth = Math.max(0, eightWeek.startBf - oneMonth.endBf);
-  const startLeanPct = weight > 0 ? (lbm / weight) * 100 : 0;
-  const endLeanPct = eightWeek.endWeight > 0 ? (lbm / eightWeek.endWeight) * 100 : 0;
-
-  return {
-    weeks,
-    startWeight: Math.round(weight * 10) / 10,
-    leanLbs: Math.round(lbm * 10) / 10,
-    startLeanPct,
-    endLeanPct: Math.round(endLeanPct * 100) / 100,
-    startFatLbs: Math.round(eightWeek.startFatLbs * 10) / 10,
-    endFatLbs: Math.round(eightWeek.endFatLbs * 10) / 10,
-    fatLostLbs: Math.round(eightWeek.fatLostLbs * 10) / 10,
-    startBf: Math.round(eightWeek.startBf * 100) / 100,
-    endBf: Math.round(eightWeek.endBf * 100) / 100,
-    endWeight: Math.round(eightWeek.endWeight * 10) / 10,
-    weeklyFatLossLbs: Math.round((eightWeek.fatLostLbs / weeks) * 10) / 10,
-    fatServingsPerDay: servings,
-    maxBfChangePerMonth: Math.round(maxBfChangePerMonth * 10) / 10,
-  };
 }
 
-/** Full timeline from daily fat servings (8-week cycles, constant LBM). */
+/** Full timeline from PHP projection cycles (60-day fat loss, constant LBM). */
 export function computeDietProjectionTimeline({
   gender,
   weightLbs,
   leanBodyMass,
   bodyFatPercent,
-  fatServingsPerDay,
+  maintainTotalCalories,
+  reduceTotalCalories,
 }) {
   const weight = Number(weightLbs);
   const lbm = Number(leanBodyMass);
   const bf = Number(bodyFatPercent);
-  const servings = Number(fatServingsPerDay);
+  const maintainTotal = Number(maintainTotalCalories);
+  const reduceTotal = Number(reduceTotalCalories);
   const g = gender === 'female' ? 'female' : 'male';
   const targetBf = TARGET_BF[g];
 
-  if (!weight || weight <= 0 || !lbm || lbm <= 0 || lbm >= weight || !bf || bf <= targetBf || bf > 70 || !servings || servings <= 0) {
+  if (!weight || weight <= 0 || !lbm || lbm <= 0 || lbm >= weight || !bf || bf <= targetBf || bf > 70) {
+    return { valid: false };
+  }
+  if (!maintainTotal || !reduceTotal || maintainTotal <= reduceTotal) {
     return { valid: false };
   }
 
-  const cycleFatLossLbs = fatLossPoundsFromDailyServings(servings, EIGHT_WEEK_CYCLE * 7);
-  const goalFatLbs = targetFatLbs(lbm, targetBf);
+  const cycleFatLossLbs = round1(fatLossPoundsFromCalorieGap(maintainTotal, reduceTotal, PROJECTION_CYCLE_DAYS));
+  const goalFatLbs = (lbm * targetBf) / 100;
   const finalWeight = lbm + goalFatLbs;
 
   const rows = [];
@@ -121,8 +106,8 @@ export function computeDietProjectionTimeline({
     const isFloor = remaining <= cycleFatLossLbs;
     const lostThisCycle = isFloor ? remaining : cycleFatLossLbs;
     const weeksThisCycle = isFloor
-      ? (lostThisCycle > 0 ? (lostThisCycle / cycleFatLossLbs) * EIGHT_WEEK_CYCLE : 0)
-      : EIGHT_WEEK_CYCLE;
+      ? (lostThisCycle > 0 ? (lostThisCycle / cycleFatLossLbs) * PROJECTION_CYCLE_WEEKS : 0)
+      : PROJECTION_CYCLE_WEEKS;
 
     curFatLbs -= lostThisCycle;
     curWeight = lbm + curFatLbs;
@@ -154,9 +139,9 @@ export function computeDietProjectionTimeline({
   return {
     valid: true,
     gender: g,
-    lbm: Math.round(lbm * 10) / 10,
+    lbm: round1(lbm),
     targetBf,
-    finalWeight: Math.round(finalWeight * 10) / 10,
+    finalWeight: round1(finalWeight),
     totalWeeks: wholeWeeks,
     rows,
   };
@@ -166,8 +151,8 @@ export function computeTodayBodyComposition(intake) {
   const weight = Number(intake?.totalWeight) || 0;
   const lbm = Number(intake?.leanBodyMass) || 0;
   const fatPct = Number(intake?.fatPercent) || 0;
-  const fatLbs = weight > 0 && lbm >= 0 ? weight - lbm : 0;
-  const leanPct = weight > 0 ? (lbm / weight) * 100 : 0;
+  const fatLbs = weight > 0 && lbm >= 0 ? round1(weight - lbm) : 0;
+  const leanPct = fatPct > 0 ? round2(100 - fatPct) : (weight > 0 ? round2((lbm / weight) * 100) : 0);
 
   return {
     leanPct: leanPct.toFixed(2),
@@ -179,12 +164,15 @@ export function computeTodayBodyComposition(intake) {
   };
 }
 
-/** Desirable LBM (lbs) from height — DXA database reference curve. */
+/** Desirable LBM (lbs) from height — PHP createsankorplan.php table. */
 export function desirableLeanBodyMassLbs(gender, heightInches) {
-  const h = Number(heightInches) || 0;
+  const h = Math.round(Number(heightInches) || 0);
   if (h <= 0) return null;
-  const coef = gender === 'female' ? 0.026 : 0.032;
-  return h * h * coef;
+  const table = DESIRABLE_LBM_BY_HEIGHT[gender === 'female' ? 'female' : 'male'];
+  if (table[h] != null) return table[h];
+  const heights = Object.keys(table).map(Number).sort((a, b) => a - b);
+  const clamped = Math.max(heights[0], Math.min(heights[heights.length - 1], h));
+  return table[clamped] ?? null;
 }
 
 export function analyzeLeanBodyMass({ gender, heightInches, leanBodyMass }) {
@@ -201,7 +189,7 @@ export function analyzeLeanBodyMass({ gender, heightInches, leanBodyMass }) {
   const atOrAbove = lbm >= desirable;
   return {
     atOrAbove,
-    desirableLbm: desirable,
+    desirableLbm: Math.round(desirable * 10) / 10,
     message: atOrAbove
       ? 'Your LBM is at or above desirable'
       : 'Your LBM is below desirable',

@@ -1,10 +1,128 @@
-/** Burn & Build BurnEngine — port of BurnEngine.swift (PHP-validated) */
+/** Burn & Build BurnEngine — PHP seminar math in JavaScript.
+ * Rounding: round1/round2 at printout boundaries; full precision between steps. */
 
 export const FAT_SERVING_CALORIES = 45;
+/** PHP seminar report: eight-week goal uses 60 days (two months). */
+export const PROJECTION_CYCLE_DAYS = 60;
+export const PROJECTION_CYCLE_WEEKS = 8;
+/** PHP printout guardrail — female 9%, male 4.5% (createsankorplan.php / threepagereporthtml.php). */
+export const PROJECTION_BF_FLOOR = { male: 4.5, female: 9 };
+/** PHP weekly line: abs(Y9) / 8.6, not / 8. */
+export const PROJECTION_WEEKLY_DIVISOR = 8.6;
+
+function round1(x) {
+  return Math.round(Number(x) * 10) / 10;
+}
+
+function round2(x) {
+  return Math.round(Number(x) * 100) / 100;
+}
 
 /** Body fat burned (lbs) when extra-fat servings are left unused. */
 export function fatLossPoundsFromDailyServings(fatServingsPerDay, days) {
   return (Number(fatServingsPerDay) * FAT_SERVING_CALORIES * Number(days)) / 3500;
+}
+
+/** PHP printout: (maintain total cal − reduce total cal) × days / 3500. */
+export function fatLossPoundsFromCalorieGap(maintainTotalCalories, reduceTotalCalories, days = PROJECTION_CYCLE_DAYS) {
+  const gap = Number(maintainTotalCalories) - Number(reduceTotalCalories);
+  if (!gap || gap <= 0) return 0;
+  return (gap * Number(days)) / 3500;
+}
+
+/** PHP printout weekly line: fat lost / 8.6. */
+export function weeklyFatLossPoundsFromProjection(fatLostLbs) {
+  const loss = Number(fatLostLbs);
+  if (!loss || loss <= 0) return 0;
+  return round1(loss / PROJECTION_WEEKLY_DIVISOR);
+}
+
+function projectionFloorBf(gender) {
+  return gender === 'female' ? PROJECTION_BF_FLOOR.female : PROJECTION_BF_FLOOR.male;
+}
+
+/** Work intensity multiplier — createsankorplan.php WR table. */
+export function workIntensityMultiplier(intensity) {
+  switch (Number(intensity)) {
+    case 1.0: return 0.47;
+    case 1.5: return 0.58;
+    case 2.0: return 0.69;
+    case 2.5: return 0.84;
+    case 3.0: return 1.0;
+    case 3.5: return 1.25;
+    case 4.0: return 1.5;
+    default: return 1.0;
+  }
+}
+
+/**
+ * Eight-week goal projection — PHP threepagereporthtml.php / createfoodpdf.php.
+ * Total calorie gap over 60 days; guardrail caps end BF at 9% (F) or 4.5% (M).
+ */
+export function computeEightWeekFatProjection({
+  weightLbs,
+  leanBodyMass,
+  bodyFatPercent,
+  maintainTotalCalories,
+  reduceTotalCalories,
+  gender = 'male',
+}) {
+  const weight = Number(weightLbs);
+  const lbm = Number(leanBodyMass);
+  const bf = Number(bodyFatPercent);
+  const maintainTotal = Number(maintainTotalCalories);
+  const reduceTotal = Number(reduceTotalCalories);
+  const isFemale = gender === 'female';
+
+  if (!weight || weight <= 0 || !lbm || lbm <= 0 || lbm >= weight || !bf || bf <= 0 || bf >= 100) {
+    return null;
+  }
+  if (!maintainTotal || !reduceTotal || maintainTotal <= reduceTotal) return null;
+
+  const startFatLbs = round1(weight - lbm);
+  const startBf = round2(bf);
+  const startLeanPct = round2(100 - startBf);
+  const floorBf = projectionFloorBf(gender);
+
+  let fatLostLbs = fatLossPoundsFromCalorieGap(maintainTotal, reduceTotal, PROJECTION_CYCLE_DAYS);
+  let endFatLbs = startFatLbs - fatLostLbs;
+  let endWeight = lbm + endFatLbs;
+  let endBf = Math.abs((endFatLbs / endWeight) * 100);
+  let capped = false;
+
+  if ((isFemale && endBf <= floorBf) || (!isFemale && endBf <= floorBf)) {
+    capped = true;
+    endBf = floorBf;
+    endFatLbs = (lbm * endBf) / 100;
+    endWeight = lbm + endFatLbs;
+    fatLostLbs = startFatLbs - endFatLbs;
+  }
+
+  fatLostLbs = round1(Math.abs(fatLostLbs));
+  endFatLbs = round1(endFatLbs);
+  endWeight = round1(endWeight);
+  endBf = round2(endBf);
+  const endLeanPct = round2(100 - endBf);
+  const weeklyFatLossLbs = weeklyFatLossPoundsFromProjection(fatLostLbs);
+
+  return {
+    startWeight: round1(weight),
+    leanLbs: round1(lbm),
+    startLeanPct,
+    endLeanPct,
+    startFatLbs,
+    endFatLbs,
+    fatLostLbs,
+    startBf,
+    endBf,
+    endBfFloor: floorBf,
+    endWeight,
+    weeklyFatLossLbs,
+    cappedByFloor: capped,
+    maintainTotalCalories: maintainTotal,
+    reduceTotalCalories: reduceTotal,
+    projectionDays: PROJECTION_CYCLE_DAYS,
+  };
 }
 
 function nf1(x) {
@@ -20,17 +138,7 @@ function phpRound(x) {
 }
 
 function computeSetupPhase(LB, intensity, HW, HA, HF) {
-  let WR = 1.0;
-  switch (intensity) {
-    case 1.0: WR = 0.47; break;
-    case 1.5: WR = 0.58; break;
-    case 2.0: WR = 0.69; break;
-    case 2.5: WR = 0.80; break;
-    case 3.0: WR = 0.91; break;
-    case 3.5: WR = 1.02; break;
-    case 4.0: WR = 1.13; break;
-    default: WR = 1.0;
-  }
+  const WR = workIntensityMultiplier(intensity);
 
   const T2 = LB * 10.65;
   const QB = LB * 0.39;
@@ -144,7 +252,11 @@ export function computePlan({ lbm, intensity, weightTrainingHours, cardioHours, 
     reduceTotalCals: formula.T1,
     maintainProteinGrams: formula.QA,
     reduceFatGrams: formula.FE,
-    weeklyFatLossPounds: ((formula.FD - formula.FG) * 7) / 3500,
+    weeklyFatLossPounds: weeklyFatLossPoundsFromProjection(
+      fatLossPoundsFromCalorieGap(formula.T7, formula.T1, PROJECTION_CYCLE_DAYS),
+    ),
+    maintainFatCalories: formula.FD,
+    reduceFatCalories: formula.FG,
   };
 }
 
