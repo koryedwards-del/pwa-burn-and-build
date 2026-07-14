@@ -3,7 +3,11 @@
 import { localDateKey } from './programPackage.js';
 
 export const MEAL_HOUR_OFFSETS = [0, 3, 6, 9, 12, 15];
-export const REMINDER_TITLE = 'Time to Burn & Build';
+
+export function reminderMessage(mealLabel) {
+  const label = String(mealLabel || 'meal').trim() || 'meal';
+  return `It's time for your Burn & Build ${label}`;
+}
 
 const FIRED_KEY = 'bnb_reminder_fired';
 const MAX_LOOKAHEAD_DAYS = 2;
@@ -109,9 +113,9 @@ export function buildReminderSchedule(wakeTime, mealSlots, now = new Date()) {
 }
 
 async function showReminderNotification(entry) {
-  const body = entry.time ? `${entry.label} · ${entry.time}` : entry.label;
+  const title = reminderMessage(entry.label);
   const options = {
-    body,
+    body: entry.time || '',
     tag: `bnb-meal-${entry.dateKey}-${entry.hoursOffset}`,
     icon: '../icons/icon-192.png',
     badge: '../icons/icon-192.png',
@@ -121,7 +125,7 @@ async function showReminderNotification(entry) {
   if ('serviceWorker' in navigator) {
     try {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification(REMINDER_TITLE, options);
+      await reg.showNotification(title, options);
       return;
     } catch {
       /* fall through */
@@ -129,7 +133,7 @@ async function showReminderNotification(entry) {
   }
 
   if (reminderPermission() === 'granted') {
-    new Notification(REMINDER_TITLE, options);
+    new Notification(title, options);
   }
 }
 
@@ -139,8 +143,8 @@ function postScheduleToServiceWorker(schedule) {
     type: 'SCHEDULE_REMINDERS',
     reminders: schedule.map((entry) => ({
       at: entry.fireAt.getTime(),
-      title: REMINDER_TITLE,
-      body: entry.time ? `${entry.label} · ${entry.time}` : entry.label,
+      title: reminderMessage(entry.label),
+      body: entry.time || '',
       tag: `bnb-meal-${entry.dateKey}-${entry.hoursOffset}`,
       dateKey: entry.dateKey,
       hoursOffset: entry.hoursOffset,

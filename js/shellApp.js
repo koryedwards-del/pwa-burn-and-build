@@ -189,9 +189,9 @@ function reminderSettingsCopy() {
     return 'Notifications are blocked. Allow them in your browser or device settings.';
   }
   if (reminderPermission() === 'granted') {
-    return 'You\'ll get a "Time to Burn & Build" alert every 3 hours from your wake time.';
+    return 'You\'ll get an "It\'s time for your Burn & Build …" alert every 3 hours from your wake time.';
   }
-  return 'Turn on to get "Time to Burn & Build" alerts every 3 hours from your wake time.';
+  return 'Turn on to get meal alerts every 3 hours from your wake time.';
 }
 
 function syncRemindersFromStore() {
@@ -956,7 +956,7 @@ function renderReminderSettings() {
       <p class="settings-field-desc">Every 3 hours from your wake time — breakfast through evening snack.</p>
       <button type="button" class="ob-reminder-toggle settings-reminder-toggle ${enabled ? 'on' : ''}" data-settings-reminders>
         <div>
-          <div class="ob-reminder-title">Time to Burn &amp; Build</div>
+          <div class="ob-reminder-title">Meal reminders</div>
           <div class="ob-reminder-sub">${reminderSettingsCopy()}</div>
         </div>
         <span class="ob-toggle-pill"></span>

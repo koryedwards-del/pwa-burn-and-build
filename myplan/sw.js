@@ -1,6 +1,6 @@
 /** My Plan PWA service worker */
 
-const CACHE = 'bnb-myplan-v52';
+const CACHE = 'bnb-myplan-v53';
 const ASSETS = [
   './',
   './index.html',
@@ -87,7 +87,7 @@ self.addEventListener('message', (e) => {
     reminderTimers = data.reminders.map((reminder) => {
       const delay = Math.max(0, Number(reminder.at) - now);
       return setTimeout(() => {
-        self.registration.showNotification(reminder.title || 'Time to Burn & Build', {
+        self.registration.showNotification(reminder.title || "It's time for your Burn & Build meal", {
           body: reminder.body || '',
           tag: reminder.tag || 'bnb-meal-reminder',
           icon: '../icons/icon-192.png',
