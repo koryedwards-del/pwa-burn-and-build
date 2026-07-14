@@ -5,9 +5,9 @@
   --yellow: #FFCC00;
   --yellow-rgb: 255, 204, 0;
   --yellow-dim: #C99700;
-  /* Logo colors — match img/brand/bnb-logo.png (canonical logo asset) */
-  --logo-burn: #E8671A;
-  --logo-build: #5A9AAA;
+  /* Logo colors — match img/brand/bblogo.png (canonical logo asset) */
+  --logo-burn: #FDC500;
+  --logo-build: #8A8A8A;
   --flame: var(--yellow);
   --flame-dim: rgba(var(--yellow-rgb), 0.15);
   --btn-on-flame: #0A0A0A;
