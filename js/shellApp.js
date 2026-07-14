@@ -42,8 +42,6 @@ import {
 } from './programApi.js';
 import {
   backupLocalAppData,
-  downloadLocalAppData,
-  getLocalBackupDate,
   hasLocalBackup,
   restoreLocalAppData,
 } from './localDataBackup.js';
@@ -830,10 +828,6 @@ function renderWakePickerSettings(wakeTime) {
 function renderSettings() {
   const canEdit = canEditWakeTime();
   const wakeTime = currentWakeTime();
-  const backupDate = getLocalBackupDate();
-  const backupLabel = backupDate
-    ? new Date(backupDate).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
-    : null;
   return `
     <div class="screen settings-screen">
       <div class="plan-header settings-header">
@@ -849,13 +843,9 @@ function renderSettings() {
           <p class="settings-empty">Open or create a diet first — wake time controls when your meals are scheduled each day.</p>
           <a href="${BNB_CREATOR_URL}" class="btn-primary settings-create-link" target="_blank" rel="noopener noreferrer" data-open-creator>Create your diet</a>
         `}
-        <div class="settings-data-block">
-          <div class="settings-field-label">Your data on this device</div>
-          <p class="settings-field-desc">Back up or restore your plan and meal logs on this device.</p>
-          ${backupLabel ? `<p class="settings-backup-meta">Last on-device backup: ${backupLabel}</p>` : ''}
-          ${hasLocalBackup() ? `<button type="button" class="btn-secondary settings-restore" data-restore-backup>Restore from backup</button>` : ''}
-          <button type="button" class="btn-secondary settings-export" data-export-backup>Download backup file</button>
-        </div>
+        ${hasLocalBackup() ? `
+          <p class="settings-restore-line">Meal logs or grocery list missing? <button type="button" class="settings-restore-link" data-restore-backup>Restore my data</button></p>
+        ` : ''}
         ${store.dataNotice ? `<div class="settings-notice">${store.dataNotice}</div>` : ''}
       </div>
     </div>`;
@@ -872,14 +862,6 @@ function restoreFromLocalBackup() {
   store.dataNotice = `Restored backup from ${new Date(result.savedAt).toLocaleString()}.`;
   store.screen = 'home';
   render();
-}
-
-function exportLocalBackup() {
-  const result = downloadLocalAppData();
-  if (!result.ok) {
-    store.dataNotice = result.message || 'Could not export backup.';
-    render();
-  }
 }
 
 function renderStubScreen(title, lead) {
@@ -1611,7 +1593,6 @@ function bindEvents() {
   });
 
   document.querySelector('[data-restore-backup]')?.addEventListener('click', restoreFromLocalBackup);
-  document.querySelector('[data-export-backup]')?.addEventListener('click', exportLocalBackup);
 
   document.querySelectorAll('[data-toggle]').forEach((btn) => {
     btn.addEventListener('click', () => {
