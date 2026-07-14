@@ -1,59 +1,63 @@
-/** Coach Kory — daily messages keyed to program day (56-day ETLF knowledge base). */
+/** Coach Kory card series — port of CoachEngine.swift */
 
-import { getCoachPlanDay } from './coachKoryPlan.js';
+function day1Cards() {
+  const title = 'How to Use Your Custom Diet';
+  return [
+    {
+      dayNumber: 1,
+      title,
+      image: 'img/coach/card-1.png',
+      text: "When you tap on your custom diet button, you'll see this screen at the top. You see new message from Coach Kory. This is where you'll receive messages from the coach.\n\nBelow that you see three meals and three snacks — Breakfast, Lunch, Dinner, Morning Snack, Afternoon Snack and Evening Snack.",
+    },
+    {
+      dayNumber: 1,
+      title,
+      image: 'img/coach/card-2.png',
+      text: "When you click into the breakfast box, you'll see protein, grains and starches and extra fats. What's incredibly unique about the Burn & Build program is when you went through the questionnaire and answered all those questions, the burn engine calculated how much food you need every day. And that's what that number 4.3 servings means — you need 4.3 servings of protein for breakfast and the same concept goes for grains and starches.\n\nNow when it comes to extra fat, the Burn & Build program is also unique because it calculates how much fat you burn every day and in this case, this person burns 28 servings of fat every day. So in a nutshell, if you don't add any extra fats, your body will burn 28 teaspoons of fat off your body and that's fat loss. On the other hand, if you eat 28 servings of fat in a day, your body will burn the diet fat you ate — or sugar or alcohol — and leave the body fat alone. This is the basic principle behind why the Burn & Build program is so effective for losing fat.",
+    },
+    {
+      dayNumber: 1,
+      title,
+      image: 'img/coach/card-3.png',
+      text: "Another unique feature of the Burn & Build program is you don't have to do any of the math. In this case the 4.3 servings is automatically calculated for each one of the foods in the drop-down list to be the right amount. For example 134 g of 95% lean ground beef is 4.3 servings. No thinking. And down the list a little farther — chicken breast with no skin, 113 g is 4.3 servings. No thinking.\n\nThis is a good place to explain why everything is in grams. It's because grams are easier and more accurate once you get used to it. All you need is a small scale. Put a plate on your scale, cook your 95% lean ground beef and put 134 g of cooked lean ground beef on your plate. Done.",
+    },
+    {
+      dayNumber: 1,
+      title,
+      image: 'img/coach/card-4.png',
+      text: "Now do the exact same thing for grains and starches. 3.7 servings of grains and starches — if you were having black beans, that would be 216 g on your plate. That's on the scale. Done.",
+    },
+    {
+      dayNumber: 1,
+      title,
+      image: 'img/coach/card-5.png',
+      text: "Now we're on extra fats — and you can include sugar, desserts, and alcohol in this category.\n\nBasically it's simple. If you want to lose fat as fast as possible, stay as far away from your maximum fat servings as you can — which in this case is 28. If you don't eat it, you don't have to work it off.",
+    },
+    {
+      dayNumber: 1,
+      title,
+      image: 'img/coach/card-6.png',
+      text: "The morning snack, afternoon snack, and evening snack are all whole fresh fruit snacks — no dried fruit, no juice. And again in this program 1.3 servings, and the apples, apricots, bananas, blackberries are all measured to give 1.3 servings.\n\nYou are probably starting to realize — for probably the first time — you have a truly accurate diet to follow. No guessing.",
+    },
+    {
+      dayNumber: 1,
+      title,
+      image: 'img/coach/card-7.png',
+      text: "This program is very simple to do. Protein, grains and starches for breakfast. Protein, grains and starches for lunch. Protein, grains and starches for dinner. And fruit snacks in between. That's it.\n\nI'll check in tomorrow and we'll talk about how to use the grocery list.\n\n— Coach Kory",
+    },
+  ];
+}
 
-/**
- * Week 1 display copy — three flowing sentences per day.
- * Source: ETLF 56-day plan, Week 1 — The Athlete Schedule (TIMING).
- */
-const WEEK_ONE_DISPLAY = {
-  1:
-    'Open your custom diet — three meals and three snacks are your game plan for the day, and that structure is where everything starts. The Burn Engine already calculated your numbers from your lean body mass, your job, your life, and your activity, so there is no guessing and no generic template. This week we focus on the schedule: athletes eat on purpose, you are on an eight-week prep, and the job today is to win today.',
-  2:
-    'Picture the canoe on the roof: you need strength to lift it, energy to paddle all day, and you want to look good doing it — those are the three things everyone actually wants from this program. Whether you are a busy parent, a weekend warrior, or sitting at a desk all week, the wants are the same, and athletes eat with exactly those goals in mind. This is not a different game for you — it is the same game, played the athlete way.',
-  3:
-    'Put your feet on the floor and eat breakfast within thirty minutes of waking, because champions do not wait until they feel hungry before they fuel up. Running on empty in the morning is not discipline — it is starting the day with your tank near empty before life asks anything of you. Your custom diet gives you that first meal; use it, and you set the clock for everything that follows.',
-  4:
-    'You were born eating every two to three hours, and kids still live that way — hunger on a regular clock is normal, not a character flaw. Watch the lean person at work who always looks great: they are usually eating often, not white-knuckling through the afternoon. Your plan spaces six eating times across the day for exactly that reason — feed the schedule, and the schedule feeds your strength and energy.',
-  5:
-    'Kids do not stop getting hungry at seven in the evening, and neither do you — there is no magic cutoff where your body stops needing fuel. Eat every two to three hours from wake-up until your head hits the pillow, because that is how you stay ahead of hunger instead of behind it. Miss that evening snack and you are not being tough — you are betting on the vending machine, and the vending machine always wins.',
-  6:
-    'Your eight-week program is fifty-six single days, not one impossible leap, so the only day that matters right now is today. Win today: hit your six eating times with the foods on your plan, and leave tomorrow for tomorrow. Athletes do not eat perfectly forever — they execute today\'s rep, and that is the whole prep in miniature.',
-  7:
-    'Time for the week-one film review: look back and count how many days you hit all six eating times on schedule. Five or more days means you are eating like an athlete on the clock, and that is the foundation everything else in this program is built on. Missed a few? No lecture — week two starts with the same schedule, and you already know what to do.\n\n— Coach Kory',
-};
-
-const DAY_IMAGES = {
-  1: 'img/coach/card-1.png',
-  2: 'img/coach/card-2.png',
-  3: 'img/coach/card-3.png',
-  4: 'img/coach/card-4.png',
-  5: 'img/coach/card-5.png',
-  6: 'img/coach/card-6.png',
-  7: 'img/coach/card-7.png',
-};
-
-const DEFAULT_IMAGE = 'img/brand/bnb-logo.png';
+/** Program day — TODO: derive from profile.programStartDate when added */
+export function getProgramDay() {
+  return 1;
+}
 
 export function getCoachDay(dayNumber) {
-  const plan = getCoachPlanDay(dayNumber);
-  if (!plan) return null;
-
-  const text = WEEK_ONE_DISPLAY[dayNumber] || plan.message;
-  const image = DAY_IMAGES[dayNumber] || DEFAULT_IMAGE;
-
+  if (dayNumber !== 1) return null;
   return {
-    dayNumber: plan.day,
-    week: plan.week,
-    weekTitle: plan.weekTitle,
-    title: plan.title,
-    cards: [
-      {
-        dayNumber: plan.day,
-        title: plan.title,
-        image,
-        text,
-      },
-    ],
+    dayNumber: 1,
+    title: 'How to Use Your Custom Diet',
+    cards: day1Cards(),
   };
 }
