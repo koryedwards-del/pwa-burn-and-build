@@ -151,6 +151,13 @@
   line-height: 1.35;
 }
 
+.food-plan-screen .meal-card-header .meal-empty-hint {
+  font-size: 14px;
+  color: var(--plan-muted);
+  margin-top: 6px;
+  line-height: 1.35;
+}
+
 .food-plan-screen .meal-card-header .meta {
   color: var(--plan-muted);
   font-size: 14px;

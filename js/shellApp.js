@@ -1363,6 +1363,7 @@ function renderPlan() {
                 ${complete ? '<span class="meal-check">✓</span>' : ''}
               </div>
               ${!expanded && logged.length ? logged.map((l) => `<div class="logged">${l}</div>`).join('') : ''}
+              ${!expanded && !logged.length && progress.required ? '<div class="meal-empty-hint">Choose your food.</div>' : ''}
               ${!expanded && progress.required ? `<div class="meal-progress">${progress.logged}/${progress.required} logged</div>` : ''}
             </div>
             <div class="meta">
