@@ -1,63 +1,70 @@
-/** Coach Kory card series — port of CoachEngine.swift */
+/** Coach Kory — daily app tips keyed to program day (week one). */
 
-function day1Cards() {
-  const title = 'How to Use Your Custom Diet';
-  return [
-    {
-      dayNumber: 1,
-      title,
-      image: 'img/coach/card-1.png',
-      text: "When you tap on your custom diet button, you'll see this screen at the top. You see new message from Coach Kory. This is where you'll receive messages from the coach.\n\nBelow that you see three meals and three snacks — Breakfast, Lunch, Dinner, Morning Snack, Afternoon Snack and Evening Snack.",
-    },
-    {
-      dayNumber: 1,
-      title,
-      image: 'img/coach/card-2.png',
-      text: "When you click into the breakfast box, you'll see protein, grains and starches and extra fats. What's incredibly unique about the Burn & Build program is when you went through the questionnaire and answered all those questions, the burn engine calculated how much food you need every day. And that's what that number 4.3 servings means — you need 4.3 servings of protein for breakfast and the same concept goes for grains and starches.\n\nNow when it comes to extra fat, the Burn & Build program is also unique because it calculates how much fat you burn every day and in this case, this person burns 28 servings of fat every day. So in a nutshell, if you don't add any extra fats, your body will burn 28 teaspoons of fat off your body and that's fat loss. On the other hand, if you eat 28 servings of fat in a day, your body will burn the diet fat you ate — or sugar or alcohol — and leave the body fat alone. This is the basic principle behind why the Burn & Build program is so effective for losing fat.",
-    },
-    {
-      dayNumber: 1,
-      title,
-      image: 'img/coach/card-3.png',
-      text: "Another unique feature of the Burn & Build program is you don't have to do any of the math. In this case the 4.3 servings is automatically calculated for each one of the foods in the drop-down list to be the right amount. For example 134 g of 95% lean ground beef is 4.3 servings. No thinking. And down the list a little farther — chicken breast with no skin, 113 g is 4.3 servings. No thinking.\n\nThis is a good place to explain why everything is in grams. It's because grams are easier and more accurate once you get used to it. All you need is a small scale. Put a plate on your scale, cook your 95% lean ground beef and put 134 g of cooked lean ground beef on your plate. Done.",
-    },
-    {
-      dayNumber: 1,
-      title,
-      image: 'img/coach/card-4.png',
-      text: "Now do the exact same thing for grains and starches. 3.7 servings of grains and starches — if you were having black beans, that would be 216 g on your plate. That's on the scale. Done.",
-    },
-    {
-      dayNumber: 1,
-      title,
-      image: 'img/coach/card-5.png',
-      text: "Now we're on extra fats — and you can include sugar, desserts, and alcohol in this category.\n\nBasically it's simple. If you want to lose fat as fast as possible, stay as far away from your maximum fat servings as you can — which in this case is 28. If you don't eat it, you don't have to work it off.",
-    },
-    {
-      dayNumber: 1,
-      title,
-      image: 'img/coach/card-6.png',
-      text: "The morning snack, afternoon snack, and evening snack are all whole fresh fruit snacks — no dried fruit, no juice. And again in this program 1.3 servings, and the apples, apricots, bananas, blackberries are all measured to give 1.3 servings.\n\nYou are probably starting to realize — for probably the first time — you have a truly accurate diet to follow. No guessing.",
-    },
-    {
-      dayNumber: 1,
-      title,
-      image: 'img/coach/card-7.png',
-      text: "This program is very simple to do. Protein, grains and starches for breakfast. Protein, grains and starches for lunch. Protein, grains and starches for dinner. And fruit snacks in between. That's it.\n\nI'll check in tomorrow and we'll talk about how to use the grocery list.\n\n— Coach Kory",
-    },
-  ];
-}
-
-/** Program day — TODO: derive from profile.programStartDate when added */
-export function getProgramDay() {
-  return 1;
-}
+const WEEK_ONE = [
+  {
+    dayNumber: 1,
+    title: 'Your Custom Diet',
+    image: 'img/coach/card-1.png',
+    text:
+      'When you open Your Custom Diet, you will see three meals and three fruit snacks for the day — breakfast, lunch, dinner, and morning, afternoon, and evening snacks. Tap any meal to see your targets for protein, grains and starches, and optional extra fats; those numbers came from your intake and the Burn Engine, so they belong to you, not a generic template. Each food in the list shows the gram weight that matches your serving count, so put that amount on your scale and you are done without doing any math yourself.',
+  },
+  {
+    dayNumber: 2,
+    title: 'Your Grocery List',
+    image: 'img/coach/card-2.png',
+    text:
+      'Your Grocery List is built from what you have logged over the last seven days, so the foods you actually eat begin appearing automatically as you use the diet screen. Check items off while you shop, and use the add button for anything else you need — the list is meant to support your plan, not become a separate project. The more consistently you log, the more useful this page becomes, so even imperfect logging in your first week pays off quickly.',
+  },
+  {
+    dayNumber: 3,
+    title: 'Logging Your Meals',
+    image: 'img/coach/card-3.png',
+    text:
+      'Logging is straightforward: when you eat something, tap it in the meal where it belongs and the app records it for that day. You do not need a perfect log every time — what matters is building the habit of tapping foods so your grocery list and your sense of the plan stay tied to real meals. Mark a meal complete when you have eaten what you planned, and come back later if you need to add or change something.',
+  },
+  {
+    dayNumber: 4,
+    title: 'Fat Servings',
+    image: 'img/coach/card-5.png',
+    text:
+      'At the bottom of your diet screen you will see fat points — your daily fat budget, or the number of fat servings your body can burn in a day. Extra fats, desserts, sugar, and alcohol all draw from that same pool, so the less you use, the more your body pulls from stored fat. You do not need to hit zero to lose fat; staying well under your maximum is what keeps the program working in your favor.',
+  },
+  {
+    dayNumber: 5,
+    title: 'Meal Timing',
+    image: 'img/coach/card-4.png',
+    text:
+      'Your meal times are spaced from the wake time you set in Settings, so when you change wake time, breakfast, lunch, dinner, and your snacks shift with it. Eating roughly every two to three hours keeps your metabolism steady through the day, which is why the schedule matters as much as the portions. Open Settings from the gear icon on the home screen whenever your routine changes — update wake time once and the app handles the rest.',
+  },
+  {
+    dayNumber: 6,
+    title: 'Weigh in Grams',
+    image: 'img/coach/card-6.png',
+    text:
+      'Everything in the app is in grams because a small kitchen scale is more accurate than eyeballing portions, and after a few days it becomes faster than guessing. Cook your food, place it on the scale, and serve the gram amount shown next to the food you chose — the app has already converted your servings into that weight. A steady weighing habit is one of the biggest differences between people who get results and people who slowly drift off plan.',
+  },
+  {
+    dayNumber: 7,
+    title: 'End of Week One',
+    image: 'img/coach/card-7.png',
+    text:
+      'You have made it through week one, and by now the rhythm should feel familiar: protein and grains at your three meals, fruit at your snacks, log what you eat, and let the grocery list follow. You do not need perfection — you need repetition, showing up each day and using the tools until they feel automatic. Head into week two with the same structure; the program works when you work the program.\n\n— Coach Kory',
+  },
+];
 
 export function getCoachDay(dayNumber) {
-  if (dayNumber !== 1) return null;
+  const entry = WEEK_ONE.find((d) => d.dayNumber === dayNumber);
+  if (!entry) return null;
   return {
-    dayNumber: 1,
-    title: 'How to Use Your Custom Diet',
-    cards: day1Cards(),
+    dayNumber: entry.dayNumber,
+    title: entry.title,
+    cards: [
+      {
+        dayNumber: entry.dayNumber,
+        title: entry.title,
+        image: entry.image,
+        text: entry.text,
+      },
+    ],
   };
 }
