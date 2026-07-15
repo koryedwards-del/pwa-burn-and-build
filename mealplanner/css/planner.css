@@ -85,6 +85,27 @@ body {
 
 /* Week grid */
 
+.week-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.week-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.col-heading--week {
+  padding-bottom: 0;
+  border-bottom: none;
+  margin: 0;
+}
+
 .week-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

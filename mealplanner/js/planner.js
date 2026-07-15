@@ -488,6 +488,19 @@ function clearDayMenu() {
   });
   activeSlot = null;
   activeFoodCategory = null;
+  refreshPlannerAfterMenuChange();
+}
+
+function clearWeekMenu() {
+  WEEK_DAYS.forEach((day) => {
+    weekPlan[day.id] = createEmptyDayState();
+  });
+  activeSlot = null;
+  activeFoodCategory = null;
+  refreshPlannerAfterMenuChange();
+}
+
+function refreshPlannerAfterMenuChange() {
   renderWeekGrid();
   renderDayColumn();
   renderFoodFilterLabel();
@@ -497,6 +510,10 @@ function clearDayMenu() {
 
 function initClearDayMenu() {
   document.getElementById('clear-day-menu').addEventListener('click', clearDayMenu);
+}
+
+function initClearWeekMenu() {
+  document.getElementById('clear-week-menu').addEventListener('click', clearWeekMenu);
 }
 
 function weekMealLabel(weekDay, mealSlotId) {
@@ -1091,6 +1108,7 @@ async function init() {
   renderFoodFilters();
   initSaveMealDialog();
   initClearDayMenu();
+  initClearWeekMenu();
   renderFoodStack();
   initFoodDropTargets();
 }
