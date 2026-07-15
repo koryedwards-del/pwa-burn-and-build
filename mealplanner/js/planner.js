@@ -172,11 +172,25 @@ function isCategorySlotActive(daySlotId, categorySlot) {
   return activeSlot?.daySlotId === daySlotId && activeSlot?.categorySlot === categorySlot;
 }
 
+function isFatSlot(categorySlot) {
+  return categorySlot === 'fat';
+}
+
+function getFatSelections(daySlotId) {
+  const fat = daySlotSelections[daySlotId]?.fat;
+  if (!fat) return [];
+  return Array.isArray(fat) ? fat : [fat];
+}
+
+function setFatSelections(daySlotId, items) {
+  daySlotSelections[daySlotId].fat = items.length ? items : null;
+}
+
 function isFruitOnlySnack(daySlotId) {
   const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
   if (daySlot.template !== 'snack') return false;
   const selections = daySlotSelections[daySlotId];
-  return selections.fruit != null && selections.fat == null;
+  return selections.fruit != null && getFatSelections(daySlotId).length === 0;
 }
 
 function acceptsSavedMealDrop(daySlotId) {
@@ -210,17 +224,22 @@ function itemSlotLabel(categorySlot, foodName) {
 
 function daySlotToMealItems(daySlotId) {
   const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
-  return templateSlots(daySlot.template)
-    .map((slotKey) => {
-      const selected = daySlotSelections[daySlotId][slotKey];
-      if (!selected) return null;
-      return {
+  return templateSlots(daySlot.template).flatMap((slotKey) => {
+    if (isFatSlot(slotKey)) {
+      return getFatSelections(daySlotId).map((selected) => ({
         slot: itemSlotLabel(slotKey, selected.foodName),
         foodName: selected.foodName,
         servings: selected.servings,
-      };
-    })
-    .filter(Boolean);
+      }));
+    }
+    const selected = daySlotSelections[daySlotId][slotKey];
+    if (!selected) return [];
+    return [{
+      slot: itemSlotLabel(slotKey, selected.foodName),
+      foodName: selected.foodName,
+      servings: selected.servings,
+    }];
+  });
 }
 
 function mealIdFromName(name) {
@@ -282,7 +301,81 @@ function renderDaySlotHeader(daySlot) {
   `;
 }
 
+function renderFatItemCard({ item, daySlotId, index }) {
+  const food = foods.find((entry) => entry.name === item.foodName);
+  const categoryLabel = FAT_LANE_SLOT_LABELS[food?.category];
+  const detail = food
+    ? `${item.servings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, item.servings)}`
+    : '';
+  const typeTag = categoryLabel
+    ? `<span class="fat-points__type">${categoryLabel}</span>`
+    : '';
+
+  return `
+    <div class="fat-points__item">
+      <button
+        type="button"
+        class="fat-points__remove"
+        data-fat-remove
+        data-day-slot-id="${daySlotId}"
+        data-fat-index="${index}"
+        aria-label="Remove ${escapeHtml(item.foodName)}"
+      >×</button>
+      ${typeTag}
+      <p class="card__title">${escapeHtml(item.foodName)}</p>
+      ${detail ? `<p class="card__detail">${detail}</p>` : ''}
+    </div>
+  `;
+}
+
+function renderFatPointsLane({ daySlotId }) {
+  const meta = SLOT_META.fat;
+  const active = isCategorySlotActive(daySlotId, 'fat');
+  const items = getFatSelections(daySlotId);
+  const optionalTag = ' <span class="card__slot-optional">(optional)</span>';
+
+  if (!items.length) {
+    return `
+      <button
+        type="button"
+        class="card card--slot card--empty card--slot-optional${active ? ' card--slot-active' : ''}"
+        data-day-category
+        data-day-slot-id="${daySlotId}"
+        data-category-slot="fat"
+      >
+        <span class="card__slot-label">${meta.label}${optionalTag}</span>
+        <span class="card__slot-hint">Optional — drag food</span>
+      </button>
+    `;
+  }
+
+  const stackHtml = items
+    .map((item, index) => renderFatItemCard({ item, daySlotId, index }))
+    .join('');
+
+  return `
+    <div
+      class="fat-points-lane card card--slot card--filled card--slot-optional${active ? ' card--slot-active' : ''}"
+      data-day-category
+      data-day-slot-id="${daySlotId}"
+      data-category-slot="fat"
+    >
+      <span class="card__slot-label">${meta.label}${optionalTag}</span>
+      <div class="fat-points-lane__stack">
+        ${stackHtml}
+        <div class="fat-points__add">
+          <span class="card__slot-hint">Drag to add another</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
+  if (isFatSlot(categorySlot)) {
+    return renderFatPointsLane({ daySlotId });
+  }
+
   const meta = SLOT_META[categorySlot];
   const active = isCategorySlotActive(daySlotId, categorySlot);
   const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
@@ -366,7 +459,8 @@ function renderDayColumn() {
   }).join('');
 
   container.querySelectorAll('[data-day-category]').forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (event) => {
+      if (event.target.closest('[data-fat-remove]')) return;
       activeSlot = {
         daySlotId: button.dataset.daySlotId,
         categorySlot: button.dataset.categorySlot,
@@ -377,6 +471,13 @@ function renderDayColumn() {
       renderFoodFilterLabel();
       renderFoodFilters();
       renderFoodStack();
+    });
+  });
+
+  container.querySelectorAll('[data-fat-remove]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      removeFatPoint(button.dataset.daySlotId, Number(button.dataset.fatIndex));
     });
   });
 
@@ -584,10 +685,25 @@ function renderFoodStack() {
 
 function fillDaySlot(daySlotId, categorySlot, foodName) {
   clearDaySlotMeta(daySlotId);
-  daySlotSelections[daySlotId][categorySlot] = {
-    foodName,
-    servings: 1,
-  };
+  if (isFatSlot(categorySlot)) {
+    setFatSelections(daySlotId, [
+      ...getFatSelections(daySlotId),
+      { foodName, servings: 1 },
+    ]);
+  } else {
+    daySlotSelections[daySlotId][categorySlot] = {
+      foodName,
+      servings: 1,
+    };
+  }
+  renderDayColumn();
+}
+
+function removeFatPoint(daySlotId, index) {
+  clearDaySlotMeta(daySlotId);
+  const items = getFatSelections(daySlotId);
+  items.splice(index, 1);
+  setFatSelections(daySlotId, items);
   renderDayColumn();
 }
 
@@ -605,15 +721,22 @@ function applySavedMealToDay(daySlotId, meal) {
   templateSlots(DAY_SLOTS.find((slot) => slot.id === daySlotId).template).forEach((slotKey) => {
     daySlotSelections[daySlotId][slotKey] = null;
   });
+  const fatItems = [];
   meal.items.forEach((item) => {
     const slotKey = labelToSlot[item.slot];
-    if (slotKey && daySlotSelections[daySlotId][slotKey] !== undefined) {
+    if (slotKey === 'fat') {
+      fatItems.push({
+        foodName: item.foodName,
+        servings: item.servings,
+      });
+    } else if (slotKey && daySlotSelections[daySlotId][slotKey] !== undefined) {
       daySlotSelections[daySlotId][slotKey] = {
         foodName: item.foodName,
         servings: item.servings,
       };
     }
   });
+  setFatSelections(daySlotId, fatItems);
   daySlotMeta[daySlotId] = { mealName: meal.name, savedMealId: meal.id };
   meal.pickCount += 1;
   renderDayColumn();

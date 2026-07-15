@@ -679,9 +679,89 @@ body {
   border-color: #444444;
 }
 
-.card--slot:not(.card--slot-active):hover {
+.card--slot:not(.card--slot-active):hover,
+.fat-points-lane:not(.card--slot-active):hover {
   background: var(--surface-3);
   border-color: #444444;
+}
+
+/* Fat points stack */
+
+.fat-points-lane {
+  cursor: pointer;
+}
+
+.fat-points-lane__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fat-points__item {
+  position: relative;
+  padding: 6px 26px 6px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  border-left: 2px solid rgba(253, 197, 0, 0.45);
+}
+
+.fat-points__type {
+  display: inline-block;
+  margin-bottom: 2px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.fat-points__item .card__title {
+  font-size: 0.78rem;
+}
+
+.fat-points__item .card__detail {
+  font-size: 0.65rem;
+  margin-top: 2px;
+}
+
+.fat-points__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.fat-points__remove:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: var(--orange-dim);
+}
+
+.fat-points__add {
+  padding: 7px 8px;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  text-align: center;
+  background: transparent;
+}
+
+.fat-points-lane.card--slot-active .fat-points__add {
+  border-color: rgba(253, 197, 0, 0.35);
+  background: rgba(253, 197, 0, 0.04);
+}
+
+.fat-points-lane.card--slot-active .fat-points__add .card__slot-hint {
+  color: var(--gold);
 }
 
 .saved-meal:hover {
