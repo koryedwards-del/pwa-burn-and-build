@@ -25,6 +25,7 @@ const SAVED_MEALS = [
   {
     id: 'oatmeal-bowl',
     name: 'Oatmeal Bowl',
+    pickCount: 38,
     items: [
       { slot: 'G / S', foodName: 'Oats, rolled', servings: 2 },
       { slot: 'Fruit', foodName: 'Blueberries', servings: 1 },
@@ -33,6 +34,7 @@ const SAVED_MEALS = [
   {
     id: 'chicken-bowl',
     name: 'Chicken Bowl',
+    pickCount: 42,
     items: [
       { slot: 'Protein', foodName: 'Chicken breast, no skin', servings: 2 },
       { slot: 'G / S', foodName: 'Rice, white', servings: 2 },
@@ -42,6 +44,7 @@ const SAVED_MEALS = [
   {
     id: 'apple-pb',
     name: 'Apple & Peanut Butter',
+    pickCount: 31,
     items: [
       { slot: 'Fruit', foodName: 'Apple', servings: 1 },
       { slot: 'Extra Fat', foodName: 'Peanut butter', servings: 1 },
@@ -50,6 +53,7 @@ const SAVED_MEALS = [
   {
     id: 'yogurt-berries',
     name: 'Yogurt & Berries',
+    pickCount: 22,
     items: [
       { slot: 'Protein', foodName: 'Greek yogurt, nonfat', servings: 1 },
       { slot: 'Fruit', foodName: 'Blueberries', servings: 1 },
@@ -58,6 +62,7 @@ const SAVED_MEALS = [
   {
     id: 'stir-fry',
     name: 'Stir Fry',
+    pickCount: 28,
     items: [
       { slot: 'Protein', foodName: 'Chicken breast, no skin', servings: 2 },
       { slot: 'G / S', foodName: 'Rice, brown', servings: 2 },
@@ -67,6 +72,7 @@ const SAVED_MEALS = [
   {
     id: 'tilapia-plate',
     name: 'Tilapia Plate',
+    pickCount: 5,
     items: [
       { slot: 'Protein', foodName: 'Tilapia, baked', servings: 2 },
       { slot: 'G / S', foodName: 'Sweet potato, baked', servings: 1 },
@@ -134,39 +140,45 @@ function mealDragHtml(meal) {
   `;
 }
 
+function renderSavedMealCard(meal) {
+  const expanded = expandedMeals.has(meal.id);
+  const itemsHtml = meal.items.map((item) => `
+    <li class="saved-meal__item">
+      <span class="saved-meal__slot">${escapeHtml(item.slot)}</span>
+      <span class="saved-meal__food">${escapeHtml(item.foodName)}</span>
+      <span class="saved-meal__amount">${mealItemDetail(item)}</span>
+    </li>
+  `).join('');
+
+  return `
+    <article class="saved-meal card card--meal${expanded ? ' saved-meal--expanded' : ''}" data-meal-id="${meal.id}">
+      <div class="saved-meal__header" draggable="true" data-meal-source data-meal-id="${meal.id}">
+        <button
+          type="button"
+          class="saved-meal__toggle"
+          data-meal-toggle="${meal.id}"
+          aria-expanded="${expanded}"
+          aria-label="${expanded ? 'Collapse' : 'Expand'} ${escapeHtml(meal.name)}"
+        >${expanded ? '▾' : '▸'}</button>
+        <div class="saved-meal__summary">
+          <p class="card__title">${escapeHtml(meal.name)}</p>
+          <p class="card__detail">${escapeHtml(mealSummary(meal))}</p>
+        </div>
+      </div>
+      <ul class="saved-meal__items${expanded ? '' : ' saved-meal__items--hidden'}">${itemsHtml}</ul>
+    </article>
+  `;
+}
+
+function savedMealsByPopularity() {
+  return [...SAVED_MEALS].sort((a, b) => b.pickCount - a.pickCount);
+}
+
 function renderSavedMeals() {
   const container = document.getElementById('saved-meals');
-  container.innerHTML = SAVED_MEALS.map((meal) => {
-    const expanded = expandedMeals.has(meal.id);
-    const itemsHtml = meal.items.map((item) => `
-      <li class="saved-meal__item">
-        <span class="saved-meal__slot">${escapeHtml(item.slot)}</span>
-        <span class="saved-meal__food">${escapeHtml(item.foodName)}</span>
-        <span class="saved-meal__amount">${mealItemDetail(item)}</span>
-      </li>
-    `).join('');
+  container.innerHTML = savedMealsByPopularity().map((meal) => renderSavedMealCard(meal)).join('');
 
-    return `
-      <article class="saved-meal card card--meal${expanded ? ' saved-meal--expanded' : ''}" data-meal-id="${meal.id}">
-        <div class="saved-meal__header" draggable="true" data-meal-source data-meal-id="${meal.id}">
-          <button
-            type="button"
-            class="saved-meal__toggle"
-            data-meal-toggle="${meal.id}"
-            aria-expanded="${expanded}"
-            aria-label="${expanded ? 'Collapse' : 'Expand'} ${escapeHtml(meal.name)}"
-          >${expanded ? '▾' : '▸'}</button>
-          <div class="saved-meal__summary">
-            <p class="card__title">${escapeHtml(meal.name)}</p>
-            <p class="card__detail">${escapeHtml(mealSummary(meal))}</p>
-          </div>
-        </div>
-        <ul class="saved-meal__items${expanded ? '' : ' saved-meal__items--hidden'}">${itemsHtml}</ul>
-      </article>
-    `;
-  }).join('');
-
-  container.querySelectorAll('[data-meal-toggle]').forEach((button) => {
+  document.querySelectorAll('[data-meal-toggle]').forEach((button) => {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
       const mealId = button.dataset.mealToggle;
@@ -383,6 +395,7 @@ function initMealDragDrop() {
       if (!meal) return;
       event.dataTransfer.effectAllowed = 'copy';
       event.dataTransfer.setData('application/x-meal-html', mealDragHtml(meal));
+      event.dataTransfer.setData('application/x-meal-id', meal.id);
       card.classList.add('card--dragging');
     });
 
@@ -410,7 +423,16 @@ function initMealDragDrop() {
       zone.classList.remove('drop-zone--over');
 
       const html = event.dataTransfer.getData('application/x-meal-html');
+      const mealId = event.dataTransfer.getData('application/x-meal-id');
       if (!html) return;
+
+      if (mealId) {
+        const meal = SAVED_MEALS.find((item) => item.id === mealId);
+        if (meal) {
+          meal.pickCount += 1;
+          renderSavedMeals();
+        }
+      }
 
       zone.classList.remove('card--empty');
       zone.classList.add('card--meal');

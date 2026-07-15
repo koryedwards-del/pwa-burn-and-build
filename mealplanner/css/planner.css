@@ -182,25 +182,6 @@ body {
   color: var(--muted);
 }
 
-.rotation {
-  margin-top: 4px;
-}
-
-.rotation__label {
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 6px;
-}
-
-.rotation__cards {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
 /* Cards */
 
 .card {
