@@ -741,7 +741,7 @@ function renderExtraFatsSection(slotLabel) {
       <button type="button" class="cat-header" data-toggle-section="${sk}">
         <div class="cat-header-main">
           <span class="cat-header-title">Extra Fats</span>
-          ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} Servings</span>` : ''}
+          ${totalPts ? `<span class="fat-pts-badge">${totalPts.toFixed(1)} pts</span>` : ''}
           <span class="cat-chevron">${open ? '▲' : '▼'}</span>
         </div>
         ${grouped.length
@@ -756,7 +756,7 @@ function renderExtraFatsSection(slotLabel) {
           </button>`).join('')}
         ${grouped.length ? `<div class="food-divider"></div>` : ''}
         <input type="search" class="food-search" placeholder="Search fats…" data-search="${sk}" value="${store.foodSearch[sk] || ''}" />
-        <div class="food-hint">Tap to add a fat serving</div>
+        <div class="food-hint">Tap to add a fat point</div>
         <div class="food-list">${renderFatRows(slotLabel, foods, grouped, sk)}</div>
       </div>` : ''}
     </div>`;
@@ -1045,8 +1045,8 @@ function intakeGender(intake) {
   return s.startsWith('f') ? 'female' : 'male';
 }
 
-function formatFatServingsDisplay(servings) {
-  const n = Number(servings);
+function formatFatPointsDisplay(points) {
+  const n = Number(points);
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
@@ -1061,14 +1061,14 @@ function projectionPlanCalories(plan) {
 function renderProjectedResults(intake, projection) {
   if (!projection) return '';
 
-  const fatServings = formatFatServingsDisplay(getPlan()?.servings?.fatMaintain);
+  const fatPoints = formatFatPointsDisplay(getPlan()?.servings?.fatMaintain);
 
   return `
     <section class="projections-section">
       <div class="projected-results-card">
         <p>Your diet is calculated using your LBM, job, life, exercise and activities.</p>
         <p>How much food you need each day depends on how much lean body mass you have. It also depends on your activity level and the type and amount of exercise you participate in.</p>
-        <p>Your body needs a certain amount of protein to repair and replace lean body mass (build muscle), and a certain amount of complex carbohydrates to provide energy for your busy days and to protect muscle mass. While all that is going on, your body will burn <strong>${fatServings} tsp of fat</strong> to balance out the equation.</p>
+        <p>Your body needs a certain amount of protein to repair and replace lean body mass (build muscle), and a certain amount of complex carbohydrates to provide energy for your busy days and to protect muscle mass. While all that is going on, your body will burn <strong>${fatPoints} fat points</strong> to balance out the equation.</p>
         <p>Here's how losing fat works: in eight weeks, you could safely lose <strong>${projection.fatLostLbs.toFixed(1)} pounds of fat</strong>. You project to lose an average of <strong>${projection.weeklyFatLossLbs.toFixed(1)} pounds of fat per week</strong>.</p>
         <div class="projected-results-pro-tip">
           <div class="projections-block-header">PRO TIP</div>
@@ -1366,8 +1366,8 @@ function renderMealFatPoints(fatTarget, fatUsed, fatPct) {
     <div class="fat-bar-wrap plan-fat-points">
       <div class="fat-bar"><div class="fat-bar-fill ${fatUsed >= fatTarget ? 'over' : ''}" style="width:${fatPct * 100}%"></div></div>
       <div class="fat-bar-meta">
-        <span>Fat Servings</span>
-        <span>${fatUsed.toFixed(1)} / ${fatTarget} Servings</span>
+        <span>Fat points</span>
+        <span>${fatUsed.toFixed(1)} / ${fatTarget} pts</span>
       </div>
     </div>`;
 }

@@ -18,9 +18,9 @@ function round2(x) {
   return Math.round(Number(x) * 100) / 100;
 }
 
-/** Body fat burned (lbs) when extra-fat servings are left unused. */
-export function fatLossPoundsFromDailyServings(fatServingsPerDay, days) {
-  return (Number(fatServingsPerDay) * FAT_SERVING_CALORIES * Number(days)) / 3500;
+/** Body fat burned (lbs) when fat points from diet are left unused. */
+export function fatLossPoundsFromDailyServings(fatPointsPerDay, days) {
+  return (Number(fatPointsPerDay) * FAT_SERVING_CALORIES * Number(days)) / 3500;
 }
 
 /** PHP printout: (maintain total cal − reduce total cal) × days / 3500. */

@@ -14,12 +14,12 @@ const SLOT_META = {
   protein: { label: 'Protein', categories: ['protein'] },
   gs: { label: 'G / S', categories: ['grain', 'starch'] },
   vegetable: { label: 'Veggie', categories: ['vegetable'], optional: true },
-  fat: { label: 'Extra Fat', categories: ['fat', 'sugar', 'alcohol'], optional: true },
+  fat: { label: 'Fat Points', categories: ['fat', 'sugar', 'alcohol'], optional: true },
   fruit: { label: 'Fruit', categories: ['fruit'] },
 };
 
 const FAT_LANE_SLOT_LABELS = {
-  fat: 'Extra Fat',
+  fat: 'Fat',
   sugar: 'Sugar',
   alcohol: 'Alcohol',
 };

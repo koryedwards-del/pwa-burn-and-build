@@ -44,10 +44,10 @@ const TEACHING = [
     quote: { text: 'If you want to see real results like you never thought possible, this is the plan to be on because it dials everything in for each person.', by: 'Dave McAftery, client since 1990' },
   },
   {
-    kicker: 'Fat servings',
+    kicker: 'Fat points',
     title: 'The number that controls fat loss.',
     body: [
-      'Every day your body burns a specific amount of fat. The Burn Engine calculates that number and gives it to you as fat servings — your daily budget.',
+      'Every day your body burns a specific amount of fat. The Burn Engine calculates that number and gives it to you as fat points — your daily budget.',
       'Stay under that number and your body burns stored body fat. Hit it exactly and you maintain. Go over it and you are burning what you ate instead of what you are carrying.',
       'This is the basic principle behind why Burn & Build works when cookie-cutter diets fail.',
     ],

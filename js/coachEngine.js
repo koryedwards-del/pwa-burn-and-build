@@ -69,7 +69,7 @@ const COACH_DAYS = [
   },
   {
     title: 'No two alike',
-    text: 'Your protein, grains, and fat servings come from YOU — LBM, job, stress, exercise. One-size diets fit someone in the middle. You\'re not middle.',
+    text: 'Your protein, grains, and fat points come from YOU — LBM, job, stress, exercise. One-size diets fit someone in the middle. You\'re not middle.',
   },
   {
     title: 'Grams win',
@@ -92,8 +92,8 @@ const COACH_DAYS = [
     text: 'You owe $295 and it\'s in your pocket. Would you drive to the ATM? Your body won\'t dig into stored fat if butter, oil, cheese, or sugar is already on the plate.',
   },
   {
-    title: 'Your tsp budget',
-    text: 'Your plan shows how many teaspoons of fat your body burns daily. That\'s your cut budget. Unused budget comes off your body.',
+    title: 'Your fat points budget',
+    text: 'Your plan shows how many fat points your body burns daily. That\'s your cut budget. Unused budget comes off your body.',
   },
   {
     title: 'Butter on bread',
@@ -177,11 +177,11 @@ const COACH_DAYS = [
   },
   {
     title: 'Why this works',
-    text: 'Protein rebuilds lean. Carbs fuel and protect muscle. Your body burns fat servings daily to balance the equation. Dialed in, that comes off you.',
+    text: 'Protein rebuilds lean. Carbs fuel and protect muscle. Your body burns fat points daily to balance the equation. Dialed in, that comes off you.',
   },
   {
     title: 'The math',
-    text: 'Those tsp you don\'t eat as fat, sugar, or alcohol add up to your 8-week fat-loss projection. Your numbers, not a generic chart.',
+    text: 'Fat points you don\'t eat as fat, sugar, or alcohol add up to your 8-week fat-loss projection. Your numbers, not a generic chart.',
   },
   {
     title: 'Lean may rise',
