@@ -64,7 +64,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--yellow);
+  color: var(--text);
 }
 
 .planner-subtitle {
@@ -181,7 +181,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--yellow);
+  color: var(--text);
   padding-bottom: 8px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -361,7 +361,19 @@ body {
 }
 
 .card--meal {
-  border-left: 3px solid rgba(253, 197, 0, 0.55);
+  border-left: none;
+  position: relative;
+}
+
+.card--meal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background: rgba(253, 197, 0, 0.42);
+  border-radius: 0 0 2px 0;
 }
 
 .card--meal[draggable="true"] {
@@ -428,10 +440,10 @@ body {
 
 .food-filter {
   padding: 5px 8px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: 4px;
-  background: var(--surface-2);
-  color: var(--muted);
+  background: var(--surface);
+  color: #666666;
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -690,9 +702,9 @@ body {
 }
 
 .food-filter:not(.food-filter--active):hover {
-  background: var(--surface-3);
-  border-color: #444444;
-  color: var(--text);
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--muted);
 }
 
 .card--food:hover {
