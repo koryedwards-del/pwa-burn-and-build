@@ -344,7 +344,7 @@ function renderFatPointsLane({ daySlotId }) {
         data-category-slot="fat"
       >
         <span class="card__slot-label">${meta.label}${optionalTag}</span>
-        <span class="card__slot-hint">Optional — drag food</span>
+        <span class="card__slot-hint">Tap or drag food</span>
       </button>
     `;
   }
@@ -379,7 +379,7 @@ function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
   const meta = SLOT_META[categorySlot];
   const active = isCategorySlotActive(daySlotId, categorySlot);
   const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
-  const emptyHint = meta.optional ? 'Optional — drag food' : 'Tap · drag food';
+  const emptyHint = 'Tap or drag food';
 
   if (selected) {
     const food = foods.find((item) => item.name === selected.foodName);
