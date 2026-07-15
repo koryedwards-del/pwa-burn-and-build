@@ -100,33 +100,93 @@ const SAVED_MEALS = [
 
 const FOODS_DATA_VERSION = '2';
 
+const WEEK_DAYS = [
+  { id: 'sun', label: 'Sun', fullLabel: 'Sunday' },
+  { id: 'mon', label: 'Mon', fullLabel: 'Monday' },
+  { id: 'tue', label: 'Tue', fullLabel: 'Tuesday' },
+  { id: 'wed', label: 'Wed', fullLabel: 'Wednesday' },
+  { id: 'thu', label: 'Thu', fullLabel: 'Thursday' },
+  { id: 'fri', label: 'Fri', fullLabel: 'Friday' },
+  { id: 'sat', label: 'Sat', fullLabel: 'Saturday' },
+];
+
+const WEEK_GRID_MEALS = ['breakfast', 'lunch', 'dinner'];
+
+const WEEK_MEAL_EMPTY_LABEL = {
+  breakfast: 'Breakfast —',
+  lunch: 'Lunch —',
+  dinner: 'Dinner —',
+};
+
 let foods = [];
+let activeWeekDay = 'wed';
 let activeSlot = null;
 let activeFoodCategory = null;
-let daySlotSelections = {};
-let daySlotMeta = {};
+let weekPlan = {};
 const expandedMeals = new Set();
 let pendingSaveDaySlotId = null;
+
+function createEmptyDayState() {
+  const selections = {};
+  const meta = {};
+  DAY_SLOTS.forEach((daySlot) => {
+    selections[daySlot.id] = {};
+    meta[daySlot.id] = { mealName: null, savedMealId: null };
+    templateSlots(daySlot.template).forEach((slot) => {
+      selections[daySlot.id][slot] = null;
+    });
+  });
+  return { selections, meta };
+}
+
+WEEK_DAYS.forEach((day) => {
+  weekPlan[day.id] = createEmptyDayState();
+});
+
+function categorySelections(mealSlotId, weekDay = activeWeekDay) {
+  return weekPlan[weekDay].selections[mealSlotId];
+}
+
+function mealSlotMeta(mealSlotId, weekDay = activeWeekDay) {
+  return weekPlan[weekDay].meta[mealSlotId];
+}
 
 function templateSlots(template) {
   return TEMPLATE_SLOTS[template];
 }
 
-DAY_SLOTS.forEach((daySlot) => {
-  daySlotSelections[daySlot.id] = {};
-  daySlotMeta[daySlot.id] = { mealName: null, savedMealId: null };
-  templateSlots(daySlot.template).forEach((slot) => {
-    daySlotSelections[daySlot.id][slot] = null;
-  });
-});
+function savedMealById(id) {
+  return SAVED_MEALS.find((meal) => meal.id === id);
+}
 
-daySlotSelections.breakfast.gs = { foodName: 'Oats, rolled', servings: 2 };
-daySlotSelections['morning-snack'].fruit = { foodName: 'Apple', servings: 1 };
-daySlotSelections.lunch.protein = { foodName: 'Chicken breast, no skin', servings: 2 };
-daySlotSelections.lunch.gs = { foodName: 'Rice, white', servings: 2 };
-daySlotSelections.lunch.vegetable = { foodName: 'Broccoli, cooked', servings: 1 };
-daySlotMeta.lunch = { mealName: 'Chicken Bowl', savedMealId: 'chicken-bowl' };
-daySlotSelections['evening-snack'].fruit = { foodName: 'Blueberries', servings: 1 };
+function seedWeekPlan() {
+  const presets = {
+    sun: ['oatmeal-bowl', 'chicken-bowl', 'tilapia-plate'],
+    mon: ['oatmeal-bowl', 'chicken-bowl', 'stir-fry'],
+    tue: ['oatmeal-bowl', 'chicken-bowl', 'tilapia-plate'],
+    thu: ['oatmeal-bowl', 'chicken-bowl', 'stir-fry'],
+    fri: ['oatmeal-bowl', 'chicken-bowl', 'tilapia-plate'],
+    sat: ['oatmeal-bowl', 'chicken-bowl', 'stir-fry'],
+  };
+
+  Object.entries(presets).forEach(([weekDay, mealIds]) => {
+    if (weekDay === 'wed') return;
+    WEEK_GRID_MEALS.forEach((mealSlotId, index) => {
+      const meal = savedMealById(mealIds[index]);
+      if (meal) applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick: false });
+    });
+  });
+
+  weekPlan.wed = createEmptyDayState();
+  categorySelections('breakfast', 'wed').gs = { foodName: 'Oats, rolled', servings: 2 };
+  categorySelections('morning-snack', 'wed').fruit = { foodName: 'Apple', servings: 1 };
+  categorySelections('lunch', 'wed').protein = { foodName: 'Chicken breast, no skin', servings: 2 };
+  categorySelections('lunch', 'wed').gs = { foodName: 'Rice, white', servings: 2 };
+  categorySelections('lunch', 'wed').vegetable = { foodName: 'Broccoli, cooked', servings: 1 };
+  mealSlotMeta('lunch', 'wed').mealName = 'Chicken Bowl';
+  mealSlotMeta('lunch', 'wed').savedMealId = 'chicken-bowl';
+  categorySelections('evening-snack', 'wed').fruit = { foodName: 'Blueberries', servings: 1 };
+}
 
 function scaledLabel(food, servings) {
   if (food.unitsPerServing > 0) {
@@ -176,21 +236,21 @@ function isFatSlot(categorySlot) {
   return categorySlot === 'fat';
 }
 
-function getFatSelections(daySlotId) {
-  const fat = daySlotSelections[daySlotId]?.fat;
+function getFatSelections(mealSlotId, weekDay = activeWeekDay) {
+  const fat = categorySelections(mealSlotId, weekDay)?.fat;
   if (!fat) return [];
   return Array.isArray(fat) ? fat : [fat];
 }
 
-function setFatSelections(daySlotId, items) {
-  daySlotSelections[daySlotId].fat = items.length ? items : null;
+function setFatSelections(mealSlotId, items, weekDay = activeWeekDay) {
+  categorySelections(mealSlotId, weekDay).fat = items.length ? items : null;
 }
 
-function isFruitOnlySnack(daySlotId) {
-  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
+function isFruitOnlySnack(mealSlotId, weekDay = activeWeekDay) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
   if (daySlot.template !== 'snack') return false;
-  const selections = daySlotSelections[daySlotId];
-  return selections.fruit != null && getFatSelections(daySlotId).length === 0;
+  const selections = categorySelections(mealSlotId, weekDay);
+  return selections.fruit != null && getFatSelections(mealSlotId, weekDay).length === 0;
 }
 
 function acceptsSavedMealDrop(daySlotId) {
@@ -198,22 +258,23 @@ function acceptsSavedMealDrop(daySlotId) {
   return daySlot.template !== 'snack';
 }
 
-function isDaySlotSaveable(daySlotId) {
-  if (isFruitOnlySnack(daySlotId)) return false;
-  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
+function isDaySlotSaveable(mealSlotId, weekDay = activeWeekDay) {
+  if (isFruitOnlySnack(mealSlotId, weekDay)) return false;
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
   return templateSlots(daySlot.template).every((slotKey) => {
     const meta = SLOT_META[slotKey];
     if (meta.optional) return true;
-    return daySlotSelections[daySlotId][slotKey] != null;
+    return categorySelections(mealSlotId, weekDay)[slotKey] != null;
   });
 }
 
-function showSaveMealButton(daySlotId) {
-  return isDaySlotSaveable(daySlotId) && !daySlotMeta[daySlotId].savedMealId;
+function showSaveMealButton(mealSlotId) {
+  return isDaySlotSaveable(mealSlotId) && !mealSlotMeta(mealSlotId).savedMealId;
 }
 
-function clearDaySlotMeta(daySlotId) {
-  daySlotMeta[daySlotId] = { mealName: null, savedMealId: null };
+function clearDaySlotMeta(mealSlotId, weekDay = activeWeekDay) {
+  mealSlotMeta(mealSlotId, weekDay).mealName = null;
+  mealSlotMeta(mealSlotId, weekDay).savedMealId = null;
 }
 
 function itemSlotLabel(categorySlot, foodName) {
@@ -222,17 +283,17 @@ function itemSlotLabel(categorySlot, foodName) {
   return FAT_LANE_SLOT_LABELS[food?.category] || SLOT_META.fat.label;
 }
 
-function daySlotToMealItems(daySlotId) {
-  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
+function daySlotToMealItems(mealSlotId, weekDay = activeWeekDay) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
   return templateSlots(daySlot.template).flatMap((slotKey) => {
     if (isFatSlot(slotKey)) {
-      return getFatSelections(daySlotId).map((selected) => ({
+      return getFatSelections(mealSlotId, weekDay).map((selected) => ({
         slot: itemSlotLabel(slotKey, selected.foodName),
         foodName: selected.foodName,
         servings: selected.servings,
       }));
     }
-    const selected = daySlotSelections[daySlotId][slotKey];
+    const selected = categorySelections(mealSlotId, weekDay)[slotKey];
     if (!selected) return [];
     return [{
       slot: itemSlotLabel(slotKey, selected.foodName),
@@ -253,7 +314,7 @@ function mealIdFromName(name) {
   return id;
 }
 
-function saveMealFromDay(daySlotId, name) {
+function saveMealFromDay(mealSlotId, name) {
   const trimmed = name.trim();
   if (!trimmed) return;
 
@@ -261,32 +322,34 @@ function saveMealFromDay(daySlotId, name) {
     id: mealIdFromName(trimmed),
     name: trimmed,
     pickCount: 1,
-    items: daySlotToMealItems(daySlotId),
+    items: daySlotToMealItems(mealSlotId),
   };
 
   SAVED_MEALS.push(meal);
-  daySlotMeta[daySlotId] = { mealName: trimmed, savedMealId: meal.id };
+  mealSlotMeta(mealSlotId).mealName = trimmed;
+  mealSlotMeta(mealSlotId).savedMealId = meal.id;
+  renderWeekGrid();
   renderDayColumn();
   renderSavedMeals();
 }
 
-function openSaveMealDialog(daySlotId) {
+function openSaveMealDialog(mealSlotId) {
   const dialog = document.getElementById('save-meal-dialog');
   const input = document.getElementById('save-meal-name');
-  pendingSaveDaySlotId = daySlotId;
-  input.value = daySlotMeta[daySlotId].mealName || '';
+  pendingSaveDaySlotId = mealSlotId;
+  input.value = mealSlotMeta(mealSlotId).mealName || '';
   dialog.showModal();
   input.focus();
   input.select();
 }
 
 function renderDaySlotHeader(daySlot) {
-  const meta = daySlotMeta[daySlot.id];
+  const meta = mealSlotMeta(daySlot.id);
   let nameHtml = '';
   if (meta.mealName) {
     nameHtml = `<span class="slot__meal-name"> · ${escapeHtml(meta.mealName)}</span>`;
   } else if (isFruitOnlySnack(daySlot.id)) {
-    const fruit = daySlotSelections[daySlot.id].fruit;
+    const fruit = categorySelections(daySlot.id).fruit;
     nameHtml = `<span class="slot__food-choice"> · ${escapeHtml(fruit.foodName)}</span>`;
   }
   const saveButtonHtml = showSaveMealButton(daySlot.id)
@@ -418,12 +481,14 @@ function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
 function clearDayMenu() {
   DAY_SLOTS.forEach((daySlot) => {
     templateSlots(daySlot.template).forEach((slot) => {
-      daySlotSelections[daySlot.id][slot] = null;
+      categorySelections(daySlot.id, activeWeekDay)[slot] = null;
     });
-    daySlotMeta[daySlot.id] = { mealName: null, savedMealId: null };
+    mealSlotMeta(daySlot.id, activeWeekDay).mealName = null;
+    mealSlotMeta(daySlot.id, activeWeekDay).savedMealId = null;
   });
   activeSlot = null;
   activeFoodCategory = null;
+  renderWeekGrid();
   renderDayColumn();
   renderFoodFilterLabel();
   renderFoodFilters();
@@ -434,10 +499,131 @@ function initClearDayMenu() {
   document.getElementById('clear-day-menu').addEventListener('click', clearDayMenu);
 }
 
+function weekMealLabel(weekDay, mealSlotId) {
+  const meta = mealSlotMeta(mealSlotId, weekDay);
+  if (meta.mealName) {
+    return { text: meta.mealName, empty: false };
+  }
+
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
+  const hasContent = templateSlots(daySlot.template).some((slotKey) => {
+    if (isFatSlot(slotKey)) return getFatSelections(mealSlotId, weekDay).length > 0;
+    return categorySelections(mealSlotId, weekDay)[slotKey] != null;
+  });
+
+  if (!hasContent) {
+    return { text: WEEK_MEAL_EMPTY_LABEL[mealSlotId], empty: true };
+  }
+
+  if (isFruitOnlySnack(mealSlotId, weekDay)) {
+    return {
+      text: categorySelections(mealSlotId, weekDay).fruit.foodName,
+      empty: false,
+    };
+  }
+
+  for (const slotKey of templateSlots(daySlot.template)) {
+    const selected = categorySelections(mealSlotId, weekDay)[slotKey];
+    if (selected) {
+      return { text: selected.foodName.split(',')[0], empty: false };
+    }
+  }
+
+  return { text: WEEK_MEAL_EMPTY_LABEL[mealSlotId], empty: true };
+}
+
+function renderWeekGrid() {
+  const container = document.getElementById('week-grid');
+  container.innerHTML = WEEK_DAYS.map((day) => {
+    const active = day.id === activeWeekDay;
+    const mealsHtml = WEEK_GRID_MEALS.map((mealSlotId) => {
+      const { text, empty } = weekMealLabel(day.id, mealSlotId);
+      return `
+        <div
+          class="mini-card${empty ? ' mini-card--empty' : ''}"
+          data-week-meal-drop
+          data-week-day="${day.id}"
+          data-meal-slot="${mealSlotId}"
+        >${escapeHtml(text)}</div>
+      `;
+    }).join('');
+
+    return `
+      <div
+        class="day-col${active ? ' day-col--active' : ''}"
+        data-week-day-select
+        data-week-day="${day.id}"
+      >
+        <p class="day-col__name">${day.label}</p>
+        <div class="day-col__meals">${mealsHtml}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setActiveWeekDay(weekDay) {
+  if (weekDay === activeWeekDay) return;
+  activeWeekDay = weekDay;
+  activeSlot = null;
+  activeFoodCategory = null;
+  renderWeekGrid();
+  renderActiveDayLabel();
+  renderDayColumn();
+  renderFoodFilterLabel();
+  renderFoodFilters();
+  renderFoodStack();
+}
+
+function renderActiveDayLabel() {
+  const day = WEEK_DAYS.find((item) => item.id === activeWeekDay);
+  document.getElementById('active-day-label').textContent = day.fullLabel;
+}
+
+function initWeekGrid() {
+  const grid = document.getElementById('week-grid');
+  if (grid.dataset.weekInit) return;
+  grid.dataset.weekInit = '1';
+
+  grid.addEventListener('click', (event) => {
+    const col = event.target.closest('[data-week-day-select]');
+    if (!col) return;
+    setActiveWeekDay(col.dataset.weekDay);
+  });
+
+  grid.addEventListener('dragover', (event) => {
+    const cell = event.target.closest('[data-week-meal-drop]');
+    if (!cell) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    cell.classList.add('drop-zone--over');
+  });
+
+  grid.addEventListener('dragleave', (event) => {
+    const cell = event.target.closest('[data-week-meal-drop]');
+    if (cell) cell.classList.remove('drop-zone--over');
+  });
+
+  grid.addEventListener('drop', (event) => {
+    const cell = event.target.closest('[data-week-meal-drop]');
+    if (!cell) return;
+    event.preventDefault();
+    cell.classList.remove('drop-zone--over');
+
+    const mealId = event.dataTransfer.getData('application/x-meal-id');
+    if (!mealId) return;
+
+    const meal = SAVED_MEALS.find((item) => item.id === mealId);
+    if (!meal) return;
+
+    applySavedMealToMealSlot(cell.dataset.weekDay, cell.dataset.mealSlot, meal);
+    setActiveWeekDay(cell.dataset.weekDay);
+  });
+}
+
 function renderDayColumn() {
   const container = document.getElementById('day-slots');
   container.innerHTML = DAY_SLOTS.map((daySlot) => {
-    const selections = daySlotSelections[daySlot.id];
+    const selections = categorySelections(daySlot.id);
     const categoryHtml = templateSlots(daySlot.template)
       .map((categorySlot) => renderCategorySlotButton({
         categorySlot,
@@ -566,13 +752,17 @@ function deleteSavedMeal(mealId) {
   SAVED_MEALS.splice(index, 1);
   expandedMeals.delete(mealId);
 
-  Object.keys(daySlotMeta).forEach((daySlotId) => {
-    if (daySlotMeta[daySlotId].savedMealId === mealId) {
-      daySlotMeta[daySlotId] = { mealName: null, savedMealId: null };
-    }
+  WEEK_DAYS.forEach((weekDay) => {
+    DAY_SLOTS.forEach((daySlot) => {
+      if (mealSlotMeta(daySlot.id, weekDay).savedMealId === mealId) {
+        mealSlotMeta(daySlot.id, weekDay).mealName = null;
+        mealSlotMeta(daySlot.id, weekDay).savedMealId = null;
+      }
+    });
   });
 
   renderSavedMeals();
+  renderWeekGrid();
   renderDayColumn();
 }
 
@@ -728,11 +918,12 @@ function fillDaySlot(daySlotId, categorySlot, foodName) {
       { foodName, servings: 1 },
     ]);
   } else {
-    daySlotSelections[daySlotId][categorySlot] = {
+    categorySelections(daySlotId)[categorySlot] = {
       foodName,
       servings: 1,
     };
   }
+  renderWeekGrid();
   renderDayColumn();
 }
 
@@ -741,11 +932,12 @@ function removeFatPoint(daySlotId, index) {
   const items = getFatSelections(daySlotId);
   items.splice(index, 1);
   setFatSelections(daySlotId, items);
+  renderWeekGrid();
   renderDayColumn();
 }
 
-function applySavedMealToDay(daySlotId, meal) {
-  if (!acceptsSavedMealDrop(daySlotId)) return;
+function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true } = {}) {
+  if (!acceptsSavedMealDrop(mealSlotId)) return;
   const labelToSlot = {
     Protein: 'protein',
     'G / S': 'gs',
@@ -755,8 +947,8 @@ function applySavedMealToDay(daySlotId, meal) {
     Alcohol: 'fat',
     Fruit: 'fruit',
   };
-  templateSlots(DAY_SLOTS.find((slot) => slot.id === daySlotId).template).forEach((slotKey) => {
-    daySlotSelections[daySlotId][slotKey] = null;
+  templateSlots(DAY_SLOTS.find((slot) => slot.id === mealSlotId).template).forEach((slotKey) => {
+    categorySelections(mealSlotId, weekDay)[slotKey] = null;
   });
   const fatItems = [];
   meal.items.forEach((item) => {
@@ -766,18 +958,24 @@ function applySavedMealToDay(daySlotId, meal) {
         foodName: item.foodName,
         servings: item.servings,
       });
-    } else if (slotKey && daySlotSelections[daySlotId][slotKey] !== undefined) {
-      daySlotSelections[daySlotId][slotKey] = {
+    } else if (slotKey && categorySelections(mealSlotId, weekDay)[slotKey] !== undefined) {
+      categorySelections(mealSlotId, weekDay)[slotKey] = {
         foodName: item.foodName,
         servings: item.servings,
       };
     }
   });
-  setFatSelections(daySlotId, fatItems);
-  daySlotMeta[daySlotId] = { mealName: meal.name, savedMealId: meal.id };
-  meal.pickCount += 1;
-  renderDayColumn();
+  setFatSelections(mealSlotId, fatItems, weekDay);
+  mealSlotMeta(mealSlotId, weekDay).mealName = meal.name;
+  mealSlotMeta(mealSlotId, weekDay).savedMealId = meal.id;
+  if (trackPick) meal.pickCount += 1;
+  renderWeekGrid();
+  if (weekDay === activeWeekDay) renderDayColumn();
   renderSavedMeals();
+}
+
+function applySavedMealToDay(mealSlotId, meal) {
+  applySavedMealToMealSlot(activeWeekDay, mealSlotId, meal);
 }
 
 function initFoodDropTargets() {
@@ -882,6 +1080,10 @@ function initSaveMealDialog() {
 async function init() {
   const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
   foods = await response.json();
+  seedWeekPlan();
+  renderWeekGrid();
+  initWeekGrid();
+  renderActiveDayLabel();
   renderDayColumn();
   renderSavedMeals();
   renderFoodFilterLabel();
