@@ -150,6 +150,11 @@ function isFruitOnlySnack(daySlotId) {
   return selections.fruit != null && selections.fat == null;
 }
 
+function acceptsSavedMealDrop(daySlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
+  return daySlot.template !== 'snack';
+}
+
 function isDaySlotSaveable(daySlotId) {
   if (isFruitOnlySnack(daySlotId)) return false;
   const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
@@ -294,10 +299,12 @@ function renderDayColumn() {
       }))
       .join('');
 
+    const mealDropAttr = acceptsSavedMealDrop(daySlot.id) ? ' data-day-meal-drop' : '';
+
     return `
       <div class="slot">
         ${renderDaySlotHeader(daySlot)}
-        <div class="day-slot" data-day-meal-drop data-day-slot-id="${daySlot.id}">
+        <div class="day-slot"${mealDropAttr} data-day-slot-id="${daySlot.id}">
           <div class="day-slot__categories">${categoryHtml}</div>
         </div>
       </div>
@@ -490,6 +497,7 @@ function fillDaySlot(daySlotId, categorySlot, foodName) {
 }
 
 function applySavedMealToDay(daySlotId, meal) {
+  if (!acceptsSavedMealDrop(daySlotId)) return;
   const labelToSlot = {
     Protein: 'protein',
     'G / S': 'gs',
@@ -608,7 +616,7 @@ function initMealDragDrop() {
       if (!mealId) return;
 
       const meal = SAVED_MEALS.find((item) => item.id === mealId);
-      if (!meal) return;
+      if (!meal || !acceptsSavedMealDrop(zone.dataset.daySlotId)) return;
 
       applySavedMealToDay(zone.dataset.daySlotId, meal);
     });
