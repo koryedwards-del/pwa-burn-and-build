@@ -341,16 +341,19 @@ body {
 }
 
 .meal-builder__type {
-  font-size: 0.65rem;
+  font-family: "Oswald", system-ui, sans-serif;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--yellow);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
 }
 
 .meal-slots {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
 }
 

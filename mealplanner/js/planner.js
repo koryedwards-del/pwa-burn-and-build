@@ -17,8 +17,8 @@ const SLOT_META = {
 };
 
 const MEAL_BUILDERS = [
-  { id: 'lunch', label: 'Lunch', slots: ['protein', 'gs', 'vegetable', 'fat'] },
-  { id: 'snack', label: 'Snack', slots: ['fruit', 'fat'] },
+  { id: 'lunch', label: 'Build Meal', slots: ['protein', 'gs', 'vegetable', 'fat'] },
+  { id: 'snack', label: 'Fruit Snack', slots: ['fruit', 'fat'] },
 ];
 
 const SAVED_MEALS = [
@@ -275,7 +275,7 @@ function renderFoodStack() {
   const list = foodsForActiveSlot();
 
   if (!activeSlot) {
-    container.innerHTML = '<p class="food-stack__hint">Tap an empty slot in Lunch or Snack to load foods.</p>';
+    container.innerHTML = '<p class="food-stack__hint">Tap an empty slot in Build Meal or Fruit Snack to load foods.</p>';
     return;
   }
 
