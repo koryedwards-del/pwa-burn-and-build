@@ -300,6 +300,24 @@ function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
   `;
 }
 
+function clearDayMenu() {
+  DAY_SLOTS.forEach((daySlot) => {
+    templateSlots(daySlot.template).forEach((slot) => {
+      daySlotSelections[daySlot.id][slot] = null;
+    });
+    daySlotMeta[daySlot.id] = { mealName: null, savedMealId: null };
+  });
+  activeSlot = null;
+  renderDayColumn();
+  renderFoodFilterLabel();
+  renderFoodFilters();
+  renderFoodStack();
+}
+
+function initClearDayMenu() {
+  document.getElementById('clear-day-menu').addEventListener('click', clearDayMenu);
+}
+
 function renderDayColumn() {
   const container = document.getElementById('day-slots');
   container.innerHTML = DAY_SLOTS.map((daySlot) => {
@@ -680,6 +698,7 @@ async function init() {
   renderFoodFilterLabel();
   renderFoodFilters();
   initSaveMealDialog();
+  initClearDayMenu();
   renderFoodStack();
   initFoodDropTargets();
 }

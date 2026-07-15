@@ -75,7 +75,10 @@
 
       <section class="workspace" aria-label="Planner workspace">
         <div class="workspace__col workspace__col--day">
-          <p class="col-heading">Wednesday</p>
+          <div class="day-col-header">
+            <p class="col-heading col-heading--day" id="active-day-label">Wednesday</p>
+            <button type="button" class="day-col__clear" id="clear-day-menu">Clear Menu</button>
+          </div>
           <div class="day-slots" id="day-slots"></div>
         </div>
 
