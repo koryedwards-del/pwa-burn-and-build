@@ -305,6 +305,12 @@ body {
   cursor: pointer;
 }
 
+.day-slot__categories {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .workspace__col--meals {
   overflow-y: auto;
 }

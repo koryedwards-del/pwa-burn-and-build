@@ -21,6 +21,20 @@ const MEAL_BUILDERS = [
   { id: 'snack', label: 'Fruit Snack', slots: ['fruit', 'fat'] },
 ];
 
+const DAY_SLOTS = [
+  { id: 'breakfast', label: 'Breakfast', template: 'meal' },
+  { id: 'morning-snack', label: 'Morning Snack', template: 'snack' },
+  { id: 'lunch', label: 'Lunch', template: 'meal' },
+  { id: 'afternoon-snack', label: 'Afternoon Snack', template: 'snack' },
+  { id: 'dinner', label: 'Dinner', template: 'meal' },
+  { id: 'evening-snack', label: 'Evening Snack', template: 'snack' },
+];
+
+const TEMPLATE_SLOTS = {
+  meal: ['protein', 'gs', 'vegetable', 'fat'],
+  snack: ['fruit', 'fat'],
+};
+
 const SAVED_MEALS = [
   {
     id: 'oatmeal-bowl',
@@ -85,7 +99,12 @@ let foods = [];
 let previewServings = 1;
 let activeSlot = null;
 let slotSelections = {};
+let daySlotSelections = {};
 const expandedMeals = new Set();
+
+function templateSlots(template) {
+  return TEMPLATE_SLOTS[template];
+}
 
 MEAL_BUILDERS.forEach((builder) => {
   slotSelections[builder.id] = {};
@@ -93,6 +112,20 @@ MEAL_BUILDERS.forEach((builder) => {
     slotSelections[builder.id][slot] = null;
   });
 });
+
+DAY_SLOTS.forEach((daySlot) => {
+  daySlotSelections[daySlot.id] = {};
+  templateSlots(daySlot.template).forEach((slot) => {
+    daySlotSelections[daySlot.id][slot] = null;
+  });
+});
+
+daySlotSelections.breakfast.gs = { foodName: 'Oats, rolled', servings: 2 };
+daySlotSelections['morning-snack'].fruit = { foodName: 'Apple', servings: 1 };
+daySlotSelections.lunch.protein = { foodName: 'Chicken breast, no skin', servings: 2 };
+daySlotSelections.lunch.gs = { foodName: 'Rice, white', servings: 2 };
+daySlotSelections.lunch.vegetable = { foodName: 'Broccoli, cooked', servings: 1 };
+daySlotSelections['evening-snack'].fruit = { foodName: 'Blueberries', servings: 1 };
 
 function scaledLabel(food, servings) {
   if (food.unitsPerServing > 0) {
@@ -112,7 +145,109 @@ function escapeHtml(text) {
 
 function activeCategories() {
   if (!activeSlot) return [];
-  return SLOT_META[activeSlot.slot].categories;
+  return SLOT_META[activeSlot.categorySlot].categories;
+}
+
+function isCategorySlotActive(zone, categorySlot, { daySlotId, builderId } = {}) {
+  if (!activeSlot || activeSlot.categorySlot !== categorySlot) return false;
+  if (zone === 'day') {
+    return activeSlot.zone === 'day' && activeSlot.daySlotId === daySlotId;
+  }
+  return activeSlot.zone === 'builder' && activeSlot.builderId === builderId;
+}
+
+function renderCategorySlotButton({
+  zone,
+  categorySlot,
+  daySlotId,
+  builderId,
+  selected,
+}) {
+  const meta = SLOT_META[categorySlot];
+  const active = isCategorySlotActive(zone, categorySlot, { daySlotId, builderId });
+  const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
+  const emptyHint = meta.optional ? 'Optional — drag food' : 'Tap · drag food';
+  const dataAttrs = zone === 'day'
+    ? `data-day-category data-day-slot-id="${daySlotId}" data-category-slot="${categorySlot}"`
+    : `data-builder="${builderId}" data-slot="${categorySlot}"`;
+
+  if (selected) {
+    const food = foods.find((item) => item.name === selected.foodName);
+    const detail = food
+      ? `${selected.servings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, selected.servings)}`
+      : '';
+    return `
+      <button type="button" class="card card--slot card--filled${active ? ' card--slot-active' : ''}" ${dataAttrs}>
+        <span class="card__slot-label">${meta.label}${optionalTag}</span>
+        <p class="card__title">${escapeHtml(selected.foodName)}</p>
+        ${detail ? `<p class="card__detail">${detail}</p>` : ''}
+      </button>
+    `;
+  }
+
+  return `
+    <button
+      type="button"
+      class="card card--slot card--empty${meta.optional ? ' card--slot-optional' : ''}${active ? ' card--slot-active' : ''}"
+      ${dataAttrs}
+    >
+      <span class="card__slot-label">${meta.label}${optionalTag}</span>
+      <span class="card__slot-hint">${emptyHint}</span>
+    </button>
+  `;
+}
+
+function renderDayColumn() {
+  const container = document.getElementById('day-slots');
+  container.innerHTML = DAY_SLOTS.map((daySlot) => {
+    const selections = daySlotSelections[daySlot.id];
+    const slots = templateSlots(daySlot.template);
+    const categoryHtml = slots
+      .map((categorySlot) => renderCategorySlotButton({
+        zone: 'day',
+        categorySlot,
+        daySlotId: daySlot.id,
+        selected: selections[categorySlot],
+      }))
+      .join('');
+
+    return `
+      <div class="slot">
+        <p class="slot__label">${daySlot.label}</p>
+        <div class="day-slot" data-day-meal-drop data-day-slot-id="${daySlot.id}">
+          <div class="day-slot__categories">${categoryHtml}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  bindCategorySlotClicks(container, 'day');
+}
+
+function bindCategorySlotClicks(container, zone) {
+  const selector = zone === 'day' ? '[data-day-category]' : '[data-slot]';
+  container.querySelectorAll(selector).forEach((button) => {
+    button.addEventListener('click', () => {
+      if (zone === 'day') {
+        activeSlot = {
+          zone: 'day',
+          daySlotId: button.dataset.daySlotId,
+          categorySlot: button.dataset.categorySlot,
+        };
+      } else {
+        activeSlot = {
+          zone: 'builder',
+          builderId: button.dataset.builder,
+          categorySlot: button.dataset.slot,
+        };
+      }
+      renderDayColumn();
+      renderMealBuilders();
+      renderFoodFilterLabel();
+      renderFoodFilters();
+      renderFoodStack();
+    });
+  });
 }
 
 function foodsForActiveSlot() {
@@ -195,75 +330,33 @@ function renderSavedMeals() {
   initMealDragDrop();
 }
 
-function isSlotActive(builderId, slotKey) {
-  return activeSlot?.builder === builderId && activeSlot?.slot === slotKey;
-}
-
 function renderMealBuilders() {
   MEAL_BUILDERS.forEach((builder) => {
     const container = document.getElementById(`${builder.id}-slots`);
-    container.innerHTML = builder.slots.map((slotKey) => {
-      const meta = SLOT_META[slotKey];
-      const selected = slotSelections[builder.id][slotKey];
-      const active = isSlotActive(builder.id, slotKey);
-      const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
-      const emptyHint = meta.optional ? 'Optional — tap to add' : 'Tap to pick';
+    container.innerHTML = builder.slots.map((slotKey) => renderCategorySlotButton({
+      zone: 'builder',
+      categorySlot: slotKey,
+      builderId: builder.id,
+      selected: slotSelections[builder.id][slotKey],
+    })).join('');
 
-      if (selected) {
-        const food = foods.find((item) => item.name === selected.foodName);
-        const detail = food
-          ? `${selected.servings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, selected.servings)}`
-          : '';
-        return `
-          <button
-            type="button"
-            class="card card--slot card--filled${active ? ' card--slot-active' : ''}"
-            data-builder="${builder.id}"
-            data-slot="${slotKey}"
-          >
-            <span class="card__slot-label">${meta.label}${optionalTag}</span>
-            <p class="card__title">${escapeHtml(selected.foodName)}</p>
-            ${detail ? `<p class="card__detail">${detail}</p>` : ''}
-          </button>
-        `;
-      }
-
-      return `
-        <button
-          type="button"
-          class="card card--slot card--empty${meta.optional ? ' card--slot-optional' : ''}${active ? ' card--slot-active' : ''}"
-          data-builder="${builder.id}"
-          data-slot="${slotKey}"
-        >
-          <span class="card__slot-label">${meta.label}${optionalTag}</span>
-          <span class="card__slot-hint">${emptyHint}</span>
-        </button>
-      `;
-    }).join('');
-
-    container.querySelectorAll('[data-slot]').forEach((button) => {
-      button.addEventListener('click', () => {
-        activeSlot = {
-          builder: button.dataset.builder,
-          slot: button.dataset.slot,
-        };
-        renderMealBuilders();
-        renderFoodFilterLabel();
-        renderFoodFilters();
-        renderFoodStack();
-      });
-    });
+    bindCategorySlotClicks(container, 'builder');
   });
 }
 
 function renderFoodFilterLabel() {
   const label = document.getElementById('food-filter-label');
   if (!activeSlot) {
-    label.textContent = 'Select a slot to filter foods';
+    label.textContent = 'Select a day or build slot to filter foods';
     return;
   }
-  const builder = MEAL_BUILDERS.find((item) => item.id === activeSlot.builder);
-  const slot = SLOT_META[activeSlot.slot];
+  const slot = SLOT_META[activeSlot.categorySlot];
+  if (activeSlot.zone === 'day') {
+    const daySlot = DAY_SLOTS.find((item) => item.id === activeSlot.daySlotId);
+    label.textContent = `${daySlot.label} · ${slot.label}`;
+    return;
+  }
+  const builder = MEAL_BUILDERS.find((item) => item.id === activeSlot.builderId);
   label.textContent = `${builder.label} · ${slot.label}`;
 }
 
@@ -289,7 +382,7 @@ function renderFoodStack() {
   const list = foodsForActiveSlot();
 
   if (!activeSlot) {
-    container.innerHTML = '<p class="food-stack__hint">Tap an empty slot in Build Meal or Fruit Snack to load foods.</p>';
+    container.innerHTML = '<p class="food-stack__hint">Tap a category on the day column or build meal, then drag food.</p>';
     return;
   }
 
@@ -325,17 +418,47 @@ function initServingsControls() {
     previewServings = Number(button.dataset.servings);
     updateServingsUI();
     renderMealBuilders();
+    renderDayColumn();
     renderFoodStack();
   });
   updateServingsUI();
 }
 
-function fillSlot(builderId, slotKey, foodName) {
-  slotSelections[builderId][slotKey] = {
-    foodName,
-    servings: previewServings,
-  };
+function fillCategorySlot(zone, { daySlotId, builderId, categorySlot }, foodName) {
+  const selection = { foodName, servings: previewServings };
+  if (zone === 'day') {
+    daySlotSelections[daySlotId][categorySlot] = selection;
+    renderDayColumn();
+    return;
+  }
+  slotSelections[builderId][categorySlot] = selection;
   renderMealBuilders();
+}
+
+function applySavedMealToDay(daySlotId, meal) {
+  const daySlot = DAY_SLOTS.find((slot) => slot.id === daySlotId);
+  const labelToSlot = {
+    Protein: 'protein',
+    'G / S': 'gs',
+    Veggie: 'vegetable',
+    'Extra Fat': 'fat',
+    Fruit: 'fruit',
+  };
+  templateSlots(daySlot.template).forEach((slotKey) => {
+    daySlotSelections[daySlotId][slotKey] = null;
+  });
+  meal.items.forEach((item) => {
+    const slotKey = labelToSlot[item.slot];
+    if (slotKey && daySlotSelections[daySlotId][slotKey] !== undefined) {
+      daySlotSelections[daySlotId][slotKey] = {
+        foodName: item.foodName,
+        servings: item.servings,
+      };
+    }
+  });
+  meal.pickCount += 1;
+  renderDayColumn();
+  renderSavedMeals();
 }
 
 function initFoodDragDrop() {
@@ -357,36 +480,73 @@ function initFoodDragDrop() {
       card.classList.remove('card--dragging');
     });
   });
+}
 
-  document.querySelectorAll('[data-slot]').forEach((slot) => {
-    if (slot.dataset.dropBound) return;
-    slot.dataset.dropBound = '1';
-
-    slot.addEventListener('dragover', (event) => {
-      if (!activeSlot) return;
-      if (activeSlot.builder !== slot.dataset.builder || activeSlot.slot !== slot.dataset.slot) return;
+function initFoodDropTargets() {
+  const daySlots = document.getElementById('day-slots');
+  if (!daySlots.dataset.dropInit) {
+    daySlots.dataset.dropInit = '1';
+    daySlots.addEventListener('dragover', (event) => {
+      const slot = event.target.closest('[data-day-category]');
+      if (!slot || !activeSlot || activeSlot.zone !== 'day') return;
+      if (activeSlot.daySlotId !== slot.dataset.daySlotId
+        || activeSlot.categorySlot !== slot.dataset.categorySlot) return;
       event.preventDefault();
       event.dataTransfer.dropEffect = 'copy';
       slot.classList.add('drop-zone--over');
     });
-
-    slot.addEventListener('dragleave', () => {
-      slot.classList.remove('drop-zone--over');
+    daySlots.addEventListener('dragleave', (event) => {
+      const slot = event.target.closest('[data-day-category]');
+      if (slot) slot.classList.remove('drop-zone--over');
     });
-
-    slot.addEventListener('drop', (event) => {
+    daySlots.addEventListener('drop', (event) => {
+      const slot = event.target.closest('[data-day-category]');
+      if (!slot) return;
       event.preventDefault();
       slot.classList.remove('drop-zone--over');
       const foodName = event.dataTransfer.getData('application/x-food-name');
       if (!foodName) return;
-      fillSlot(slot.dataset.builder, slot.dataset.slot, foodName);
+      fillCategorySlot('day', {
+        daySlotId: slot.dataset.daySlotId,
+        categorySlot: slot.dataset.categorySlot,
+      }, foodName);
+    });
+  }
+
+  MEAL_BUILDERS.forEach((builder) => {
+    const container = document.getElementById(`${builder.id}-slots`);
+    if (container.dataset.dropInit) return;
+    container.dataset.dropInit = '1';
+    container.addEventListener('dragover', (event) => {
+      const slot = event.target.closest('[data-slot][data-builder]');
+      if (!slot || !activeSlot || activeSlot.zone !== 'builder') return;
+      if (activeSlot.builderId !== slot.dataset.builder
+        || activeSlot.categorySlot !== slot.dataset.slot) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      slot.classList.add('drop-zone--over');
+    });
+    container.addEventListener('dragleave', (event) => {
+      const slot = event.target.closest('[data-slot][data-builder]');
+      if (slot) slot.classList.remove('drop-zone--over');
+    });
+    container.addEventListener('drop', (event) => {
+      const slot = event.target.closest('[data-slot][data-builder]');
+      if (!slot) return;
+      event.preventDefault();
+      slot.classList.remove('drop-zone--over');
+      const foodName = event.dataTransfer.getData('application/x-food-name');
+      if (!foodName) return;
+      fillCategorySlot('builder', {
+        builderId: slot.dataset.builder,
+        categorySlot: slot.dataset.slot,
+      }, foodName);
     });
   });
 }
 
 function initMealDragDrop() {
   const mealSources = document.querySelectorAll('[data-meal-source]');
-  const dropZones = document.querySelectorAll('[data-drop-zone]');
 
   mealSources.forEach((card) => {
     if (card.dataset.mealDragBound) return;
@@ -406,9 +566,9 @@ function initMealDragDrop() {
     });
   });
 
-  dropZones.forEach((zone) => {
-    if (zone.dataset.dropBound) return;
-    zone.dataset.dropBound = '1';
+  document.querySelectorAll('[data-day-meal-drop]').forEach((zone) => {
+    if (zone.dataset.mealDropBound) return;
+    zone.dataset.mealDropBound = '1';
 
     zone.addEventListener('dragover', (event) => {
       event.preventDefault();
@@ -424,22 +584,13 @@ function initMealDragDrop() {
       event.preventDefault();
       zone.classList.remove('drop-zone--over');
 
-      const html = event.dataTransfer.getData('application/x-meal-html');
       const mealId = event.dataTransfer.getData('application/x-meal-id');
-      if (!html) return;
+      if (!mealId) return;
 
-      if (mealId) {
-        const meal = SAVED_MEALS.find((item) => item.id === mealId);
-        if (meal) {
-          meal.pickCount += 1;
-          renderSavedMeals();
-        }
-      }
+      const meal = SAVED_MEALS.find((item) => item.id === mealId);
+      if (!meal) return;
 
-      zone.classList.remove('card--empty');
-      zone.classList.add('card--meal');
-      zone.innerHTML = html;
-      zone.removeAttribute('data-drop-zone');
+      applySavedMealToDay(zone.dataset.daySlotId, meal);
     });
   });
 }
@@ -447,12 +598,14 @@ function initMealDragDrop() {
 async function init() {
   const response = await fetch('../data/foods.json');
   foods = await response.json();
+  renderDayColumn();
   renderMealBuilders();
   renderSavedMeals();
   renderFoodFilterLabel();
   renderFoodFilters();
   initServingsControls();
   renderFoodStack();
+  initFoodDropTargets();
 }
 
 init().catch((error) => {
