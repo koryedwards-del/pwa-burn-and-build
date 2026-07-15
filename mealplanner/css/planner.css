@@ -265,6 +265,71 @@ body {
 
 /* Food stack */
 
+.food-servings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.food-servings__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.food-servings__controls {
+  display: flex;
+  gap: 4px;
+}
+
+.food-servings__btn {
+  min-width: 28px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.food-servings__btn--active {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: var(--yellow-dim);
+}
+
+.food-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.food-filter {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.food-filter--active {
+  border-color: var(--yellow);
+  color: var(--yellow);
+  background: var(--yellow-dim);
+}
+
 .food-stack {
   display: flex;
   flex-direction: column;
@@ -273,6 +338,20 @@ body {
   flex: 1;
   min-height: 0;
   padding-right: 4px;
+}
+
+.card--food .card__title {
+  font-size: 0.8rem;
+}
+
+.card--food .card__detail {
+  font-size: 0.68rem;
+}
+
+.food-stack__error {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .food-stack::-webkit-scrollbar {

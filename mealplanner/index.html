@@ -10,7 +10,7 @@
   <div class="planner-app">
     <header class="planner-header">
       <h1 class="planner-title">Meal Planner</h1>
-      <p class="planner-subtitle">Step 3 — drag a meal into an empty slot</p>
+      <p class="planner-subtitle">Step 4 — real food list with serving sizes</p>
     </header>
 
     <main class="planner-frame">
@@ -160,26 +160,23 @@
         <div class="workspace__col workspace__col--foods">
           <p class="col-heading">Foods</p>
 
-          <div class="food-stack">
-            <div class="card card--food">Oatmeal</div>
-            <div class="card card--food">Blueberries</div>
-            <div class="card card--food">Eggs</div>
-            <div class="card card--food">Chicken</div>
-            <div class="card card--food">White Rice</div>
-            <div class="card card--food">Brown Rice</div>
-            <div class="card card--food">Broccoli</div>
-            <div class="card card--food">Apple</div>
-            <div class="card card--food">Greek Yogurt</div>
-            <div class="card card--food">Salmon</div>
-            <div class="card card--food">Sweet Potato</div>
-            <div class="card card--food">Asparagus</div>
-            <div class="card card--food">Peppers</div>
-            <div class="card card--food">Banana</div>
+          <div class="food-servings">
+            <span class="food-servings__label">Servings</span>
+            <div class="food-servings__controls" id="food-servings-controls">
+              <button type="button" class="food-servings__btn" data-servings="1">1</button>
+              <button type="button" class="food-servings__btn" data-servings="2">2</button>
+              <button type="button" class="food-servings__btn" data-servings="3">3</button>
+              <button type="button" class="food-servings__btn" data-servings="4">4</button>
+              <button type="button" class="food-servings__btn" data-servings="5">5</button>
+            </div>
           </div>
+
+          <div class="food-filters" id="food-filters"></div>
+          <div class="food-stack" id="food-stack"></div>
         </div>
       </section>
     </main>
   </div>
-  <script src="js/planner.js"></script>
+  <script type="module" src="js/planner.js"></script>
 </body>
 </html>
