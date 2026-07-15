@@ -18,12 +18,17 @@
   --gold: #fdc500;
   --gold-dim: rgba(253, 197, 0, 0.12);
   --gold-glow: rgba(253, 197, 0, 0.08);
+  --gold-muted: rgba(253, 197, 0, 0.38);
+  --gold-select-bg: rgba(253, 197, 0, 0.05);
   --orange: #ff7a00;
   --orange-dim: rgba(255, 122, 0, 0.14);
   --on-gold: #0a0a0a;
+  --text-bright: #ffffff;
+  --text-secondary: #7e7e7e;
+  --surface-food: #232323;
   --yellow: var(--gold);
   --yellow-dim: var(--gold-dim);
-  --planner-width: 1200px;
+  --planner-width: 1225px;
 }
 
 html, body {
@@ -95,12 +100,15 @@ body {
   border-radius: 6px;
   padding: 10px 8px;
   min-height: 110px;
+  transition: transform 0.2s ease, border-color 0.15s ease, background 0.15s ease;
 }
 
 .day-col--active {
-  border-color: var(--gold);
-  background: var(--gold-glow);
-  box-shadow: inset 0 0 0 1px var(--gold-dim);
+  transform: scale(1.07);
+  z-index: 1;
+  border-color: var(--gold-muted);
+  background: var(--gold-select-bg);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 
 .day-col__name {
@@ -114,7 +122,7 @@ body {
 }
 
 .day-col--active .day-col__name {
-  color: var(--yellow);
+  color: rgba(253, 197, 0, 0.82);
 }
 
 .day-col__meals {
@@ -147,7 +155,7 @@ body {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 1.1fr 1fr 0.85fr;
+  grid-template-columns: 1.05fr 1fr 0.95fr;
   gap: 12px;
   padding: 12px;
   background: var(--bg);
@@ -353,7 +361,7 @@ body {
 }
 
 .card--meal {
-  border-left: 3px solid var(--yellow);
+  border-left: 3px solid rgba(253, 197, 0, 0.55);
 }
 
 .card--meal[draggable="true"] {
@@ -377,8 +385,10 @@ body {
 }
 
 .card--food {
-  padding: 8px 12px;
+  padding: 9px 12px;
   font-size: 0.85rem;
+  background: var(--surface-food);
+  border-color: #2e2e2e;
 }
 
 .card--empty {
@@ -486,13 +496,14 @@ body {
 .saved-meals {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .saved-meal {
   padding: 0;
   overflow: hidden;
   position: relative;
+  border-radius: 7px;
 }
 
 .saved-meal__delete {
@@ -521,8 +532,8 @@ body {
 .saved-meal__header {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 36px 10px 12px;
+  gap: 10px;
+  padding: 14px 38px 14px 14px;
   cursor: grab;
 }
 
@@ -546,6 +557,16 @@ body {
 .saved-meal__summary {
   flex: 1;
   min-width: 0;
+}
+
+.saved-meal .card__title {
+  font-size: 0.9rem;
+  color: var(--text-bright);
+}
+
+.saved-meal .card__detail {
+  margin-top: 5px;
+  font-size: 0.74rem;
 }
 
 .saved-meal__items {
@@ -598,10 +619,10 @@ body {
 }
 
 .card--slot-active {
-  border-color: var(--gold);
-  background: var(--gold-dim);
-  border-left-color: var(--gold);
-  box-shadow: inset 0 0 0 1px var(--gold-glow);
+  border-color: var(--gold-muted);
+  background: var(--gold-select-bg);
+  border-left-color: var(--gold-muted);
+  box-shadow: none;
 }
 
 .card--slot.card--filled {
@@ -620,7 +641,7 @@ body {
 }
 
 .card--slot-active .card__slot-label {
-  color: var(--yellow);
+  color: rgba(253, 197, 0, 0.72);
 }
 
 .card__slot-hint {
@@ -756,12 +777,12 @@ body {
 }
 
 .fat-points-lane.card--slot-active .fat-points__add {
-  border-color: rgba(253, 197, 0, 0.35);
-  background: rgba(253, 197, 0, 0.04);
+  border-color: rgba(253, 197, 0, 0.22);
+  background: rgba(253, 197, 0, 0.03);
 }
 
 .fat-points-lane.card--slot-active .fat-points__add .card__slot-hint {
-  color: var(--gold);
+  color: rgba(253, 197, 0, 0.65);
 }
 
 .saved-meal:hover {
@@ -787,11 +808,15 @@ body {
 }
 
 .card--food .card__title {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-bright);
 }
 
 .card--food .card__detail {
-  font-size: 0.68rem;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
 }
 
 .food-stack__hint,
