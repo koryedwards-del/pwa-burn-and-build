@@ -6,14 +6,22 @@ const FOOD_CATEGORIES = [
   { id: 'vegetable', label: 'Vegetables' },
   { id: 'fruit', label: 'Fruit' },
   { id: 'fat', label: 'Fats' },
+  { id: 'sugar', label: 'Sugar' },
+  { id: 'alcohol', label: 'Alcohol' },
 ];
 
 const SLOT_META = {
   protein: { label: 'Protein', categories: ['protein'] },
   gs: { label: 'G / S', categories: ['grain', 'starch'] },
   vegetable: { label: 'Veggie', categories: ['vegetable'], optional: true },
-  fat: { label: 'Extra Fat', categories: ['fat'], optional: true },
+  fat: { label: 'Extra Fat', categories: ['fat', 'sugar', 'alcohol'], optional: true },
   fruit: { label: 'Fruit', categories: ['fruit'] },
+};
+
+const FAT_LANE_SLOT_LABELS = {
+  fat: 'Extra Fat',
+  sugar: 'Sugar',
+  alcohol: 'Alcohol',
 };
 
 const DAY_SLOTS = [
@@ -172,6 +180,12 @@ function clearDaySlotMeta(daySlotId) {
   daySlotMeta[daySlotId] = { mealName: null, savedMealId: null };
 }
 
+function itemSlotLabel(categorySlot, foodName) {
+  if (categorySlot !== 'fat') return SLOT_META[categorySlot].label;
+  const food = foods.find((item) => item.name === foodName);
+  return FAT_LANE_SLOT_LABELS[food?.category] || SLOT_META.fat.label;
+}
+
 function daySlotToMealItems(daySlotId) {
   const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
   return templateSlots(daySlot.template)
@@ -179,7 +193,7 @@ function daySlotToMealItems(daySlotId) {
       const selected = daySlotSelections[daySlotId][slotKey];
       if (!selected) return null;
       return {
-        slot: SLOT_META[slotKey].label,
+        slot: itemSlotLabel(slotKey, selected.foodName),
         foodName: selected.foodName,
         servings: selected.servings,
       };
@@ -516,6 +530,8 @@ function applySavedMealToDay(daySlotId, meal) {
     'G / S': 'gs',
     Veggie: 'vegetable',
     'Extra Fat': 'fat',
+    Sugar: 'fat',
+    Alcohol: 'fat',
     Fruit: 'fruit',
   };
   templateSlots(DAY_SLOTS.find((slot) => slot.id === daySlotId).template).forEach((slotKey) => {
