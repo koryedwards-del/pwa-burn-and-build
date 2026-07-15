@@ -214,6 +214,24 @@ body {
   border-left: 3px solid var(--yellow);
 }
 
+.card--meal[draggable="true"] {
+  cursor: grab;
+}
+
+.card--meal[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.card--dragging {
+  opacity: 0.45;
+}
+
+.drop-zone--over {
+  border-color: var(--yellow);
+  background: var(--yellow-dim);
+  color: var(--text);
+}
+
 .card--food {
   padding: 8px 12px;
   font-size: 0.85rem;
