@@ -16,11 +16,6 @@ const SLOT_META = {
   fruit: { label: 'Fruit', categories: ['fruit'] },
 };
 
-const MEAL_BUILDERS = [
-  { id: 'lunch', label: 'Build Meal', slots: ['protein', 'gs', 'vegetable', 'fat'] },
-  { id: 'snack', label: 'Fruit Snack', slots: ['fruit', 'fat'] },
-];
-
 const DAY_SLOTS = [
   { id: 'breakfast', label: 'Breakfast', template: 'meal' },
   { id: 'morning-snack', label: 'Morning Snack', template: 'snack' },
@@ -98,20 +93,12 @@ const SAVED_MEALS = [
 let foods = [];
 let previewServings = 1;
 let activeSlot = null;
-let slotSelections = {};
 let daySlotSelections = {};
 const expandedMeals = new Set();
 
 function templateSlots(template) {
   return TEMPLATE_SLOTS[template];
 }
-
-MEAL_BUILDERS.forEach((builder) => {
-  slotSelections[builder.id] = {};
-  builder.slots.forEach((slot) => {
-    slotSelections[builder.id][slot] = null;
-  });
-});
 
 DAY_SLOTS.forEach((daySlot) => {
   daySlotSelections[daySlot.id] = {};
@@ -148,28 +135,15 @@ function activeCategories() {
   return SLOT_META[activeSlot.categorySlot].categories;
 }
 
-function isCategorySlotActive(zone, categorySlot, { daySlotId, builderId } = {}) {
-  if (!activeSlot || activeSlot.categorySlot !== categorySlot) return false;
-  if (zone === 'day') {
-    return activeSlot.zone === 'day' && activeSlot.daySlotId === daySlotId;
-  }
-  return activeSlot.zone === 'builder' && activeSlot.builderId === builderId;
+function isCategorySlotActive(daySlotId, categorySlot) {
+  return activeSlot?.daySlotId === daySlotId && activeSlot?.categorySlot === categorySlot;
 }
 
-function renderCategorySlotButton({
-  zone,
-  categorySlot,
-  daySlotId,
-  builderId,
-  selected,
-}) {
+function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
   const meta = SLOT_META[categorySlot];
-  const active = isCategorySlotActive(zone, categorySlot, { daySlotId, builderId });
+  const active = isCategorySlotActive(daySlotId, categorySlot);
   const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
   const emptyHint = meta.optional ? 'Optional — drag food' : 'Tap · drag food';
-  const dataAttrs = zone === 'day'
-    ? `data-day-category data-day-slot-id="${daySlotId}" data-category-slot="${categorySlot}"`
-    : `data-builder="${builderId}" data-slot="${categorySlot}"`;
 
   if (selected) {
     const food = foods.find((item) => item.name === selected.foodName);
@@ -177,7 +151,13 @@ function renderCategorySlotButton({
       ? `${selected.servings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, selected.servings)}`
       : '';
     return `
-      <button type="button" class="card card--slot card--filled${active ? ' card--slot-active' : ''}" ${dataAttrs}>
+      <button
+        type="button"
+        class="card card--slot card--filled${active ? ' card--slot-active' : ''}"
+        data-day-category
+        data-day-slot-id="${daySlotId}"
+        data-category-slot="${categorySlot}"
+      >
         <span class="card__slot-label">${meta.label}${optionalTag}</span>
         <p class="card__title">${escapeHtml(selected.foodName)}</p>
         ${detail ? `<p class="card__detail">${detail}</p>` : ''}
@@ -189,7 +169,9 @@ function renderCategorySlotButton({
     <button
       type="button"
       class="card card--slot card--empty${meta.optional ? ' card--slot-optional' : ''}${active ? ' card--slot-active' : ''}"
-      ${dataAttrs}
+      data-day-category
+      data-day-slot-id="${daySlotId}"
+      data-category-slot="${categorySlot}"
     >
       <span class="card__slot-label">${meta.label}${optionalTag}</span>
       <span class="card__slot-hint">${emptyHint}</span>
@@ -201,10 +183,8 @@ function renderDayColumn() {
   const container = document.getElementById('day-slots');
   container.innerHTML = DAY_SLOTS.map((daySlot) => {
     const selections = daySlotSelections[daySlot.id];
-    const slots = templateSlots(daySlot.template);
-    const categoryHtml = slots
+    const categoryHtml = templateSlots(daySlot.template)
       .map((categorySlot) => renderCategorySlotButton({
-        zone: 'day',
         categorySlot,
         daySlotId: daySlot.id,
         selected: selections[categorySlot],
@@ -221,28 +201,13 @@ function renderDayColumn() {
     `;
   }).join('');
 
-  bindCategorySlotClicks(container, 'day');
-}
-
-function bindCategorySlotClicks(container, zone) {
-  const selector = zone === 'day' ? '[data-day-category]' : '[data-slot]';
-  container.querySelectorAll(selector).forEach((button) => {
+  container.querySelectorAll('[data-day-category]').forEach((button) => {
     button.addEventListener('click', () => {
-      if (zone === 'day') {
-        activeSlot = {
-          zone: 'day',
-          daySlotId: button.dataset.daySlotId,
-          categorySlot: button.dataset.categorySlot,
-        };
-      } else {
-        activeSlot = {
-          zone: 'builder',
-          builderId: button.dataset.builder,
-          categorySlot: button.dataset.slot,
-        };
-      }
+      activeSlot = {
+        daySlotId: button.dataset.daySlotId,
+        categorySlot: button.dataset.categorySlot,
+      };
       renderDayColumn();
-      renderMealBuilders();
       renderFoodFilterLabel();
       renderFoodFilters();
       renderFoodStack();
@@ -330,34 +295,15 @@ function renderSavedMeals() {
   initMealDragDrop();
 }
 
-function renderMealBuilders() {
-  MEAL_BUILDERS.forEach((builder) => {
-    const container = document.getElementById(`${builder.id}-slots`);
-    container.innerHTML = builder.slots.map((slotKey) => renderCategorySlotButton({
-      zone: 'builder',
-      categorySlot: slotKey,
-      builderId: builder.id,
-      selected: slotSelections[builder.id][slotKey],
-    })).join('');
-
-    bindCategorySlotClicks(container, 'builder');
-  });
-}
-
 function renderFoodFilterLabel() {
   const label = document.getElementById('food-filter-label');
   if (!activeSlot) {
-    label.textContent = 'Select a day or build slot to filter foods';
+    label.textContent = 'Select a day slot to filter foods';
     return;
   }
+  const daySlot = DAY_SLOTS.find((item) => item.id === activeSlot.daySlotId);
   const slot = SLOT_META[activeSlot.categorySlot];
-  if (activeSlot.zone === 'day') {
-    const daySlot = DAY_SLOTS.find((item) => item.id === activeSlot.daySlotId);
-    label.textContent = `${daySlot.label} · ${slot.label}`;
-    return;
-  }
-  const builder = MEAL_BUILDERS.find((item) => item.id === activeSlot.builderId);
-  label.textContent = `${builder.label} · ${slot.label}`;
+  label.textContent = `${daySlot.label} · ${slot.label}`;
 }
 
 function renderFoodFilters() {
@@ -382,7 +328,7 @@ function renderFoodStack() {
   const list = foodsForActiveSlot();
 
   if (!activeSlot) {
-    container.innerHTML = '<p class="food-stack__hint">Tap a category on the day column or build meal, then drag food.</p>';
+    container.innerHTML = '<p class="food-stack__hint">Tap a category on the day, then drag food.</p>';
     return;
   }
 
@@ -417,26 +363,21 @@ function initServingsControls() {
     if (!button) return;
     previewServings = Number(button.dataset.servings);
     updateServingsUI();
-    renderMealBuilders();
     renderDayColumn();
     renderFoodStack();
   });
   updateServingsUI();
 }
 
-function fillCategorySlot(zone, { daySlotId, builderId, categorySlot }, foodName) {
-  const selection = { foodName, servings: previewServings };
-  if (zone === 'day') {
-    daySlotSelections[daySlotId][categorySlot] = selection;
-    renderDayColumn();
-    return;
-  }
-  slotSelections[builderId][categorySlot] = selection;
-  renderMealBuilders();
+function fillDaySlot(daySlotId, categorySlot, foodName) {
+  daySlotSelections[daySlotId][categorySlot] = {
+    foodName,
+    servings: previewServings,
+  };
+  renderDayColumn();
 }
 
 function applySavedMealToDay(daySlotId, meal) {
-  const daySlot = DAY_SLOTS.find((slot) => slot.id === daySlotId);
   const labelToSlot = {
     Protein: 'protein',
     'G / S': 'gs',
@@ -444,7 +385,7 @@ function applySavedMealToDay(daySlotId, meal) {
     'Extra Fat': 'fat',
     Fruit: 'fruit',
   };
-  templateSlots(daySlot.template).forEach((slotKey) => {
+  templateSlots(DAY_SLOTS.find((slot) => slot.id === daySlotId).template).forEach((slotKey) => {
     daySlotSelections[daySlotId][slotKey] = null;
   });
   meal.items.forEach((item) => {
@@ -484,71 +425,37 @@ function initFoodDragDrop() {
 
 function initFoodDropTargets() {
   const daySlots = document.getElementById('day-slots');
-  if (!daySlots.dataset.dropInit) {
-    daySlots.dataset.dropInit = '1';
-    daySlots.addEventListener('dragover', (event) => {
-      const slot = event.target.closest('[data-day-category]');
-      if (!slot || !activeSlot || activeSlot.zone !== 'day') return;
-      if (activeSlot.daySlotId !== slot.dataset.daySlotId
-        || activeSlot.categorySlot !== slot.dataset.categorySlot) return;
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'copy';
-      slot.classList.add('drop-zone--over');
-    });
-    daySlots.addEventListener('dragleave', (event) => {
-      const slot = event.target.closest('[data-day-category]');
-      if (slot) slot.classList.remove('drop-zone--over');
-    });
-    daySlots.addEventListener('drop', (event) => {
-      const slot = event.target.closest('[data-day-category]');
-      if (!slot) return;
-      event.preventDefault();
-      slot.classList.remove('drop-zone--over');
-      const foodName = event.dataTransfer.getData('application/x-food-name');
-      if (!foodName) return;
-      fillCategorySlot('day', {
-        daySlotId: slot.dataset.daySlotId,
-        categorySlot: slot.dataset.categorySlot,
-      }, foodName);
-    });
-  }
+  if (daySlots.dataset.dropInit) return;
+  daySlots.dataset.dropInit = '1';
 
-  MEAL_BUILDERS.forEach((builder) => {
-    const container = document.getElementById(`${builder.id}-slots`);
-    if (container.dataset.dropInit) return;
-    container.dataset.dropInit = '1';
-    container.addEventListener('dragover', (event) => {
-      const slot = event.target.closest('[data-slot][data-builder]');
-      if (!slot || !activeSlot || activeSlot.zone !== 'builder') return;
-      if (activeSlot.builderId !== slot.dataset.builder
-        || activeSlot.categorySlot !== slot.dataset.slot) return;
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'copy';
-      slot.classList.add('drop-zone--over');
-    });
-    container.addEventListener('dragleave', (event) => {
-      const slot = event.target.closest('[data-slot][data-builder]');
-      if (slot) slot.classList.remove('drop-zone--over');
-    });
-    container.addEventListener('drop', (event) => {
-      const slot = event.target.closest('[data-slot][data-builder]');
-      if (!slot) return;
-      event.preventDefault();
-      slot.classList.remove('drop-zone--over');
-      const foodName = event.dataTransfer.getData('application/x-food-name');
-      if (!foodName) return;
-      fillCategorySlot('builder', {
-        builderId: slot.dataset.builder,
-        categorySlot: slot.dataset.slot,
-      }, foodName);
-    });
+  daySlots.addEventListener('dragover', (event) => {
+    const slot = event.target.closest('[data-day-category]');
+    if (!slot || !activeSlot) return;
+    if (activeSlot.daySlotId !== slot.dataset.daySlotId
+      || activeSlot.categorySlot !== slot.dataset.categorySlot) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    slot.classList.add('drop-zone--over');
+  });
+
+  daySlots.addEventListener('dragleave', (event) => {
+    const slot = event.target.closest('[data-day-category]');
+    if (slot) slot.classList.remove('drop-zone--over');
+  });
+
+  daySlots.addEventListener('drop', (event) => {
+    const slot = event.target.closest('[data-day-category]');
+    if (!slot) return;
+    event.preventDefault();
+    slot.classList.remove('drop-zone--over');
+    const foodName = event.dataTransfer.getData('application/x-food-name');
+    if (!foodName) return;
+    fillDaySlot(slot.dataset.daySlotId, slot.dataset.categorySlot, foodName);
   });
 }
 
 function initMealDragDrop() {
-  const mealSources = document.querySelectorAll('[data-meal-source]');
-
-  mealSources.forEach((card) => {
+  document.querySelectorAll('[data-meal-source]').forEach((card) => {
     if (card.dataset.mealDragBound) return;
     card.dataset.mealDragBound = '1';
 
@@ -599,7 +506,6 @@ async function init() {
   const response = await fetch('../data/foods.json');
   foods = await response.json();
   renderDayColumn();
-  renderMealBuilders();
   renderSavedMeals();
   renderFoodFilterLabel();
   renderFoodFilters();
