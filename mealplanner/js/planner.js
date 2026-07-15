@@ -143,7 +143,15 @@ function isCategorySlotActive(daySlotId, categorySlot) {
   return activeSlot?.daySlotId === daySlotId && activeSlot?.categorySlot === categorySlot;
 }
 
+function isFruitOnlySnack(daySlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
+  if (daySlot.template !== 'snack') return false;
+  const selections = daySlotSelections[daySlotId];
+  return selections.fruit != null && selections.fat == null;
+}
+
 function isDaySlotSaveable(daySlotId) {
+  if (isFruitOnlySnack(daySlotId)) return false;
   const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
   return templateSlots(daySlot.template).every((slotKey) => {
     const meta = SLOT_META[slotKey];
@@ -215,16 +223,20 @@ function openSaveMealDialog(daySlotId) {
 
 function renderDaySlotHeader(daySlot) {
   const meta = daySlotMeta[daySlot.id];
-  const mealNameHtml = meta.mealName
-    ? `<span class="slot__meal-name"> · ${escapeHtml(meta.mealName)}</span>`
-    : '';
+  let nameHtml = '';
+  if (meta.mealName) {
+    nameHtml = `<span class="slot__meal-name"> · ${escapeHtml(meta.mealName)}</span>`;
+  } else if (isFruitOnlySnack(daySlot.id)) {
+    const fruit = daySlotSelections[daySlot.id].fruit;
+    nameHtml = `<span class="slot__food-choice"> · ${escapeHtml(fruit.foodName)}</span>`;
+  }
   const saveButtonHtml = showSaveMealButton(daySlot.id)
     ? `<button type="button" class="slot__save" data-save-meal="${daySlot.id}">Save Meal</button>`
     : '';
 
   return `
     <div class="slot-header">
-      <p class="slot__label"><span class="slot__time">${daySlot.label}</span>${mealNameHtml}</p>
+      <p class="slot__label"><span class="slot__time">${daySlot.label}</span>${nameHtml}</p>
       ${saveButtonHtml}
     </div>
   `;

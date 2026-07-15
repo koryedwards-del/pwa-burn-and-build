@@ -201,6 +201,11 @@ body {
   font-weight: 600;
 }
 
+.slot__food-choice {
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .slot__save {
   flex-shrink: 0;
   padding: 3px 8px;
