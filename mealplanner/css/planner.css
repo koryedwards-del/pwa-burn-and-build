@@ -1,0 +1,101 @@
+/* Burn & Build Meal Planner — Step 1 shell */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --yellow: #ffcc00;
+  --bg: #0a0a0a;
+  --surface: #1a1a1a;
+  --border: #2a2a2a;
+  --text: #d4d4d4;
+  --muted: #8a8a8a;
+  --planner-width: 1200px;
+}
+
+html, body {
+  min-height: 100%;
+}
+
+body {
+  background: #050505;
+  color: var(--text);
+  font-family: "Open Sans", system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px 48px;
+}
+
+.planner-app {
+  width: var(--planner-width);
+  min-height: calc(100vh - 72px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.planner-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.planner-title {
+  font-family: "Oswald", system-ui, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+.planner-subtitle {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.planner-frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.frame-zone {
+  background: var(--bg);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+
+.frame-zone--week {
+  min-height: 120px;
+  padding: 16px;
+}
+
+.frame-zone--workspace {
+  flex: 1;
+  min-height: 520px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+
+.frame-column {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  min-height: 100%;
+  padding: 16px;
+}
+
+.frame-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
