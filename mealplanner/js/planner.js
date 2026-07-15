@@ -100,6 +100,7 @@ const SAVED_MEALS = [
 
 let foods = [];
 let activeSlot = null;
+let activeFoodCategory = null;
 let daySlotSelections = {};
 let daySlotMeta = {};
 const expandedMeals = new Set();
@@ -145,9 +146,24 @@ function escapeHtml(text) {
     .replace(/"/g, '&quot;');
 }
 
-function activeCategories() {
+function slotFoodCategories() {
   if (!activeSlot) return [];
   return SLOT_META[activeSlot.categorySlot].categories;
+}
+
+function ensureActiveFoodCategory() {
+  const categories = slotFoodCategories();
+  if (!categories.length) {
+    activeFoodCategory = null;
+    return;
+  }
+  if (categories.length === 1) {
+    activeFoodCategory = categories[0];
+    return;
+  }
+  if (!activeFoodCategory || !categories.includes(activeFoodCategory)) {
+    activeFoodCategory = categories[0];
+  }
 }
 
 function isCategorySlotActive(daySlotId, categorySlot) {
@@ -312,6 +328,7 @@ function clearDayMenu() {
     daySlotMeta[daySlot.id] = { mealName: null, savedMealId: null };
   });
   activeSlot = null;
+  activeFoodCategory = null;
   renderDayColumn();
   renderFoodFilterLabel();
   renderFoodFilters();
@@ -352,6 +369,8 @@ function renderDayColumn() {
         daySlotId: button.dataset.daySlotId,
         categorySlot: button.dataset.categorySlot,
       };
+      activeFoodCategory = null;
+      ensureActiveFoodCategory();
       renderDayColumn();
       renderFoodFilterLabel();
       renderFoodFilters();
@@ -369,10 +388,14 @@ function renderDayColumn() {
 }
 
 function foodsForActiveSlot() {
-  const categories = activeCategories();
+  const categories = slotFoodCategories();
   if (!categories.length) return [];
+  ensureActiveFoodCategory();
+  const filterCategories = categories.length > 1
+    ? [activeFoodCategory]
+    : categories;
   return foods
-    .filter((food) => categories.includes(food.category))
+    .filter((food) => filterCategories.includes(food.category))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -493,19 +516,40 @@ function renderFoodFilterLabel() {
 
 function renderFoodFilters() {
   const container = document.getElementById('food-filters');
-  const categories = activeCategories();
+  const categories = slotFoodCategories();
 
   if (!categories.length) {
     container.innerHTML = '';
     return;
   }
 
+  ensureActiveFoodCategory();
+  const multiCategory = categories.length > 1;
+
   container.innerHTML = FOOD_CATEGORIES
     .filter((cat) => categories.includes(cat.id))
-    .map((cat) => `
-      <span class="food-filter food-filter--active">${cat.label}</span>
-    `)
+    .map((cat) => {
+      const active = cat.id === activeFoodCategory;
+      if (!multiCategory) {
+        return `<span class="food-filter food-filter--active">${cat.label}</span>`;
+      }
+      return `
+        <button
+          type="button"
+          class="food-filter${active ? ' food-filter--active' : ''}"
+          data-food-category="${cat.id}"
+        >${cat.label}</button>
+      `;
+    })
     .join('');
+
+  container.querySelectorAll('[data-food-category]').forEach((button) => {
+    button.addEventListener('click', () => {
+      activeFoodCategory = button.dataset.foodCategory;
+      renderFoodFilters();
+      renderFoodStack();
+    });
+  });
 }
 
 function renderFoodStack() {

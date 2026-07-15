@@ -414,6 +414,7 @@ body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  font-family: inherit;
 }
 
 .day-slot__categories {
