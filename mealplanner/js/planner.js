@@ -660,7 +660,7 @@ function renderFoodStack() {
   const list = foodsForActiveSlot();
 
   if (!activeSlot) {
-    container.innerHTML = '';
+    container.innerHTML = '<p class="food-stack__hint">Tap a slot on the left, then tap or drag a food.</p>';
     return;
   }
 
@@ -680,7 +680,44 @@ function renderFoodStack() {
     </div>
   `).join('');
 
-  initFoodDragDrop();
+  initFoodStackInteractions();
+}
+
+function addFoodToActiveSlot(foodName) {
+  if (!activeSlot) return;
+  fillDaySlot(activeSlot.daySlotId, activeSlot.categorySlot, foodName);
+}
+
+function initFoodStackInteractions() {
+  document.querySelectorAll('[data-food-name]').forEach((card) => {
+    if (card.dataset.foodBound) return;
+    card.dataset.foodBound = '1';
+
+    let dragged = false;
+
+    card.addEventListener('dragstart', (event) => {
+      if (!activeSlot) {
+        event.preventDefault();
+        return;
+      }
+      dragged = true;
+      event.dataTransfer.effectAllowed = 'copy';
+      event.dataTransfer.setData('application/x-food-name', card.dataset.foodName);
+      card.classList.add('card--dragging');
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('card--dragging');
+      window.setTimeout(() => {
+        dragged = false;
+      }, 0);
+    });
+
+    card.addEventListener('click', () => {
+      if (dragged || !activeSlot) return;
+      addFoodToActiveSlot(card.dataset.foodName);
+    });
+  });
 }
 
 function fillDaySlot(daySlotId, categorySlot, foodName) {
@@ -741,27 +778,6 @@ function applySavedMealToDay(daySlotId, meal) {
   meal.pickCount += 1;
   renderDayColumn();
   renderSavedMeals();
-}
-
-function initFoodDragDrop() {
-  document.querySelectorAll('[data-food-name]').forEach((card) => {
-    if (card.dataset.dragBound) return;
-    card.dataset.dragBound = '1';
-
-    card.addEventListener('dragstart', (event) => {
-      if (!activeSlot) {
-        event.preventDefault();
-        return;
-      }
-      event.dataTransfer.effectAllowed = 'copy';
-      event.dataTransfer.setData('application/x-food-name', card.dataset.foodName);
-      card.classList.add('card--dragging');
-    });
-
-    card.addEventListener('dragend', () => {
-      card.classList.remove('card--dragging');
-    });
-  });
 }
 
 function initFoodDropTargets() {

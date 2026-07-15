@@ -719,7 +719,7 @@ body {
 }
 
 .card--food[draggable="true"] {
-  cursor: grab;
+  cursor: pointer;
 }
 
 .card--food[draggable="true"]:active {
