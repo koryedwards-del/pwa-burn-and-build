@@ -442,13 +442,37 @@ body {
 .saved-meal {
   padding: 0;
   overflow: hidden;
+  position: relative;
+}
+
+.saved-meal__delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.saved-meal__delete:hover {
+  border-color: #c45c5c;
+  color: #e07070;
+  background: rgba(196, 92, 92, 0.12);
 }
 
 .saved-meal__header {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 10px 36px 10px 12px;
   cursor: grab;
 }
 

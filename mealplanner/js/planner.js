@@ -369,6 +369,12 @@ function renderSavedMealCard(meal) {
 
   return `
     <article class="saved-meal card card--meal${expanded ? ' saved-meal--expanded' : ''}" data-meal-id="${meal.id}">
+      <button
+        type="button"
+        class="saved-meal__delete"
+        data-meal-delete="${meal.id}"
+        aria-label="Delete ${escapeHtml(meal.name)}"
+      >×</button>
       <div class="saved-meal__header" draggable="true" data-meal-source data-meal-id="${meal.id}">
         <button
           type="button"
@@ -391,6 +397,23 @@ function savedMealsByPopularity() {
   return [...SAVED_MEALS].sort((a, b) => b.pickCount - a.pickCount);
 }
 
+function deleteSavedMeal(mealId) {
+  const index = SAVED_MEALS.findIndex((meal) => meal.id === mealId);
+  if (index === -1) return;
+
+  SAVED_MEALS.splice(index, 1);
+  expandedMeals.delete(mealId);
+
+  Object.keys(daySlotMeta).forEach((daySlotId) => {
+    if (daySlotMeta[daySlotId].savedMealId === mealId) {
+      daySlotMeta[daySlotId] = { mealName: null, savedMealId: null };
+    }
+  });
+
+  renderSavedMeals();
+  renderDayColumn();
+}
+
 function renderSavedMeals() {
   const container = document.getElementById('saved-meals');
   container.innerHTML = savedMealsByPopularity().map((meal) => renderSavedMealCard(meal)).join('');
@@ -406,6 +429,13 @@ function renderSavedMeals() {
       }
       renderSavedMeals();
       initMealDragDrop();
+    });
+  });
+
+  document.querySelectorAll('[data-meal-delete]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteSavedMeal(button.dataset.mealDelete);
     });
   });
 
