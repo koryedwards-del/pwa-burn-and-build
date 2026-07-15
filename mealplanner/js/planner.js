@@ -91,7 +91,6 @@ const SAVED_MEALS = [
 ];
 
 let foods = [];
-let previewServings = 1;
 let activeSlot = null;
 let daySlotSelections = {};
 let daySlotMeta = {};
@@ -416,12 +415,14 @@ function renderSavedMeals() {
 function renderFoodFilterLabel() {
   const label = document.getElementById('food-filter-label');
   if (!activeSlot) {
-    label.textContent = 'Select a day slot to filter foods';
+    label.textContent = '';
+    label.hidden = true;
     return;
   }
   const daySlot = DAY_SLOTS.find((item) => item.id === activeSlot.daySlotId);
   const slot = SLOT_META[activeSlot.categorySlot];
   label.textContent = `${daySlot.label} · ${slot.label}`;
+  label.hidden = false;
 }
 
 function renderFoodFilters() {
@@ -446,7 +447,7 @@ function renderFoodStack() {
   const list = foodsForActiveSlot();
 
   if (!activeSlot) {
-    container.innerHTML = '<p class="food-stack__hint">Tap a category on the day, then drag food.</p>';
+    container.innerHTML = '';
     return;
   }
 
@@ -462,36 +463,18 @@ function renderFoodStack() {
       data-food-name="${food.name.replace(/"/g, '&quot;')}"
     >
       <p class="card__title">${escapeHtml(food.name)}</p>
-      <p class="card__detail">${previewServings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, previewServings)}</p>
+      <p class="card__detail">${scaledLabel(food, 1)}</p>
     </div>
   `).join('');
 
   initFoodDragDrop();
 }
 
-function updateServingsUI() {
-  document.querySelectorAll('[data-servings]').forEach((button) => {
-    button.classList.toggle('food-servings__btn--active', Number(button.dataset.servings) === previewServings);
-  });
-}
-
-function initServingsControls() {
-  document.getElementById('food-servings-controls').addEventListener('click', (event) => {
-    const button = event.target.closest('[data-servings]');
-    if (!button) return;
-    previewServings = Number(button.dataset.servings);
-    updateServingsUI();
-    renderDayColumn();
-    renderFoodStack();
-  });
-  updateServingsUI();
-}
-
 function fillDaySlot(daySlotId, categorySlot, foodName) {
   clearDaySlotMeta(daySlotId);
   daySlotSelections[daySlotId][categorySlot] = {
     foodName,
-    servings: previewServings,
+    servings: 1,
   };
   renderDayColumn();
 }
@@ -650,7 +633,6 @@ async function init() {
   renderSavedMeals();
   renderFoodFilterLabel();
   renderFoodFilters();
-  initServingsControls();
   initSaveMealDialog();
   renderFoodStack();
   initFoodDropTargets();
