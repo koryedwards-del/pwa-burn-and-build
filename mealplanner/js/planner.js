@@ -12,7 +12,7 @@ const FOOD_CATEGORIES = [
 
 const SLOT_META = {
   protein: { label: 'Protein', categories: ['protein'] },
-  gs: { label: 'G / S', categories: ['grain', 'starch'] },
+  gs: { label: 'Grains/Starches', categories: ['grain', 'starch'] },
   vegetable: { label: 'Veggie', categories: ['vegetable'], optional: true },
   fat: { label: 'Fat Points', categories: ['fat', 'sugar', 'alcohol'], optional: true },
   fruit: { label: 'Fruit', categories: ['fruit'] },
@@ -44,7 +44,7 @@ const SAVED_MEALS = [
     name: 'Oatmeal Bowl',
     pickCount: 38,
     items: [
-      { slot: 'G / S', foodName: 'Oats, rolled', servings: 2 },
+      { slot: 'Grains/Starches', foodName: 'Oats, rolled', servings: 2 },
       { slot: 'Fruit', foodName: 'Blueberries', servings: 1 },
     ],
   },
@@ -54,7 +54,7 @@ const SAVED_MEALS = [
     pickCount: 42,
     items: [
       { slot: 'Protein', foodName: 'Chicken breast, no skin', servings: 2 },
-      { slot: 'G / S', foodName: 'Rice, white', servings: 2 },
+      { slot: 'Grains/Starches', foodName: 'Rice, white', servings: 2 },
       { slot: 'Veggie', foodName: 'Broccoli, cooked', servings: 1 },
     ],
   },
@@ -82,7 +82,7 @@ const SAVED_MEALS = [
     pickCount: 28,
     items: [
       { slot: 'Protein', foodName: 'Chicken breast, no skin', servings: 2 },
-      { slot: 'G / S', foodName: 'Rice, brown', servings: 2 },
+      { slot: 'Grains/Starches', foodName: 'Rice, brown', servings: 2 },
       { slot: 'Veggie', foodName: 'Peppers, red bell, cooked', servings: 1 },
     ],
   },
@@ -92,7 +92,7 @@ const SAVED_MEALS = [
     pickCount: 5,
     items: [
       { slot: 'Protein', foodName: 'Tilapia, baked', servings: 2 },
-      { slot: 'G / S', foodName: 'Sweet potato, baked', servings: 1 },
+      { slot: 'Grains/Starches', foodName: 'Sweet potato, baked', servings: 1 },
       { slot: 'Veggie', foodName: 'Asparagus, cooked', servings: 1 },
     ],
   },
@@ -940,6 +940,7 @@ function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true 
   if (!acceptsSavedMealDrop(mealSlotId)) return;
   const labelToSlot = {
     Protein: 'protein',
+    'Grains/Starches': 'gs',
     'G / S': 'gs',
     Veggie: 'vegetable',
     'Extra Fat': 'fat',
