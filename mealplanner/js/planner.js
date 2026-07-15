@@ -98,6 +98,8 @@ const SAVED_MEALS = [
   },
 ];
 
+const FOODS_DATA_VERSION = '2';
+
 let foods = [];
 let activeSlot = null;
 let activeFoodCategory = null;
@@ -739,7 +741,7 @@ function initSaveMealDialog() {
 }
 
 async function init() {
-  const response = await fetch('../data/foods.json');
+  const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
   foods = await response.json();
   renderDayColumn();
   renderSavedMeals();
