@@ -2222,5 +2222,261 @@
     "gramWeight": 33.0,
     "unitsPerServing": 0.0,
     "fatBracket": 0.0
+  },
+  {
+    "name": "Honey, jam, jelly, sugar",
+    "category": "sugar",
+    "servingDescription": "1 tbs",
+    "gramWeight": 15.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 0.0
+  },
+  {
+    "name": "Brownie",
+    "category": "sugar",
+    "servingDescription": "2 inch-square",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.5
+  },
+  {
+    "name": "Candy, Baby Ruth®",
+    "category": "sugar",
+    "servingDescription": "2 oz. bar",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 5.7
+  },
+  {
+    "name": "Cheesecake",
+    "category": "sugar",
+    "servingDescription": "1/8 cake",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 5.0
+  },
+  {
+    "name": "Cookies, animal crackers",
+    "category": "sugar",
+    "servingDescription": "crackers",
+    "gramWeight": 0.0,
+    "unitsPerServing": 10.0,
+    "fatBracket": 2.5
+  },
+  {
+    "name": "Cookies, chocolate chip",
+    "category": "sugar",
+    "servingDescription": "cookies",
+    "gramWeight": 0.0,
+    "unitsPerServing": 2.0,
+    "fatBracket": 2.2
+  },
+  {
+    "name": "Cookies, Fig Newton's®",
+    "category": "sugar",
+    "servingDescription": "cookies",
+    "gramWeight": 0.0,
+    "unitsPerServing": 2.0,
+    "fatBracket": 2.2
+  },
+  {
+    "name": "Cookies, Oreo®",
+    "category": "sugar",
+    "servingDescription": "cookies",
+    "gramWeight": 0.0,
+    "unitsPerServing": 3.0,
+    "fatBracket": 3.1
+  },
+  {
+    "name": "Danish",
+    "category": "sugar",
+    "servingDescription": "1 danish",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.6
+  },
+  {
+    "name": "Granola bar",
+    "category": "sugar",
+    "servingDescription": "1 bar",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.7
+  },
+  {
+    "name": "Ice cream, Haagen-Dazs®, chocolate chip",
+    "category": "sugar",
+    "servingDescription": "1/2 cup",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 6.9
+  },
+  {
+    "name": "Snack cakes, Suzy Q's",
+    "category": "sugar",
+    "servingDescription": "1 cake",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 5.3
+  },
+  {
+    "name": "Snack cakes, Twinkies®",
+    "category": "sugar",
+    "servingDescription": "1 cake",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.5
+  },
+  {
+    "name": "Snack cakes, Ding Dongs®",
+    "category": "sugar",
+    "servingDescription": "1 cake",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.8
+  },
+  {
+    "name": "Toaster pastry",
+    "category": "sugar",
+    "servingDescription": "1 pastry",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 4.3
+  },
+  {
+    "name": "Ale",
+    "category": "alcohol",
+    "servingDescription": "12 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.4
+  },
+  {
+    "name": "Beer",
+    "category": "alcohol",
+    "servingDescription": "12 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.4
+  },
+  {
+    "name": "Beer, light",
+    "category": "alcohol",
+    "servingDescription": "12 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.6
+  },
+  {
+    "name": "Beer, low-alcohol",
+    "category": "alcohol",
+    "servingDescription": "12 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.4
+  },
+  {
+    "name": "Bloody Mary",
+    "category": "alcohol",
+    "servingDescription": "5 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.6
+  },
+  {
+    "name": "Daiquiri",
+    "category": "alcohol",
+    "servingDescription": "2 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.5
+  },
+  {
+    "name": "Malt liquor",
+    "category": "alcohol",
+    "servingDescription": "12 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.3
+  },
+  {
+    "name": "Manhattan",
+    "category": "alcohol",
+    "servingDescription": "2 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.9
+  },
+  {
+    "name": "Martini",
+    "category": "alcohol",
+    "servingDescription": "2.5 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.5
+  },
+  {
+    "name": "Gin, 90 proof",
+    "category": "alcohol",
+    "servingDescription": "1.5 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.4
+  },
+  {
+    "name": "Gin & tonic",
+    "category": "alcohol",
+    "servingDescription": "7.5 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 3.8
+  },
+  {
+    "name": "Pina colada",
+    "category": "alcohol",
+    "servingDescription": "4.5 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 5.8
+  },
+  {
+    "name": "Tequila sunrise",
+    "category": "alcohol",
+    "servingDescription": "5.5 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 4.2
+  },
+  {
+    "name": "Whiskey",
+    "category": "alcohol",
+    "servingDescription": "1.5 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.3
+  },
+  {
+    "name": "Wine, sparkling cooler",
+    "category": "alcohol",
+    "servingDescription": "12 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 4.7
+  },
+  {
+    "name": "Wine, dessert, dry",
+    "category": "alcohol",
+    "servingDescription": "2 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 1.6
+  },
+  {
+    "name": "Wine, dessert, sweet",
+    "category": "alcohol",
+    "servingDescription": "2 fl. oz.",
+    "gramWeight": 0.0,
+    "unitsPerServing": 0.0,
+    "fatBracket": 2.0
   }
 ]

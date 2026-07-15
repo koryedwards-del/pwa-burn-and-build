@@ -130,6 +130,10 @@ function scaledLabel(food, servings) {
     const count = Math.ceil(food.unitsPerServing * servings);
     return `${count} ${food.servingDescription}`;
   }
+  if (!food.gramWeight && food.servingDescription) {
+    if (servings === 1) return food.servingDescription;
+    return `${servings} × ${food.servingDescription}`;
+  }
   return `${Math.round(food.gramWeight * servings)} g`;
 }
 
