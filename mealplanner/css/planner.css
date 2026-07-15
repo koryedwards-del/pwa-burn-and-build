@@ -324,10 +324,173 @@ body {
   cursor: pointer;
 }
 
+.workspace__col--meals {
+  overflow-y: auto;
+}
+
+.col-heading--secondary {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.meal-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meal-builder__type {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.meal-slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.saved-meals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.saved-meal {
+  padding: 0;
+  overflow: hidden;
+}
+
+.saved-meal__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: grab;
+}
+
+.saved-meal__header:active {
+  cursor: grabbing;
+}
+
+.saved-meal__toggle {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--yellow);
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.saved-meal__summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.saved-meal__items {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 10px 42px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.saved-meal__items--hidden {
+  display: none;
+}
+
+.saved-meal__item {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 0.7rem;
+}
+
+.saved-meal__slot {
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.saved-meal__food {
+  color: var(--text);
+}
+
+.saved-meal__amount {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.card--slot {
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-left: 3px solid var(--border);
+}
+
+.card--slot.card--empty {
+  padding: 10px;
+}
+
+.card--slot-active {
+  border-color: var(--yellow);
+  background: var(--yellow-dim);
+  border-left-color: var(--yellow);
+}
+
+.card__slot-label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.card--slot-active .card__slot-label {
+  color: var(--yellow);
+}
+
+.card__slot-hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.card--food[draggable="true"] {
+  cursor: grab;
+}
+
+.card--food[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.food-filter-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
 .food-filter--active {
   border-color: var(--yellow);
   color: var(--yellow);
   background: var(--yellow-dim);
+  cursor: default;
 }
 
 .food-stack {
@@ -348,10 +511,15 @@ body {
   font-size: 0.68rem;
 }
 
+.food-stack__hint,
 .food-stack__error {
   font-size: 0.8rem;
   color: var(--muted);
   line-height: 1.5;
+}
+
+.food-stack__hint {
+  padding: 8px 2px;
 }
 
 .food-stack::-webkit-scrollbar {

@@ -10,7 +10,7 @@
   <div class="planner-app">
     <header class="planner-header">
       <h1 class="planner-title">Meal Planner</h1>
-      <p class="planner-subtitle">Step 4 — real food list with serving sizes</p>
+      <p class="planner-subtitle">Step 5 — tap a slot, food list follows</p>
     </header>
 
     <main class="planner-frame">
@@ -130,31 +130,20 @@
         </div>
 
         <div class="workspace__col workspace__col--meals">
-          <p class="col-heading">Meals</p>
+          <p class="col-heading">Build Meal</p>
 
-          <div class="card card--meal" draggable="true" data-meal-source>
-            <p class="card__title">Oatmeal Bowl</p>
-            <p class="card__detail">Oatmeal · Blueberries</p>
+          <div class="meal-builder" id="meal-builder-lunch">
+            <p class="meal-builder__type">Lunch</p>
+            <div class="meal-slots" id="lunch-slots"></div>
           </div>
-          <div class="card card--meal" draggable="true" data-meal-source>
-            <p class="card__title">Chicken Bowl</p>
-            <p class="card__detail">Chicken · White Rice · Broccoli</p>
+
+          <div class="meal-builder" id="meal-builder-snack">
+            <p class="meal-builder__type">Snack</p>
+            <div class="meal-slots" id="snack-slots"></div>
           </div>
-          <div class="card card--meal" draggable="true" data-meal-source>
-            <p class="card__title">Apple</p>
-          </div>
-          <div class="card card--meal" draggable="true" data-meal-source>
-            <p class="card__title">Yogurt &amp; Berries</p>
-            <p class="card__detail">Greek Yogurt · Blueberries</p>
-          </div>
-          <div class="card card--meal" draggable="true" data-meal-source>
-            <p class="card__title">Stir Fry</p>
-            <p class="card__detail">Chicken · Brown Rice · Peppers</p>
-          </div>
-          <div class="card card--meal" draggable="true" data-meal-source>
-            <p class="card__title">Salmon Plate</p>
-            <p class="card__detail">Salmon · Sweet Potato · Asparagus</p>
-          </div>
+
+          <p class="col-heading col-heading--secondary">Saved Meals</p>
+          <div class="saved-meals" id="saved-meals"></div>
         </div>
 
         <div class="workspace__col workspace__col--foods">
@@ -171,6 +160,7 @@
             </div>
           </div>
 
+          <p class="food-filter-label" id="food-filter-label">Select a slot to filter foods</p>
           <div class="food-filters" id="food-filters"></div>
           <div class="food-stack" id="food-stack"></div>
         </div>
