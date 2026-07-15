@@ -12,7 +12,7 @@ const SLOT_META = {
   protein: { label: 'Protein', categories: ['protein'] },
   gs: { label: 'G / S', categories: ['grain', 'starch'] },
   vegetable: { label: 'Veggie', categories: ['vegetable'] },
-  fat: { label: 'Extra Fat', categories: ['fat'] },
+  fat: { label: 'Extra Fat', categories: ['fat'], optional: true },
   fruit: { label: 'Fruit', categories: ['fruit'] },
 };
 
@@ -206,6 +206,8 @@ function renderMealBuilders() {
       const meta = SLOT_META[slotKey];
       const selected = slotSelections[builder.id][slotKey];
       const active = isSlotActive(builder.id, slotKey);
+      const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
+      const emptyHint = meta.optional ? 'Optional — tap to add' : 'Tap to pick';
 
       if (selected) {
         const food = foods.find((item) => item.name === selected.foodName);
@@ -219,7 +221,7 @@ function renderMealBuilders() {
             data-builder="${builder.id}"
             data-slot="${slotKey}"
           >
-            <span class="card__slot-label">${meta.label}</span>
+            <span class="card__slot-label">${meta.label}${optionalTag}</span>
             <p class="card__title">${escapeHtml(selected.foodName)}</p>
             ${detail ? `<p class="card__detail">${detail}</p>` : ''}
           </button>
@@ -229,12 +231,12 @@ function renderMealBuilders() {
       return `
         <button
           type="button"
-          class="card card--slot card--empty${active ? ' card--slot-active' : ''}"
+          class="card card--slot card--empty${meta.optional ? ' card--slot-optional' : ''}${active ? ' card--slot-active' : ''}"
           data-builder="${builder.id}"
           data-slot="${slotKey}"
         >
-          <span class="card__slot-label">${meta.label}</span>
-          <span class="card__slot-hint">Tap to pick</span>
+          <span class="card__slot-label">${meta.label}${optionalTag}</span>
+          <span class="card__slot-hint">${emptyHint}</span>
         </button>
       `;
     }).join('');

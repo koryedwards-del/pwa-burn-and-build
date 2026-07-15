@@ -453,6 +453,22 @@ body {
   color: var(--muted);
 }
 
+.card__slot-optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.card--slot-optional {
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+.card--slot-optional.card--slot-active {
+  opacity: 1;
+}
+
 .card--food[draggable="true"] {
   cursor: grab;
 }
