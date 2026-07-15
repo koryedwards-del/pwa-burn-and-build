@@ -1,4 +1,4 @@
-/* Burn & Build Meal Planner — Step 1 shell */
+/* Burn & Build Meal Planner */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -8,8 +8,10 @@
 
 :root {
   --yellow: #ffcc00;
+  --yellow-dim: rgba(255, 204, 0, 0.12);
   --bg: #0a0a0a;
   --surface: #1a1a1a;
+  --surface-2: #222222;
   --border: #2a2a2a;
   --text: #d4d4d4;
   --muted: #8a8a8a;
@@ -64,38 +66,202 @@ body {
   gap: 16px;
 }
 
-.frame-zone {
+/* Week grid */
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  padding: 12px;
   background: var(--bg);
-  border: 1px dashed var(--border);
+  border: 1px solid var(--border);
   border-radius: 8px;
 }
 
-.frame-zone--week {
-  min-height: 120px;
-  padding: 16px;
+.day-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 8px;
+  min-height: 110px;
 }
 
-.frame-zone--workspace {
+.day-col--active {
+  border-color: var(--yellow);
+  background: var(--yellow-dim);
+}
+
+.day-col__name {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.day-col--active .day-col__name {
+  color: var(--yellow);
+}
+
+.day-col__meals {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mini-card {
+  font-size: 0.65rem;
+  line-height: 1.3;
+  padding: 4px 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-card--empty {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+/* Workspace */
+
+.workspace {
   flex: 1;
   min-height: 520px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1.1fr 1fr 0.85fr;
   gap: 12px;
   padding: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
 }
 
-.frame-column {
+.workspace__col {
   background: var(--surface);
-  border: 1px dashed var(--border);
+  border: 1px solid var(--border);
   border-radius: 6px;
-  min-height: 100%;
-  padding: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
 }
 
-.frame-label {
-  font-size: 0.75rem;
+.col-heading {
+  font-family: "Oswald", system-ui, sans-serif;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--yellow);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Day slots */
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slot__label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--muted);
+}
+
+.rotation {
+  margin-top: 4px;
+}
+
+.rotation__label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.rotation__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Cards */
+
+.card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.card--meal {
+  border-left: 3px solid var(--yellow);
+}
+
+.card--food {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}
+
+.card--empty {
+  border-style: dashed;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 14px 12px;
+}
+
+.card--compact {
+  padding: 6px 8px;
+  font-size: 0.7rem;
+  flex: 0 0 auto;
+}
+
+.card__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.card__detail {
+  margin-top: 3px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* Food stack */
+
+.food-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-right: 4px;
+}
+
+.food-stack::-webkit-scrollbar {
+  width: 6px;
+}
+
+.food-stack::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
 }

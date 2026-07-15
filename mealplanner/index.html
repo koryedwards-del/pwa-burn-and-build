@@ -10,23 +10,172 @@
   <div class="planner-app">
     <header class="planner-header">
       <h1 class="planner-title">Meal Planner</h1>
-      <p class="planner-subtitle">Step 1 — shell</p>
+      <p class="planner-subtitle">Step 2 — static wireframe</p>
     </header>
 
     <main class="planner-frame">
-      <section class="frame-zone frame-zone--week" aria-label="Week grid">
-        <p class="frame-label">Week</p>
+      <section class="week-grid" aria-label="Week">
+        <div class="day-col">
+          <p class="day-col__name">Mon</p>
+          <div class="day-col__meals">
+            <div class="mini-card">Oatmeal Bowl</div>
+            <div class="mini-card">Chicken Bowl</div>
+            <div class="mini-card">Stir Fry</div>
+          </div>
+        </div>
+        <div class="day-col">
+          <p class="day-col__name">Tue</p>
+          <div class="day-col__meals">
+            <div class="mini-card">Oatmeal Bowl</div>
+            <div class="mini-card">Chicken Bowl</div>
+            <div class="mini-card">Salmon Plate</div>
+          </div>
+        </div>
+        <div class="day-col day-col--active">
+          <p class="day-col__name">Wed</p>
+          <div class="day-col__meals">
+            <div class="mini-card">Oatmeal Bowl</div>
+            <div class="mini-card">Chicken Bowl</div>
+            <div class="mini-card mini-card--empty">Dinner —</div>
+          </div>
+        </div>
+        <div class="day-col">
+          <p class="day-col__name">Thu</p>
+          <div class="day-col__meals">
+            <div class="mini-card">Oatmeal Bowl</div>
+            <div class="mini-card">Chicken Bowl</div>
+            <div class="mini-card">Stir Fry</div>
+          </div>
+        </div>
+        <div class="day-col">
+          <p class="day-col__name">Fri</p>
+          <div class="day-col__meals">
+            <div class="mini-card">Oatmeal Bowl</div>
+            <div class="mini-card">Chicken Bowl</div>
+            <div class="mini-card">Salmon Plate</div>
+          </div>
+        </div>
+        <div class="day-col">
+          <p class="day-col__name">Sat</p>
+          <div class="day-col__meals">
+            <div class="mini-card">Oatmeal Bowl</div>
+            <div class="mini-card">Chicken Bowl</div>
+            <div class="mini-card">Stir Fry</div>
+          </div>
+        </div>
+        <div class="day-col">
+          <p class="day-col__name">Sun</p>
+          <div class="day-col__meals">
+            <div class="mini-card">Oatmeal Bowl</div>
+            <div class="mini-card">Chicken Bowl</div>
+            <div class="mini-card">Salmon Plate</div>
+          </div>
+        </div>
       </section>
 
-      <section class="frame-zone frame-zone--workspace" aria-label="Planner workspace">
-        <div class="frame-column">
-          <p class="frame-label">Day</p>
+      <section class="workspace" aria-label="Planner workspace">
+        <div class="workspace__col workspace__col--day">
+          <p class="col-heading">Wednesday</p>
+
+          <div class="slot">
+            <p class="slot__label">Breakfast</p>
+            <div class="card card--meal">
+              <p class="card__title">Oatmeal Bowl</p>
+              <p class="card__detail">Oatmeal · Blueberries</p>
+            </div>
+          </div>
+
+          <div class="slot">
+            <p class="slot__label">Morning Snack</p>
+            <div class="card card--meal">
+              <p class="card__title">Apple</p>
+            </div>
+          </div>
+
+          <div class="slot">
+            <p class="slot__label">Lunch</p>
+            <div class="card card--meal">
+              <p class="card__title">Chicken Bowl</p>
+              <p class="card__detail">Chicken · White Rice · Broccoli</p>
+            </div>
+          </div>
+
+          <div class="slot">
+            <p class="slot__label">Afternoon Snack</p>
+            <div class="card card--empty">Drop a meal</div>
+          </div>
+
+          <div class="slot">
+            <p class="slot__label">Dinner</p>
+            <div class="card card--empty">Drop a meal</div>
+            <div class="rotation">
+              <p class="rotation__label">Rotation</p>
+              <div class="rotation__cards">
+                <div class="card card--meal card--compact">Stir Fry</div>
+                <div class="card card--meal card--compact">Salmon Plate</div>
+                <div class="card card--meal card--compact">Turkey Chili</div>
+                <div class="card card--meal card--compact">Chicken Bowl</div>
+                <div class="card card--meal card--compact">Beef &amp; Rice</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="slot">
+            <p class="slot__label">Evening Snack</p>
+            <div class="card card--meal">
+              <p class="card__title">Yogurt &amp; Berries</p>
+              <p class="card__detail">Greek Yogurt · Blueberries</p>
+            </div>
+          </div>
         </div>
-        <div class="frame-column">
-          <p class="frame-label">Meals</p>
+
+        <div class="workspace__col workspace__col--meals">
+          <p class="col-heading">Meals</p>
+
+          <div class="card card--meal">
+            <p class="card__title">Oatmeal Bowl</p>
+            <p class="card__detail">Oatmeal · Blueberries</p>
+          </div>
+          <div class="card card--meal">
+            <p class="card__title">Chicken Bowl</p>
+            <p class="card__detail">Chicken · White Rice · Broccoli</p>
+          </div>
+          <div class="card card--meal">
+            <p class="card__title">Apple</p>
+          </div>
+          <div class="card card--meal">
+            <p class="card__title">Yogurt &amp; Berries</p>
+            <p class="card__detail">Greek Yogurt · Blueberries</p>
+          </div>
+          <div class="card card--meal">
+            <p class="card__title">Stir Fry</p>
+            <p class="card__detail">Chicken · Brown Rice · Peppers</p>
+          </div>
+          <div class="card card--meal">
+            <p class="card__title">Salmon Plate</p>
+            <p class="card__detail">Salmon · Sweet Potato · Asparagus</p>
+          </div>
         </div>
-        <div class="frame-column">
-          <p class="frame-label">Foods</p>
+
+        <div class="workspace__col workspace__col--foods">
+          <p class="col-heading">Foods</p>
+
+          <div class="food-stack">
+            <div class="card card--food">Oatmeal</div>
+            <div class="card card--food">Blueberries</div>
+            <div class="card card--food">Eggs</div>
+            <div class="card card--food">Chicken</div>
+            <div class="card card--food">White Rice</div>
+            <div class="card card--food">Brown Rice</div>
+            <div class="card card--food">Broccoli</div>
+            <div class="card card--food">Apple</div>
+            <div class="card card--food">Greek Yogurt</div>
+            <div class="card card--food">Salmon</div>
+            <div class="card card--food">Sweet Potato</div>
+            <div class="card card--food">Asparagus</div>
+            <div class="card card--food">Peppers</div>
+            <div class="card card--food">Banana</div>
+          </div>
         </div>
       </section>
     </main>
