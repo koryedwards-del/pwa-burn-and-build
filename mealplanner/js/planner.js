@@ -94,7 +94,9 @@ let foods = [];
 let previewServings = 1;
 let activeSlot = null;
 let daySlotSelections = {};
+let daySlotMeta = {};
 const expandedMeals = new Set();
+let pendingSaveDaySlotId = null;
 
 function templateSlots(template) {
   return TEMPLATE_SLOTS[template];
@@ -102,6 +104,7 @@ function templateSlots(template) {
 
 DAY_SLOTS.forEach((daySlot) => {
   daySlotSelections[daySlot.id] = {};
+  daySlotMeta[daySlot.id] = { mealName: null, savedMealId: null };
   templateSlots(daySlot.template).forEach((slot) => {
     daySlotSelections[daySlot.id][slot] = null;
   });
@@ -112,6 +115,7 @@ daySlotSelections['morning-snack'].fruit = { foodName: 'Apple', servings: 1 };
 daySlotSelections.lunch.protein = { foodName: 'Chicken breast, no skin', servings: 2 };
 daySlotSelections.lunch.gs = { foodName: 'Rice, white', servings: 2 };
 daySlotSelections.lunch.vegetable = { foodName: 'Broccoli, cooked', servings: 1 };
+daySlotMeta.lunch = { mealName: 'Chicken Bowl', savedMealId: 'chicken-bowl' };
 daySlotSelections['evening-snack'].fruit = { foodName: 'Blueberries', servings: 1 };
 
 function scaledLabel(food, servings) {
@@ -137,6 +141,93 @@ function activeCategories() {
 
 function isCategorySlotActive(daySlotId, categorySlot) {
   return activeSlot?.daySlotId === daySlotId && activeSlot?.categorySlot === categorySlot;
+}
+
+function isDaySlotSaveable(daySlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
+  return templateSlots(daySlot.template).every((slotKey) => {
+    const meta = SLOT_META[slotKey];
+    if (meta.optional) return true;
+    return daySlotSelections[daySlotId][slotKey] != null;
+  });
+}
+
+function showSaveMealButton(daySlotId) {
+  return isDaySlotSaveable(daySlotId) && !daySlotMeta[daySlotId].savedMealId;
+}
+
+function clearDaySlotMeta(daySlotId) {
+  daySlotMeta[daySlotId] = { mealName: null, savedMealId: null };
+}
+
+function daySlotToMealItems(daySlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
+  return templateSlots(daySlot.template)
+    .map((slotKey) => {
+      const selected = daySlotSelections[daySlotId][slotKey];
+      if (!selected) return null;
+      return {
+        slot: SLOT_META[slotKey].label,
+        foodName: selected.foodName,
+        servings: selected.servings,
+      };
+    })
+    .filter(Boolean);
+}
+
+function mealIdFromName(name) {
+  let base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'meal';
+  let id = base;
+  let suffix = 2;
+  while (SAVED_MEALS.some((meal) => meal.id === id)) {
+    id = `${base}-${suffix}`;
+    suffix += 1;
+  }
+  return id;
+}
+
+function saveMealFromDay(daySlotId, name) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+
+  const meal = {
+    id: mealIdFromName(trimmed),
+    name: trimmed,
+    pickCount: 1,
+    items: daySlotToMealItems(daySlotId),
+  };
+
+  SAVED_MEALS.push(meal);
+  daySlotMeta[daySlotId] = { mealName: trimmed, savedMealId: meal.id };
+  renderDayColumn();
+  renderSavedMeals();
+}
+
+function openSaveMealDialog(daySlotId) {
+  const dialog = document.getElementById('save-meal-dialog');
+  const input = document.getElementById('save-meal-name');
+  pendingSaveDaySlotId = daySlotId;
+  input.value = daySlotMeta[daySlotId].mealName || '';
+  dialog.showModal();
+  input.focus();
+  input.select();
+}
+
+function renderDaySlotHeader(daySlot) {
+  const meta = daySlotMeta[daySlot.id];
+  const mealNameHtml = meta.mealName
+    ? `<span class="slot__meal-name"> · ${escapeHtml(meta.mealName)}</span>`
+    : '';
+  const saveButtonHtml = showSaveMealButton(daySlot.id)
+    ? `<button type="button" class="slot__save" data-save-meal="${daySlot.id}">Save Meal</button>`
+    : '';
+
+  return `
+    <div class="slot-header">
+      <p class="slot__label"><span class="slot__time">${daySlot.label}</span>${mealNameHtml}</p>
+      ${saveButtonHtml}
+    </div>
+  `;
 }
 
 function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
@@ -193,7 +284,7 @@ function renderDayColumn() {
 
     return `
       <div class="slot">
-        <p class="slot__label">${daySlot.label}</p>
+        ${renderDaySlotHeader(daySlot)}
         <div class="day-slot" data-day-meal-drop data-day-slot-id="${daySlot.id}">
           <div class="day-slot__categories">${categoryHtml}</div>
         </div>
@@ -213,6 +304,14 @@ function renderDayColumn() {
       renderFoodStack();
     });
   });
+
+  container.querySelectorAll('[data-save-meal]').forEach((button) => {
+    button.addEventListener('click', () => {
+      openSaveMealDialog(button.dataset.saveMeal);
+    });
+  });
+
+  initMealDragDrop();
 }
 
 function foodsForActiveSlot() {
@@ -370,6 +469,7 @@ function initServingsControls() {
 }
 
 function fillDaySlot(daySlotId, categorySlot, foodName) {
+  clearDaySlotMeta(daySlotId);
   daySlotSelections[daySlotId][categorySlot] = {
     foodName,
     servings: previewServings,
@@ -397,6 +497,7 @@ function applySavedMealToDay(daySlotId, meal) {
       };
     }
   });
+  daySlotMeta[daySlotId] = { mealName: meal.name, savedMealId: meal.id };
   meal.pickCount += 1;
   renderDayColumn();
   renderSavedMeals();
@@ -502,6 +603,26 @@ function initMealDragDrop() {
   });
 }
 
+function initSaveMealDialog() {
+  const dialog = document.getElementById('save-meal-dialog');
+  const form = document.getElementById('save-meal-form');
+  const input = document.getElementById('save-meal-name');
+  const cancel = document.getElementById('save-meal-cancel');
+
+  cancel.addEventListener('click', () => {
+    pendingSaveDaySlotId = null;
+    dialog.close();
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!pendingSaveDaySlotId) return;
+    saveMealFromDay(pendingSaveDaySlotId, input.value);
+    pendingSaveDaySlotId = null;
+    dialog.close();
+  });
+}
+
 async function init() {
   const response = await fetch('../data/foods.json');
   foods = await response.json();
@@ -510,6 +631,7 @@ async function init() {
   renderFoodFilterLabel();
   renderFoodFilters();
   initServingsControls();
+  initSaveMealDialog();
   renderFoodStack();
   initFoodDropTargets();
 }

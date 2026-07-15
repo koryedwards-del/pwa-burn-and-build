@@ -10,7 +10,7 @@
   <div class="planner-app">
     <header class="planner-header">
       <h1 class="planner-title">Meal Planner</h1>
-      <p class="planner-subtitle">Step 6 — drag food onto day slots</p>
+      <p class="planner-subtitle">Step 7 — save meals from day slots</p>
     </header>
 
     <main class="planner-frame">
@@ -105,6 +105,26 @@
       </section>
     </main>
   </div>
+
+  <dialog id="save-meal-dialog" class="save-dialog">
+    <form method="dialog" class="save-dialog__form" id="save-meal-form">
+      <p class="save-dialog__title">Name this meal</p>
+      <input
+        type="text"
+        id="save-meal-name"
+        class="save-dialog__input"
+        placeholder="e.g. Chicken Bowl"
+        maxlength="48"
+        required
+        autocomplete="off"
+      />
+      <div class="save-dialog__actions">
+        <button type="button" class="save-dialog__btn save-dialog__btn--ghost" id="save-meal-cancel">Cancel</button>
+        <button type="submit" class="save-dialog__btn save-dialog__btn--primary">Save Meal</button>
+      </div>
+    </form>
+  </dialog>
+
   <script type="module" src="js/planner.js"></script>
 </body>
 </html>

@@ -178,12 +178,118 @@ body {
   gap: 6px;
 }
 
+.slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 1.25rem;
+}
+
 .slot__label {
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
+  margin: 0;
+  min-width: 0;
+}
+
+.slot__meal-name {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.slot__save {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border: 1px solid var(--yellow);
+  border-radius: 4px;
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.slot__save:hover {
+  background: var(--yellow);
+  color: var(--surface);
+}
+
+.save-dialog {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  max-width: 320px;
+}
+
+.save-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.save-dialog__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.save-dialog__title {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--yellow);
+}
+
+.save-dialog__input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.save-dialog__input:focus {
+  outline: none;
+  border-color: var(--yellow);
+}
+
+.save-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.save-dialog__btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.save-dialog__btn--ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+}
+
+.save-dialog__btn--primary {
+  border: 1px solid var(--yellow);
+  background: var(--yellow);
+  color: var(--surface);
 }
 
 /* Cards */
