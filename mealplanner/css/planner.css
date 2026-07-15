@@ -25,6 +25,7 @@
   --on-gold: #0a0a0a;
   --text-bright: #ffffff;
   --text-secondary: #7e7e7e;
+  --text-hint: #656565;
   --surface-food: #232323;
   --surface-drop: #2a2a2a;
   --yellow: var(--gold);
@@ -440,7 +441,7 @@ body {
 }
 
 .food-filter {
-  padding: 5px 8px;
+  padding: 4px 8px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: var(--surface);
@@ -641,8 +642,11 @@ body {
   background: #2e2e2e;
 }
 
-.card--slot.card--empty .card__slot-hint {
-  color: var(--text-secondary);
+.card--slot.card--empty .card__slot-hint,
+.fat-points__add .card__slot-hint {
+  color: var(--text-hint);
+  font-style: italic;
+  font-weight: 400;
 }
 
 .card--slot-active {
@@ -660,16 +664,17 @@ body {
 .card__slot-label {
   display: inline-block;
   width: fit-content;
-  padding: 3px 8px;
+  padding: 2px 8px;
   border: 1px solid rgba(253, 197, 0, 0.22);
-  border-radius: 4px;
+  border-radius: 3px;
   background: rgba(253, 197, 0, 0.07);
   font-size: 0.58rem;
+  line-height: 1.25;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: rgba(253, 197, 0, 0.82);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .card--slot-active .card__slot-label {
