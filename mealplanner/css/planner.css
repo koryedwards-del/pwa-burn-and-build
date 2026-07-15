@@ -230,7 +230,7 @@ body {
 .day-slots {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 40px;
 }
 
 .slot {
@@ -245,7 +245,7 @@ body {
   justify-content: space-between;
   gap: 8px;
   min-height: 1.25rem;
-  margin-bottom: 12px;
+  margin-bottom: 17px;
 }
 
 .slot__label {
@@ -259,9 +259,11 @@ body {
 }
 
 .slot__time {
+  font-family: "Oswald", system-ui, sans-serif;
+  font-size: 0.72rem;
   color: var(--text);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
 }
 
 .slot__meal-name {
