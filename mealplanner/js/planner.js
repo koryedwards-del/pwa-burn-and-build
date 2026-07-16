@@ -1146,31 +1146,8 @@ function buildShoppingTotals() {
   return totals;
 }
 
-function dinnerPrepSections() {
-  const dinnerSlot = DAY_SLOTS.find((slot) => slot.id === 'dinner');
-  return WEEK_DAYS.map((day) => {
-    const items = [];
-    templateSlots(dinnerSlot.template).forEach((categorySlot) => {
-      if (isFatSlot(categorySlot)) {
-        getFatSelections('dinner', day.id).forEach((item) => items.push(item));
-        return;
-      }
-      const selected = categorySelections('dinner', day.id)[categorySlot];
-      if (selected) items.push(selected);
-    });
-    if (!items.length) return null;
-    const meta = mealSlotMeta('dinner', day.id);
-    return {
-      dayLabel: day.fullLabel,
-      mealName: meta.mealName,
-      items,
-    };
-  }).filter(Boolean);
-}
-
 function buildAssistantDocumentHtml() {
   const totals = buildShoppingTotals();
-  const dinners = dinnerPrepSections();
   const categoryOrder = FOOD_CATEGORIES.map((cat) => cat.id);
   const categoryLabels = Object.fromEntries(FOOD_CATEGORIES.map((cat) => [cat.id, cat.label]));
 
@@ -1200,22 +1177,6 @@ function buildAssistantDocumentHtml() {
         </section>
       `).join('')
     : '<p class="assistant-empty">No ingredients in this week\'s plan yet.</p>';
-
-  const dinnerHtml = dinners.length
-    ? dinners.map((dinner) => `
-        <section class="assistant-dinner">
-          <h3>${escapeHtml(dinner.dayLabel)}${dinner.mealName ? ` · ${escapeHtml(dinner.mealName)}` : ''}</h3>
-          <ul class="assistant-list">
-            ${dinner.items.map((item) => {
-              const food = foods.find((entry) => entry.name === item.foodName);
-              return `
-                <li><span class="assistant-food">${escapeHtml(item.foodName)}</span><span class="assistant-amount">${escapeHtml(foodAmountLabel(food, item.servings))}</span></li>
-              `;
-            }).join('')}
-          </ul>
-        </section>
-      `).join('')
-    : '<p class="assistant-empty">No dinners planned yet.</p>';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1277,16 +1238,7 @@ function buildAssistantDocumentHtml() {
       color: #333;
       margin-bottom: 8px;
     }
-    h3 {
-      font-family: Oswald, system-ui, sans-serif;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
     .assistant-section { margin-bottom: 20px; }
-    .assistant-dinner { margin-bottom: 16px; }
     .assistant-list {
       list-style: none;
       display: flex;
@@ -1308,11 +1260,6 @@ function buildAssistantDocumentHtml() {
       white-space: nowrap;
     }
     .assistant-empty { color: #666; font-size: 0.9rem; }
-    .assistant-divider {
-      border: none;
-      border-top: 1px solid #ddd;
-      margin: 28px 0;
-    }
     @media print {
       .assistant-toolbar { display: none; }
       body { padding: 0.5in; }
@@ -1325,11 +1272,7 @@ function buildAssistantDocumentHtml() {
   </div>
   <h1>Burn &amp; Build</h1>
   <p class="assistant-subtitle">Shopping &amp; Food Prep Assistant</p>
-  <h2>Shopping</h2>
   ${shoppingHtml}
-  <hr class="assistant-divider" />
-  <h2>Dinner Prep</h2>
-  ${dinnerHtml}
 </body>
 </html>`;
 }
