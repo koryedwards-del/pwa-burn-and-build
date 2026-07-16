@@ -6,8 +6,10 @@ import {
   WORK_STRESS,
 } from '../../js/onboardingEngine.js';
 import { buildProgramPackage } from '../../js/programPackage.js';
+import { persistAppEmail, saveProgramToServer, isValidEmail } from '../../js/programApi.js';
+import { persistProgramBridge } from '../../js/programBridgeHandoff.js';
 
-const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
+const CREATOR_CHECKOUT_URL = '../createyourfoodplan/?browse=1';
 
 const STEPS = [
   { id: 'welcome', label: 'Welcome' },
@@ -277,17 +279,47 @@ document.querySelectorAll('[data-q-next]').forEach((btn) => {
 
 backBtn.addEventListener('click', () => showStep(step - 1));
 
-continueBtn.addEventListener('click', (event) => {
+continueBtn.addEventListener('click', async (event) => {
   event.preventDefault();
   const values = readForm();
   if (!canProceed(5)) return;
+
+  const email = String(values.email || '').trim();
+  if (!isValidEmail(email)) {
+    window.alert('Enter a valid email address before continuing.');
+    showStep(1);
+    return;
+  }
+
+  continueBtn.disabled = true;
+  const prevLabel = continueBtn.textContent;
+  continueBtn.textContent = 'Saving your program…';
+
   try {
     const program = buildProgramFromValues(values);
-    sessionStorage.setItem(MEALPLANNER_PROGRAM_KEY, JSON.stringify(program));
-    window.location.href = '../program-report/';
+    persistAppEmail(email);
+    persistProgramBridge(program);
+    sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
+    sessionStorage.setItem('bnb_browse_mode', '1');
+
+    const saved = await saveProgramToServer(email, program);
+    if (!saved.ok) {
+      window.alert(saved.message || 'Could not save your plan. Check your connection and try again.');
+      continueBtn.disabled = false;
+      continueBtn.textContent = prevLabel;
+      return;
+    }
+    if (saved.programId && program.program) {
+      program.program.id = saved.programId;
+      persistProgramBridge(program);
+    }
+
+    window.location.href = CREATOR_CHECKOUT_URL;
   } catch (error) {
     console.error(error);
     window.alert('Could not build your program. Check your answers and try again.');
+    continueBtn.disabled = false;
+    continueBtn.textContent = prevLabel;
   }
 });
 

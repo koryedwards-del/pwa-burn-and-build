@@ -15,8 +15,7 @@ import {
   programMetaHtml,
   programNavHtml,
 } from '../../js/programBridgeUi.js';
-
-const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
+import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
 const PREVIEW_FORM = {
@@ -46,13 +45,7 @@ let activePage = 0;
 let programPackage = null;
 
 function loadProgramPackage() {
-  try {
-    const raw = sessionStorage.getItem(MEALPLANNER_PROGRAM_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return loadProgramBridge();
 }
 
 function buildPreviewProgram() {
@@ -107,7 +100,7 @@ function initialPageFromUrl() {
 }
 
 function persistProgram(pkg) {
-  sessionStorage.setItem(MEALPLANNER_PROGRAM_KEY, JSON.stringify(pkg));
+  persistProgramBridge(pkg);
 }
 
 function loadPreviewProgram() {
@@ -438,7 +431,7 @@ function renderMissingProgram() {
       <p class="r-note" style="margin-bottom:20px;">Preview the report with sample data, or complete intake to build yours.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
         <button type="button" class="r-btn r-btn--primary" data-report-preview>Preview sample report →</button>
-        <a class="r-btn r-btn--ghost" href="../questionnaire/">Questionnaire</a>
+        <a class="r-btn r-btn--ghost" href="../createyourfoodplan/?browse=1">Create your diet</a>
       </div>
     </div>
   `;

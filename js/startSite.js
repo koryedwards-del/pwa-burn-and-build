@@ -12,6 +12,7 @@ import {
   packageToImportUrl,
 } from './programPackage.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail, fetchProgramFromServer } from './programApi.js';
+import { persistProgramBridge, programReportHref } from './programBridgeHandoff.js';
 import { lookupContact } from './contactsApi.js';
 import {
   completeCheckoutForTest,
@@ -125,7 +126,7 @@ function confirmOnboardingPage() {
 
 function persistBuiltPackage() {
   if (!store.builtPackage) return;
-  sessionStorage.setItem('bnb_built_package', JSON.stringify(store.builtPackage));
+  persistProgramBridge(store.builtPackage);
 }
 
 function persistFlowState() {
@@ -279,6 +280,31 @@ function escapeStandaloneToMyplan() {
   return true;
 }
 
+async function openProgramReport() {
+  restoreBuiltPackage();
+  const email = (store.email || getAppEmail() || store.builtPackage?.intake?.email || '').trim();
+  if (isValidEmail(email)) persistAppEmail(email);
+  if (store.builtPackage) {
+    if (isValidEmail(email)) {
+      store.saveBusy = true;
+      store.saveError = '';
+      const saved = await saveProgramToServer(email, store.builtPackage);
+      store.saveBusy = false;
+      if (!saved.ok) {
+        store.saveError = saved.message || 'Could not save your plan to your account.';
+        render();
+        return;
+      }
+      if (saved.programId && store.builtPackage?.program) {
+        store.builtPackage.program.id = saved.programId;
+        persistBuiltPackage();
+      }
+    }
+    persistProgramBridge(store.builtPackage);
+  }
+  window.location.href = programReportHref();
+}
+
 async function openMyplanApp() {
   restoreBuiltPackage();
   const email = (store.email || getAppEmail() || store.builtPackage?.intake?.email || '').trim();
@@ -328,9 +354,14 @@ function renderPwaInstallBox() {
 }
 
 function renderPlanReadyAppHandoff(unlocked) {
+  if (!unlocked) {
+    return '<p class="unlock-tagline">Complete purchase to unlock your program and daily app.</p>';
+  }
   return `
-          <button type="button" class="btn-primary unlock-cta plan-ready-open-app" data-open-myplan>Open Burn &amp; Build app →</button>
-          <p class="unlock-tagline">${unlocked ? 'Eat the food. Trust the plan.' : 'Open your diet, then follow the install steps below.'}</p>`;
+          <button type="button" class="btn-primary unlock-cta plan-ready-open-program" data-open-program-report>View your program →</button>
+          <p class="unlock-tagline">Food plan, servings, and menu planner — then use the app every day.</p>
+          <button type="button" class="btn-secondary unlock-cta-secondary plan-ready-open-app" data-open-myplan>Open daily app →</button>
+          ${renderPwaInstallBox()}`;
 }
 
 function renderPlanReady() {
@@ -338,7 +369,7 @@ function renderPlanReady() {
   const unlocked = store.accessGranted || store.checkoutVerified;
   let lead;
   if (unlocked) {
-    lead = 'Your personalized diet is ready in the Burn &amp; Build app.';
+    lead = 'Payment complete. Your personalized program is ready — view your food plan, then open the daily app when you are ready.';
   } else if (store.saveError) {
     lead = 'Your diet is ready on this device. Save it to your account, then complete checkout.';
   } else {
@@ -378,7 +409,7 @@ function renderPlanReady() {
           ${checkoutBlock}
           ${saveActions}
           ${renderPlanReadyAppHandoff(unlocked)}
-          ${renderPwaInstallBox()}
+          ${unlocked ? '' : renderPwaInstallBox()}
           ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
@@ -725,7 +756,7 @@ async function handleCheckoutReturn() {
   }
   await restoreBuiltPackageFromServer(store.email);
 
-  store.checkoutMessage = 'Payment complete. Your Burn & Build app access is unlocked.';
+  store.checkoutMessage = 'Payment complete. Your program is unlocked.';
   store.checkoutVerified = true;
   await refreshAccessState();
 }
@@ -904,6 +935,10 @@ function bindGlobal() {
     }
     if (e.target.closest('[data-retry-save]')) {
       retrySavePlan();
+      return;
+    }
+    if (e.target.closest('[data-open-program-report]')) {
+      openProgramReport().catch((err) => console.error(err));
       return;
     }
     if (e.target.closest('[data-open-myplan]')) {

@@ -4,8 +4,7 @@ import {
   programMetaHtml,
   programNavHtml,
 } from '../../js/programBridgeUi.js';
-
-const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
+import { loadProgramBridge } from '../../js/programBridgeHandoff.js';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',
@@ -119,13 +118,7 @@ function templateSlots(template) {
 }
 
 function loadProgramPackage() {
-  try {
-    const raw = sessionStorage.getItem(MEALPLANNER_PROGRAM_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  return loadProgramBridge();
 }
 
 function initMealSlotsFromProgram(pkg) {
