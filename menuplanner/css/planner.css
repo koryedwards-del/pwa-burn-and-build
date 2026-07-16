@@ -1060,6 +1060,11 @@ body {
 
 /* Email access gate */
 
+#access-gate[hidden],
+#planner-root[hidden] {
+  display: none !important;
+}
+
 .mp-access {
   width: min(100%, var(--planner-width, 1120px));
   min-height: calc(100vh - 72px);
