@@ -41,12 +41,10 @@ export function programMetaHtml(pkg) {
     </header>`;
 }
 
-export function programNavHtml(activeId) {
-  return `
-    <ol class="pb-nav__list">
-      ${PROGRAM_BRIDGE_PAGES.map((page) => {
-        const isActive = page.id === activeId;
-        return `
+export function programNavListHtml(activeId) {
+  return PROGRAM_BRIDGE_PAGES.map((page) => {
+    const isActive = page.id === activeId;
+    return `
           <li class="pb-nav__item">
             <button
               type="button"
@@ -55,6 +53,12 @@ export function programNavHtml(activeId) {
               ${isActive ? ' aria-current="page"' : ''}
             >${page.step}. ${page.label}</button>
           </li>`;
-      }).join('')}
+  }).join('');
+}
+
+export function programNavHtml(activeId) {
+  return `
+    <ol class="pb-nav__list">
+      ${programNavListHtml(activeId)}
     </ol>`;
 }

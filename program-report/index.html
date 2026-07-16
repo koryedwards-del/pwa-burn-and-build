@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/program-bridge.css?v=25" />
+  <link rel="stylesheet" href="../css/program-bridge.css?v=26" />
   <link rel="stylesheet" href="css/report.css?v=16" />
   <link rel="stylesheet" href="../menuplanner/css/planner.css?v=41" />
 </head>
@@ -85,7 +85,9 @@
 
     <div class="r-layout pb-layout">
       <aside class="pb-aside">
-        <nav class="r-nav pb-nav" aria-label="Program report" id="r-nav-list"></nav>
+        <nav class="r-nav pb-nav" aria-label="Program report">
+          <ol id="r-nav-list" class="pb-nav__list"></ol>
+        </nav>
         <section class="pb-side-card pb-side-card--action" id="print-shop" aria-label="Print shop" hidden>
           <button type="button" class="print-shop-card" id="print-shop-open">
             <span class="pb-side-card__title">Print Shop</span>
@@ -205,6 +207,6 @@
       event.preventDefault();
     });
   </script>
-  <script type="module" src="js/report.js?v=37"></script>
+  <script type="module" src="js/report.js?v=39"></script>
 </body>
 </html>

@@ -2,10 +2,14 @@
 
 :root {
   --app-width: 1200px;
-  /* Nav stack (4 items + print shop on menu planner) + gap before diet plans card */
-  --pb-nav-stack-height: 16rem;
+  /* Nav stack (4 items) + optional print shop slot on menu planner */
+  --pb-nav-stack-height: 11.5rem;
   --pb-side-card-height: 4.5rem;
   --pb-dock-gap: calc(2 * var(--pb-side-card-height));
+}
+
+.pb-aside--print-shop {
+  --pb-nav-stack-height: 16rem;
 }
 
 .pb-layout {
@@ -272,6 +276,10 @@ a.pb-nav__btn {
 
 .pb-nav__item--print-shop {
   margin-top: 8px;
+}
+
+.pb-nav__item--print-shop[hidden] {
+  display: none;
 }
 
 .pb-nav__item--print-shop .pb-side-card {

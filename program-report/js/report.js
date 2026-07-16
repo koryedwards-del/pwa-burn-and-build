@@ -13,8 +13,8 @@ import {
   PROGRAM_BRIDGE_PAGES,
   escapeHtml,
   programMetaHtml,
-  programNavHtml,
-} from '../../js/programBridgeUi.js?v=22';
+  programNavListHtml,
+} from '../../js/programBridgeUi.js?v=23';
 import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js?v=22';
 import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=22';
 import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=22';
@@ -133,9 +133,35 @@ function loadPreviewProgram() {
   showPage(initialPageFromUrl());
 }
 
-function mountPrintShopUnderMenuPlanner(nav) {
+function shouldShowPrintShop() {
+  return activePage === 3 && Boolean(programPackage?.intake?.leanBodyMass);
+}
+
+function syncPrintShopNavVisibility() {
+  const show = shouldShowPrintShop();
   const printShop = document.getElementById('print-shop');
-  const list = nav?.querySelector('.pb-nav__list');
+  const slot = printShop?.closest('.pb-nav__item--print-shop');
+  document.querySelector('.pb-aside')?.classList.toggle('pb-aside--print-shop', show);
+  if (show) {
+    printShop?.removeAttribute('hidden');
+    slot?.removeAttribute('hidden');
+  } else {
+    printShop?.setAttribute('hidden', '');
+    slot?.setAttribute('hidden', '');
+  }
+}
+
+function detachPrintShopFromNav() {
+  const printShop = document.getElementById('print-shop');
+  const aside = document.querySelector('.pb-aside');
+  const dock = aside?.querySelector('.pb-aside__dock');
+  if (printShop && aside && dock && printShop.parentElement !== aside) {
+    aside.insertBefore(printShop, dock);
+  }
+}
+
+function mountPrintShopUnderMenuPlanner(list) {
+  const printShop = document.getElementById('print-shop');
   if (!printShop || !list) return;
 
   const menuItem = list.querySelector('[data-nav-page="3"]')?.closest('.pb-nav__item');
@@ -149,12 +175,13 @@ function mountPrintShopUnderMenuPlanner(nav) {
 }
 
 function renderNav() {
-  const nav = document.getElementById('r-nav-list');
-  if (!nav) return;
+  const list = document.getElementById('r-nav-list');
+  if (!list) return;
+  detachPrintShopFromNav();
   const activeId = PAGES[activePage]?.id || 'welcome';
-  nav.innerHTML = programNavHtml(activeId);
-  nav.setAttribute('aria-label', 'Program report');
-  mountPrintShopUnderMenuPlanner(nav);
+  list.innerHTML = programNavListHtml(activeId);
+  mountPrintShopUnderMenuPlanner(list);
+  syncPrintShopNavVisibility();
 }
 
 function renderWelcome(pkg) {
@@ -491,7 +518,6 @@ function renderPage() {
 
   if (!programPackage?.intake?.leanBodyMass) {
     plannerPage.hidden = true;
-    document.getElementById('print-shop')?.setAttribute('hidden', '');
     main.hidden = false;
     main.innerHTML = renderMissingProgram();
     return;
@@ -501,7 +527,6 @@ function renderPage() {
     main.hidden = true;
     main.innerHTML = '';
     plannerPage.hidden = false;
-    document.getElementById('print-shop')?.removeAttribute('hidden');
     bootMenuPlannerPage()
       .then(() => {
         applyMenuPlannerProgram(programPackage);
@@ -511,7 +536,6 @@ function renderPage() {
   }
 
   plannerPage.hidden = true;
-  document.getElementById('print-shop')?.setAttribute('hidden', '');
   main.hidden = false;
   main.innerHTML = activePage === 0
     ? renderWelcome(programPackage)
@@ -581,6 +605,7 @@ function launchApp() {
       renderNav();
       if (activePage === 3) {
         applyMenuPlannerProgram(programPackage);
+        syncPrintShopNavVisibility();
       } else {
         renderPage();
       }
