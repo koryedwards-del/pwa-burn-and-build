@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/questionnaire.css?v=12" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=13" />
 </head>
 <body>
   <div class="q-app">
@@ -82,8 +82,15 @@
                   </label>
                 </div>
               </label>
+              <div class="q-field q-field--gender" role="group" aria-labelledby="q-gender-label">
+                <span class="q-label" id="q-gender-label">Gender</span>
+                <div class="q-segmented">
+                  <label class="q-segment"><input type="radio" name="sex" value="female" /> Female</label>
+                  <label class="q-segment"><input type="radio" name="sex" value="male" /> Male</label>
+                </div>
+              </div>
             </div>
-            <div class="q-grid q-grid--3 q-grid--tight q-grid--row-align">
+            <div class="q-grid q-grid--2 q-grid--tight q-grid--row-align">
               <label class="q-field">
                 <span class="q-label">Height</span>
                 <div class="q-inline q-field__control">
@@ -100,13 +107,6 @@
                   <span class="q-unit">lbs</span>
                 </div>
               </label>
-              <div class="q-field" role="group" aria-labelledby="q-gender-label">
-                <span class="q-label" id="q-gender-label">Gender</span>
-                <div class="q-segmented q-field__control">
-                  <label class="q-segment"><input type="radio" name="sex" value="female" /> Female</label>
-                  <label class="q-segment"><input type="radio" name="sex" value="male" /> Male</label>
-                </div>
-              </div>
             </div>
             <div class="q-grid q-grid--2 q-grid--tight q-grid--row-align">
               <label class="q-field">

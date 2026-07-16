@@ -532,6 +532,10 @@ body {
   margin-bottom: 0;
 }
 
+.q-field--gender {
+  grid-column: 1;
+}
+
 .q-newsletter {
   margin-top: 10px;
   display: flex;
