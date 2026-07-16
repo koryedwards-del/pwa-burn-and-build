@@ -182,13 +182,6 @@ function renderWelcome(pkg) {
           appropriate weight goals based on your current lean body mass.
         </p>
 
-        <h3>History</h3>
-        <p>
-          Page three is a record of your body composition history with me. Having a history of body compositions
-          can give you valuable information about how your eating habits are affecting your weight loss. That&apos;s
-          why I recommend having your body composition checked every 6-8 weeks. I call it a check-in.
-        </p>
-
         <h3>Food Plan</h3>
         <p>
           Page four is your custom-designed diet. How much food you need each day depends on how much LBM
