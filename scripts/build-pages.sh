@@ -10,7 +10,7 @@ mkdir -p "$OUT"
 cp -r "$ROOT/landing/." "$OUT/"
 cp "$ROOT/CNAME" "$OUT/CNAME"
 
-for path in myplan createyourfoodplan questionnaire program-report mealplanner css data img icons contacts shell; do
+for path in myplan createyourfoodplan questionnaire program-report menuplanner mealplanner css data img icons contacts shell; do
   cp -r "$ROOT/$path" "$OUT/$path"
 done
 

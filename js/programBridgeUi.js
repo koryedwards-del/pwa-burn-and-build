@@ -1,10 +1,10 @@
-/** Shared chrome for program report (pages 1–3) and meal planner (page 4). */
+/** Shared chrome for program report (pages 1–3) and menu planner (page 4). */
 
 export const PROGRAM_BRIDGE_PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1, reportPage: 0, reportQuery: 'welcome' },
   { id: 'projections', label: 'Projections', step: 2, reportPage: 1, reportQuery: 'projections' },
   { id: 'servings', label: 'Plan/Servings', step: 3, reportPage: 2, reportQuery: 'servings' },
-  { id: 'menuplanner', label: 'Menu planner', step: 4, href: '../mealplanner/' },
+  { id: 'menuplanner', label: 'Menu planner', step: 4, href: '../menuplanner/' },
 ];
 
 export function escapeHtml(text) {

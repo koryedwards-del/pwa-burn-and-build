@@ -20,5 +20,8 @@ export const CREATOR_ENTRY_URL = CREATOR_CHECKOUT_URL;
 
 /** Purchased program deliverable — welcome, food plan, servings */
 export const PROGRAM_REPORT_URL = `${CREATOR_HOST_ORIGIN}/program-report/`;
-export const MEALPLANNER_URL = `${CREATOR_HOST_ORIGIN}/mealplanner/`;
+export const MENUPLANNER_URL = `${CREATOR_HOST_ORIGIN}/menuplanner/`;
+
+/** @deprecated Use MENUPLANNER_URL */
+export const MEALPLANNER_URL = MENUPLANNER_URL;
 export const MYPLAN_URL = `${CREATOR_HOST_ORIGIN}/myplan/`;

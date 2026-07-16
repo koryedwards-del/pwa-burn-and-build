@@ -3,29 +3,54 @@ description: Project map and hosting context
 alwaysApply: true
 ---
 
-# Burn & Build — one repo
+# Burn & Build — one repo, separate products
 
 Repo: **`pwa-burn-and-build`** (this workspace)
 
-**Product:** Brand-new **desktop web application** on burnandbuilddiet.com — not the old phone/PWA daily app.
+**Keep top products separate.** Do not merge flows, copy, CTAs, or implementation between them unless the user explicitly asks.
 
-| Path | Host | Role |
-|------|------|------|
-| `landing/` | burnandbuilddiet.com (GitHub Pages) | Marketing CTAs → questionnaire |
-| `questionnaire/` | `/questionnaire/` | Intake steps → save plan → checkout handoff |
-| `createyourfoodplan/` | `/createyourfoodplan/` | Plan-ready screen + Stripe paywall ($149 per program) |
-| `program-report/` | `/program-report/` | Deliverable — projections, plan/servings |
-| `mealplanner/` | `/mealplanner/` | Menu planner + Print Assistant (desktop) |
-| `server/` | Render (`program-creator`) | API + SQLite — programs, per-program payment |
-| `myplan/` | `/myplan/` | **Legacy phone app** — daily logging; not the desktop funnel |
+**Product name:** **Menu planner** (folder/URL: `menuplanner/`). Never use “meal planner” in user-facing copy or docs.
 
-**Desktop user flow:**
+---
+
+## Product A — Desktop web app (active build)
+
+**Site:** burnandbuilddiet.com
+
+| Path | Role |
+|------|------|
+| `landing/` | Marketing → questionnaire |
+| `questionnaire/` | Intake → save plan → checkout handoff |
+| `createyourfoodplan/` | Plan-ready + Stripe paywall ($149 per program) |
+| `program-report/` | Deliverable — projections, plan/servings |
+| `menuplanner/` | **Menu planner** shell + Print Assistant |
+| `mealplanner/` | Redirect stub only → `/menuplanner/` |
+| `server/` | API + SQLite — programs, per-program payment |
+
+**Desktop flow:**
 ```
-Landing → questionnaire → Stripe (per program) → program-report → mealplanner
+Landing → questionnaire → Stripe (per program) → program-report → menuplanner
 ```
 
-Each new program requires its own Stripe checkout. Access is per `programId`, not lifetime per email.
+**Return access:** `burnandbuilddiet.com/menuplanner/` + email → unlock planner and paid program(s).
 
-**Deploy site:** push to `main` (paths in `.github/workflows/deploy-landing.yml`) → GitHub Pages.
+- Each new program = its own Stripe checkout (`programId`).
+- **End of desktop product** = menu planner shell.
 
-**Hardkor Diet landing** merge tracker: `docs/LANDING-MERGE.md`. **Signal+** is a separate product.
+---
+
+## Product B — Phone PWA (separate; do not conflate)
+
+| Path | Role |
+|------|------|
+| `myplan/` | Phone daily app |
+| `js/shell.js`, `js/app.js` | Phone shell / older PWA |
+
+Not part of the desktop funnel or menu planner.
+
+---
+
+## Other
+
+- **Signal+** — separate product.
+- **Deploy:** push `main` → `.github/workflows/deploy-landing.yml` → GitHub Pages.

@@ -9,6 +9,7 @@ on:
       - 'createyourfoodplan/**'
       - 'questionnaire/**'
       - 'program-report/**'
+      - 'menuplanner/**'
       - 'mealplanner/**'
       - 'css/**'
       - 'js/**'

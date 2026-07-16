@@ -416,7 +416,7 @@ function renderServings(pkg) {
 
       <footer class="r-actions">
         <button type="button" class="r-btn r-btn--ghost" data-report-back-food>← Projections</button>
-        <a class="r-btn r-btn--primary" href="../mealplanner/">Continue to meal planner →</a>
+        <a class="r-btn r-btn--primary" href="../menuplanner/">Continue to menu planner →</a>
       </footer>
     </section>
   `;
