@@ -9,6 +9,12 @@ import {
   projectionTimelineFromPackage,
 } from '../../js/foodPlanPrintout.js';
 import { extraFatLines, servingsGridRows } from '../../js/servingsPrintout.js';
+import {
+  PROGRAM_BRIDGE_PAGES,
+  escapeHtml,
+  programMetaHtml,
+  programNavHtml,
+} from '../../js/programBridgeUi.js';
 
 const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 
@@ -34,23 +40,10 @@ const PREVIEW_FORM = {
   lowActivities: [],
 };
 
-const PAGES = [
-  { id: 'welcome', label: 'Welcome', step: 1 },
-  { id: 'foodplan', label: 'Food plan', step: 2 },
-  { id: 'servings', label: 'Servings', step: 3 },
-  { id: 'menuplanner', label: 'Menu planner', step: 4, href: '../mealplanner/' },
-];
+const PAGES = PROGRAM_BRIDGE_PAGES;
 
 let activePage = 0;
 let programPackage = null;
-
-function escapeHtml(text) {
-  return String(text ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 function loadProgramPackage() {
   try {
@@ -123,60 +116,24 @@ function loadPreviewProgram() {
   showPage(initialPageFromUrl());
 }
 
-function formatReportDate(iso) {
-  if (!iso) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
-function formatReportDateShort(iso) {
-  if (!iso) return new Date().toISOString().slice(0, 10);
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return String(iso).slice(0, 10);
-  return d.toISOString().slice(0, 10);
-}
-
 function renderNav() {
   const nav = document.getElementById('r-nav-list');
   if (!nav) return;
-  nav.innerHTML = PAGES.map((page, index) => {
-    if (page.href) {
-      return `
-    <li class="r-nav__item">
-      <a class="r-nav__btn" href="${page.href}">${page.step}. ${page.label}</a>
-    </li>`;
-    }
-    return `
-    <li class="r-nav__item">
-      <button
-        type="button"
-        class="r-nav__btn${index === activePage ? ' is-active' : ''}${page.future ? ' is-future' : ''}"
-        data-nav-page="${index}"
-        ${page.future ? 'disabled' : ''}
-      >${page.step}. ${page.label}</button>
-    </li>`;
-  }).join('');
+  const activeId = PAGES[activePage]?.id || 'welcome';
+  nav.innerHTML = programNavHtml(activeId);
+  nav.setAttribute('aria-label', 'Program report');
 }
 
 function renderWelcome(pkg) {
-  const name = escapeHtml(pkg.intake?.preferredName || 'you');
-  const date = escapeHtml(formatReportDate(pkg.program?.issuedAt));
-
   return `
     <section class="r-panel">
-      <div>
-        <p class="r-eyebrow">Page 1</p>
-        <h2 class="r-panel__title">Welcome</h2>
+      <div class="pb-page-head">
+        <p class="pb-eyebrow">Page 1</p>
+        <h2 class="pb-panel__title">Welcome</h2>
       </div>
 
       <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong><br />
-            On: <strong>${date}</strong>
-          </p>
-        </header>
+        ${programMetaHtml(pkg)}
 
         <h3>Welcome</h3>
         <p>
@@ -244,9 +201,6 @@ function renderFoodPlan(pkg) {
   const hours = exerciseHoursSummary(intake);
   const macroRows = macroTableRows(pkg.plan?.formula, intake.workIntensity);
 
-  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
-  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
-
   const fatLost = projection ? projection.fatLostLbs.toFixed(1) : '—';
   const weekly = projection ? projection.weeklyFatLossLbs.toFixed(1) : '—';
   const goalLeanPct = projection ? `${projection.endLeanPct.toFixed(2)}%` : '—';
@@ -277,17 +231,13 @@ function renderFoodPlan(pkg) {
 
   return `
     <section class="r-panel">
-      <div>
-        <p class="r-eyebrow">Page 2</p>
-        <h2 class="r-panel__title">Food plan</h2>
+      <div class="pb-page-head">
+        <p class="pb-eyebrow">Page 2</p>
+        <h2 class="pb-panel__title">Food plan</h2>
       </div>
 
       <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
-          </p>
-        </header>
+        ${programMetaHtml(pkg)}
 
         <h3>Food Plan</h3>
         <p>
@@ -406,12 +356,8 @@ function renderFoodPlan(pkg) {
 }
 
 function renderServings(pkg) {
-  const intake = pkg.intake;
   const gridRows = servingsGridRows(pkg);
   const extraFats = extraFatLines(pkg);
-
-  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
-  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
 
   const gridBody = gridRows.map((row) => `
     <tr>
@@ -436,17 +382,13 @@ function renderServings(pkg) {
 
   return `
     <section class="r-panel">
-      <div>
-        <p class="r-eyebrow">Page 3</p>
-        <h2 class="r-panel__title">Servings</h2>
+      <div class="pb-page-head">
+        <p class="pb-eyebrow">Page 3</p>
+        <h2 class="pb-panel__title">Servings</h2>
       </div>
 
       <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
-          </p>
-        </header>
+        ${programMetaHtml(pkg)}
 
         <h3>Servings</h3>
         <p class="r-doc__note">

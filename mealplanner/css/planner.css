@@ -55,6 +55,35 @@ body {
   gap: 20px;
 }
 
+.planner-layout {
+  flex: 1;
+  min-height: 0;
+}
+
+.planner-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  min-width: 0;
+}
+
+.planner-meta.pb-doc {
+  flex-shrink: 0;
+}
+
+.planner-meta .pb-doc__head {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.planner-meta .pb-servings-note {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
 .planner-header {
   border-bottom: 1px solid var(--border);
   padding-bottom: 16px;
@@ -84,13 +113,6 @@ body {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text);
-}
-
-.planner-program {
-  margin-top: 6px;
-  font-size: 0.8rem;
-  color: var(--muted);
-  letter-spacing: 0.02em;
 }
 
 .planner-frame {

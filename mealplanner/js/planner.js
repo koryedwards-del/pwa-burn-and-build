@@ -1,4 +1,9 @@
 import { formatGroceryQuantity } from '../../js/groceryEngine.js';
+import {
+  programClientName,
+  programMetaHtml,
+  programNavHtml,
+} from '../../js/programBridgeUi.js';
 
 const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 
@@ -162,17 +167,39 @@ function servingHint(daySlotId, categorySlot) {
   return `${fmtServings(required)} serving${Math.abs(required - 1) < 0.05 ? '' : 's'}`;
 }
 
-function renderProgramHeader() {
-  const el = document.getElementById('planner-program');
-  if (!el) return;
-  if (!programPackage?.plan?.servings) {
-    el.hidden = true;
+function reportBackHref(page) {
+  const href = `../program-report/?page=${page}`;
+  if (new URLSearchParams(location.search).has('preview')) {
+    return `${href}&preview=1`;
+  }
+  return href;
+}
+
+function renderProgramChrome() {
+  const nav = document.getElementById('program-nav');
+  if (nav) {
+    nav.innerHTML = programNavHtml('menuplanner', { reportHref: '../program-report/' });
+  }
+
+  const back = document.getElementById('planner-back');
+  if (back) back.href = reportBackHref('servings');
+
+  const meta = document.getElementById('planner-meta');
+  if (!meta) return;
+
+  if (!programPackage?.intake) {
+    meta.innerHTML = '';
     return;
   }
-  const name = programPackage.intake?.preferredName || 'Your program';
-  const servings = programPackage.plan.servings;
-  el.hidden = false;
-  el.textContent = `${name} — Protein ${fmtServings(servings.protein)}, G/S ${fmtServings(servings.grainsStarches)}, Fruit ${fmtServings(servings.fruits)}, Veg ${fmtServings(servings.vegetables)}, Fat pts ${fmtServings(servings.fatMaintain)}`;
+
+  const servings = programPackage.plan?.servings;
+  const servingsLine = servings
+    ? `Protein ${fmtServings(servings.protein)}, G/S ${fmtServings(servings.grainsStarches)}, Fruit ${fmtServings(servings.fruits)}, Veg ${fmtServings(servings.vegetables)}, Fat pts ${fmtServings(servings.fatMaintain)}`
+    : '';
+
+  meta.innerHTML = `
+    ${programMetaHtml(programPackage)}
+    ${servingsLine ? `<p class="pb-servings-note">${escapeHtml(programClientName(programPackage))} — ${escapeHtml(servingsLine)}</p>` : ''}`;
 }
 
 function savedMealById(id) {
@@ -1347,7 +1374,7 @@ function initPrintAssistant() {
 async function init() {
   programPackage = loadProgramPackage();
   initMealSlotsFromProgram(programPackage);
-  renderProgramHeader();
+  renderProgramChrome();
 
   const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
   foods = await response.json();

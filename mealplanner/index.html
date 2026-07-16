@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1200" />
   <title>Burn &amp; Build — Meal Planner</title>
-  <link rel="stylesheet" href="css/planner.css?v=11" />
+  <link rel="stylesheet" href="../css/program-bridge.css?v=2" />
+  <link rel="stylesheet" href="css/planner.css?v=13" />
 </head>
 <body>
   <div class="planner-app">
@@ -12,55 +13,71 @@
       <div class="planner-brand">
         <img class="planner-logo" src="../img/brand/bblogo.png" alt="Burn &amp; Build" width="56" height="56" />
         <div class="planner-brand__text">
-          <h1 class="planner-title">Meal Planner</h1>
-          <p class="planner-program" id="planner-program" hidden></p>
+          <h1 class="planner-title">Your Program</h1>
         </div>
       </div>
     </header>
 
-    <main class="planner-frame">
-      <div class="week-panel">
-        <div class="week-panel__header">
-          <p class="col-heading col-heading--week">Week</p>
-          <div class="week-panel__actions">
-            <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>
-            <button type="button" class="day-col__clear" id="clear-week-menu">Clear Week</button>
-          </div>
+    <div class="pb-layout planner-layout">
+      <nav class="pb-nav" aria-label="Program report" id="program-nav"></nav>
+
+      <div class="planner-main">
+        <div class="pb-page-head">
+          <p class="pb-eyebrow">Page 4</p>
+          <h2 class="pb-panel__title">Menu planner</h2>
         </div>
-        <section class="week-grid" id="week-grid" aria-label="Week"></section>
+
+        <div class="pb-doc planner-meta" id="planner-meta"></div>
+
+        <main class="planner-frame">
+          <div class="week-panel">
+            <div class="week-panel__header">
+              <p class="col-heading col-heading--week">Week</p>
+              <div class="week-panel__actions">
+                <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>
+                <button type="button" class="day-col__clear" id="clear-week-menu">Clear Week</button>
+              </div>
+            </div>
+            <section class="week-grid" id="week-grid" aria-label="Week"></section>
+          </div>
+
+          <section class="workspace" aria-label="Planner workspace">
+            <div class="workspace__col workspace__col--day">
+              <div class="day-col-header">
+                <p class="col-heading col-heading--day" id="active-day-label">Wednesday</p>
+                <button type="button" class="day-col__clear" id="clear-day-menu">Clear Menu</button>
+              </div>
+              <div class="day-slots" id="day-slots"></div>
+            </div>
+
+            <div class="workspace__col workspace__col--meals">
+              <p class="col-heading">Saved Meals</p>
+              <div class="saved-meals" id="saved-meals"></div>
+            </div>
+
+            <div class="workspace__col workspace__col--foods">
+              <p class="col-heading">Foods</p>
+
+              <p class="food-filter-label" id="food-filter-label" hidden></p>
+              <input
+                type="search"
+                class="food-search"
+                id="food-search"
+                placeholder="Search foods…"
+                autocomplete="off"
+                hidden
+              />
+              <div class="food-filters" id="food-filters"></div>
+              <div class="food-stack" id="food-stack"></div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="pb-actions">
+          <a class="pb-btn pb-btn--ghost" href="../program-report/?page=servings" id="planner-back">← Servings</a>
+        </footer>
       </div>
-
-      <section class="workspace" aria-label="Planner workspace">
-        <div class="workspace__col workspace__col--day">
-          <div class="day-col-header">
-            <p class="col-heading col-heading--day" id="active-day-label">Wednesday</p>
-            <button type="button" class="day-col__clear" id="clear-day-menu">Clear Menu</button>
-          </div>
-          <div class="day-slots" id="day-slots"></div>
-        </div>
-
-        <div class="workspace__col workspace__col--meals">
-          <p class="col-heading">Saved Meals</p>
-          <div class="saved-meals" id="saved-meals"></div>
-        </div>
-
-        <div class="workspace__col workspace__col--foods">
-          <p class="col-heading">Foods</p>
-
-          <p class="food-filter-label" id="food-filter-label" hidden></p>
-          <input
-            type="search"
-            class="food-search"
-            id="food-search"
-            placeholder="Search foods…"
-            autocomplete="off"
-            hidden
-          />
-          <div class="food-filters" id="food-filters"></div>
-          <div class="food-stack" id="food-stack"></div>
-        </div>
-      </section>
-    </main>
+    </div>
   </div>
 
   <dialog id="save-meal-dialog" class="save-dialog">
@@ -82,6 +99,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/planner.js?v=20"></script>
+  <script type="module" src="js/planner.js?v=22"></script>
 </body>
 </html>

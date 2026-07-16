@@ -1,0 +1,142 @@
+/* Shared nav + page chrome — program report and meal planner */
+
+.pb-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+}
+
+.pb-nav__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pb-nav__btn {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+a.pb-nav__btn {
+  display: block;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.pb-nav__btn:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.pb-nav__btn.is-active {
+  background: var(--gold-dim);
+  border-color: rgba(253, 197, 0, 0.35);
+  color: var(--gold);
+}
+
+.pb-page-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pb-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.pb-panel__title {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.pb-doc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.pb-doc__head {
+  margin: 0;
+}
+
+.r-doc .pb-doc__head,
+.pb-doc .pb-doc__head {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.pb-doc__meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.pb-doc__meta strong {
+  color: var(--text);
+}
+
+.pb-servings-note {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.pb-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.pb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pb-btn:hover {
+  border-color: var(--muted);
+}
+
+.pb-btn--ghost {
+  background: transparent;
+}
