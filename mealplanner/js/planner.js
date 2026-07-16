@@ -51,65 +51,7 @@ const TEMPLATE_SLOTS = {
   snack: ['fruit', 'fat'],
 };
 
-const SAVED_MEALS = [
-  {
-    id: 'oatmeal-bowl',
-    name: 'Oatmeal Bowl',
-    pickCount: 38,
-    items: [
-      { slot: 'Grains/Starches', foodName: 'Oats, rolled', servings: 2 },
-      { slot: 'Fruit', foodName: 'Blueberries', servings: 1 },
-    ],
-  },
-  {
-    id: 'chicken-bowl',
-    name: 'Chicken Bowl',
-    pickCount: 42,
-    items: [
-      { slot: 'Protein', foodName: 'Chicken breast, no skin', servings: 2 },
-      { slot: 'Grains/Starches', foodName: 'Rice, white', servings: 2 },
-      { slot: 'Veggie', foodName: 'Broccoli, cooked', servings: 1 },
-    ],
-  },
-  {
-    id: 'apple-pb',
-    name: 'Apple & Peanut Butter',
-    pickCount: 31,
-    items: [
-      { slot: 'Fruit', foodName: 'Apple', servings: 1 },
-      { slot: 'Extra Fat', foodName: 'Peanut butter', servings: 1 },
-    ],
-  },
-  {
-    id: 'yogurt-berries',
-    name: 'Yogurt & Berries',
-    pickCount: 22,
-    items: [
-      { slot: 'Protein', foodName: 'Greek yogurt, nonfat', servings: 1 },
-      { slot: 'Fruit', foodName: 'Blueberries', servings: 1 },
-    ],
-  },
-  {
-    id: 'stir-fry',
-    name: 'Stir Fry',
-    pickCount: 28,
-    items: [
-      { slot: 'Protein', foodName: 'Chicken breast, no skin', servings: 2 },
-      { slot: 'Grains/Starches', foodName: 'Rice, brown', servings: 2 },
-      { slot: 'Veggie', foodName: 'Peppers, red bell, cooked', servings: 1 },
-    ],
-  },
-  {
-    id: 'tilapia-plate',
-    name: 'Tilapia Plate',
-    pickCount: 5,
-    items: [
-      { slot: 'Protein', foodName: 'Tilapia, baked', servings: 2 },
-      { slot: 'Grains/Starches', foodName: 'Sweet potato, baked', servings: 1 },
-      { slot: 'Veggie', foodName: 'Asparagus, cooked', servings: 1 },
-    ],
-  },
-];
+const SAVED_MEALS = [];
 
 const FOODS_DATA_VERSION = '2';
 
@@ -235,37 +177,6 @@ function renderProgramHeader() {
 
 function savedMealById(id) {
   return SAVED_MEALS.find((meal) => meal.id === id);
-}
-
-function seedWeekPlan() {
-  if (programPackage) return;
-
-  const presets = {
-    sun: ['oatmeal-bowl', 'chicken-bowl', 'tilapia-plate'],
-    mon: ['oatmeal-bowl', 'chicken-bowl', 'stir-fry'],
-    tue: ['oatmeal-bowl', 'chicken-bowl', 'tilapia-plate'],
-    thu: ['oatmeal-bowl', 'chicken-bowl', 'stir-fry'],
-    fri: ['oatmeal-bowl', 'chicken-bowl', 'tilapia-plate'],
-    sat: ['oatmeal-bowl', 'chicken-bowl', 'stir-fry'],
-  };
-
-  Object.entries(presets).forEach(([weekDay, mealIds]) => {
-    if (weekDay === 'wed') return;
-    WEEK_GRID_MEALS.forEach((mealSlotId, index) => {
-      const meal = savedMealById(mealIds[index]);
-      if (meal) applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick: false });
-    });
-  });
-
-  weekPlan.wed = createEmptyDayState();
-  categorySelections('breakfast', 'wed').gs = { foodName: 'Oats, rolled', servings: 2 };
-  categorySelections('morning-snack', 'wed').fruit = { foodName: 'Apple', servings: 1 };
-  categorySelections('lunch', 'wed').protein = { foodName: 'Chicken breast, no skin', servings: 2 };
-  categorySelections('lunch', 'wed').gs = { foodName: 'Rice, white', servings: 2 };
-  categorySelections('lunch', 'wed').vegetable = { foodName: 'Broccoli, cooked', servings: 1 };
-  mealSlotMeta('lunch', 'wed').mealName = 'Chicken Bowl';
-  mealSlotMeta('lunch', 'wed').savedMealId = 'chicken-bowl';
-  categorySelections('evening-snack', 'wed').fruit = { foodName: 'Blueberries', servings: 1 };
 }
 
 function scaledLabel(food, servings) {
@@ -888,7 +799,10 @@ function deleteSavedMeal(mealId) {
 
 function renderSavedMeals() {
   const container = document.getElementById('saved-meals');
-  container.innerHTML = savedMealsByPopularity().map((meal) => renderSavedMealCard(meal)).join('');
+  const meals = savedMealsByPopularity();
+  container.innerHTML = meals.length
+    ? meals.map((meal) => renderSavedMealCard(meal)).join('')
+    : '<p class="saved-meals__hint">Save meals from day slots to build your library.</p>';
 
   document.querySelectorAll('[data-meal-toggle]').forEach((button) => {
     button.addEventListener('click', (event) => {
@@ -1437,7 +1351,6 @@ async function init() {
 
   const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
   foods = await response.json();
-  seedWeekPlan();
   renderWeekGrid();
   initWeekGrid();
   renderActiveDayLabel();

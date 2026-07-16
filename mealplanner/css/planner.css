@@ -581,6 +581,13 @@ body {
   gap: 12px;
 }
 
+.saved-meals__hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 8px 2px;
+}
+
 .saved-meal {
   padding: 0;
   overflow: hidden;
