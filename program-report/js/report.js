@@ -3,8 +3,31 @@ import {
   computeDietEightWeekProjection,
   computeTodayBodyComposition,
 } from '../../js/bodyCompositionAnalysis.js';
+import { buildProgramPackage } from '../../js/programPackage.js';
 
 const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
+
+/** Sample intake for design review — seminar-style client (no questionnaire). */
+const PREVIEW_FORM = {
+  preferredName: 'Kristi',
+  email: 'preview@example.com',
+  sex: 'female',
+  heightFeet: '5',
+  heightInchesPart: '6',
+  age: 28,
+  weightText: '184',
+  fatPercentText: '38.22',
+  fatSource: 'recent',
+  workPhysical: 'sitting',
+  workStress: 'busy',
+  weightTrainingHours: 3,
+  cardioHours: 0,
+  fatBurningHours: 3,
+  wakeTime: '06:00',
+  remindersEnabled: false,
+  newsletterOptIn: false,
+  lowActivities: [],
+};
 
 const PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1 },
@@ -15,6 +38,7 @@ const PAGES = [
 
 let activePage = 0;
 let programPackage = null;
+let usingPreview = false;
 
 function escapeHtml(text) {
   return String(text ?? '')
@@ -32,6 +56,35 @@ function loadProgramPackage() {
   } catch {
     return null;
   }
+}
+
+function buildPreviewProgram() {
+  return buildProgramPackage(PREVIEW_FORM, {
+    label: '8-Week Burn & Build Program',
+    meta: { source: 'program-report-preview' },
+  });
+}
+
+function wantsPreviewFromUrl() {
+  return new URLSearchParams(location.search).has('preview');
+}
+
+function initialPageFromUrl() {
+  const page = new URLSearchParams(location.search).get('page');
+  if (page === '2' || page === 'lbm') return 1;
+  return 0;
+}
+
+function persistProgram(pkg) {
+  sessionStorage.setItem(MEALPLANNER_PROGRAM_KEY, JSON.stringify(pkg));
+}
+
+function loadPreviewProgram() {
+  programPackage = buildPreviewProgram();
+  usingPreview = true;
+  persistProgram(programPackage);
+  renderPreparedLine(programPackage);
+  showPage(initialPageFromUrl());
 }
 
 function genderKey(sex) {
@@ -93,7 +146,8 @@ function renderPreparedLine(pkg) {
   if (!el || !pkg) return;
   const name = pkg.intake?.preferredName || 'You';
   const date = formatReportDate(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate);
-  el.textContent = `Prepared exclusively for ${name} · ${date}`;
+  const previewNote = usingPreview ? ' · Sample program' : '';
+  el.textContent = `Prepared exclusively for ${name} · ${date}${previewNote}`;
 }
 
 function renderWelcome(pkg) {
@@ -272,8 +326,12 @@ function renderLbmAnalysis(pkg) {
 function renderMissingProgram() {
   return `
     <div class="r-empty">
-      <p>No program found. Complete the questionnaire first so the Burn Engine can build your report.</p>
-      <a class="r-btn r-btn--primary" href="../questionnaire/">Go to questionnaire →</a>
+      <p>No program in this browser session yet.</p>
+      <p class="r-note" style="margin-bottom:20px;">Preview the report with sample data, or complete intake to build yours.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="r-btn r-btn--primary" data-report-preview>Preview sample report →</button>
+        <a class="r-btn r-btn--ghost" href="../questionnaire/">Questionnaire</a>
+      </div>
     </div>
   `;
 }
@@ -306,6 +364,10 @@ function bindEvents() {
   });
 
   document.getElementById('r-main')?.addEventListener('click', (event) => {
+    if (event.target.closest('[data-report-preview]')) {
+      loadPreviewProgram();
+      return;
+    }
     if (event.target.closest('[data-report-next]')) {
       showPage(1);
       return;
@@ -318,7 +380,18 @@ function bindEvents() {
 
 function init() {
   programPackage = loadProgramPackage();
+  usingPreview = programPackage?.meta?.source === 'program-report-preview';
+
+  if (!programPackage?.intake?.leanBodyMass && wantsPreviewFromUrl()) {
+    programPackage = buildPreviewProgram();
+    usingPreview = true;
+    persistProgram(programPackage);
+  }
+
   renderPreparedLine(programPackage);
+  if (programPackage?.intake?.leanBodyMass) {
+    activePage = initialPageFromUrl();
+  }
   renderNav();
   renderPage();
   bindEvents();
