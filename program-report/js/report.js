@@ -257,8 +257,8 @@ function renderFoodPlan(pkg) {
         <p>
           The following food program contains a sophisticated calculation that is based on your individual lean
           body mass (LBM), and on your activities. This is the most individualized food program available for
-          losing fat and getting more energy. In eight weeks, you could safely lose ${fatLost} pounds of fat. On your
-          information sheet, you indicated you plan to exercise a total of ${hours.total} hour(s) per week.
+          losing fat and building muscle. In eight weeks, you could safely lose ${fatLost} pounds of fat. In your
+          questionnaire, you indicated you plan to exercise a total of ${hours.total} hour(s) per week.
           ${hours.wt} hour(s) of weight training, ${hours.cardio} hour(s) of cardiovascular activities,
           ${hours.fatBurn} hour(s) of fat-burning activities
         </p>
