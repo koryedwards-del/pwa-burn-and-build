@@ -3,13 +3,7 @@ import {
   computeTodayBodyComposition,
 } from '../../js/bodyCompositionAnalysis.js';
 import { buildProgramPackage } from '../../js/programPackage.js';
-import {
-  aceRangeHeaders,
-  aceVerdictSentence,
-  desirableLeanLine,
-  lbmCongratulationsLine,
-  weightGoalBandsByLbm,
-} from '../../js/leanBodyAnalysisPrintout.js';
+import { desirableLeanLine } from '../../js/leanBodyAnalysisPrintout.js';
 import {
   eightWeekProjectionFromPackage,
   exerciseHoursSummary,
@@ -120,13 +114,6 @@ function formatReportDate(iso) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function formatReportDateShort(iso) {
-  if (!iso) return new Date().toISOString().slice(0, 10);
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return String(iso).slice(0, 10);
-  return d.toISOString().slice(0, 10);
-}
-
 function renderNav() {
   const nav = document.getElementById('r-nav-list');
   if (!nav) return;
@@ -148,79 +135,58 @@ function renderPreparedLine(pkg) {
   const name = pkg.intake?.preferredName || 'You';
   const date = formatReportDate(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate);
   const previewNote = usingPreview ? ' · Sample program' : '';
-  el.textContent = `Prepared exclusively for ${name} · ${date}${previewNote}`;
+  el.textContent = `${name} · ${date}${previewNote}`;
+}
+
+function renderPageMeta(pkg) {
+  const name = escapeHtml(pkg.intake?.preferredName || 'You');
+  const date = escapeHtml(formatReportDate(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
+  return `
+    <header class="r-doc__head">
+      <p class="r-doc__meta">Prepared for <strong>${name}</strong> · ${date}</p>
+    </header>
+  `;
 }
 
 function renderWelcome(pkg) {
-  const name = escapeHtml(pkg.intake?.preferredName || 'you');
-  const date = escapeHtml(formatReportDate(pkg.program?.issuedAt));
-
   return `
     <section class="r-panel">
       <div>
-        <p class="r-eyebrow">Page 1</p>
+        <p class="r-eyebrow">Step 1 of 4</p>
         <h2 class="r-panel__title">Welcome</h2>
+        <p class="r-panel__lead">Your program was built from your intake — review it here, then plan your week in the meal planner.</p>
       </div>
 
       <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong><br />
-            On: <strong>${date}</strong>
-          </p>
-        </header>
+        ${renderPageMeta(pkg)}
 
-        <h3>Welcome</h3>
+        <h3>Your program</h3>
         <p>
-          Congratulations! You have in your hands the most advanced diet available anywhere, at any price. It is
-          the most individualized program available for losing fat. This diet will not work effectively for anyone
-          else because it has been created just for you, using your LBM, your job, your lifestyle and your daily
-          plan for exercise &amp; activities.
+          This diet is built for you alone. The Burn Engine used your lean body mass, your workday, your lifestyle
+          stress, and the exercise you committed to for the next eight weeks. No one else gets these numbers.
         </p>
 
         <p>
-          How we did it. We determined your lean weight using sophisticated body composition testing. Then you
-          told us about your job, lifestyle, exercise and activities. With this information, the computer generated
-          this five-page report. Included is your ultrasound body composition report that I call your Lean Body
-          Analysis, your body composition history and the last two pages are your custom designed diet.
+          You just finished the questionnaire. That intake — plus your body composition numbers — is what the
+          Burn Engine used to generate this report and the serving targets that follow.
         </p>
 
-        <h3>Lean Body Analysis</h3>
-        <p>
-          Page two is the results of your body composition test. Although very few people want to know how fat
-          they are, all of them want to how to lose fat. Our Lean Body Analysis page includes a breakdown of
-          your current body composition with an emphasis on the good stuff. LBM (lean body mass) is used by
-          the computer to calculate your metabolic rate (RMR). In addition, the Lean Body Analysis projects
-          appropriate weight goals based on your current lean body mass.
-        </p>
+        <h3>What&apos;s in this report</h3>
+        <ul class="r-doc__list">
+          <li><strong>Lean body analysis</strong> — where you are today. Lean mass is the engine; we protect it while fat moves.</li>
+          <li><strong>Food plan</strong> — your eight-week projection and daily fuel targets.</li>
+          <li><strong>Servings</strong> — daily totals split across breakfast, lunch, dinner, and snacks.</li>
+          <li><strong>Meal planner</strong> — build your week using those serving targets.</li>
+        </ul>
 
-        <h3>History</h3>
         <p>
-          Page three is a record of your body composition history with me. Having a history of body compositions
-          can give you valuable information about how your eating habits are affecting your weight loss. That&apos;s
-          why I recommend having your body composition checked every 6-8 weeks. I call it a check-in.
-        </p>
-
-        <h3>Food Plan</h3>
-        <p>
-          Page four is your custom-designed diet. How much food you need each day depends on how much LBM
-          you have, your job, lifestyle and the type and amount of exercise you participate in. Based on the
-          information you provide, this diet gives you the amount of protein, carbohydrates and fat you need per
-          day to lose fat. It also tells you how much fat you can lose in eight weeks. And it shows you what your
-          body requires at rest (your resting metabolic rate), for your workday and for one hour of each type of
-          exercise.
-        </p>
-
-        <h3>Servings</h3>
-        <p>
-          Page five is the servings page. No need to count calories or macros in this diet. The computer breaks
-          down all the information from the table on page four and shows you the number of servings you need
-          daily to have maximum strength &amp; energy and to lose fat as fast as possible.
+          You do not need to count calories or macros day to day. The servings page is the contract. The meal
+          planner is where you turn it into meals and a shopping list.
         </p>
       </article>
 
       <footer class="r-actions">
-        <span class="r-note">Four-page program report — then meal planner.</span>
+        <span class="r-note">Review each section, then open the meal planner.</span>
         <button type="button" class="r-btn r-btn--primary" data-report-next>Lean body analysis →</button>
       </footer>
     </section>
@@ -236,85 +202,56 @@ function renderLbmAnalysis(pkg) {
     heightInches: intake.heightInches,
     leanBodyMass: intake.leanBodyMass,
   });
-  const aceHeaders = aceRangeHeaders(gender);
-  const weightBands = weightGoalBandsByLbm(gender, intake.leanBodyMass);
   const desirableLine = desirableLeanLine(gender, intake.heightInches);
-  const congratsLine = lbmCongratulationsLine(lbmAnalysis.atOrAbove);
-  const aceVerdict = aceVerdictSentence(gender, intake.fatPercent);
 
-  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
-  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
   const heightIn = Math.round(Number(intake.heightInches) || 0);
-  const sex = gender === 'female' ? 'FEMALE' : 'MALE';
-  const thigh = intake.thighMm != null ? `${intake.thighMm} mm` : '— mm';
-  const waist = intake.waistMm != null ? `${intake.waistMm} mm` : '— mm';
-  const age = intake.age != null ? `${intake.age} years of experience` : '— years of experience';
+  const sex = gender === 'female' ? 'Female' : 'Male';
+  const age = intake.age != null ? String(intake.age) : '—';
+
+  const lbmCallout = lbmAnalysis.atOrAbove
+    ? `<div class="r-callout">
+        <strong>Lean body mass: ${today.leanLbs} lbs.</strong>
+        ${desirableLine ? ` ${escapeHtml(desirableLine)}` : ''}
+        Your LBM is at or above the desirable amount for your height. Feed your body properly — the food plan
+        shows how much you need daily for maximum results.
+      </div>`
+    : `<div class="r-callout">
+        <strong>Lean body mass: ${today.leanLbs} lbs.</strong>
+        ${desirableLine ? ` ${escapeHtml(desirableLine)}` : ''}
+        This plan is built to protect lean mass while you lose fat.
+      </div>`;
 
   return `
     <section class="r-panel">
       <div>
-        <p class="r-eyebrow">Page 2</p>
+        <p class="r-eyebrow">Step 2 of 4</p>
         <h2 class="r-panel__title">Lean body analysis</h2>
+        <p class="r-panel__lead">Today&apos;s composition — lean mass drives your metabolic rate and every serving target that follows.</p>
       </div>
 
       <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
-          </p>
-        </header>
+        ${renderPageMeta(pkg)}
 
-        <h3>Lean Body Analysis</h3>
+        <h3>Today</h3>
         <p class="r-doc__stats-line">
-          Height: ${heightIn} inches Sex: ${sex} Thigh: ${thigh} Waist: ${waist} Age: ${age}
+          Height: ${heightIn} in · Sex: ${sex} · Age: ${age}
         </p>
 
-        <p class="r-doc__today-label">--TODAY--</p>
-        <p class="r-doc__today-row">LEAN ${today.leanPct} % ${today.leanLbs} lbs.</p>
-        <p class="r-doc__today-row">FAT ${today.fatPct} % ${today.fatLbs} lbs.</p>
-        <p class="r-doc__today-row">TOTAL ${today.totalPct} % ${today.totalLbs} lbs.</p>
+        <p class="r-doc__today-label">Composition</p>
+        <p class="r-doc__today-row">Lean ${today.leanPct}% · ${today.leanLbs} lbs</p>
+        <p class="r-doc__today-row">Fat ${today.fatPct}% · ${today.fatLbs} lbs</p>
+        <p class="r-doc__today-row">Total ${today.totalLbs} lbs</p>
 
-        <table class="r-ace-table" aria-label="ACE body fat categories">
-          <thead>
-            <tr>
-              ${aceHeaders.map((row) => `<th scope="col">${row.label}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              ${aceHeaders.map((row) => `<td>${row.rangeLabel}</td>`).join('')}
-            </tr>
-          </tbody>
-        </table>
+        ${lbmCallout}
 
-        <p>${escapeHtml(aceVerdict)}</p>
         <p>
-          How much fat is right for each individual is a personal choice. How you look in the mirror is the only
-          true judge of whether you have fat to lose. If you see more fat than you personally want, then exercise
-          and follow your this plan until you reach your desired goals.
+          How you look in the mirror is the real judge of whether you want to lose fat. If you do, follow this
+          plan as closely as you can — the next page shows what you can lose in eight weeks while keeping your
+          strength and energy.
         </p>
 
-        ${desirableLine ? `<p>${escapeHtml(desirableLine)}</p>` : ''}
-        ${congratsLine ? `<p>${escapeHtml(congratsLine)}</p>` : ''}
-
-        <table class="r-ace-table r-ace-table--weights" aria-label="Weight goals by health category">
-          <thead>
-            <tr>
-              ${weightBands.map((band) => `<th scope="col">${escapeHtml(band.label)}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              ${weightBands.map((band) => `<td>${escapeHtml(band.display)}</td>`).join('')}
-            </tr>
-          </tbody>
-        </table>
-
-        <p>
-          Continue to monitor your body composition using Lean Body Analysis every 6 to 8 weeks to make sure
-          you are losing only fat and not lean! If you want to lose fat, do so by following this diet as closely as
-          you can. This plan allows you to lose all the fat you want to lose while increasing your strength &amp;
-          energy.
+        <p class="r-note">
+          Re-check body composition every 6–8 weeks to confirm you are losing fat, not lean.
         </p>
       </article>
 
@@ -333,17 +270,14 @@ function renderFoodPlan(pkg) {
   const hours = exerciseHoursSummary(intake);
   const macroRows = macroTableRows(pkg.plan?.formula, intake.workIntensity);
 
-  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
-  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
-
   const fatLost = projection ? projection.fatLostLbs.toFixed(1) : '—';
   const weekly = projection ? projection.weeklyFatLossLbs.toFixed(1) : '—';
   const goalLeanPct = projection ? `${projection.endLeanPct.toFixed(2)}%` : '—';
-  const goalLeanLbs = projection ? `${projection.leanLbs.toFixed(1)} lbs.` : '—';
+  const goalLeanLbs = projection ? `${projection.leanLbs.toFixed(1)} lbs` : '—';
   const goalFatPct = projection ? `${projection.endBf.toFixed(2)}%` : '—';
-  const goalFatLbs = projection ? `${projection.endFatLbs.toFixed(1)} lbs.` : '—';
+  const goalFatLbs = projection ? `${projection.endFatLbs.toFixed(1)} lbs` : '—';
   const goalTotalPct = '100.00%';
-  const goalTotalLbs = projection ? `${projection.endWeight.toFixed(1)} lbs.` : '—';
+  const goalTotalLbs = projection ? `${projection.endWeight.toFixed(1)} lbs` : '—';
 
   const macroBody = macroRows.map((row) => {
     if (row.spacer) {
@@ -365,94 +299,85 @@ function renderFoodPlan(pkg) {
   return `
     <section class="r-panel">
       <div>
-        <p class="r-eyebrow">Page 3</p>
+        <p class="r-eyebrow">Step 3 of 4</p>
         <h2 class="r-panel__title">Food plan</h2>
+        <p class="r-panel__lead">Your eight-week projection and the daily fuel the Burn Engine calculated from your intake.</p>
       </div>
 
       <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
-          </p>
-        </header>
+        ${renderPageMeta(pkg)}
 
-        <h3>Food Plan</h3>
+        <div class="r-callout">
+          <p class="r-hero-stat">In eight weeks you could lose ${fatLost} lbs of fat</p>
+          <p>About ${weekly} lbs per week on average — while protecting lean mass and keeping your strength and energy up.</p>
+        </div>
+
         <p>
-          The following food program contains a sophisticated calculation that is based on your individual lean
-          body mass (LBM), and on your activities. This is the most individualized food program available for
-          losing fat and getting more energy. In eight weeks, you could safely lose ${fatLost} pounds of fat. On your
-          information sheet, you indicated you plan to exercise a total of ${hours.total} hour(s) per week.
-          ${hours.wt} hour(s) of weight training, ${hours.cardio} hour(s) of cardiovascular activities,
-          ${hours.fatBurn} hour(s) of fat-burning activities
+          This plan is based on your lean body mass and the exercise you committed to in the questionnaire:
+          ${hours.total} hour(s) per week total (${hours.wt} weight training, ${hours.cardio} cardio, ${hours.fatBurn} fat-burn).
         </p>
 
         <table class="r-goal-table" aria-label="Today and eight week goal">
           <thead>
             <tr>
               <th scope="col"></th>
-              <th scope="col">TODAY</th>
+              <th scope="col">Today</th>
               <th scope="col"></th>
-              <th scope="col">EIGHT WEEK GOAL</th>
+              <th scope="col">Eight-week goal</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <th scope="row" class="r-goal-row-label">LEAN</th>
-              <td>${today.leanPct} % ${today.leanLbs} lbs.</td>
+              <th scope="row" class="r-goal-row-label">Lean</th>
+              <td>${today.leanPct}% · ${today.leanLbs} lbs</td>
               <td></td>
-              <td>${goalLeanPct} ${goalLeanLbs}</td>
+              <td>${goalLeanPct} · ${goalLeanLbs}</td>
             </tr>
             <tr>
-              <th scope="row" class="r-goal-row-label">FAT</th>
-              <td>${today.fatPct} % ${today.fatLbs} lbs.</td>
-              <td class="r-goal-fat-loss">−${fatLost} lbs. of fat</td>
-              <td>${goalFatPct} ${goalFatLbs}</td>
+              <th scope="row" class="r-goal-row-label">Fat</th>
+              <td>${today.fatPct}% · ${today.fatLbs} lbs</td>
+              <td class="r-goal-fat-loss">−${fatLost} lbs fat</td>
+              <td>${goalFatPct} · ${goalFatLbs}</td>
             </tr>
             <tr>
-              <th scope="row" class="r-goal-row-label">TOTAL</th>
-              <td>${today.totalPct} % ${today.totalLbs} lbs.</td>
+              <th scope="row" class="r-goal-row-label">Total</th>
+              <td>${today.totalLbs} lbs</td>
               <td></td>
-              <td>${goalTotalPct} ${goalTotalLbs}</td>
+              <td>${goalTotalPct} · ${goalTotalLbs}</td>
             </tr>
           </tbody>
         </table>
 
-        <p>
-          You project to lose an average of ${weekly} pounds of fat per week. In addition, you could gain lean weight.
-          Gaining lean weight will increase your strength and energy and offset your fat loss.
-        </p>
-
-        <p>
-          How much food you need each day depends on how much LBM you have. Also, it depends on your
-          activity level and the type and amount of exercise you participate in. Based on the information you
-          provided, the following table gives you the number of calories and the amount of protein, carbohydrates
-          and fat you need per day to maintain your fat or to reduce body fat. Also listed is what your body
-          requires at rest (your resting metabolic rate), for your workday and for one hour of each type of exercise.
-        </p>
-
-        <table class="r-macro-table" aria-label="Daily macro and calorie requirements">
-          <thead>
-            <tr>
-              <th scope="col" rowspan="2"></th>
-              <th scope="colgroup" colspan="2">PROTEIN</th>
-              <th scope="colgroup" colspan="2">CARBS</th>
-              <th scope="colgroup" colspan="2">FATS</th>
-              <th scope="colgroup" rowspan="2">TOTAL</th>
-            </tr>
-            <tr>
-              <th scope="col">grams</th>
-              <th scope="col">calories</th>
-              <th scope="col">grams</th>
-              <th scope="col">calories</th>
-              <th scope="col">grams</th>
-              <th scope="col">calories</th>
-              <th scope="col">calories</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${macroBody}
-          </tbody>
-        </table>
+        <details class="r-details">
+          <summary>Daily calories &amp; macros (reference)</summary>
+          <p class="r-note" style="margin: 12px 0;">
+            You do not need to track these day to day — the servings page is what you follow. This table shows
+            how the Burn Engine derived your targets (RMR, workday, and per-hour exercise).
+          </p>
+          <table class="r-macro-table" aria-label="Daily macro and calorie requirements">
+            <thead>
+              <tr>
+                <th scope="col" rowspan="2"></th>
+                <th scope="colgroup" colspan="2">Protein</th>
+                <th scope="colgroup" colspan="2">Carbs</th>
+                <th scope="colgroup" colspan="2">Fats</th>
+                <th scope="colgroup" rowspan="2">Total</th>
+              </tr>
+              <tr>
+                <th scope="col">g</th>
+                <th scope="col">cal</th>
+                <th scope="col">g</th>
+                <th scope="col">cal</th>
+                <th scope="col">g</th>
+                <th scope="col">cal</th>
+                <th scope="col">cal</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${macroBody}
+            </tbody>
+          </table>
+        </details>
       </article>
 
       <footer class="r-actions">
@@ -467,9 +392,6 @@ function renderServings(pkg) {
   const intake = pkg.intake;
   const gridRows = servingsGridRows(pkg);
   const extraFats = extraFatLines(pkg);
-
-  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
-  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
 
   const gridBody = gridRows.map((row) => `
     <tr>
@@ -486,7 +408,7 @@ function renderServings(pkg) {
 
   const extraBody = extraFats.map((line) => `
     <tr>
-      <th scope="row" class="r-servings-label">Extra Fats</th>
+      <th scope="row" class="r-servings-label">Extra fats</th>
       <td>${escapeHtml(line.value)}</td>
       <td colspan="6">${escapeHtml(line.note)}</td>
     </tr>
@@ -495,21 +417,16 @@ function renderServings(pkg) {
   return `
     <section class="r-panel">
       <div>
-        <p class="r-eyebrow">Page 4</p>
+        <p class="r-eyebrow">Step 4 of 4</p>
         <h2 class="r-panel__title">Servings</h2>
+        <p class="r-panel__lead">Your daily contract — split across meals. The meal planner uses these targets to build your week.</p>
       </div>
 
       <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
-          </p>
-        </header>
+        ${renderPageMeta(pkg)}
 
-        <h3>Servings</h3>
         <p class="r-doc__note">
-          NOTE: Always consult your physician before starting this plan or making any change in your eating
-          habits.
+          Consult your physician before starting this plan or changing how you eat.
         </p>
 
         <table class="r-servings-table" aria-label="Daily servings by meal">
@@ -530,6 +447,11 @@ function renderServings(pkg) {
             ${extraBody}
           </tbody>
         </table>
+
+        <p>
+          Hit these serving counts each day for maximum strength and energy while losing fat. Next, open the
+          meal planner to turn this grid into meals, snacks, and a grocery list.
+        </p>
       </article>
 
       <footer class="r-actions">

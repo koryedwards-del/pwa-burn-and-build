@@ -1,4 +1,4 @@
-/* Burn & Build — Program report bridge (seminar printout, on screen) */
+/* Burn & Build — Program report bridge */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -18,10 +18,6 @@
   --on-gold: #0a0a0a;
   --text-hint: #656565;
   --layout-width: 1100px;
-  --doc-paper: #f7f5f0;
-  --doc-ink: #1a1a1a;
-  --doc-muted: #5c5c5c;
-  --doc-rule: #d4d0c8;
 }
 
 html, body {
@@ -90,10 +86,6 @@ body {
   gap: 4px;
 }
 
-.r-nav__item {
-  width: 100%;
-}
-
 .r-nav__btn {
   width: 100%;
   text-align: left;
@@ -118,19 +110,6 @@ body {
   background: var(--gold-dim);
   border-color: rgba(253, 197, 0, 0.35);
   color: var(--gold);
-}
-
-.r-nav__btn.is-future {
-  opacity: 0.45;
-  cursor: default;
-}
-
-.r-nav__btn:disabled {
-  cursor: default;
-}
-
-.r-main {
-  min-width: 0;
 }
 
 .r-panel {
@@ -164,59 +143,59 @@ body {
 }
 
 .r-doc {
-  background: var(--doc-paper);
-  color: var(--doc-ink);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 28px 32px 32px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  padding: 24px 28px 28px;
 }
 
 .r-doc__head {
-  border-bottom: 2px solid var(--doc-ink);
+  border-bottom: 1px solid var(--border);
   padding-bottom: 14px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .r-doc__meta {
   font-size: 0.78rem;
-  color: var(--doc-muted);
+  color: var(--muted);
   line-height: 1.5;
 }
 
 .r-doc__meta strong {
-  color: var(--doc-ink);
+  color: var(--text);
 }
 
 .r-doc h3 {
   font-family: Oswald, system-ui, sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin: 22px 0 10px;
+  margin: 20px 0 10px;
+  color: var(--gold);
+}
+
+.r-doc h3:first-of-type {
+  margin-top: 0;
 }
 
 .r-doc p {
   font-size: 0.92rem;
   line-height: 1.65;
   margin-bottom: 12px;
-}
-
-.r-doc__section-title {
-  font-family: Oswald, system-ui, sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin-top: 18px;
-  margin-bottom: 8px;
-  color: var(--doc-ink);
+  color: var(--text);
 }
 
 .r-doc__list {
   margin: 0 0 12px 1.1rem;
   font-size: 0.9rem;
   line-height: 1.6;
+  color: var(--muted);
+}
+
+.r-doc__list strong {
+  color: var(--text);
 }
 
 .r-doc__list li {
@@ -224,16 +203,19 @@ body {
 }
 
 .r-doc__stats-line {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   line-height: 1.6;
   margin-bottom: 14px;
+  color: var(--muted);
 }
 
 .r-doc__today-label {
   font-weight: 700;
-  font-size: 0.88rem;
-  margin: 12px 0 6px;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  margin: 14px 0 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
 }
 
 .r-doc__today-row {
@@ -243,35 +225,16 @@ body {
   margin-bottom: 4px;
 }
 
-.r-ace-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.78rem;
-  margin: 16px 0;
-  text-align: center;
-}
-
-.r-ace-table th,
-.r-ace-table td {
-  border: 1px solid var(--doc-rule);
-  padding: 8px 6px;
-  vertical-align: middle;
-}
-
-.r-ace-table thead th {
-  background: #ebe8e2;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.r-ace-table--weights td {
-  font-size: 0.76rem;
+.r-doc__note {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  margin-bottom: 14px;
+  color: var(--muted);
 }
 
 .r-goal-table,
-.r-macro-table {
+.r-macro-table,
+.r-servings-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.82rem;
@@ -281,159 +244,102 @@ body {
 .r-goal-table th,
 .r-goal-table td,
 .r-macro-table th,
-.r-macro-table td {
-  border: 1px solid var(--doc-rule);
+.r-macro-table td,
+.r-servings-table th,
+.r-servings-table td {
+  border: 1px solid var(--border);
   padding: 8px 10px;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .r-goal-table thead th,
-.r-macro-table thead th {
-  background: #ebe8e2;
+.r-macro-table thead th,
+.r-servings-table thead th {
+  background: var(--surface-2);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: center;
+  color: var(--gold);
 }
 
 .r-goal-row-label,
-.r-macro-label {
+.r-macro-label,
+.r-servings-label {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: #f0ede6;
+  background: var(--surface-2);
   text-align: left;
+  color: var(--text);
 }
 
 .r-goal-fat-loss {
   font-weight: 700;
   text-align: center;
   white-space: nowrap;
+  color: var(--gold);
 }
 
-.r-macro-table td {
+.r-macro-table td,
+.r-servings-table td {
   text-align: center;
 }
 
 .r-macro-spacer td {
-  height: 10px;
+  height: 8px;
   border-left: none;
   border-right: none;
-  background: var(--doc-paper);
-}
-
-.r-doc__note {
-  font-size: 0.88rem;
-  line-height: 1.55;
-  margin-bottom: 14px;
-}
-
-.r-servings-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.82rem;
-  margin: 16px 0;
-}
-
-.r-servings-table th,
-.r-servings-table td {
-  border: 1px solid var(--doc-rule);
-  padding: 8px 10px;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.r-servings-table .r-servings-label {
-  text-align: left;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: #f0ede6;
-}
-
-.r-servings-table thead th {
-  background: #ebe8e2;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.r-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px 24px;
-  font-size: 0.82rem;
-  color: var(--doc-muted);
-  margin-bottom: 16px;
-}
-
-.r-stats span strong {
-  color: var(--doc-ink);
-}
-
-.r-composition {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.88rem;
-  margin: 16px 0 20px;
-}
-
-.r-composition th,
-.r-composition td {
-  border: 1px solid var(--doc-rule);
-  padding: 10px 12px;
-  text-align: left;
-  vertical-align: top;
-}
-
-.r-composition thead th {
-  background: #ebe8e2;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.r-composition .r-composition__row-label {
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: #f0ede6;
-  width: 88px;
-}
-
-.r-composition .r-composition__metric {
-  font-family: Oswald, system-ui, sans-serif;
-  font-size: 1.05rem;
-  letter-spacing: 0.02em;
-}
-
-.r-composition .r-composition__sub {
-  display: block;
-  font-size: 0.78rem;
-  color: var(--doc-muted);
-  font-family: "Open Sans", system-ui, sans-serif;
-  font-weight: 400;
-  margin-top: 2px;
+  background: var(--surface);
 }
 
 .r-callout {
-  background: rgba(253, 197, 0, 0.15);
-  border-left: 4px solid #c9a000;
+  background: var(--gold-dim);
+  border: 1px solid rgba(253, 197, 0, 0.28);
+  border-radius: 8px;
   padding: 14px 16px;
   margin: 16px 0;
   font-size: 0.9rem;
   line-height: 1.55;
 }
 
-.r-callout--good {
-  background: rgba(80, 160, 90, 0.12);
-  border-left-color: #3d8f4a;
+.r-callout strong {
+  color: var(--gold);
+}
+
+.r-hero-stat {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+  color: var(--gold);
+  margin: 8px 0 4px;
+}
+
+.r-details {
+  margin-top: 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+  background: var(--surface-2);
+}
+
+.r-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text);
+  list-style-position: outside;
+}
+
+.r-details summary:hover {
+  color: var(--gold);
+}
+
+.r-details[open] summary {
+  margin-bottom: 4px;
+  color: var(--gold);
 }
 
 .r-note {
@@ -496,4 +402,45 @@ body {
 .r-empty p {
   margin-bottom: 16px;
   line-height: 1.5;
+}
+
+@media print {
+  body {
+    background: #fff;
+    color: #111;
+    padding: 0;
+  }
+
+  .r-nav,
+  .r-actions,
+  .r-header .r-tag {
+    display: none !important;
+  }
+
+  .r-layout {
+    display: block;
+  }
+
+  .r-doc {
+    background: #fff;
+    color: #111;
+    border-color: #ccc;
+  }
+
+  .r-doc h3,
+  .r-goal-table thead th,
+  .r-macro-table thead th,
+  .r-servings-table thead th,
+  .r-goal-fat-loss {
+    color: #111;
+  }
+
+  .r-goal-row-label,
+  .r-macro-label,
+  .r-servings-label,
+  .r-goal-table thead th,
+  .r-macro-table thead th,
+  .r-servings-table thead th {
+    background: #eee;
+  }
 }
