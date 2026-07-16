@@ -265,7 +265,7 @@ body {
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow: clip;
   transition: background 0.15s ease, border-color 0.2s ease;
 }
 

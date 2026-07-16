@@ -87,8 +87,6 @@ const WEEK_MEAL_EMPTY_LABEL = {
   'evening-snack': 'Snack',
 };
 
-const SAVED_MEAL_NAME_MAX = 14;
-
 let foods = [];
 let programPackage = null;
 const mealSlotsById = {};
@@ -401,7 +399,7 @@ function mealIdFromName(name) {
 }
 
 function saveMealFromDay(mealSlotId, name) {
-  const trimmed = name.trim().slice(0, SAVED_MEAL_NAME_MAX);
+  const trimmed = name.trim();
   if (!trimmed) return;
 
   const meal = {
@@ -423,7 +421,6 @@ function saveMealFromDay(mealSlotId, name) {
 function openSaveMealDialog(mealSlotId) {
   const dialog = document.getElementById('save-meal-dialog');
   const input = document.getElementById('save-meal-name');
-  input.maxLength = SAVED_MEAL_NAME_MAX;
   pendingSaveDaySlotId = mealSlotId;
   input.value = mealSlotMeta(mealSlotId).mealName || '';
   dialog.showModal();
@@ -658,10 +655,11 @@ function renderWeekGrid() {
     const active = day.id === activeWeekDay;
     const mealsHtml = WEEK_GRID_MEALS.map((mealSlotId) => {
       const { text, empty } = weekMealLabel(day.id, mealSlotId);
+      const titleAttr = empty ? '' : ` title="${escapeHtml(text)}"`;
       const dropAttrs = acceptsSavedMealDrop(mealSlotId) ? ' data-week-meal-drop' : '';
       return `
         <div
-          class="mini-card${empty ? ' mini-card--empty' : ''}"${dropAttrs}
+          class="mini-card${empty ? ' mini-card--empty' : ''}"${dropAttrs}${titleAttr}
           data-week-day="${day.id}"
           data-meal-slot="${mealSlotId}"
         >${escapeHtml(text)}</div>
