@@ -101,6 +101,12 @@ body {
   cursor: pointer;
 }
 
+a.r-nav__btn {
+  display: block;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
 .r-nav__btn:hover:not(:disabled) {
   background: var(--surface);
   color: var(--text);

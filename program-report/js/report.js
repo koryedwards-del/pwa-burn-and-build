@@ -37,6 +37,7 @@ const PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1 },
   { id: 'foodplan', label: 'Food plan', step: 2 },
   { id: 'servings', label: 'Servings', step: 3 },
+  { id: 'menuplanner', label: 'Menu planner', step: 4, href: '../mealplanner/' },
 ];
 
 let activePage = 0;
@@ -111,7 +112,14 @@ function formatReportDateShort(iso) {
 function renderNav() {
   const nav = document.getElementById('r-nav-list');
   if (!nav) return;
-  nav.innerHTML = PAGES.map((page, index) => `
+  nav.innerHTML = PAGES.map((page, index) => {
+    if (page.href) {
+      return `
+    <li class="r-nav__item">
+      <a class="r-nav__btn" href="${page.href}">${page.step}. ${page.label}</a>
+    </li>`;
+    }
+    return `
     <li class="r-nav__item">
       <button
         type="button"
@@ -119,8 +127,8 @@ function renderNav() {
         data-nav-page="${index}"
         ${page.future ? 'disabled' : ''}
       >${page.step}. ${page.label}</button>
-    </li>
-  `).join('');
+    </li>`;
+  }).join('');
 }
 
 function renderWelcome(pkg) {
