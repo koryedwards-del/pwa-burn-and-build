@@ -895,7 +895,7 @@ function renderSavedMeals() {
   const meals = savedMealsByPopularity();
   container.innerHTML = meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
-    : '<p class="saved-meals__hint">Save meals from day slots to build your library.</p>';
+    : '<p class="saved-meals__hint">It won\'t take long before you have a few go-to meals. Eggs and oatmeal. Chicken and rice. Save your go-to meals to speed up menu planning. If you build a meal and don\'t see Save Meal, it\'s because a required slot is still empty. Fill protein and grains/starches first.</p>';
 
   document.querySelectorAll('[data-meal-toggle]').forEach((button) => {
     button.addEventListener('click', (event) => {
