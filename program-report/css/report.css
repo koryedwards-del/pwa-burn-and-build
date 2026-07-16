@@ -223,6 +223,53 @@ body {
   margin-bottom: 6px;
 }
 
+.r-doc__stats-line {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.r-doc__today-label {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin: 12px 0 6px;
+  letter-spacing: 0.04em;
+}
+
+.r-doc__today-row {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+
+.r-ace-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.r-ace-table th,
+.r-ace-table td {
+  border: 1px solid var(--doc-rule);
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+
+.r-ace-table thead th {
+  background: #ebe8e2;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.r-ace-table--weights td {
+  font-size: 0.76rem;
+}
+
 .r-stats {
   display: flex;
   flex-wrap: wrap;

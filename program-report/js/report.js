@@ -1,9 +1,15 @@
 import {
   analyzeLeanBodyMass,
-  computeDietEightWeekProjection,
   computeTodayBodyComposition,
 } from '../../js/bodyCompositionAnalysis.js';
 import { buildProgramPackage } from '../../js/programPackage.js';
+import {
+  aceRangeHeaders,
+  aceVerdictSentence,
+  desirableLeanLine,
+  lbmCongratulationsLine,
+  weightGoalBandsByLbm,
+} from '../../js/leanBodyAnalysisPrintout.js';
 
 const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 
@@ -59,10 +65,16 @@ function loadProgramPackage() {
 }
 
 function buildPreviewProgram() {
-  return buildProgramPackage(PREVIEW_FORM, {
+  const pkg = buildProgramPackage(PREVIEW_FORM, {
     label: '8-Week Burn & Build Program',
     meta: { source: 'program-report-preview' },
   });
+  pkg.intake.preferredName = 'Kristi Warner';
+  pkg.intake.thighMm = 25;
+  pkg.intake.waistMm = 25;
+  pkg.program.issuedAt = '2024-01-15T12:00:00.000Z';
+  pkg.program.foodPlanCreatedDate = '2024-01-15';
+  return pkg;
 }
 
 function wantsPreviewFromUrl() {
@@ -92,10 +104,6 @@ function genderKey(sex) {
   return s.startsWith('f') ? 'female' : 'male';
 }
 
-function genderLabel(sex) {
-  return genderKey(sex) === 'female' ? 'Female' : 'Male';
-}
-
 function formatReportDate(iso) {
   if (!iso) return new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const d = new Date(iso);
@@ -103,27 +111,11 @@ function formatReportDate(iso) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-function heightLabel(inches) {
-  const total = Number(inches);
-  if (!total) return '—';
-  const feet = Math.floor(total / 12);
-  const inch = Math.round(total % 12);
-  return `${feet}'${inch}" (${total} in)`;
-}
-
-function projectionFromPackage(pkg) {
-  const intake = pkg?.intake;
-  const summary = pkg?.plan?.summary;
-  if (!intake?.leanBodyMass || !intake?.totalWeight || !intake?.fatPercent) return null;
-  if (!summary?.maintainTotalCals || !summary?.reduceTotalCals) return null;
-  return computeDietEightWeekProjection({
-    weightLbs: intake.totalWeight,
-    leanBodyMass: intake.leanBodyMass,
-    bodyFatPercent: intake.fatPercent,
-    maintainTotalCalories: summary.maintainTotalCals,
-    reduceTotalCalories: summary.reduceTotalCals,
-    gender: genderKey(intake.sex),
-  });
+function formatReportDateShort(iso) {
+  if (!iso) return new Date().toISOString().slice(0, 10);
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return String(iso).slice(0, 10);
+  return d.toISOString().slice(0, 10);
 }
 
 function renderNav() {
@@ -228,106 +220,92 @@ function renderWelcome(pkg) {
 
 function renderLbmAnalysis(pkg) {
   const intake = pkg.intake;
+  const gender = genderKey(intake.sex);
   const today = computeTodayBodyComposition(intake);
-  const projection = projectionFromPackage(pkg);
   const lbmAnalysis = analyzeLeanBodyMass({
-    gender: genderKey(intake.sex),
+    gender,
     heightInches: intake.heightInches,
     leanBodyMass: intake.leanBodyMass,
   });
+  const aceHeaders = aceRangeHeaders(gender);
+  const weightBands = weightGoalBandsByLbm(gender, intake.leanBodyMass);
+  const desirableLine = desirableLeanLine(gender, intake.heightInches);
+  const congratsLine = lbmCongratulationsLine(lbmAnalysis.atOrAbove);
+  const aceVerdict = aceVerdictSentence(gender, intake.fatPercent);
 
-  const stats = `
-    <div class="r-stats">
-      <span>Height: <strong>${escapeHtml(heightLabel(intake.heightInches))}</strong></span>
-      <span>Sex: <strong>${escapeHtml(genderLabel(intake.sex))}</strong></span>
-      <span>Age: <strong>${escapeHtml(intake.age ?? '—')}</strong></span>
-    </div>
-  `;
-
-  const goalLeanLbs = projection ? `${projection.leanLbs.toFixed(1)} lbs.` : '—';
-  const goalLeanPct = projection ? `${projection.endLeanPct.toFixed(2)} %` : '—';
-  const goalFatLine = projection
-    ? `<span class="r-composition__metric">−${projection.fatLostLbs.toFixed(1)} lbs. of fat</span>
-       <span class="r-composition__sub">${projection.endBf.toFixed(2)} % · ${projection.endFatLbs.toFixed(1)} lbs.</span>`
-    : '—';
-  const goalTotal = projection
-    ? `<span class="r-composition__metric">100.00 %</span>
-       <span class="r-composition__sub">${projection.endWeight.toFixed(1)} lbs.</span>`
-    : '—';
-
-  const lbmCallout = lbmAnalysis.atOrAbove
-    ? `<div class="r-callout r-callout--good">
-        <strong>Congratulations!</strong> Your lean body mass is at or above the desirable amount for your height
-        (${lbmAnalysis.desirableLbm} lbs. or more). Even so, it&apos;s a good idea to exercise at least twice a week.
-        Feed your body properly — this program shows you how much food you need daily for maximum results.
-      </div>`
-    : `<div class="r-callout">
-        A ${genderLabel(intake.sex).toLowerCase()} your height in good condition has
-        <strong>${lbmAnalysis.desirableLbm} pounds</strong> or more of lean body weight.
-        This plan is built to protect lean mass while you lose fat. Feed your body properly — the servings page
-        shows how much food you need daily.
-      </div>`;
+  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
+  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
+  const heightIn = Math.round(Number(intake.heightInches) || 0);
+  const sex = gender === 'female' ? 'FEMALE' : 'MALE';
+  const thigh = intake.thighMm != null ? `${intake.thighMm} mm` : '— mm';
+  const waist = intake.waistMm != null ? `${intake.waistMm} mm` : '— mm';
+  const age = intake.age != null ? `${intake.age} years of experience` : '— years of experience';
 
   return `
     <section class="r-panel">
       <div>
         <p class="r-eyebrow">Page 2</p>
         <h2 class="r-panel__title">Lean body analysis</h2>
-        <p class="r-panel__lead">Today versus your eight-week goal — lean mass is the engine; fat is what moves.</p>
       </div>
 
       <article class="r-doc">
         <header class="r-doc__head">
-          <p class="r-doc__meta">Lean Body Analysis</p>
+          <p class="r-doc__meta">
+            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
+          </p>
         </header>
 
-        ${stats}
+        <h3>Lean Body Analysis</h3>
+        <p class="r-doc__stats-line">
+          Height: ${heightIn} inches Sex: ${sex} Thigh: ${thigh} Waist: ${waist} Age: ${age}
+        </p>
 
-        <table class="r-composition" aria-label="Body composition today and eight-week goal">
+        <p class="r-doc__today-label">--TODAY--</p>
+        <p class="r-doc__today-row">LEAN ${today.leanPct} % ${today.leanLbs} lbs.</p>
+        <p class="r-doc__today-row">FAT ${today.fatPct} % ${today.fatLbs} lbs.</p>
+        <p class="r-doc__today-row">TOTAL ${today.totalPct} % ${today.totalLbs} lbs.</p>
+
+        <table class="r-ace-table" aria-label="ACE body fat categories">
           <thead>
             <tr>
-              <th scope="col"></th>
-              <th scope="col">Today</th>
-              <th scope="col">Eight week goal</th>
+              ${aceHeaders.map((row) => `<th scope="col">${row.label}</th>`).join('')}
             </tr>
           </thead>
           <tbody>
             <tr>
-              <th scope="row" class="r-composition__row-label">Lean</th>
-              <td>
-                <span class="r-composition__metric">${today.leanPct} %</span>
-                <span class="r-composition__sub">${today.leanLbs} lbs.</span>
-              </td>
-              <td>
-                <span class="r-composition__metric">${goalLeanPct}</span>
-                <span class="r-composition__sub">${goalLeanLbs}</span>
-              </td>
-            </tr>
-            <tr>
-              <th scope="row" class="r-composition__row-label">Fat</th>
-              <td>
-                <span class="r-composition__metric">${today.fatPct} %</span>
-                <span class="r-composition__sub">${today.fatLbs} lbs.</span>
-              </td>
-              <td>${goalFatLine}</td>
-            </tr>
-            <tr>
-              <th scope="row" class="r-composition__row-label">Total</th>
-              <td>
-                <span class="r-composition__metric">${today.totalPct} %</span>
-                <span class="r-composition__sub">${today.totalLbs} lbs.</span>
-              </td>
-              <td>${goalTotal}</td>
+              ${aceHeaders.map((row) => `<td>${row.rangeLabel}</td>`).join('')}
             </tr>
           </tbody>
         </table>
 
-        ${lbmCallout}
+        <p>${escapeHtml(aceVerdict)}</p>
+        <p>
+          How much fat is right for each individual is a personal choice. How you look in the mirror is the only
+          true judge of whether you have fat to lose. If you see more fat than you personally want, then exercise
+          and follow your this plan until you reach your desired goals.
+        </p>
+
+        ${desirableLine ? `<p>${escapeHtml(desirableLine)}</p>` : ''}
+        ${congratsLine ? `<p>${escapeHtml(congratsLine)}</p>` : ''}
+
+        <table class="r-ace-table r-ace-table--weights" aria-label="Weight goals by health category">
+          <thead>
+            <tr>
+              ${weightBands.map((band) => `<th scope="col">${escapeHtml(band.label)}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              ${weightBands.map((band) => `<td>${escapeHtml(band.display)}</td>`).join('')}
+            </tr>
+          </tbody>
+        </table>
 
         <p>
-          Continue to monitor your body composition every 6 to 8 weeks to make sure you are losing only fat and
-          not lean. If you want to lose fat, follow this plan as closely as you can — it allows you to lose the
-          fat you want while increasing your strength and energy.
+          Continue to monitor your body composition using Lean Body Analysis every 6 to 8 weeks to make sure
+          you are losing only fat and not lean! If you want to lose fat, do so by following this diet as closely as
+          you can. This plan allows you to lose all the fat you want to lose while increasing your strength &amp;
+          energy.
         </p>
       </article>
 
