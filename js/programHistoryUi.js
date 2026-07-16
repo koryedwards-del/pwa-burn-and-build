@@ -29,7 +29,6 @@ export function renderSidebarProgramCard(row, { isActive = false, isOpening = fa
       >
         <span class="pb-program-card__date">${row.testDateDisplay}</span>
         ${isActive ? '<span class="pb-program-card__tag">Active</span>' : ''}
-        <span class="pb-program-card__toggle-icon" aria-hidden="true"></span>
       </button>
       <div class="pb-program-card__body" data-switch-program="${row.id}">
         ${renderHistoryCardRows(row.fieldRows)}

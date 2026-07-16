@@ -127,35 +127,6 @@
   outline-offset: 2px;
 }
 
-.pb-program-card__toggle-icon {
-  position: relative;
-  flex-shrink: 0;
-  margin-left: auto;
-  width: 1em;
-  height: 1em;
-  font-size: calc(0.9rem * 5);
-  background: transparent;
-  color: var(--muted);
-  transition: transform 0.15s ease;
-  pointer-events: none;
-}
-
-.pb-program-card__toggle-icon::before {
-  content: '';
-  position: absolute;
-  top: 18%;
-  left: 50%;
-  width: 0.42em;
-  height: 0.42em;
-  border-right: 0.12em solid currentColor;
-  border-bottom: 0.12em solid currentColor;
-  transform: translateX(-50%) rotate(45deg);
-}
-
-.pb-program-card:not(.is-collapsed) .pb-program-card__toggle-icon {
-  transform: rotate(180deg);
-}
-
 .pb-program-card__body[data-switch-program] {
   cursor: default;
 }
