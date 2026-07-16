@@ -72,18 +72,6 @@ body {
   flex-shrink: 0;
 }
 
-.planner-meta .pb-doc__head {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.planner-meta .pb-servings-note {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-
 .planner-header {
   border-bottom: 1px solid var(--border);
   padding-bottom: 16px;
