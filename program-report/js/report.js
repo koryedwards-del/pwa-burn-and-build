@@ -1,5 +1,6 @@
 import { computeTodayBodyComposition } from '../../js/bodyCompositionAnalysis.js';
 import { buildProgramPackage } from '../../js/programPackage.js';
+import { computePlan } from '../../js/burnEngine.js';
 import {
   eightWeekProjectionFromPackage,
   exerciseHoursSummary,
@@ -67,10 +68,37 @@ function buildPreviewProgram() {
     meta: { source: 'program-report-preview' },
   });
   pkg.intake.preferredName = 'Kristi Warner';
+  pkg.intake.leanBodyMass = 113.7;
+  pkg.intake.workIntensity = 1.5;
+  pkg.intake.workPhysical = 'sitting';
+  pkg.intake.workStress = 'comfortable';
   pkg.intake.thighMm = 25;
   pkg.intake.waistMm = 25;
   pkg.program.issuedAt = '2024-01-15T12:00:00.000Z';
   pkg.program.foodPlanCreatedDate = '2024-01-15';
+
+  const plan = computePlan({
+    lbm: pkg.intake.leanBodyMass,
+    intensity: pkg.intake.workIntensity,
+    weightTrainingHours: pkg.intake.weightTrainingHours,
+    cardioHours: pkg.intake.cardioHours,
+    fatBurningHours: pkg.intake.fatBurningHours,
+  });
+  pkg.plan = {
+    ...pkg.plan,
+    servings: plan.servings,
+    summary: {
+      maintainTotalCals: plan.maintainTotalCals,
+      reduceTotalCals: plan.reduceTotalCals,
+      maintainProteinGrams: plan.maintainProteinGrams,
+      reduceFatGrams: plan.reduceFatGrams,
+      maintainFatCalories: plan.maintainFatCalories,
+      reduceFatCalories: plan.reduceFatCalories,
+      weeklyFatLossPounds: plan.weeklyFatLossPounds,
+    },
+    formula: plan.formula,
+  };
+
   return pkg;
 }
 
@@ -520,11 +548,11 @@ function bindEvents() {
 }
 
 function init() {
-  programPackage = loadProgramPackage();
-
-  if (!programPackage?.intake?.leanBodyMass && wantsPreviewFromUrl()) {
+  if (wantsPreviewFromUrl()) {
     programPackage = buildPreviewProgram();
     persistProgram(programPackage);
+  } else {
+    programPackage = loadProgramPackage();
   }
 
   if (programPackage?.intake?.leanBodyMass) {
