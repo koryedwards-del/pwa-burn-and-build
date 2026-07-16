@@ -95,7 +95,7 @@ function wantsPreviewFromUrl() {
 
 function initialPageFromUrl() {
   const page = new URLSearchParams(location.search).get('page');
-  if (page === '2' || page === 'food' || page === 'foodplan' || page === 'lbm') return 1;
+  if (page === '2' || page === 'food' || page === 'foodplan' || page === 'lbm' || page === 'projections') return 1;
   if (page === '3' || page === '4' || page === 'servings') return 2;
   return 0;
 }
@@ -144,21 +144,18 @@ function renderWelcome(pkg) {
           Analysis, your body composition history and the last two pages are your custom designed diet.
         </p>
 
-        <h3>Food Plan</h3>
+        <h3>Projections</h3>
         <p>
-          Page two is your custom-designed diet. How much food you need each day depends on how much LBM
-          you have, your job, lifestyle and the type and amount of exercise you participate in. Based on the
-          information you provide, this diet gives you the amount of protein, carbohydrates and fat you need per
-          day to lose fat. It also tells you how much fat you can lose in eight weeks — and projects where you
-          can go over time. And it shows you what your body requires at rest (your resting metabolic rate), for
-          your workday and for one hour of each type of exercise.
+          Page two shows your eight-week fat-loss projection and longer-term timeline — how much fat you can
+          lose based on your lean body mass, job, lifestyle, and exercise plan.
         </p>
 
-        <h3>Servings</h3>
+        <h3>Plan/Servings</h3>
         <p>
-          Page three is the servings page. No need to count calories or macros in this diet. The computer breaks
-          down all the information from the table on page two and shows you the number of servings you need
-          daily to have maximum strength &amp; energy and to lose fat as fast as possible.
+          Page three is your plan and servings. How much food you need each day depends on your LBM, your job,
+          and your exercise. The macro table shows calories and protein, carbs, and fat at rest, at work, and
+          per hour of exercise. The servings grid breaks that into daily meal targets — no counting calories
+          on your own.
         </p>
 
         <h3>Menu Planner</h3>
@@ -169,7 +166,7 @@ function renderWelcome(pkg) {
       </article>
 
       <footer class="r-actions r-actions--end">
-        <button type="button" class="r-btn r-btn--primary" data-report-next>Food plan →</button>
+        <button type="button" class="r-btn r-btn--primary" data-report-next>Projections →</button>
       </footer>
     </section>
   `;
@@ -267,13 +264,13 @@ function renderFoodPlan(pkg) {
     <section class="r-panel">
       <div class="pb-page-head">
         <p class="pb-eyebrow">Page 2</p>
-        <h2 class="pb-panel__title">Food plan</h2>
+        <h2 class="pb-panel__title">Projections</h2>
       </div>
 
       <article class="r-doc">
         ${programMetaHtml(pkg)}
 
-        <h3>Food Plan</h3>
+        <h3>Projections</h3>
         <p>
           The following food program contains a sophisticated calculation that is based on your individual lean
           body mass (LBM), and on your activities. This is the most individualized food program available for
@@ -348,7 +345,7 @@ function renderFoodPlan(pkg) {
 
       <footer class="r-actions">
         <button type="button" class="r-btn r-btn--ghost" data-report-back>← Welcome</button>
-        <button type="button" class="r-btn r-btn--primary" data-report-next-servings>Servings →</button>
+        <button type="button" class="r-btn r-btn--primary" data-report-next-servings>Plan/Servings →</button>
       </footer>
     </section>
   `;
@@ -383,7 +380,7 @@ function renderServings(pkg) {
     <section class="r-panel">
       <div class="pb-page-head">
         <p class="pb-eyebrow">Page 3</p>
-        <h2 class="pb-panel__title">Servings</h2>
+        <h2 class="pb-panel__title">Plan/Servings</h2>
       </div>
 
       <article class="r-doc">
@@ -418,7 +415,7 @@ function renderServings(pkg) {
       </article>
 
       <footer class="r-actions">
-        <button type="button" class="r-btn r-btn--ghost" data-report-back-food>← Food plan</button>
+        <button type="button" class="r-btn r-btn--ghost" data-report-back-food>← Projections</button>
         <a class="r-btn r-btn--primary" href="../mealplanner/">Continue to meal planner →</a>
       </footer>
     </section>
@@ -436,7 +433,7 @@ function renderMissingProgram() {
       </p>
       <ol class="r-empty__steps">
         <li><strong>Intake</strong> — personal info, body fat, work &amp; exercise</li>
-        <li><strong>Your program</strong> — welcome, food plan, and daily servings</li>
+        <li><strong>Your program</strong> — welcome, projections, plan/servings, and menu planner</li>
         <li><strong>Menu planner</strong> — build your week and grocery list</li>
       </ol>
       <div class="r-empty__actions">

@@ -343,7 +343,7 @@ function renderPlanReadyAppHandoff(unlocked) {
   const reportUrl = programReportHref();
   return `
           <a class="btn-primary unlock-cta plan-ready-open-program" href="${reportUrl}" data-open-program-report>View your program →</a>
-          <p class="unlock-tagline">Welcome letter, food plan, servings, and menu planner.</p>`;
+          <p class="unlock-tagline">Projections, plan/servings, and menu planner.</p>`;
 }
 
 function renderPlanReady() {

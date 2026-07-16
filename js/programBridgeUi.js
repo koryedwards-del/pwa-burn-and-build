@@ -2,8 +2,8 @@
 
 export const PROGRAM_BRIDGE_PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1, reportPage: 0, reportQuery: 'welcome' },
-  { id: 'foodplan', label: 'Food plan', step: 2, reportPage: 1, reportQuery: 'food' },
-  { id: 'servings', label: 'Servings', step: 3, reportPage: 2, reportQuery: 'servings' },
+  { id: 'projections', label: 'Projections', step: 2, reportPage: 1, reportQuery: 'projections' },
+  { id: 'servings', label: 'Plan/Servings', step: 3, reportPage: 2, reportQuery: 'servings' },
   { id: 'menuplanner', label: 'Menu planner', step: 4, href: '../mealplanner/' },
 ];
 
