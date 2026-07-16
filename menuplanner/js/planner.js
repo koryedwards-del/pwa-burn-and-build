@@ -81,7 +81,6 @@ const WEEK_MEAL_EMPTY_LABEL = {
 let foods = [];
 let programPackage = null;
 const mealSlotsById = {};
-let activeWeekDay = 'wed';
 let activeSlot = null;
 let activeFoodCategory = null;
 let foodSearchQuery = '';
@@ -105,6 +104,12 @@ function createEmptyDayState() {
 WEEK_DAYS.forEach((day) => {
   weekPlan[day.id] = createEmptyDayState();
 });
+
+function todayWeekDayId() {
+  return WEEK_DAYS[new Date().getDay()].id;
+}
+
+let activeWeekDay = todayWeekDayId();
 
 function categorySelections(mealSlotId, weekDay = activeWeekDay) {
   return weekPlan[weekDay].selections[mealSlotId];
