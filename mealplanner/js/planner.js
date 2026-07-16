@@ -1095,6 +1095,256 @@ function initSaveMealDialog() {
   });
 }
 
+function iterWeekFoodSelections(callback) {
+  WEEK_DAYS.forEach((day) => {
+    DAY_SLOTS.forEach((mealSlot) => {
+      templateSlots(mealSlot.template).forEach((categorySlot) => {
+        if (isFatSlot(categorySlot)) {
+          getFatSelections(mealSlot.id, day.id).forEach((item) => {
+            callback({
+              weekDay: day.id,
+              mealSlotId: mealSlot.id,
+              foodName: item.foodName,
+              servings: item.servings,
+            });
+          });
+          return;
+        }
+        const selected = categorySelections(mealSlot.id, day.id)[categorySlot];
+        if (selected) {
+          callback({
+            weekDay: day.id,
+            mealSlotId: mealSlot.id,
+            foodName: selected.foodName,
+            servings: selected.servings,
+          });
+        }
+      });
+    });
+  });
+}
+
+function foodAmountLabel(food, servings) {
+  if (!food) return `${servings} servings`;
+  if (food.gramWeight) return `${Math.round(food.gramWeight * servings)} g`;
+  if (food.unitsPerServing > 0) {
+    const count = Math.ceil(food.unitsPerServing * servings);
+    return `${count} ${food.servingDescription}`;
+  }
+  if (food.servingDescription) {
+    if (servings === 1) return food.servingDescription;
+    return `${servings} × ${food.servingDescription}`;
+  }
+  return `${servings} servings`;
+}
+
+function buildShoppingTotals() {
+  const totals = new Map();
+  iterWeekFoodSelections(({ foodName, servings }) => {
+    totals.set(foodName, (totals.get(foodName) || 0) + servings);
+  });
+  return totals;
+}
+
+function dinnerPrepSections() {
+  const dinnerSlot = DAY_SLOTS.find((slot) => slot.id === 'dinner');
+  return WEEK_DAYS.map((day) => {
+    const items = [];
+    templateSlots(dinnerSlot.template).forEach((categorySlot) => {
+      if (isFatSlot(categorySlot)) {
+        getFatSelections('dinner', day.id).forEach((item) => items.push(item));
+        return;
+      }
+      const selected = categorySelections('dinner', day.id)[categorySlot];
+      if (selected) items.push(selected);
+    });
+    if (!items.length) return null;
+    const meta = mealSlotMeta('dinner', day.id);
+    return {
+      dayLabel: day.fullLabel,
+      mealName: meta.mealName,
+      items,
+    };
+  }).filter(Boolean);
+}
+
+function buildAssistantDocumentHtml() {
+  const totals = buildShoppingTotals();
+  const dinners = dinnerPrepSections();
+  const categoryOrder = FOOD_CATEGORIES.map((cat) => cat.id);
+  const categoryLabels = Object.fromEntries(FOOD_CATEGORIES.map((cat) => [cat.id, cat.label]));
+
+  const shoppingRows = [];
+  categoryOrder.forEach((categoryId) => {
+    const rows = [];
+    totals.forEach((servings, foodName) => {
+      const food = foods.find((item) => item.name === foodName);
+      if ((food?.category || 'other') !== categoryId) return;
+      rows.push({ foodName, amount: foodAmountLabel(food, servings) });
+    });
+    rows.sort((a, b) => a.foodName.localeCompare(b.foodName));
+    if (rows.length) {
+      shoppingRows.push({ category: categoryLabels[categoryId], rows });
+    }
+  });
+
+  const shoppingHtml = shoppingRows.length
+    ? shoppingRows.map((group) => `
+        <section class="assistant-section">
+          <h2>${escapeHtml(group.category)}</h2>
+          <ul class="assistant-list">
+            ${group.rows.map((row) => `
+              <li><span class="assistant-food">${escapeHtml(row.foodName)}</span><span class="assistant-amount">${escapeHtml(row.amount)}</span></li>
+            `).join('')}
+          </ul>
+        </section>
+      `).join('')
+    : '<p class="assistant-empty">No ingredients in this week\'s plan yet.</p>';
+
+  const dinnerHtml = dinners.length
+    ? dinners.map((dinner) => `
+        <section class="assistant-dinner">
+          <h3>${escapeHtml(dinner.dayLabel)}${dinner.mealName ? ` · ${escapeHtml(dinner.mealName)}` : ''}</h3>
+          <ul class="assistant-list">
+            ${dinner.items.map((item) => {
+              const food = foods.find((entry) => entry.name === item.foodName);
+              return `
+                <li><span class="assistant-food">${escapeHtml(item.foodName)}</span><span class="assistant-amount">${escapeHtml(foodAmountLabel(food, item.servings))}</span></li>
+              `;
+            }).join('')}
+          </ul>
+        </section>
+      `).join('')
+    : '<p class="assistant-empty">No dinners planned yet.</p>';
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Burn &amp; Build — Shopping &amp; Food Prep Assistant</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Open Sans", system-ui, sans-serif;
+      background: #ffffff;
+      color: #111111;
+      padding: 32px 40px 48px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .assistant-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .assistant-toolbar button {
+      padding: 8px 14px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .assistant-toolbar button.primary {
+      border-color: #c9a000;
+      background: #fdc500;
+      color: #111;
+    }
+    h1 {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .assistant-subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+    }
+    h2 {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    h3 {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .assistant-section { margin-bottom: 20px; }
+    .assistant-dinner { margin-bottom: 16px; }
+    .assistant-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .assistant-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 0.9rem;
+      padding: 4px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .assistant-food { flex: 1; }
+    .assistant-amount {
+      color: #333;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .assistant-empty { color: #666; font-size: 0.9rem; }
+    .assistant-divider {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 28px 0;
+    }
+    @media print {
+      .assistant-toolbar { display: none; }
+      body { padding: 0.5in; }
+    }
+  </style>
+</head>
+<body>
+  <div class="assistant-toolbar">
+    <button type="button" class="primary" onclick="window.print()">Print</button>
+  </div>
+  <h1>Burn &amp; Build</h1>
+  <p class="assistant-subtitle">Shopping &amp; Food Prep Assistant</p>
+  <h2>Shopping</h2>
+  ${shoppingHtml}
+  <hr class="assistant-divider" />
+  <h2>Dinner Prep</h2>
+  ${dinnerHtml}
+</body>
+</html>`;
+}
+
+function openPrintAssistant() {
+  const doc = window.open('', '_blank');
+  if (!doc) return;
+  doc.document.write(buildAssistantDocumentHtml());
+  doc.document.close();
+}
+
+function initPrintAssistant() {
+  document.getElementById('print-assistant').addEventListener('click', openPrintAssistant);
+}
+
 async function init() {
   const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
   foods = await response.json();
@@ -1109,6 +1359,7 @@ async function init() {
   initSaveMealDialog();
   initClearDayMenu();
   initClearWeekMenu();
+  initPrintAssistant();
   renderFoodStack();
   initFoodDropTargets();
 }

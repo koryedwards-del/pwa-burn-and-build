@@ -17,7 +17,10 @@
       <div class="week-panel">
         <div class="week-panel__header">
           <p class="col-heading col-heading--week">Week</p>
-          <button type="button" class="day-col__clear" id="clear-week-menu">Clear Week</button>
+          <div class="week-panel__actions">
+            <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>
+            <button type="button" class="day-col__clear" id="clear-week-menu">Clear Week</button>
+          </div>
         </div>
         <section class="week-grid" id="week-grid" aria-label="Week"></section>
       </div>
@@ -66,6 +69,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/planner.js?v=11"></script>
+  <script type="module" src="js/planner.js?v=12"></script>
 </body>
 </html>
