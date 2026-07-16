@@ -1424,11 +1424,14 @@ bootMenuPlannerAccess(async (pkg) => {
   const stack = document.getElementById('food-stack');
   if (gate) {
     gate.hidden = false;
-    const errorEl = gate.querySelector('#access-error');
-    if (errorEl) {
-      errorEl.textContent = 'Something went wrong loading the menu planner. Refresh and try again.';
-      errorEl.hidden = false;
+    const messageEl = gate.querySelector('#access-error-message');
+    if (messageEl) {
+      messageEl.textContent = 'Something went wrong loading the menu planner. Refresh and try again.';
     }
+    const emailScreen = gate.querySelector('#access-screen-email');
+    const errorScreen = gate.querySelector('#access-screen-error');
+    if (emailScreen) emailScreen.hidden = true;
+    if (errorScreen) errorScreen.hidden = false;
   }
   if (stack) {
     stack.innerHTML = '<p class="food-stack__error">Could not load foods. Open via a local server from the repo root.</p>';

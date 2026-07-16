@@ -22,6 +22,12 @@ export const CREATOR_ENTRY_URL = CREATOR_CHECKOUT_URL;
 export const PROGRAM_REPORT_URL = `${CREATOR_HOST_ORIGIN}/program-report/`;
 export const MENUPLANNER_URL = `${CREATOR_HOST_ORIGIN}/menuplanner/`;
 
+/** Desktop questionnaire — start a new program */
+export const DESKTOP_PROGRAM_START_URL = QUESTIONNAIRE_WELCOME_URL;
+
+/** Desktop checkout resume — plan-ready paywall after questionnaire */
+export const DESKTOP_CHECKOUT_URL = CREATOR_CHECKOUT_URL;
+
 /** @deprecated Use MENUPLANNER_URL */
 export const MEALPLANNER_URL = MENUPLANNER_URL;
 export const MYPLAN_URL = `${CREATOR_HOST_ORIGIN}/myplan/`;

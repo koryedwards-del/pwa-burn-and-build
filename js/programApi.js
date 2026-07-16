@@ -41,6 +41,7 @@ function apiFailure(res, data, fallback) {
     ok: false,
     status: res.status,
     saved: !!data.saved,
+    programId: data.programId || null,
     message: data.message || fallback,
   };
 }
@@ -80,6 +81,18 @@ export async function fetchProgramPaymentStatus(email, programId) {
     return data;
   } catch {
     return { ok: false, paid: false, message: 'Network error checking payment status.' };
+  }
+}
+
+export async function fetchProgramResumeCheckout(email) {
+  try {
+    const { res, data } = await fetchJson(
+      apiUrl(`/api/programs/resume-checkout?email=${encodeURIComponent(normalizeEmail(email))}`)
+    );
+    if (!res.ok) return apiFailure(res, data, 'Could not load your program for checkout.');
+    return data;
+  } catch {
+    return { ok: false, message: 'Network error loading checkout.' };
   }
 }
 

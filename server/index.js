@@ -354,6 +354,34 @@ app.get('/api/programs/saved', (req, res) => {
   });
 });
 
+app.get('/api/programs/resume-checkout', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+
+  const meta = getLatestProgramMeta(email);
+  if (!meta) {
+    res.status(404).json({ ok: false, message: 'No program saved for this email.' });
+    return;
+  }
+
+  const pkg = getLatestProgram(email);
+  if (!pkg) {
+    res.status(404).json({ ok: false, message: 'No program saved for this email.' });
+    return;
+  }
+
+  res.json({
+    ok: true,
+    email,
+    programId: meta.id,
+    programPaid: isProgramPaid(email, meta.id),
+    package: pkg,
+  });
+});
+
 app.get('/api/programs/payment-status', (req, res) => {
   const email = normalizeEmail(req.query.email);
   const programId = String(req.query.programId || '').trim();
@@ -385,7 +413,11 @@ app.get('/api/programs', (req, res) => {
     res.status(result.status).json({
       ok: false,
       message: result.message,
-      ...(result.saved ? { saved: true, programCount: result.programCount } : {}),
+      ...(result.saved ? {
+        saved: true,
+        programCount: result.programCount,
+        programId: result.programId || null,
+      } : {}),
     });
     return;
   }
@@ -410,7 +442,11 @@ app.get('/api/programs/history', (req, res) => {
     res.status(result.status).json({
       ok: false,
       message: result.message,
-      ...(result.saved ? { saved: true, programCount: result.programCount } : {}),
+      ...(result.saved ? {
+        saved: true,
+        programCount: result.programCount,
+        programId: result.programId || null,
+      } : {}),
     });
     return;
   }

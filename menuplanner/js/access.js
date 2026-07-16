@@ -1,11 +1,14 @@
 import { persistProgramBridge, loadProgramBridge } from '../../js/programBridgeHandoff.js';
 import {
   fetchProgramFromServer,
+  fetchProgramResumeCheckout,
   getAppEmail,
   isValidEmail,
   persistAppEmail,
 } from '../../js/programApi.js';
-import { CREATOR_CHECKOUT_URL, QUESTIONNAIRE_WELCOME_URL } from '../../js/siteUrls.js';
+import { DESKTOP_CHECKOUT_URL } from '../../js/siteUrls.js';
+
+const ACCESS_SCREENS = ['email', 'unpaid', 'missing', 'error'];
 
 function programReady(pkg) {
   return !!(pkg?.intake?.leanBodyMass && pkg?.plan?.mealSlots?.length);
@@ -19,33 +22,44 @@ function plannerRoot() {
   return document.getElementById('planner-root');
 }
 
-function showAccessGate({ email = '', error = '', hint = '' } = {}) {
+function showAccessScreen(screen, { email = '' } = {}) {
   const gate = gateEl();
   const root = plannerRoot();
   if (!gate) return;
   gate.hidden = false;
   if (root) root.hidden = true;
 
-  const form = gate.querySelector('#access-form');
-  const input = gate.querySelector('#access-email');
-  const errorEl = gate.querySelector('#access-error');
-  const hintEl = gate.querySelector('#access-hint');
-  const submit = gate.querySelector('#access-submit');
+  ACCESS_SCREENS.forEach((id) => {
+    const panel = gate.querySelector(`#access-screen-${id}`);
+    if (panel) panel.hidden = id !== screen;
+  });
 
-  if (input) input.value = email;
-  if (errorEl) {
-    errorEl.textContent = error;
-    errorEl.hidden = !error;
+  if (screen === 'email') {
+    const input = gate.querySelector('#access-email');
+    const errorEl = gate.querySelector('#access-form-error');
+    const submit = gate.querySelector('#access-submit');
+    if (input) input.value = email;
+    if (errorEl) {
+      errorEl.textContent = '';
+      errorEl.hidden = true;
+    }
+    if (submit) {
+      submit.disabled = false;
+      submit.textContent = 'Continue';
+    }
+    input?.focus();
   }
-  if (hintEl) {
-    hintEl.innerHTML = hint;
-    hintEl.hidden = !hint;
+
+  if (screen === 'unpaid') {
+    const label = gate.querySelector('#access-unpaid-email');
+    if (label) label.textContent = email;
+    gate.dataset.pendingEmail = email;
   }
-  if (submit) {
-    submit.disabled = false;
-    submit.textContent = 'Open menu planner';
+
+  if (screen === 'missing') {
+    const label = gate.querySelector('#access-missing-email');
+    if (label) label.textContent = email;
   }
-  input?.focus();
 }
 
 function showPlanner() {
@@ -59,26 +73,13 @@ function setAccessBusy(busy) {
   const submit = gateEl()?.querySelector('#access-submit');
   if (!submit) return;
   submit.disabled = busy;
-  submit.textContent = busy ? 'Opening…' : 'Open menu planner';
+  submit.textContent = busy ? 'Checking…' : 'Continue';
 }
 
-function accessMessage(result, email) {
-  if (result.status === 403 && result.saved) {
-    return {
-      error: 'Your program is saved but checkout is not complete yet.',
-      hint: `<a class="mp-access__link" href="${CREATOR_CHECKOUT_URL}">Complete purchase</a> to unlock the menu planner for <strong>${email}</strong>.`,
-    };
-  }
-  if (result.status === 404 || (result.message && result.message.includes('No diet'))) {
-    return {
-      error: 'No program found for this email.',
-      hint: `<a class="mp-access__link" href="${QUESTIONNAIRE_WELCOME_URL}">Create your diet</a> to get started.`,
-    };
-  }
-  return {
-    error: result.message || 'Could not load your program. Check your connection and try again.',
-    hint: '',
-  };
+function resolveAccessScreen(result) {
+  if (result.status === 403 && result.saved) return 'unpaid';
+  if (result.status === 404 || (result.message && result.message.includes('No diet'))) return 'missing';
+  return 'error';
 }
 
 async function loadProgramForEmail(email) {
@@ -88,26 +89,62 @@ async function loadProgramForEmail(email) {
   }
   const result = await fetchProgramFromServer(normalized);
   if (!result.ok || !result.package) {
-    return result;
+    return { ...result, email: normalized };
   }
   if (!programReady(result.package)) {
-    return { ok: false, message: 'Your program is incomplete. Create a new diet to continue.' };
+    return { ok: false, status: 404, message: 'Your program is incomplete.', email: normalized };
   }
   persistProgramBridge(result.package);
   return { ok: true, package: result.package, email: normalized };
 }
 
-function bindAccessForm(onProgramReady) {
-  const form = gateEl()?.querySelector('#access-form');
-  if (!form || form.dataset.bound === '1') return;
-  form.dataset.bound = '1';
+async function resumeDesktopCheckout(email) {
+  const normalized = persistAppEmail(email);
+  const button = gateEl()?.querySelector('#access-unpaid-checkout');
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Opening checkout…';
+  }
 
-  form.addEventListener('submit', async (event) => {
+  const result = await fetchProgramResumeCheckout(normalized);
+  if (!result.ok || !result.package) {
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Complete purchase — $149';
+    }
+    const message = result.message || 'Could not load your program for checkout.';
+    const errorEl = gateEl()?.querySelector('#access-error-message');
+    if (errorEl) errorEl.textContent = message;
+    showAccessScreen('error');
+    return;
+  }
+
+  persistProgramBridge(result.package);
+  try {
+    sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
+    sessionStorage.setItem('bnb_browse_mode', '1');
+  } catch (err) {
+    console.error(err);
+  }
+  window.location.href = DESKTOP_CHECKOUT_URL;
+}
+
+function bindAccessGate(onProgramReady) {
+  const gate = gateEl();
+  if (!gate || gate.dataset.bound === '1') return;
+  gate.dataset.bound = '1';
+
+  gate.querySelector('#access-form')?.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const input = form.querySelector('#access-email');
+    const input = gate.querySelector('#access-email');
     const email = String(input?.value || '').trim();
+    const errorEl = gate.querySelector('#access-form-error');
+
     if (!isValidEmail(email)) {
-      showAccessGate({ email, error: 'Enter a valid email address.' });
+      if (errorEl) {
+        errorEl.textContent = 'Enter a valid email address.';
+        errorEl.hidden = false;
+      }
       return;
     }
 
@@ -116,18 +153,52 @@ function bindAccessForm(onProgramReady) {
     setAccessBusy(false);
 
     if (!result.ok) {
-      const { error, hint } = accessMessage(result, email);
-      showAccessGate({ email, error, hint });
+      if (result.message === 'Enter a valid email address.') {
+        if (errorEl) {
+          errorEl.textContent = result.message;
+          errorEl.hidden = false;
+        }
+        return;
+      }
+      if (resolveAccessScreen(result) === 'error') {
+        const messageEl = gate.querySelector('#access-error-message');
+        if (messageEl) {
+          messageEl.textContent = result.message || 'Check your connection and try again.';
+        }
+      }
+      showAccessScreen(resolveAccessScreen(result), { email: result.email || email });
       return;
     }
 
     showPlanner();
     await onProgramReady(result.package);
   });
+
+  gate.querySelector('#access-unpaid-checkout')?.addEventListener('click', () => {
+    const email = gate.dataset.pendingEmail || getAppEmail();
+    if (!isValidEmail(email)) {
+      showAccessScreen('email');
+      return;
+    }
+    resumeDesktopCheckout(email).catch((err) => {
+      console.error(err);
+      const messageEl = gate.querySelector('#access-error-message');
+      if (messageEl) messageEl.textContent = 'Something went wrong opening checkout. Try again.';
+      showAccessScreen('error');
+    });
+  });
+
+  gate.querySelectorAll('[data-access-screen]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const screen = button.getAttribute('data-access-screen');
+      const email = getAppEmail();
+      showAccessScreen(screen, { email });
+    });
+  });
 }
 
 export async function bootMenuPlannerAccess(onProgramReady) {
-  bindAccessForm(onProgramReady);
+  bindAccessGate(onProgramReady);
 
   const params = new URLSearchParams(location.search);
   const queryEmail = String(params.get('email') || '').trim();
@@ -146,9 +217,9 @@ export async function bootMenuPlannerAccess(onProgramReady) {
   }
 
   const prefilled = queryEmail || getAppEmail();
-  showAccessGate({ email: isValidEmail(prefilled) ? prefilled : '' });
+  showAccessScreen('email', { email: isValidEmail(prefilled) ? prefilled : '' });
 }
 
 export function openAccessGate() {
-  showAccessGate({ email: getAppEmail() });
+  showAccessScreen('email', { email: getAppEmail() });
 }
