@@ -358,7 +358,7 @@ export function defaultOnboardingForm(profile) {
 export function profileFromForm(form) {
   const weight = Number(form.weightText);
   const fatPercent = Number(form.fatPercentText);
-  const lbm = weight * (1 - fatPercent / 100);
+  const lbm = Math.round(weight * (1 - fatPercent / 100) * 10) / 10;
   const intensity = computeWorkIntensity(form.workPhysical, form.workStress);
   return {
     preferredName: form.preferredName.trim().replace(/\b\w/g, (c) => c.toUpperCase()),

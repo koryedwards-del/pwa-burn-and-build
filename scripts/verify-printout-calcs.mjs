@@ -1,8 +1,72 @@
 /** Golden 5-page seminar printouts — regression check for burnEngine.js */
-import { computePlan } from '../js/burnEngine.js';
-import { computeDietEightWeekProjection, computeTodayBodyComposition, desirableLeanBodyMassLbs } from '../js/bodyCompositionAnalysis.js';
+import { computePlan, PROJECTION_BF_FLOOR } from '../js/burnEngine.js';
+import {
+  computeDietEightWeekProjection,
+  computeDietProjectionTimeline,
+  computeTodayBodyComposition,
+  desirableLeanBodyMassLbs,
+} from '../js/bodyCompositionAnalysis.js';
+import { buildProgramPackage } from '../js/programPackage.js';
 
 const rnd = (x) => Math.round(x);
+
+/** Kristi Warner — seminar printout (davmc). LBM 113.7, work 1.5a, 3 wt / 0 cardio / 3 fat-burn. */
+const KRISTI_INTAKE = {
+  lbm: 113.7,
+  weight: 184,
+  bf: 38.22,
+  gender: 'female',
+  heightIn: 66,
+  intensity: 1.5,
+  weightTrainingHours: 3,
+  cardioHours: 0,
+  fatBurningHours: 3,
+};
+
+const KRISTI_FORM = {
+  preferredName: 'Kristi Warner',
+  email: 'preview@example.com',
+  sex: 'female',
+  heightFeet: '5',
+  heightInchesPart: '6',
+  age: 28,
+  weightText: '184',
+  fatPercentText: '38.22',
+  fatSource: 'recent',
+  workPhysical: 'sitting',
+  workStress: 'comfortable',
+  weightTrainingHours: 3,
+  cardioHours: 0,
+  fatBurningHours: 3,
+  wakeTime: '06:00',
+  remindersEnabled: false,
+  newsletterOptIn: false,
+  lowActivities: [],
+};
+
+const KRISTI_PDF = {
+  servings: [9, 9, 3, 18],
+  maintain: [71, 219, 115, 2192],
+  reduce: [71, 219, 44, 1552],
+  rmr: [44, 78, 80, 1211],
+  workday: [25, 90, 27, 702],
+  weight: [9, 96, 3, 448],
+  cardio: [3, 88, 16, 509],
+  fatburn: [5, 54, 22, 436],
+  today: ['61.78', '38.22', '113.7', '70.3', '184.0'],
+  proj: [11, 1.3, 59.3, 173, 34.29, 65.71],
+  desirable: 106,
+  capped: false,
+  timeline: [
+    ['Current', '38.22%', '184 lbs', null],
+    ['8 weeks', '34.28%', '173.0 lbs', null],
+    ['16 weeks', '29.81%', '162.0 lbs', 'Average'],
+    ['24 weeks', '24.70%', '151.0 lbs', null],
+    ['32 weeks', '18.79%', '140.0 lbs', null],
+    ['40 weeks', '11.86%', '129.0 lbs', null],
+    ['43.7 weeks', '8.95%', '123.9 lbs', 'Showtime'],
+  ],
+};
 
 function verifyCase(name, intake, pdf) {
   const plan = computePlan(intake);
@@ -56,6 +120,36 @@ function verifyCase(name, intake, pdf) {
     errors.push(`capped: got ${proj.cappedByFloor}, want ${pdf.capped}`);
   }
 
+  if (pdf.timeline) {
+    const timeline = computeDietProjectionTimeline({
+      gender: intake.gender,
+      weightLbs: intake.weight,
+      leanBodyMass: intake.lbm,
+      bodyFatPercent: intake.bf,
+      maintainTotalCalories: f.T7,
+      reduceTotalCalories: f.T1,
+    });
+    if (!timeline.valid) {
+      errors.push('timeline: invalid');
+    } else {
+      expect('timeline rows', timeline.rows.map((row) => [
+        row.timeline,
+        row.bodyFatDisplay,
+        row.weightDisplay,
+        row.badge,
+      ]), pdf.timeline);
+      for (const row of timeline.rows) {
+        if (row.isCurrent || row.isShowtime) continue;
+        const floor = intake.gender === 'female'
+          ? PROJECTION_BF_FLOOR.female
+          : PROJECTION_BF_FLOOR.male;
+        if (row.bodyFat < floor) {
+          errors.push(`timeline guardrail: ${row.timeline} body fat ${row.bodyFat}% below floor`);
+        }
+      }
+    }
+  }
+
   if (errors.length) {
     console.error(`FAIL ${name}`);
     errors.forEach((e) => console.error(`  ${e}`));
@@ -65,17 +159,38 @@ function verifyCase(name, intake, pdf) {
   return true;
 }
 
+function verifyKristiPackage() {
+  const pkg = buildProgramPackage(KRISTI_FORM);
+  const errors = [];
+  const expect = (label, actual, expected) => {
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      errors.push(`${label}: got ${JSON.stringify(actual)}, want ${JSON.stringify(expected)}`);
+    }
+  };
+
+  expect('leanBodyMass', pkg.intake.leanBodyMass, KRISTI_INTAKE.lbm);
+  expect('workIntensity', pkg.intake.workIntensity, KRISTI_INTAKE.intensity);
+  expect('weightTrainingHours', pkg.intake.weightTrainingHours, KRISTI_INTAKE.weightTrainingHours);
+  expect('cardioHours', pkg.intake.cardioHours, KRISTI_INTAKE.cardioHours);
+  expect('fatBurningHours', pkg.intake.fatBurningHours, KRISTI_INTAKE.fatBurningHours);
+
+  const f = pkg.plan.formula;
+  expect('maintain total', rnd(f.T7), KRISTI_PDF.maintain[3]);
+  expect('reduce total', rnd(f.T1), KRISTI_PDF.reduce[3]);
+  expect('protein servings', pkg.plan.servings.protein, KRISTI_PDF.servings[0]);
+
+  if (errors.length) {
+    console.error('FAIL Kristi Warner package');
+    errors.forEach((e) => console.error(`  ${e}`));
+    return false;
+  }
+  console.log('OK Kristi Warner package');
+  return true;
+}
+
 const ok = [
-  verifyCase('Kristi Warner', {
-    lbm: 113.7, weight: 184, bf: 38.22, gender: 'female', heightIn: 66,
-    intensity: 1.5, weightTrainingHours: 3, cardioHours: 0, fatBurningHours: 3,
-  }, {
-    servings: [9, 9, 3, 18], maintain: [71, 219, 115, 2192], reduce: [71, 219, 44, 1552],
-    rmr: [44, 78, 80, 1211], workday: [25, 90, 27, 702], weight: [9, 96, 3, 448],
-    cardio: [3, 88, 16, 509], fatburn: [5, 54, 22, 436],
-    today: ['61.78', '38.22', '113.7', '70.3', '184.0'],
-    proj: [11, 1.3, 59.3, 173, 34.29, 65.71], desirable: 106, capped: false,
-  }),
+  verifyKristiPackage(),
+  verifyCase('Kristi Warner', KRISTI_INTAKE, KRISTI_PDF),
   verifyCase('Dustin Kinzler', {
     lbm: 175.3, weight: 253, bf: 30.72, gender: 'male', heightIn: 68,
     intensity: 2.0, weightTrainingHours: 0, cardioHours: 0.75, fatBurningHours: 3.5,

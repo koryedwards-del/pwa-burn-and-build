@@ -11,7 +11,7 @@ import { extraFatLines, servingsGridRows } from '../../js/servingsPrintout.js';
 
 const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 
-/** Sample intake for design review — seminar-style client (no questionnaire). */
+/** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
 const PREVIEW_FORM = {
   preferredName: 'Kristi',
   email: 'preview@example.com',
