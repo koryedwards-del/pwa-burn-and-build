@@ -13,8 +13,8 @@
 }
 
 .pb-aside {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr 1fr;
   min-width: 0;
   position: sticky;
   top: 24px;
@@ -24,19 +24,18 @@
 }
 
 .pb-aside > nav {
-  flex-shrink: 0;
+  grid-row: 1;
 }
 
 .pb-aside__dock {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
+  grid-row: 3;
+  align-self: start;
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-height: calc(50% - 12px);
+  min-height: 0;
+  max-height: 100%;
   overflow-y: auto;
 }
 
@@ -73,7 +72,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 42vh;
+  max-height: min(42vh, 100%);
   overflow: auto;
 }
 
@@ -193,7 +192,7 @@
   border-radius: 6px;
   background: transparent;
   color: var(--muted);
-  font: inherit;
+  font-family: Oswald, system-ui, sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -204,8 +203,9 @@
   -webkit-appearance: none;
 }
 
+a.pb-nav__btn,
 button.pb-nav__btn {
-  font-family: inherit;
+  font-family: Oswald, system-ui, sans-serif;
 }
 
 a.pb-nav__btn {
