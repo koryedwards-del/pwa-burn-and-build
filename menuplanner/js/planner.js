@@ -1524,11 +1524,14 @@ function buildAssistantDocumentHtml() {
       text-transform: uppercase;
       color: #111;
       padding-bottom: 4px;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
       border-bottom: 2px solid #fdc500;
     }
     .agenda-meal {
-      margin-bottom: 4px;
+      margin-bottom: 3.5rem;
+    }
+    .agenda-meal:last-child {
+      margin-bottom: 0;
     }
     .agenda-meal-head {
       font-family: Oswald, system-ui, sans-serif;
@@ -1572,6 +1575,9 @@ function buildAssistantDocumentHtml() {
       .assistant-toolbar { display: none; }
       body.view-shopping { padding: 0; }
       body.view-week { padding: 0; }
+      body.view-week .agenda-meal {
+        margin-bottom: 4.25rem;
+      }
       .assistant-panel[hidden] { display: none !important; }
     }
   </style>
