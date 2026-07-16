@@ -402,18 +402,15 @@ function saveMealFromDay(mealSlotId, name) {
   const trimmed = name.trim();
   if (!trimmed) return;
 
-  const fitted = fitWeekGridLabel(trimmed);
-  if (!fitted) return;
-
   const meal = {
-    id: mealIdFromName(fitted),
-    name: fitted,
+    id: mealIdFromName(trimmed),
+    name: trimmed,
     pickCount: 1,
     items: daySlotToMealItems(mealSlotId),
   };
 
   savedMeals.push(meal);
-  mealSlotMeta(mealSlotId).mealName = fitted;
+  mealSlotMeta(mealSlotId).mealName = trimmed;
   mealSlotMeta(mealSlotId).savedMealId = meal.id;
   renderWeekGrid();
   renderDayColumn();
@@ -425,7 +422,7 @@ function openSaveMealDialog(mealSlotId) {
   const dialog = document.getElementById('save-meal-dialog');
   const input = document.getElementById('save-meal-name');
   pendingSaveDaySlotId = mealSlotId;
-  input.value = fitWeekGridLabel(mealSlotMeta(mealSlotId).mealName || '');
+  input.value = mealSlotMeta(mealSlotId).mealName || '';
   dialog.showModal();
   input.focus();
   input.select();
@@ -628,7 +625,7 @@ function weekGridLabelReferenceCell() {
 
 function ensureWeekGridLabelProbe() {
   if (!weekGridLabelProbe) {
-    weekGridLabelProbe = document.createElement('span');
+    weekGridLabelProbe = document.createElement('div');
     weekGridLabelProbe.className = 'mini-card week-matrix__cell';
     weekGridLabelProbe.setAttribute('aria-hidden', 'true');
     Object.assign(weekGridLabelProbe.style, {
@@ -638,8 +635,8 @@ function ensureWeekGridLabelProbe() {
       visibility: 'hidden',
       pointerEvents: 'none',
       whiteSpace: 'nowrap',
-      width: 'auto',
-      maxWidth: 'none',
+      overflow: 'hidden',
+      display: 'block',
     });
     document.body.appendChild(weekGridLabelProbe);
   }
@@ -654,22 +651,23 @@ function syncWeekGridLabelProbeStyles() {
   probe.style.font = style.font;
   probe.style.letterSpacing = style.letterSpacing;
   probe.style.textTransform = style.textTransform;
-}
-
-function measureWeekGridLabelWidth(text) {
-  syncWeekGridLabelProbeStyles();
-  const probe = ensureWeekGridLabelProbe();
-  probe.textContent = text;
-  return probe.getBoundingClientRect().width;
+  probe.style.boxSizing = style.boxSizing;
+  probe.style.padding = style.padding;
+  probe.style.border = style.border;
 }
 
 function weekGridLabelMaxWidth() {
   const cell = weekGridLabelReferenceCell();
   if (!cell) return null;
-  const style = getComputedStyle(cell);
-  const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-  const borderX = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
-  return Math.max(0, cell.clientWidth - paddingX - borderX);
+  return cell.getBoundingClientRect().width;
+}
+
+function weekGridLabelFits(text, maxWidth) {
+  syncWeekGridLabelProbeStyles();
+  const probe = ensureWeekGridLabelProbe();
+  probe.style.width = `${maxWidth}px`;
+  probe.textContent = text;
+  return probe.scrollWidth <= probe.clientWidth;
 }
 
 function fitWeekGridLabel(text) {
@@ -678,13 +676,13 @@ function fitWeekGridLabel(text) {
 
   const maxWidth = weekGridLabelMaxWidth();
   if (maxWidth == null || maxWidth <= 0) return raw;
-  if (measureWeekGridLabelWidth(raw) <= maxWidth) return raw;
+  if (weekGridLabelFits(raw, maxWidth)) return raw;
 
   let lo = 0;
   let hi = raw.length;
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2);
-    if (measureWeekGridLabelWidth(raw.slice(0, mid)) <= maxWidth) {
+    if (weekGridLabelFits(raw.slice(0, mid), maxWidth)) {
       lo = mid;
     } else {
       hi = mid - 1;
@@ -696,21 +694,12 @@ function fitWeekGridLabel(text) {
   return raw.charAt(0);
 }
 
-function syncSaveMealNameInput(input) {
-  if (!input) return;
-  const raw = input.value;
-  const fitted = fitWeekGridLabel(raw);
-  if (fitted === raw) return;
-  const selStart = input.selectionStart ?? fitted.length;
-  input.value = fitted;
-  const pos = Math.min(selStart, fitted.length);
-  input.setSelectionRange(pos, pos);
-}
-
 function weekMealLabel(weekDay, mealSlotId) {
   const meta = mealSlotMeta(mealSlotId, weekDay);
   if (meta.mealName) {
-    return { text: meta.mealName, empty: false };
+    const fullText = meta.mealName;
+    const text = fitWeekGridLabel(fullText);
+    return { text, fullText, empty: false };
   }
 
   const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
@@ -763,8 +752,9 @@ function renderWeekGrid() {
       >${escapeHtml(day.label)}</div>
     `;
     const mealCells = WEEK_GRID_MEALS.map((mealSlotId) => {
-      const { text, empty } = weekMealLabel(day.id, mealSlotId);
-      const titleAttr = empty ? '' : ` title="${escapeHtml(text)}"`;
+      const { text, fullText, empty } = weekMealLabel(day.id, mealSlotId);
+      const tooltip = !empty && fullText && fullText !== text ? fullText : text;
+      const titleAttr = empty ? '' : ` title="${escapeHtml(tooltip)}"`;
       const dropAttrs = acceptsSavedMealDrop(mealSlotId) ? ' data-week-meal-drop' : '';
       return `
         <div
@@ -1222,7 +1212,7 @@ function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true 
     }
   });
   setFatSelections(mealSlotId, fatItems, weekDay);
-  mealSlotMeta(mealSlotId, weekDay).mealName = fitWeekGridLabel(meal.name);
+  mealSlotMeta(mealSlotId, weekDay).mealName = meal.name;
   mealSlotMeta(mealSlotId, weekDay).savedMealId = meal.id;
   if (trackPick) meal.pickCount += 1;
   renderWeekGrid();
@@ -1318,15 +1308,6 @@ function initSaveMealDialog() {
   const form = document.getElementById('save-meal-form');
   const input = document.getElementById('save-meal-name');
   const cancel = document.getElementById('save-meal-cancel');
-
-  input.addEventListener('input', () => {
-    syncSaveMealNameInput(input);
-  });
-
-  window.addEventListener('resize', () => {
-    if (!dialog.open) return;
-    syncSaveMealNameInput(input);
-  });
 
   cancel.addEventListener('click', () => {
     pendingSaveDaySlotId = null;
