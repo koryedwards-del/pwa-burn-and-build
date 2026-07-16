@@ -1,6 +1,9 @@
 /** Seminar page 4 — Food Plan printout (8-week table + macro grid). */
 
-import { computeDietEightWeekProjection } from './bodyCompositionAnalysis.js';
+import {
+  computeDietEightWeekProjection,
+  computeDietProjectionTimeline,
+} from './bodyCompositionAnalysis.js';
 
 function phpRound(x) {
   return Math.floor(Number(x) + 0.5);
@@ -47,6 +50,22 @@ export function eightWeekProjectionFromPackage(pkg) {
     maintainTotalCalories: summary.maintainTotalCals,
     reduceTotalCalories: summary.reduceTotalCals,
     gender: String(intake.sex || '').toLowerCase().startsWith('f') ? 'female' : 'male',
+  });
+}
+
+export function projectionTimelineFromPackage(pkg) {
+  const intake = pkg?.intake;
+  const summary = pkg?.plan?.summary;
+  if (!intake?.leanBodyMass || !intake?.totalWeight || !intake?.fatPercent) return null;
+  if (!summary?.maintainTotalCals || !summary?.reduceTotalCals) return null;
+
+  return computeDietProjectionTimeline({
+    gender: String(intake.sex || '').toLowerCase().startsWith('f') ? 'female' : 'male',
+    weightLbs: intake.totalWeight,
+    leanBodyMass: intake.leanBodyMass,
+    bodyFatPercent: intake.fatPercent,
+    maintainTotalCalories: summary.maintainTotalCals,
+    reduceTotalCalories: summary.reduceTotalCals,
   });
 }
 

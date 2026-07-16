@@ -1,20 +1,11 @@
-import {
-  analyzeLeanBodyMass,
-  computeTodayBodyComposition,
-} from '../../js/bodyCompositionAnalysis.js';
+import { computeTodayBodyComposition } from '../../js/bodyCompositionAnalysis.js';
 import { buildProgramPackage } from '../../js/programPackage.js';
-import {
-  aceRangeHeaders,
-  aceVerdictSentence,
-  desirableLeanLine,
-  lbmCongratulationsLine,
-  weightGoalBandsByLbm,
-} from '../../js/leanBodyAnalysisPrintout.js';
 import {
   eightWeekProjectionFromPackage,
   exerciseHoursSummary,
   formatCalories,
   macroTableRows,
+  projectionTimelineFromPackage,
 } from '../../js/foodPlanPrintout.js';
 import { extraFatLines, servingsGridRows } from '../../js/servingsPrintout.js';
 
@@ -44,9 +35,8 @@ const PREVIEW_FORM = {
 
 const PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1 },
-  { id: 'lbm', label: 'Lean body analysis', step: 2 },
-  { id: 'foodplan', label: 'Food plan', step: 3 },
-  { id: 'servings', label: 'Servings', step: 4 },
+  { id: 'foodplan', label: 'Food plan', step: 2 },
+  { id: 'servings', label: 'Servings', step: 3 },
 ];
 
 let activePage = 0;
@@ -89,9 +79,8 @@ function wantsPreviewFromUrl() {
 
 function initialPageFromUrl() {
   const page = new URLSearchParams(location.search).get('page');
-  if (page === '2' || page === 'lbm') return 1;
-  if (page === '3' || page === 'food' || page === 'foodplan') return 2;
-  if (page === '4' || page === 'servings') return 3;
+  if (page === '2' || page === 'food' || page === 'foodplan' || page === 'lbm') return 1;
+  if (page === '3' || page === '4' || page === 'servings') return 2;
   return 0;
 }
 
@@ -103,11 +92,6 @@ function loadPreviewProgram() {
   programPackage = buildPreviewProgram();
   persistProgram(programPackage);
   showPage(initialPageFromUrl());
-}
-
-function genderKey(sex) {
-  const s = String(sex || '').toLowerCase();
-  return s.startsWith('f') ? 'female' : 'male';
 }
 
 function formatReportDate(iso) {
@@ -173,29 +157,20 @@ function renderWelcome(pkg) {
           Analysis, your body composition history and the last two pages are your custom designed diet.
         </p>
 
-        <h3>Lean Body Analysis</h3>
-        <p>
-          Page two is the results of your body composition test. Although very few people want to know how fat
-          they are, all of them want to how to lose fat. Our Lean Body Analysis page includes a breakdown of
-          your current body composition with an emphasis on the good stuff. LBM (lean body mass) is used by
-          the computer to calculate your metabolic rate (RMR). In addition, the Lean Body Analysis projects
-          appropriate weight goals based on your current lean body mass.
-        </p>
-
         <h3>Food Plan</h3>
         <p>
-          Page four is your custom-designed diet. How much food you need each day depends on how much LBM
+          Page two is your custom-designed diet. How much food you need each day depends on how much LBM
           you have, your job, lifestyle and the type and amount of exercise you participate in. Based on the
           information you provide, this diet gives you the amount of protein, carbohydrates and fat you need per
-          day to lose fat. It also tells you how much fat you can lose in eight weeks. And it shows you what your
-          body requires at rest (your resting metabolic rate), for your workday and for one hour of each type of
-          exercise.
+          day to lose fat. It also tells you how much fat you can lose in eight weeks — and projects where you
+          can go over time. And it shows you what your body requires at rest (your resting metabolic rate), for
+          your workday and for one hour of each type of exercise.
         </p>
 
         <h3>Servings</h3>
         <p>
-          Page five is the servings page. No need to count calories or macros in this diet. The computer breaks
-          down all the information from the table on page four and shows you the number of servings you need
+          Page three is the servings page. No need to count calories or macros in this diet. The computer breaks
+          down all the information from the table on page two and shows you the number of servings you need
           daily to have maximum strength &amp; energy and to lose fat as fast as possible.
         </p>
 
@@ -207,116 +182,29 @@ function renderWelcome(pkg) {
       </article>
 
       <footer class="r-actions">
-        <span class="r-note">Four-page program report — then meal planner.</span>
-        <button type="button" class="r-btn r-btn--primary" data-report-next>Lean body analysis →</button>
+        <span class="r-note">Three-page program report — then menu planner.</span>
+        <button type="button" class="r-btn r-btn--primary" data-report-next>Food plan →</button>
       </footer>
     </section>
   `;
 }
 
-function renderLbmAnalysis(pkg) {
-  const intake = pkg.intake;
-  const gender = genderKey(intake.sex);
-  const today = computeTodayBodyComposition(intake);
-  const lbmAnalysis = analyzeLeanBodyMass({
-    gender,
-    heightInches: intake.heightInches,
-    leanBodyMass: intake.leanBodyMass,
-  });
-  const aceHeaders = aceRangeHeaders(gender);
-  const weightBands = weightGoalBandsByLbm(gender, intake.leanBodyMass);
-  const desirableLine = desirableLeanLine(gender, intake.heightInches);
-  const congratsLine = lbmCongratulationsLine(lbmAnalysis.atOrAbove);
-  const aceVerdict = aceVerdictSentence(gender, intake.fatPercent);
-
-  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
-  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
-  const heightIn = Math.round(Number(intake.heightInches) || 0);
-  const sex = gender === 'female' ? 'FEMALE' : 'MALE';
-  const thigh = intake.thighMm != null ? `${intake.thighMm} mm` : '— mm';
-  const waist = intake.waistMm != null ? `${intake.waistMm} mm` : '— mm';
-  const age = intake.age != null ? `${intake.age} years of experience` : '— years of experience';
-
-  return `
-    <section class="r-panel">
-      <div>
-        <p class="r-eyebrow">Page 2</p>
-        <h2 class="r-panel__title">Lean body analysis</h2>
-      </div>
-
-      <article class="r-doc">
-        <header class="r-doc__head">
-          <p class="r-doc__meta">
-            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
-          </p>
-        </header>
-
-        <h3>Lean Body Analysis</h3>
-        <p class="r-doc__stats-line">
-          Height: ${heightIn} inches Sex: ${sex} Thigh: ${thigh} Waist: ${waist} Age: ${age}
-        </p>
-
-        <p class="r-doc__today-label">--TODAY--</p>
-        <p class="r-doc__today-row">LEAN ${today.leanPct} % ${today.leanLbs} lbs.</p>
-        <p class="r-doc__today-row">FAT ${today.fatPct} % ${today.fatLbs} lbs.</p>
-        <p class="r-doc__today-row">TOTAL ${today.totalPct} % ${today.totalLbs} lbs.</p>
-
-        <table class="r-ace-table" aria-label="ACE body fat categories">
-          <thead>
-            <tr>
-              ${aceHeaders.map((row) => `<th scope="col">${row.label}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              ${aceHeaders.map((row) => `<td>${row.rangeLabel}</td>`).join('')}
-            </tr>
-          </tbody>
-        </table>
-
-        <p>${escapeHtml(aceVerdict)}</p>
-        <p>
-          How much fat is right for each individual is a personal choice. How you look in the mirror is the only
-          true judge of whether you have fat to lose. If you see more fat than you personally want, then exercise
-          and follow your this plan until you reach your desired goals.
-        </p>
-
-        ${desirableLine ? `<p>${escapeHtml(desirableLine)}</p>` : ''}
-        ${congratsLine ? `<p>${escapeHtml(congratsLine)}</p>` : ''}
-
-        <table class="r-ace-table r-ace-table--weights" aria-label="Weight goals by health category">
-          <thead>
-            <tr>
-              ${weightBands.map((band) => `<th scope="col">${escapeHtml(band.label)}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              ${weightBands.map((band) => `<td>${escapeHtml(band.display)}</td>`).join('')}
-            </tr>
-          </tbody>
-        </table>
-
-        <p>
-          Continue to monitor your body composition using Lean Body Analysis every 6 to 8 weeks to make sure
-          you are losing only fat and not lean! If you want to lose fat, do so by following this diet as closely as
-          you can. This plan allows you to lose all the fat you want to lose while increasing your strength &amp;
-          energy.
-        </p>
-      </article>
-
-      <footer class="r-actions">
-        <button type="button" class="r-btn r-btn--ghost" data-report-back>← Welcome</button>
-        <button type="button" class="r-btn r-btn--primary" data-report-next-food>Food plan →</button>
-      </footer>
-    </section>
-  `;
+function projectionTimelineRows(timeline) {
+  if (!timeline?.valid || !timeline.rows?.length) return '';
+  return timeline.rows.map((row) => `
+    <tr class="${row.isCurrent ? 'r-projection-current' : ''}">
+      <td>${escapeHtml(row.timeline)}</td>
+      <td>${escapeHtml(row.bodyFatDisplay)}${row.badge ? ` <span class="r-projection-badge">${escapeHtml(row.badge)}</span>` : ''}</td>
+      <td>${escapeHtml(row.weightDisplay)}</td>
+    </tr>
+  `).join('');
 }
 
 function renderFoodPlan(pkg) {
   const intake = pkg.intake;
   const today = computeTodayBodyComposition(intake);
   const projection = eightWeekProjectionFromPackage(pkg);
+  const timeline = projectionTimelineFromPackage(pkg);
   const hours = exerciseHoursSummary(intake);
   const macroRows = macroTableRows(pkg.plan?.formula, intake.workIntensity);
 
@@ -331,6 +219,8 @@ function renderFoodPlan(pkg) {
   const goalFatLbs = projection ? `${projection.endFatLbs.toFixed(1)} lbs.` : '—';
   const goalTotalPct = '100.00%';
   const goalTotalLbs = projection ? `${projection.endWeight.toFixed(1)} lbs.` : '—';
+
+  const timelineBody = projectionTimelineRows(timeline);
 
   const macroBody = macroRows.map((row) => {
     if (row.spacer) {
@@ -352,7 +242,7 @@ function renderFoodPlan(pkg) {
   return `
     <section class="r-panel">
       <div>
-        <p class="r-eyebrow">Page 3</p>
+        <p class="r-eyebrow">Page 2</p>
         <h2 class="r-panel__title">Food plan</h2>
       </div>
 
@@ -409,6 +299,21 @@ function renderFoodPlan(pkg) {
           Gaining lean weight will increase your strength and energy and offset your fat loss.
         </p>
 
+        ${timelineBody ? `
+        <table class="r-projection-table" aria-label="Body fat and weight projection timeline">
+          <thead>
+            <tr>
+              <th scope="col">Timeline</th>
+              <th scope="col">Body Fat %</th>
+              <th scope="col">Bodyweight</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${timelineBody}
+          </tbody>
+        </table>
+        ` : ''}
+
         <p>
           How much food you need each day depends on how much LBM you have. Also, it depends on your
           activity level and the type and amount of exercise you participate in. Based on the information you
@@ -443,7 +348,7 @@ function renderFoodPlan(pkg) {
       </article>
 
       <footer class="r-actions">
-        <button type="button" class="r-btn r-btn--ghost" data-report-back-lbm>← Lean body analysis</button>
+        <button type="button" class="r-btn r-btn--ghost" data-report-back>← Welcome</button>
         <button type="button" class="r-btn r-btn--primary" data-report-next-servings>Servings →</button>
       </footer>
     </section>
@@ -482,7 +387,7 @@ function renderServings(pkg) {
   return `
     <section class="r-panel">
       <div>
-        <p class="r-eyebrow">Page 4</p>
+        <p class="r-eyebrow">Page 3</p>
         <h2 class="r-panel__title">Servings</h2>
       </div>
 
@@ -552,14 +457,12 @@ function renderPage() {
   main.innerHTML = activePage === 0
     ? renderWelcome(programPackage)
     : activePage === 1
-      ? renderLbmAnalysis(programPackage)
-      : activePage === 2
-        ? renderFoodPlan(programPackage)
-        : renderServings(programPackage);
+      ? renderFoodPlan(programPackage)
+      : renderServings(programPackage);
 }
 
 function showPage(index) {
-  activePage = Math.max(0, Math.min(index, 3));
+  activePage = Math.max(0, Math.min(index, 2));
   renderNav();
   renderPage();
 }
@@ -580,19 +483,11 @@ function bindEvents() {
       showPage(1);
       return;
     }
-    if (event.target.closest('[data-report-next-food]')) {
-      showPage(2);
-      return;
-    }
     if (event.target.closest('[data-report-next-servings]')) {
-      showPage(3);
+      showPage(2);
       return;
     }
     if (event.target.closest('[data-report-back-food]')) {
-      showPage(2);
-      return;
-    }
-    if (event.target.closest('[data-report-back-lbm]')) {
       showPage(1);
       return;
     }

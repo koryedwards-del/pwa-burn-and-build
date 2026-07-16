@@ -253,6 +253,46 @@ body {
   font-size: 0.76rem;
 }
 
+.r-projection-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 16px 0;
+}
+
+.r-projection-table th,
+.r-projection-table td {
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.r-projection-table thead th {
+  background: var(--surface-2);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.r-projection-table tr.r-projection-current td {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.r-projection-badge {
+  display: inline-block;
+  color: var(--gold);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
 .r-doc__note {
   font-size: 0.82rem;
   line-height: 1.55;
