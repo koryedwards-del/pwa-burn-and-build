@@ -137,6 +137,7 @@ const mealSlotsById = {};
 let activeWeekDay = 'wed';
 let activeSlot = null;
 let activeFoodCategory = null;
+let foodSearchQuery = '';
 let weekPlan = {};
 const expandedMeals = new Set();
 let pendingSaveDaySlotId = null;
@@ -785,9 +786,26 @@ function foodsForActiveSlot() {
   const filterCategories = categories.length > 1
     ? [activeFoodCategory]
     : categories;
+  const query = foodSearchQuery.trim().toLowerCase();
   return foods
     .filter((food) => filterCategories.includes(food.category))
+    .filter((food) => !query || food.name.toLowerCase().includes(query))
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function syncFoodSearchField() {
+  const input = document.getElementById('food-search');
+  if (!input) return;
+  const show = !!activeSlot;
+  input.hidden = !show;
+  if (!show) {
+    input.value = '';
+    foodSearchQuery = '';
+    return;
+  }
+  if (input.value !== foodSearchQuery) {
+    input.value = foodSearchQuery;
+  }
 }
 
 function mealItemDetail(item) {
@@ -901,6 +919,7 @@ function renderFoodFilterLabel() {
   if (!activeSlot) {
     label.textContent = '';
     label.hidden = true;
+    syncFoodSearchField();
     return;
   }
   const daySlot = DAY_SLOTS.find((item) => item.id === activeSlot.daySlotId);
@@ -911,6 +930,7 @@ function renderFoodFilterLabel() {
     : '';
   label.textContent = `${daySlot.label} · ${slot.label}${servingNote}`;
   label.hidden = false;
+  syncFoodSearchField();
 }
 
 function renderFoodFilters() {
@@ -972,7 +992,10 @@ function renderFoodStack() {
   }
 
   if (!list.length) {
-    container.innerHTML = '<p class="food-stack__hint">No foods in this category.</p>';
+    const hint = foodSearchQuery.trim()
+      ? 'No foods match your search.'
+      : 'No foods in this category.';
+    container.innerHTML = `<p class="food-stack__hint">${hint}</p>`;
     return;
   }
 
@@ -1394,6 +1417,15 @@ function openPrintAssistant() {
   doc.document.close();
 }
 
+function initFoodSearch() {
+  const input = document.getElementById('food-search');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    foodSearchQuery = input.value;
+    renderFoodStack();
+  });
+}
+
 function initPrintAssistant() {
   document.getElementById('print-assistant').addEventListener('click', openPrintAssistant);
 }
@@ -1416,6 +1448,7 @@ async function init() {
   initSaveMealDialog();
   initClearDayMenu();
   initClearWeekMenu();
+  initFoodSearch();
   initPrintAssistant();
   renderFoodStack();
   initFoodDropTargets();

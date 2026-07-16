@@ -788,6 +788,31 @@ body {
   flex-shrink: 0;
 }
 
+.food-search {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.food-search:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.food-search::placeholder {
+  color: var(--text-hint);
+}
+
+.food-search::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
 .food-filter--active {
   border-color: var(--gold);
   color: var(--gold);

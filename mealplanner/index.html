@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1200" />
   <title>Burn &amp; Build — Meal Planner</title>
-  <link rel="stylesheet" href="css/planner.css?v=10" />
+  <link rel="stylesheet" href="css/planner.css?v=11" />
 </head>
 <body>
   <div class="planner-app">
@@ -48,6 +48,14 @@
           <p class="col-heading">Foods</p>
 
           <p class="food-filter-label" id="food-filter-label" hidden></p>
+          <input
+            type="search"
+            class="food-search"
+            id="food-search"
+            placeholder="Search foods…"
+            autocomplete="off"
+            hidden
+          />
           <div class="food-filters" id="food-filters"></div>
           <div class="food-stack" id="food-stack"></div>
         </div>
@@ -74,6 +82,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/planner.js?v=18"></script>
+  <script type="module" src="js/planner.js?v=19"></script>
 </body>
 </html>
