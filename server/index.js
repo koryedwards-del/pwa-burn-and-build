@@ -12,7 +12,7 @@ import {
   setBurnAndBuild,
   upsertContact,
 } from './contacts.js';
-import { countPrograms, dbPathForHealth, deleteProgram, getLatestProgram, getLatestProgramMeta, getProgramById, isProgramPaid, listPrograms, markProgramPaid, normalizeEmail, saveProgram } from './db.js';
+import { countPrograms, dbPathForHealth, deleteProgram, getLatestProgram, getLatestProgramMeta, getProgramById, isProgramPaid, listPaidPrograms, markProgramPaid, normalizeEmail, saveProgram } from './db.js';
 import { validateProgramPackage } from '../js/programPackage.js';
 import {
   constructStripeWebhookEvent,
@@ -437,25 +437,13 @@ app.get('/api/programs/history', (req, res) => {
     return;
   }
 
-  const result = resolveProgramLoad(email, { getLatestProgram, countPrograms });
-  if (!result.ok) {
-    res.status(result.status).json({
-      ok: false,
-      message: result.message,
-      ...(result.saved ? {
-        saved: true,
-        programCount: result.programCount,
-        programId: result.programId || null,
-      } : {}),
-    });
-    return;
-  }
-
-  const rows = listPrograms(email);
+  const rows = listPaidPrograms(email);
   const programs = rows.map((row) => ({
     id: row.id,
     label: row.label,
     createdAt: row.createdAt,
+    paid: true,
+    paidAt: row.paidAt,
     package: row.package,
   }));
 

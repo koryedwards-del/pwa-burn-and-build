@@ -20,6 +20,7 @@ import {
 } from './onboardingEngine.js';
 import { computeDietEightWeekProjection, computeDietProjectionTimeline } from './bodyCompositionAnalysis.js';
 import { sortProgramHistory, summarizeProgram } from './programHistory.js';
+import { renderHistoryCardRows } from './programHistoryUi.js';
 import {
   getProgramDay,
   importProgramPackage,
@@ -1174,20 +1175,6 @@ function renderPreviousPlansHeader() {
     <div class="plan-header">
       <button type="button" class="back-btn history-back" data-nav="home">←</button>
       <h1>Your Diets</h1>
-    </div>`;
-}
-
-function renderHistoryCardRows(fieldRows = []) {
-  return `
-    <div class="history-grid">
-      ${fieldRows.map((row, index) => `
-        <div class="history-grid-row${index > 0 ? ' history-grid-row--divider' : ''}" style="--history-cols: ${row.length}">
-          ${row.map((field) => `
-            <div class="history-field">
-              <span class="history-field-label">${field.label}</span>
-              <span class="history-field-value${field.accent ? ' accent' : ''}">${field.value}</span>
-            </div>`).join('')}
-        </div>`).join('')}
     </div>`;
 }
 

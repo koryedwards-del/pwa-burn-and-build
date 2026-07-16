@@ -80,6 +80,28 @@ function parsePackage(row) {
   }
 }
 
+function mapProgramRow(row) {
+  const pkg = parsePackage(row);
+  if (!pkg) return null;
+  return {
+    id: row.id,
+    label: row.label,
+    createdAt: row.created_at,
+    paidAt: row.paid_at || null,
+    paid: !!row.paid_at,
+    package: pkg,
+  };
+}
+
+function packageForSave(email, programId, pkg) {
+  const key = normalizeEmail(email);
+  const id = programId || pkg.program?.id;
+  if (!id || !pkg?.menuPlanner) return pkg;
+  if (isProgramPaid(key, id)) return pkg;
+  const { menuPlanner, ...rest } = pkg;
+  return rest;
+}
+
 /** Add or update a program for this email — same id updates in place. */
 export function saveProgram(email, pkg) {
   const key = normalizeEmail(email);
@@ -92,30 +114,32 @@ export function saveProgram(email, pkg) {
     throw new Error('This diet belongs to another account.');
   }
 
+  const storedPkg = packageForSave(key, id, pkg);
+
   if (existing) {
     const existingPkg = parsePackage(existing);
-    if (existingPkg?.program?.firstSavedAtLocalDate && !pkg.program?.firstSavedAtLocalDate) {
-      pkg.program = { ...pkg.program, firstSavedAtLocalDate: existingPkg.program.firstSavedAtLocalDate };
+    if (existingPkg?.program?.firstSavedAtLocalDate && !storedPkg.program?.firstSavedAtLocalDate) {
+      storedPkg.program = { ...storedPkg.program, firstSavedAtLocalDate: existingPkg.program.firstSavedAtLocalDate };
     }
-    if (existingPkg?.program?.foodPlanCreatedDate && !pkg.program?.foodPlanCreatedDate) {
-      pkg.program = { ...pkg.program, foodPlanCreatedDate: existingPkg.program.foodPlanCreatedDate };
+    if (existingPkg?.program?.foodPlanCreatedDate && !storedPkg.program?.foodPlanCreatedDate) {
+      storedPkg.program = { ...storedPkg.program, foodPlanCreatedDate: existingPkg.program.foodPlanCreatedDate };
     }
     db.prepare(`
       UPDATE programs
       SET label = ?, package_json = ?
       WHERE id = ? AND email = ?
-    `).run(label, JSON.stringify(pkg), id, key);
+    `).run(label, JSON.stringify(storedPkg), id, key);
   } else {
-    if (pkg.program && !pkg.program.firstSavedAtLocalDate) {
-      pkg.program.firstSavedAtLocalDate = pkg.program.foodPlanCreatedDate || pkg.program.issuedAtLocalDate || null;
+    if (storedPkg.program && !storedPkg.program.firstSavedAtLocalDate) {
+      storedPkg.program.firstSavedAtLocalDate = storedPkg.program.foodPlanCreatedDate || storedPkg.program.issuedAtLocalDate || null;
     }
-    if (pkg.program && !pkg.program.foodPlanCreatedDate) {
-      pkg.program.foodPlanCreatedDate = pkg.program.firstSavedAtLocalDate || pkg.program.issuedAtLocalDate || null;
+    if (storedPkg.program && !storedPkg.program.foodPlanCreatedDate) {
+      storedPkg.program.foodPlanCreatedDate = storedPkg.program.firstSavedAtLocalDate || storedPkg.program.issuedAtLocalDate || null;
     }
     db.prepare(`
       INSERT INTO programs (id, email, label, package_json, created_at)
       VALUES (?, ?, ?, ?, ?)
-    `).run(id, key, label, JSON.stringify(pkg), now);
+    `).run(id, key, label, JSON.stringify(storedPkg), now);
   }
 
   return id;
@@ -161,21 +185,23 @@ export function countPrograms(email) {
 
 export function listPrograms(email) {
   const rows = db.prepare(`
-    SELECT id, label, package_json, created_at FROM programs
+    SELECT id, label, package_json, created_at, paid_at FROM programs
     WHERE email = ?
     ORDER BY created_at DESC
   `).all(normalizeEmail(email));
 
-  return rows.map((row) => {
-    const pkg = parsePackage(row);
-    if (!pkg) return null;
-    return {
-      id: row.id,
-      label: row.label,
-      createdAt: row.created_at,
-      package: pkg,
-    };
-  }).filter(Boolean);
+  return rows.map(mapProgramRow).filter(Boolean);
+}
+
+/** Purchased or coupon-unlocked programs only — for diet history and sidebar. */
+export function listPaidPrograms(email) {
+  const rows = db.prepare(`
+    SELECT id, label, package_json, created_at, paid_at FROM programs
+    WHERE email = ? AND paid_at IS NOT NULL
+    ORDER BY created_at DESC
+  `).all(normalizeEmail(email));
+
+  return rows.map(mapProgramRow).filter(Boolean);
 }
 
 export function getProgramById(email, programId) {

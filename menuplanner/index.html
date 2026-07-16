@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/program-bridge.css?v=5" />
-  <link rel="stylesheet" href="css/planner.css?v=22" />
+  <link rel="stylesheet" href="../css/program-bridge.css?v=7" />
+  <link rel="stylesheet" href="css/planner.css?v=23" />
 </head>
 <body>
   <section id="access-gate" class="mp-access" hidden>
@@ -84,7 +84,13 @@
     </header>
 
     <div class="pb-layout planner-layout">
-      <nav class="pb-nav" aria-label="Program report" id="program-nav"></nav>
+      <aside class="pb-aside">
+        <nav class="pb-nav" aria-label="Program report" id="program-nav"></nav>
+        <div class="pb-aside__dock">
+          <section class="pb-side-card" id="program-library" aria-label="Your diet plans" hidden></section>
+          <section class="pb-side-card" id="program-links" aria-label="Quick links" hidden></section>
+        </div>
+      </aside>
 
       <div class="planner-main">
         <div class="pb-page-head">
@@ -167,6 +173,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/planner.js?v=31"></script>
+  <script type="module" src="js/planner.js?v=32"></script>
 </body>
 </html>

@@ -5,7 +5,15 @@ import {
   programNavHtml,
 } from '../../js/programBridgeUi.js';
 import { loadProgramBridge } from '../../js/programBridgeHandoff.js';
-import { bootMenuPlannerAccess } from './access.js?v=2';
+import {
+  attachPlannerStateToPackage,
+  flushProgramPersist,
+  plannerStateFromPackage,
+  scheduleProgramPersist,
+} from '../../js/menuPlannerState.js';
+import { bootProgramBridgeAside } from '../../js/programLibrary.js';
+import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js';
+import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=3';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',
@@ -56,7 +64,7 @@ const TEMPLATE_SLOTS = {
   snack: ['fruit', 'fat'],
 };
 
-const SAVED_MEALS = [];
+let savedMeals = [];
 
 const FOODS_DATA_VERSION = '2';
 
@@ -101,14 +109,88 @@ function createEmptyDayState() {
   return { selections, meta };
 }
 
-WEEK_DAYS.forEach((day) => {
-  weekPlan[day.id] = createEmptyDayState();
-});
+function createFreshWeekPlan() {
+  const plan = {};
+  WEEK_DAYS.forEach((day) => {
+    plan[day.id] = createEmptyDayState();
+  });
+  return plan;
+}
+
+function ensureWeekPlanShape(plan = weekPlan) {
+  WEEK_DAYS.forEach((day) => {
+    if (!plan[day.id]) {
+      plan[day.id] = createEmptyDayState();
+      return;
+    }
+    DAY_SLOTS.forEach((daySlot) => {
+      if (!plan[day.id].selections[daySlot.id]) {
+        plan[day.id].selections[daySlot.id] = {};
+      }
+      if (!plan[day.id].meta[daySlot.id]) {
+        plan[day.id].meta[daySlot.id] = { mealName: null, savedMealId: null };
+      }
+      templateSlots(daySlot.template).forEach((slot) => {
+        if (!(slot in plan[day.id].selections[daySlot.id])) {
+          plan[day.id].selections[daySlot.id][slot] = null;
+        }
+      });
+    });
+  });
+}
+
+function resetPlannerState() {
+  weekPlan = createFreshWeekPlan();
+  savedMeals = [];
+  activeWeekDay = todayWeekDayId();
+  expandedMeals.clear();
+  activeSlot = null;
+  activeFoodCategory = null;
+}
+
+function collectPlannerState() {
+  return {
+    version: 1,
+    activeWeekDay,
+    weekPlan,
+    savedMeals,
+    expandedMeals: [...expandedMeals],
+  };
+}
+
+function applyPlannerState(state) {
+  resetPlannerState();
+  if (!state || typeof state !== 'object') return;
+  if (state.weekPlan && typeof state.weekPlan === 'object') {
+    weekPlan = state.weekPlan;
+    ensureWeekPlanShape();
+  }
+  if (Array.isArray(state.savedMeals)) {
+    savedMeals = state.savedMeals;
+  }
+  if (state.activeWeekDay && WEEK_DAYS.some((day) => day.id === state.activeWeekDay)) {
+    activeWeekDay = state.activeWeekDay;
+  }
+  if (Array.isArray(state.expandedMeals)) {
+    state.expandedMeals.forEach((id) => expandedMeals.add(id));
+  }
+}
+
+function persistPlannerToProgram({ immediate = false } = {}) {
+  if (!programPackage?.program?.id) return;
+  programPackage = attachPlannerStateToPackage(programPackage, collectPlannerState());
+  if (immediate) {
+    flushProgramPersist(programPackage).catch((err) => console.error(err));
+    return;
+  }
+  scheduleProgramPersist(programPackage);
+}
 
 function todayWeekDayId() {
   return WEEK_DAYS[new Date().getDay()].id;
 }
 
+weekPlan = createFreshWeekPlan();
 let activeWeekDay = todayWeekDayId();
 
 function categorySelections(mealSlotId, weekDay = activeWeekDay) {
@@ -202,7 +284,7 @@ function renderProgramChrome() {
 }
 
 function savedMealById(id) {
-  return SAVED_MEALS.find((meal) => meal.id === id);
+  return savedMeals.find((meal) => meal.id === id);
 }
 
 function scaledLabel(food, servings) {
@@ -330,7 +412,7 @@ function mealIdFromName(name) {
   let base = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'meal';
   let id = base;
   let suffix = 2;
-  while (SAVED_MEALS.some((meal) => meal.id === id)) {
+  while (savedMeals.some((meal) => meal.id === id)) {
     id = `${base}-${suffix}`;
     suffix += 1;
   }
@@ -348,12 +430,13 @@ function saveMealFromDay(mealSlotId, name) {
     items: daySlotToMealItems(mealSlotId),
   };
 
-  SAVED_MEALS.push(meal);
+  savedMeals.push(meal);
   mealSlotMeta(mealSlotId).mealName = trimmed;
   mealSlotMeta(mealSlotId).savedMealId = meal.id;
   renderWeekGrid();
   renderDayColumn();
   renderSavedMeals();
+  persistPlannerToProgram();
 }
 
 function openSaveMealDialog(mealSlotId) {
@@ -529,6 +612,7 @@ function refreshPlannerAfterMenuChange() {
   renderFoodFilterLabel();
   renderFoodFilters();
   renderFoodStack();
+  persistPlannerToProgram();
 }
 
 function initClearDayMenu() {
@@ -612,6 +696,7 @@ function setActiveWeekDay(weekDay) {
   renderFoodFilterLabel();
   renderFoodFilters();
   renderFoodStack();
+  persistPlannerToProgram();
 }
 
 function renderActiveDayLabel() {
@@ -652,7 +737,7 @@ function initWeekGrid() {
     const mealId = event.dataTransfer.getData('application/x-meal-id');
     if (!mealId) return;
 
-    const meal = SAVED_MEALS.find((item) => item.id === mealId);
+    const meal = savedMeals.find((item) => item.id === mealId);
     if (!meal) return;
 
     applySavedMealToMealSlot(cell.dataset.weekDay, cell.dataset.mealSlot, meal);
@@ -799,14 +884,14 @@ function renderSavedMealCard(meal) {
 }
 
 function savedMealsByPopularity() {
-  return [...SAVED_MEALS].sort((a, b) => b.pickCount - a.pickCount);
+  return [...savedMeals].sort((a, b) => b.pickCount - a.pickCount);
 }
 
 function deleteSavedMeal(mealId) {
-  const index = SAVED_MEALS.findIndex((meal) => meal.id === mealId);
+  const index = savedMeals.findIndex((meal) => meal.id === mealId);
   if (index === -1) return;
 
-  SAVED_MEALS.splice(index, 1);
+  savedMeals.splice(index, 1);
   expandedMeals.delete(mealId);
 
   WEEK_DAYS.forEach((weekDay) => {
@@ -821,6 +906,7 @@ function deleteSavedMeal(mealId) {
   renderSavedMeals();
   renderWeekGrid();
   renderDayColumn();
+  persistPlannerToProgram();
 }
 
 function renderSavedMeals() {
@@ -1097,7 +1183,7 @@ function initMealDragDrop() {
     card.dataset.mealDragBound = '1';
 
     card.addEventListener('dragstart', (event) => {
-      const meal = SAVED_MEALS.find((item) => item.id === card.dataset.mealId);
+      const meal = savedMeals.find((item) => item.id === card.dataset.mealId);
       if (!meal) return;
       event.dataTransfer.effectAllowed = 'copy';
       event.dataTransfer.setData('application/x-meal-html', mealDragHtml(meal));
@@ -1131,7 +1217,7 @@ function initMealDragDrop() {
       const mealId = event.dataTransfer.getData('application/x-meal-id');
       if (!mealId) return;
 
-      const meal = SAVED_MEALS.find((item) => item.id === mealId);
+      const meal = savedMeals.find((item) => item.id === mealId);
       if (!meal || !acceptsSavedMealDrop(zone.dataset.daySlotId)) return;
 
       applySavedMealToDay(zone.dataset.daySlotId, meal);
@@ -1400,6 +1486,10 @@ function initPrintAssistant() {
 
 async function init(pkg) {
   programPackage = pkg || loadProgramPackage();
+  if (programPackage?.program?.id) {
+    setActiveProgramId(programPackage.program.id);
+  }
+  applyPlannerState(plannerStateFromPackage(programPackage));
   initMealSlotsFromProgram(programPackage);
   renderProgramChrome();
 
@@ -1419,7 +1509,21 @@ async function init(pkg) {
   initPrintAssistant();
   renderFoodStack();
   initFoodDropTargets();
+  await bootProgramBridgeAside({
+    getProgramPackage: () => programPackage,
+    openAccessGate,
+    beforeSwitch: async () => {
+      persistPlannerToProgram({ immediate: true });
+    },
+    onSwitch: async (pkg) => {
+      await init(pkg);
+    },
+  });
 }
+
+window.addEventListener('beforeunload', () => {
+  persistPlannerToProgram({ immediate: true });
+});
 
 bootMenuPlannerAccess(async (pkg) => {
   await init(pkg);

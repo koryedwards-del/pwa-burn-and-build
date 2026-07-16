@@ -41,6 +41,16 @@ export function programMetaHtml(pkg) {
     </header>`;
 }
 
+export function programLinksHtml() {
+  return `
+    <h2 class="pb-side-card__title">Links</h2>
+    <nav class="pb-link-list" aria-label="Quick links">
+      <a class="pb-link-list__item" href="/questionnaire/#welcome">Create new diet</a>
+      <button type="button" class="pb-link-list__item" data-open-access-gate>Sign in with different email</button>
+      <a class="pb-link-list__item" href="/">Back to website</a>
+    </nav>`;
+}
+
 export function programNavHtml(activeId, { reportHref = '' } = {}) {
   const stepHref = (query) => {
     if (!reportHref) return `?page=${query}`;

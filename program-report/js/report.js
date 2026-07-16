@@ -16,6 +16,8 @@ import {
   programNavHtml,
 } from '../../js/programBridgeUi.js';
 import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js';
+import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js';
+import { bootProgramBridgeAside } from '../../js/programLibrary.js';
 import { QUESTIONNAIRE_WELCOME_URL } from '../../js/siteUrls.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
@@ -102,6 +104,7 @@ function initialPageFromUrl() {
 
 function persistProgram(pkg) {
   persistProgramBridge(pkg);
+  if (pkg?.program?.id) setActiveProgramId(pkg.program.id);
 }
 
 function loadPreviewProgram() {
@@ -511,6 +514,15 @@ function init() {
   renderNav();
   renderPage();
   bindEvents();
+  bootProgramBridgeAside({
+    getProgramPackage: () => programPackage,
+    onSwitch: async (pkg) => {
+      programPackage = pkg;
+      persistProgram(programPackage);
+      renderNav();
+      renderPage();
+    },
+  }).catch((err) => console.error(err));
 }
 
 init();

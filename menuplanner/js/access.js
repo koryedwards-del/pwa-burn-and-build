@@ -2,10 +2,12 @@ import { persistProgramBridge, loadProgramBridge } from '../../js/programBridgeH
 import {
   fetchProgramFromServer,
   fetchProgramResumeCheckout,
+  fetchProgramByIdFromServer,
   getAppEmail,
   isValidEmail,
   persistAppEmail,
 } from '../../js/programApi.js';
+import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js';
 import { DESKTOP_CHECKOUT_URL } from '../../js/siteUrls.js';
 
 const ACCESS_SCREENS = ['email', 'unpaid', 'missing', 'error'];
@@ -87,6 +89,17 @@ async function loadProgramForEmail(email) {
   if (!isValidEmail(normalized)) {
     return { ok: false, message: 'Enter a valid email address.' };
   }
+
+  const activeId = getActiveProgramId();
+  if (activeId) {
+    const activeResult = await fetchProgramByIdFromServer(normalized, activeId);
+    if (activeResult.ok && activeResult.package && programReady(activeResult.package)) {
+      persistProgramBridge(activeResult.package);
+      setActiveProgramId(activeId);
+      return { ok: true, package: activeResult.package, email: normalized };
+    }
+  }
+
   const result = await fetchProgramFromServer(normalized);
   if (!result.ok || !result.package) {
     return { ...result, email: normalized };
@@ -95,6 +108,7 @@ async function loadProgramForEmail(email) {
     return { ok: false, status: 404, message: 'Your program is incomplete.', email: normalized };
   }
   persistProgramBridge(result.package);
+  setActiveProgramId(result.package?.program?.id || '');
   return { ok: true, package: result.package, email: normalized };
 }
 
