@@ -225,6 +225,34 @@ body {
   margin-bottom: 4px;
 }
 
+.r-ace-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin: 16px 0;
+  text-align: center;
+}
+
+.r-ace-table th,
+.r-ace-table td {
+  border: 1px solid var(--border);
+  padding: 8px 6px;
+  vertical-align: middle;
+}
+
+.r-ace-table thead th {
+  background: var(--surface-2);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.r-ace-table--weights td {
+  font-size: 0.76rem;
+}
+
 .r-doc__note {
   font-size: 0.82rem;
   line-height: 1.55;

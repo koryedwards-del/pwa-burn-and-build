@@ -51,7 +51,6 @@ const PAGES = [
 
 let activePage = 0;
 let programPackage = null;
-let usingPreview = false;
 
 function escapeHtml(text) {
   return String(text ?? '')
@@ -102,9 +101,7 @@ function persistProgram(pkg) {
 
 function loadPreviewProgram() {
   programPackage = buildPreviewProgram();
-  usingPreview = true;
   persistProgram(programPackage);
-  renderPreparedLine(programPackage);
   showPage(initialPageFromUrl());
 }
 
@@ -140,15 +137,6 @@ function renderNav() {
       >${page.step}. ${page.label}</button>
     </li>
   `).join('');
-}
-
-function renderPreparedLine(pkg) {
-  const el = document.getElementById('r-prepared');
-  if (!el || !pkg) return;
-  const name = pkg.intake?.preferredName || 'You';
-  const date = formatReportDate(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate);
-  const previewNote = usingPreview ? ' · Sample program' : '';
-  el.textContent = `Prepared exclusively for ${name} · ${date}${previewNote}`;
 }
 
 function renderWelcome(pkg) {
@@ -617,15 +605,12 @@ function bindEvents() {
 
 function init() {
   programPackage = loadProgramPackage();
-  usingPreview = programPackage?.meta?.source === 'program-report-preview';
 
   if (!programPackage?.intake?.leanBodyMass && wantsPreviewFromUrl()) {
     programPackage = buildPreviewProgram();
-    usingPreview = true;
     persistProgram(programPackage);
   }
 
-  renderPreparedLine(programPackage);
   if (programPackage?.intake?.leanBodyMass) {
     activePage = initialPageFromUrl();
   }
