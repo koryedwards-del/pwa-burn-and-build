@@ -872,7 +872,7 @@ function renderSavedMealCard(meal) {
           data-meal-toggle="${meal.id}"
           aria-expanded="${expanded}"
           aria-label="${expanded ? 'Collapse' : 'Expand'} ${escapeHtml(meal.name)}"
-        >${expanded ? '▾' : '▸'}</button>
+        >▾</button>
         <div class="saved-meal__summary">
           <p class="card__title">${escapeHtml(meal.name)}</p>
           <p class="card__detail">${escapeHtml(mealSummary(meal))}</p>

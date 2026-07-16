@@ -62,29 +62,39 @@ function setProgramCardCollapsed(programId, collapsed) {
   else expandedProgramCards.add(programId);
 }
 
+function toggleProgramCard(card) {
+  const programId = card?.getAttribute('data-program-card');
+  if (!programId || !card) return;
+  const collapsed = card.classList.toggle('is-collapsed');
+  setProgramCardCollapsed(programId, !collapsed);
+  const top = card.querySelector('[data-toggle-program-card]');
+  if (top) {
+    top.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    top.setAttribute('aria-label', collapsed ? 'Show diet details' : 'Hide diet details');
+  }
+}
+
 function bindLibraryEvents() {
   const library = libraryEl();
   if (!library || library.dataset.bound === '1') return;
   library.dataset.bound = '1';
 
   library.addEventListener('click', (event) => {
-    const toggle = event.target.closest('[data-toggle-program-card]');
-    if (toggle) {
+    const top = event.target.closest('[data-toggle-program-card]');
+    if (top) {
       event.preventDefault();
-      event.stopPropagation();
-      const programId = toggle.getAttribute('data-toggle-program-card');
-      const card = toggle.closest('[data-program-card]');
-      if (!programId || !card) return;
-      const collapsed = card.classList.toggle('is-collapsed');
-      setProgramCardCollapsed(programId, !collapsed);
-      toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-      toggle.setAttribute('aria-label', collapsed ? 'Show diet details' : 'Hide diet details');
+      const card = top.closest('[data-program-card]');
+      if (!card) return;
+      toggleProgramCard(card);
       return;
     }
 
-    const button = event.target.closest('[data-switch-program]');
-    if (!button || button.disabled) return;
-    const programId = button.getAttribute('data-switch-program');
+    const body = event.target.closest('.pb-program-card__body[data-switch-program]');
+    if (!body) return;
+    const card = body.closest('[data-program-card]');
+    if (!card || card.classList.contains('is-active') || card.classList.contains('is-collapsed')) return;
+    const programId = body.getAttribute('data-switch-program');
+    if (!programId) return;
     switchProgram(programId).catch((err) => console.error(err));
   });
 }

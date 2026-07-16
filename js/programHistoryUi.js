@@ -20,20 +20,18 @@ export function renderSidebarProgramCard(row, { isActive = false, isOpening = fa
       class="pb-program-card${isActive ? ' is-active' : ''}${isOpening ? ' is-opening' : ''}${isCollapsed ? ' is-collapsed' : ''}"
       data-program-card="${row.id}"
     >
-      <div class="pb-program-card__top">
-        <button type="button" class="pb-program-card__switch" data-switch-program="${row.id}">
-          <span class="pb-program-card__date">${row.testDateDisplay}</span>
-          ${isActive ? '<span class="pb-program-card__tag">Active</span>' : ''}
-        </button>
-        <button
-          type="button"
-          class="pb-program-card__toggle"
-          data-toggle-program-card="${row.id}"
-          aria-expanded="${isCollapsed ? 'false' : 'true'}"
-          aria-label="${isCollapsed ? 'Show diet details' : 'Hide diet details'}"
-        >▸</button>
-      </div>
-      <div class="pb-program-card__body">
+      <button
+        type="button"
+        class="pb-program-card__top"
+        data-toggle-program-card="${row.id}"
+        aria-expanded="${isCollapsed ? 'false' : 'true'}"
+        aria-label="${isCollapsed ? 'Show diet details' : 'Hide diet details'}"
+      >
+        <span class="pb-program-card__date">${row.testDateDisplay}</span>
+        ${isActive ? '<span class="pb-program-card__tag">Active</span>' : ''}
+        <span class="pb-program-card__toggle-icon" aria-hidden="true">▾</span>
+      </button>
+      <div class="pb-program-card__body" data-switch-program="${row.id}">
         ${renderHistoryCardRows(row.fieldRows)}
       </div>
     </div>`;

@@ -708,15 +708,24 @@ body {
 
 .saved-meal__toggle {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  border: none;
   border-radius: 4px;
-  background: var(--surface);
+  background: transparent;
   color: var(--yellow);
-  font-size: 0.75rem;
+  font-size: calc(0.75rem * 5);
   line-height: 1;
   cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.saved-meal--expanded .saved-meal__toggle {
+  transform: rotate(180deg);
 }
 
 .saved-meal__summary {
