@@ -143,6 +143,17 @@ export function getLatestProgramMeta(email) {
   return { id: row.id, createdAt: row.created_at };
 }
 
+export function getLatestPaidProgramMeta(email) {
+  const row = db.prepare(`
+    SELECT id, created_at FROM programs
+    WHERE email = ? AND paid_at IS NOT NULL
+    ORDER BY created_at DESC
+    LIMIT 1
+  `).get(normalizeEmail(email));
+  if (!row) return null;
+  return { id: row.id, createdAt: row.created_at };
+}
+
 export function countPrograms(email) {
   const row = db.prepare('SELECT COUNT(*) AS n FROM programs WHERE email = ?').get(normalizeEmail(email));
   return row?.n || 0;

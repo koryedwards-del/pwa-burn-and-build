@@ -5,7 +5,7 @@ import {
   programNavHtml,
 } from '../../js/programBridgeUi.js';
 import { loadProgramBridge } from '../../js/programBridgeHandoff.js';
-import { bootMenuPlannerAccess } from './access.js';
+import { bootMenuPlannerAccess } from './access.js?v=2';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',

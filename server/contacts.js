@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import Database from 'better-sqlite3';
-import { countPrograms, getLatestProgram, getLatestProgramMeta, isProgramPaid, normalizeEmail } from './db.js';
+import { countPrograms, getLatestProgram, getLatestProgramMeta, getLatestPaidProgramMeta, getProgramById, isProgramPaid, normalizeEmail } from './db.js';
 import { prepareDatabasePath, resolveDatabasePath } from './dbPath.js';
 
 const dbPath = resolveDatabasePath();
@@ -150,6 +150,14 @@ export function programSavedForEmail(email) {
 
 export function resolveProgramLoad(email, { getLatestProgram: getLatest, countPrograms: count }) {
   const key = normalizeEmail(email);
+  const paidMeta = getLatestPaidProgramMeta(key);
+  if (paidMeta) {
+    const pkg = getProgramById(key, paidMeta.id);
+    if (pkg) {
+      return { ok: true, package: pkg, programCount: count(key), programId: paidMeta.id };
+    }
+  }
+
   const meta = getLatestProgramMeta(key);
   if (!meta) {
     return { ok: false, status: 404, message: 'No diet saved for this email yet.' };
