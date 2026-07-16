@@ -184,6 +184,60 @@ body {
   max-width: 62ch;
 }
 
+.q-personal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  row-gap: 20px;
+  max-width: 680px;
+  align-items: start;
+}
+
+.q-personal-grid__name { grid-column: 1; grid-row: 1; }
+.q-personal-grid__date { grid-column: 2; grid-row: 1; }
+.q-personal-grid__contact-left { grid-column: 1; grid-row: 2; }
+.q-personal-grid__contact-right { grid-column: 2; grid-row: 2; }
+.q-personal-grid__height { grid-column: 1; grid-row: 3; }
+.q-personal-grid__weight { grid-column: 2; grid-row: 3; }
+.q-personal-grid__birth { grid-column: 1; grid-row: 4; }
+.q-personal-grid__age { grid-column: 2; grid-row: 4; }
+
+.q-personal-grid__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.q-personal-grid .q-label {
+  min-height: 1.1rem;
+}
+
+.q-personal-grid .q-inline {
+  align-items: center;
+  min-height: 42px;
+}
+
+.q-personal-grid .q-input,
+.q-personal-grid .q-static-value {
+  min-height: 42px;
+}
+
+.q-segmented--pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.q-segmented--pair .q-segment {
+  justify-content: center;
+  min-height: 42px;
+}
+
+.q-personal-grid .q-newsletter {
+  margin-top: 0;
+}
+
 .q-panel--workday .q-panel__head {
   margin-bottom: 32px;
 }
@@ -526,14 +580,6 @@ body {
 .q-check--compact {
   font-size: 0.85rem;
   color: var(--text);
-}
-
-.q-field--email .q-input {
-  margin-bottom: 0;
-}
-
-.q-field--gender {
-  grid-column: 1;
 }
 
 .q-newsletter {

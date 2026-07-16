@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/questionnaire.css?v=13" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=14" />
 </head>
 <body>
   <div class="q-app">
@@ -51,29 +51,42 @@
             <p class="q-intro-price">$149 one-time purchase · own your program forever</p>
           </section>
 
-          <section class="q-panel" data-step="1" hidden>
+          <section class="q-panel q-panel--personal" data-step="1" hidden>
             <div class="q-panel__head">
               <p class="q-eyebrow">Step 2</p>
               <h2 class="q-panel__title">Personal information</h2>
               <p class="q-panel__lead">The basics we need before calculating your servings and food plan.</p>
             </div>
-            <div class="q-grid q-grid--2">
-              <label class="q-field">
+            <div class="q-personal-grid">
+              <label class="q-field q-personal-grid__name">
                 <span class="q-label">First name</span>
                 <input class="q-input" name="preferredName" autocomplete="given-name" required />
               </label>
-              <div class="q-field">
+              <div class="q-field q-personal-grid__date">
                 <span class="q-label">Today's date</span>
                 <p class="q-static-value" id="q-intake-date-display"></p>
                 <input type="hidden" name="intakeDate" />
               </div>
-              <label class="q-field">
-                <span class="q-label">Phone <span class="q-optional">(optional)</span></span>
-                <input class="q-input" type="tel" name="phone" autocomplete="tel" />
-              </label>
-              <label class="q-field q-field--email">
-                <span class="q-label">Email</span>
-                <input class="q-input" type="email" name="email" autocomplete="email" required />
+
+              <div class="q-personal-grid__stack q-personal-grid__contact-left">
+                <label class="q-field">
+                  <span class="q-label">Phone <span class="q-optional">(optional)</span></span>
+                  <input class="q-input" type="tel" name="phone" autocomplete="tel" />
+                </label>
+                <div class="q-field" role="group" aria-labelledby="q-gender-label">
+                  <span class="q-label" id="q-gender-label">Gender</span>
+                  <div class="q-segmented q-segmented--pair">
+                    <label class="q-segment"><input type="radio" name="sex" value="female" /> Female</label>
+                    <label class="q-segment"><input type="radio" name="sex" value="male" /> Male</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="q-personal-grid__stack q-personal-grid__contact-right">
+                <label class="q-field">
+                  <span class="q-label">Email</span>
+                  <input class="q-input" type="email" name="email" autocomplete="email" required />
+                </label>
                 <div class="q-newsletter">
                   <p class="q-newsletter__lead">Maybe you&rsquo;d like a touch of motivation going into every weekend.</p>
                   <label class="q-check q-check--compact">
@@ -81,41 +94,31 @@
                     <span>Yes, add me to the weekly newsletter</span>
                   </label>
                 </div>
-              </label>
-              <div class="q-field q-field--gender" role="group" aria-labelledby="q-gender-label">
-                <span class="q-label" id="q-gender-label">Gender</span>
-                <div class="q-segmented">
-                  <label class="q-segment"><input type="radio" name="sex" value="female" /> Female</label>
-                  <label class="q-segment"><input type="radio" name="sex" value="male" /> Male</label>
-                </div>
               </div>
-            </div>
-            <div class="q-grid q-grid--2 q-grid--tight q-grid--row-align">
-              <label class="q-field">
+
+              <label class="q-field q-personal-grid__height">
                 <span class="q-label">Height</span>
-                <div class="q-inline q-field__control">
+                <div class="q-inline">
                   <input class="q-input q-input--short" name="heightFeet" inputmode="numeric" placeholder="ft" />
                   <span class="q-unit">ft</span>
                   <input class="q-input q-input--short" name="heightInchesPart" inputmode="numeric" placeholder="in" />
                   <span class="q-unit">in</span>
                 </div>
               </label>
-              <label class="q-field">
+              <label class="q-field q-personal-grid__weight">
                 <span class="q-label">Weight</span>
-                <div class="q-inline q-field__control">
+                <div class="q-inline">
                   <input class="q-input q-input--short" name="weight" inputmode="decimal" required />
                   <span class="q-unit">lbs</span>
                 </div>
               </label>
-            </div>
-            <div class="q-grid q-grid--2 q-grid--tight q-grid--row-align">
-              <label class="q-field">
+              <label class="q-field q-personal-grid__birth">
                 <span class="q-label">Birthdate</span>
-                <input class="q-input q-field__control" name="birthDate" type="date" />
+                <input class="q-input" name="birthDate" type="date" />
               </label>
-              <label class="q-field">
+              <label class="q-field q-personal-grid__age">
                 <span class="q-label">Age <span class="q-optional">(from birthdate)</span></span>
-                <input class="q-input q-input--short q-field__control" name="age" readonly tabindex="-1" />
+                <input class="q-input q-input--short" name="age" readonly tabindex="-1" />
               </label>
             </div>
           </section>
