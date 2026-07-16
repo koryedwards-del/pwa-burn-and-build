@@ -250,9 +250,9 @@ export async function bootMenuPlannerAccess(onProgramReady) {
 
   const bridged = loadProgramBridge();
   if (handoff && programReady(bridged)) {
+    showPlanner();
     try {
       await onProgramReady(bridged);
-      showPlanner();
     } catch (err) {
       console.error(err);
       const messageEl = gateEl()?.querySelector('#access-error-message');

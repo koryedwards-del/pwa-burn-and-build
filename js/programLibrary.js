@@ -7,12 +7,12 @@ import {
   isValidEmail,
   persistAppEmail,
   normalizeEmail,
-} from './programApi.js';
-import { getActiveProgramId, setActiveProgramId } from './programActive.js';
-import { summarizeProgram, sortProgramHistory } from './programHistory.js';
-import { renderSidebarProgramCard } from './programHistoryUi.js';
-import { persistProgramBridge } from './programBridgeHandoff.js';
-import { flushProgramPersist } from './menuPlannerState.js';
+} from './programApi.js?v=17';
+import { getActiveProgramId, setActiveProgramId } from './programActive.js?v=17';
+import { summarizeProgram, sortProgramHistory } from './programHistory.js?v=17';
+import { renderSidebarProgramCard } from './programHistoryUi.js?v=17';
+import { persistProgramBridge } from './programBridgeHandoff.js?v=17';
+import { flushProgramPersist } from './menuPlannerState.js?v=17';
 
 function libraryEl() {
   return document.getElementById('program-library');

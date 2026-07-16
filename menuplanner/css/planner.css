@@ -48,8 +48,7 @@ body {
 
 .planner-app {
   width: var(--planner-width);
-  height: calc(100vh - 72px);
-  min-height: 520px;
+  min-height: calc(100vh - 72px);
   display: flex;
   flex-direction: column;
   gap: 20px;

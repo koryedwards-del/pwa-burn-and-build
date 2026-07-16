@@ -3,17 +3,17 @@ import {
   programClientName,
   programMetaHtml,
   programNavHtml,
-} from '../../js/programBridgeUi.js';
-import { loadProgramBridge } from '../../js/programBridgeHandoff.js';
+} from '../../js/programBridgeUi.js?v=17';
+import { loadProgramBridge } from '../../js/programBridgeHandoff.js?v=17';
 import {
   attachPlannerStateToPackage,
   flushProgramPersist,
   plannerStateFromPackage,
   scheduleProgramPersist,
-} from '../../js/menuPlannerState.js';
-import { bootProgramBridgeAside } from '../../js/programLibrary.js';
-import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js';
-import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=9';
+} from '../../js/menuPlannerState.js?v=17';
+import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=17';
+import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=17';
+import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=10';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',
@@ -1492,6 +1492,18 @@ async function init(pkg) {
   applyPlannerState(plannerStateFromPackage(programPackage));
   initMealSlotsFromProgram(programPackage);
   renderProgramChrome();
+  bootProgramBridgeAside({
+    getProgramPackage: () => programPackage,
+    openAccessGate,
+    beforeSwitch: async () => {
+      persistPlannerToProgram({ immediate: true });
+    },
+    onSwitch: async (nextPkg) => {
+      await init(nextPkg);
+    },
+  }).catch((err) => {
+    console.error('Program library sidebar failed to load:', err);
+  });
 
   const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
   if (!response.ok) {
@@ -1512,20 +1524,6 @@ async function init(pkg) {
   initPrintAssistant();
   renderFoodStack();
   initFoodDropTargets();
-  try {
-    await bootProgramBridgeAside({
-      getProgramPackage: () => programPackage,
-      openAccessGate,
-      beforeSwitch: async () => {
-        persistPlannerToProgram({ immediate: true });
-      },
-      onSwitch: async (nextPkg) => {
-        await init(nextPkg);
-      },
-    });
-  } catch (err) {
-    console.error('Program library sidebar failed to load:', err);
-  }
 }
 
 window.addEventListener('beforeunload', () => {
