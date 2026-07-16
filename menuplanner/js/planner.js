@@ -1,5 +1,6 @@
 import { formatGroceryQuantity } from '../../js/groceryEngine.js';
 import {
+  formatProgramDateLong,
   programClientName,
   programMetaHtml,
 } from '../../js/programBridgeUi.js?v=22';
@@ -1273,13 +1274,13 @@ function printFoodAmount(foodName, servings) {
   return scaledLabel(food, servings);
 }
 
-function mealSlotHeadline(mealSlotId) {
+function mealSlotPrintParts(mealSlotId) {
   const schedule = mealSlotsById[mealSlotId];
   const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
-  const time = schedule?.time ? escapeHtml(schedule.time) : '';
-  const label = escapeHtml(daySlot?.label || mealSlotId);
-  if (time) return `<span class="agenda-time">${time}</span> ${label}`;
-  return label;
+  return {
+    time: schedule?.time || '',
+    label: daySlot?.label || mealSlotId,
+  };
 }
 
 function mealFoodLinesForPrint(mealSlotId, weekDay) {
@@ -1305,6 +1306,89 @@ function mealFoodLinesForPrint(mealSlotId, weekDay) {
     }
   });
   return lines;
+}
+
+function renderAgendaCell(foodLines) {
+  if (!foodLines.length) {
+    return '<span class="agenda-cell-empty" aria-hidden="true">—</span>';
+  }
+  return `
+    <ul class="agenda-foods">
+      ${foodLines.map((line) => `
+        <li>
+          <span class="agenda-food">${escapeHtml(line.foodName)}</span>
+          <span class="agenda-amount">${escapeHtml(line.amount)}</span>
+        </li>
+      `).join('')}
+    </ul>
+  `;
+}
+
+function mealSlotHasAnyContent(mealSlotId) {
+  return WEEK_DAYS.some((day) => mealFoodLinesForPrint(mealSlotId, day.id).length > 0);
+}
+
+function buildWeekAgendaContent() {
+  if (!weekPlanHasContent()) {
+    return '<p class="assistant-empty">No meals planned for this week yet. Fill in your menu planner, then open Print Assistant again.</p>';
+  }
+
+  const name = escapeHtml(programClientName(programPackage));
+
+  return `
+    <div class="agenda-section">
+      <h2 class="agenda-section-title">Weekly Meal Schedule</h2>
+      <p class="agenda-section-sub">Burn &amp; Build Diet · Meal schedule for ${name}</p>
+      <table class="agenda-table">
+        <thead>
+          <tr>
+            <th class="agenda-table-corner" scope="col"><span class="visually-hidden">Meal</span></th>
+            ${WEEK_DAYS.map((day) => `
+              <th class="agenda-day-head" scope="col">${escapeHtml(day.label)}</th>
+            `).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${DAY_SLOTS.map((mealSlot) => {
+            if (!mealSlotHasAnyContent(mealSlot.id)) return '';
+            const { time, label } = mealSlotPrintParts(mealSlot.id);
+            return `
+              <tr class="agenda-row">
+                <th class="agenda-row-head" scope="row">
+                  ${time ? `<span class="agenda-time">${escapeHtml(time)}</span>` : ''}
+                  <span class="agenda-meal-label">${escapeHtml(label)}</span>
+                </th>
+                ${WEEK_DAYS.map((day) => `
+                  <td class="agenda-cell">
+                    ${renderAgendaCell(mealFoodLinesForPrint(mealSlot.id, day.id))}
+                  </td>
+                `).join('')}
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function buildWeekPlanReportHeaderHtml() {
+  const name = escapeHtml(programClientName(programPackage));
+  const date = escapeHtml(formatProgramDateLong(
+    programPackage?.program?.issuedAt || programPackage?.program?.foodPlanCreatedDate,
+  ));
+  const logoUrl = escapeHtml(new URL('../img/brand/bblogo.png', window.location.href).href);
+  return `
+    <header class="assistant-doc-header assistant-doc-header--report">
+      <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="120" height="120" />
+      <div class="assistant-doc-titles">
+        <p class="assistant-doc-eyebrow">Personalized nutrition plan for</p>
+        <h1 class="assistant-doc-name">${name}</h1>
+        <p class="assistant-doc-guide">Burn &amp; Build Diet · Week Plan</p>
+        <p class="assistant-doc-date">${date}</p>
+      </div>
+    </header>
+  `;
 }
 
 function weekPlanHasContent() {
@@ -1356,43 +1440,35 @@ function buildShoppingListContent() {
   `).join('');
 }
 
-function buildWeekAgendaContent() {
-  if (!weekPlanHasContent()) {
-    return '<p class="assistant-empty">No meals planned for this week yet. Fill in your menu planner, then open Print Assistant again.</p>';
-  }
-
+function buildAssistantHeaderHtml(title) {
+  const name = escapeHtml(programClientName(programPackage));
+  const date = escapeHtml(formatProgramDateLong(
+    programPackage?.program?.issuedAt || programPackage?.program?.foodPlanCreatedDate,
+  ));
+  const logoUrl = escapeHtml(new URL('../img/brand/bblogo.png', window.location.href).href);
   return `
-    <div class="agenda-grid">
-      ${WEEK_DAYS.map((day) => `
-        <div class="agenda-day">
-          <h2 class="agenda-day-name">${escapeHtml(day.label)}</h2>
-          ${DAY_SLOTS.map((mealSlot) => {
-            const foodLines = mealFoodLinesForPrint(mealSlot.id, day.id);
-            if (!foodLines.length) return '';
-            return `
-              <div class="agenda-meal">
-                <p class="agenda-meal-head">${mealSlotHeadline(mealSlot.id)}</p>
-                <ul class="agenda-foods">
-                  ${foodLines.map((line) => `
-                    <li>
-                      <span class="agenda-food">${escapeHtml(line.foodName)}</span>
-                      <span class="agenda-amount">${escapeHtml(line.amount)}</span>
-                    </li>
-                  `).join('')}
-                </ul>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `).join('')}
-    </div>
+    <header class="assistant-doc-header">
+      <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="160" height="160" />
+      <div class="assistant-doc-titles">
+        <p class="assistant-doc-brand">Burn &amp; Build Diet</p>
+        <h1 class="assistant-doc-title">${escapeHtml(title)}</h1>
+        <p class="assistant-doc-meta">Prepared for ${name} · ${date}</p>
+      </div>
+    </header>
   `;
 }
 
 function buildAssistantDocumentHtml() {
-  const logoUrl = escapeHtml(new URL('../img/brand/bblogo.png', window.location.href).href);
   const shoppingHtml = buildShoppingListContent();
   const weekHtml = buildWeekAgendaContent();
+  const weekHeaderHtml = buildWeekPlanReportHeaderHtml();
+  const shoppingHeaderHtml = buildAssistantHeaderHtml('Shopping List');
+  const weekFooterHtml = `
+    <footer class="assistant-doc-footer">
+      <span>Burn &amp; Build Diet</span>
+      <span>Week Plan · ${escapeHtml(programClientName(programPackage))}</span>
+    </footer>
+  `;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1400,31 +1476,38 @@ function buildAssistantDocumentHtml() {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Burn &amp; Build — Print Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     @page portrait-page { size: portrait; margin: 0.5in; }
     @page landscape-page { size: landscape; margin: 0.35in; }
     body {
       font-family: "Open Sans", system-ui, sans-serif;
-      background: #ffffff;
+      background: #ececec;
       color: #111111;
-      padding: 32px 40px 48px;
-      margin: 0 auto;
+      margin: 0;
     }
     body.view-shopping {
-      max-width: 720px;
       page: portrait-page;
     }
     body.view-week {
-      max-width: none;
       page: landscape-page;
+    }
+    .assistant-screen {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #ececec;
+      border-bottom: 1px solid #d4d4d4;
+      padding: 14px 20px 16px;
     }
     .assistant-toolbar {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 24px;
+      max-width: 720px;
+      margin: 0 auto;
     }
     .assistant-toolbar button {
       padding: 8px 14px;
@@ -1447,21 +1530,120 @@ function buildAssistantDocumentHtml() {
       background: #111;
       color: #fdc500;
     }
-    .assistant-brand {
-      text-align: center;
-      margin-bottom: 20px;
+    .assistant-document {
+      background: #ffffff;
+      color: #111111;
+      margin: 0 auto;
+      padding: 36px 44px 52px;
+    }
+    body.view-shopping .assistant-document {
+      max-width: 720px;
+    }
+    body.view-week .assistant-document {
+      max-width: none;
+    }
+    .assistant-doc-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      margin-bottom: 28px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .assistant-doc-header--report {
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 24px;
+      margin-bottom: 24px;
     }
     .assistant-logo {
       display: block;
-      width: 100px;
+      width: 120px;
       height: auto;
-      margin: 0 auto 10px;
+      flex-shrink: 0;
     }
-    .assistant-subtitle {
+    .assistant-doc-titles {
+      text-align: left;
+    }
+    .assistant-doc-eyebrow {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .assistant-doc-name {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 2.15rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: #111;
+      line-height: 1.05;
+      margin-bottom: 8px;
+    }
+    .assistant-doc-guide {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #444;
+      margin-bottom: 4px;
+    }
+    .assistant-doc-date {
+      font-size: 0.8rem;
       color: #666;
-      font-size: 0.9rem;
-      text-align: center;
-      margin-bottom: 16px;
+    }
+    .assistant-doc-brand {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 4px;
+    }
+    .assistant-doc-title {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #111;
+      line-height: 1.05;
+      margin-bottom: 8px;
+    }
+    .assistant-doc-meta {
+      font-size: 0.82rem;
+      color: #666;
+      letter-spacing: 0.01em;
+    }
+    .assistant-doc-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid #e8e8e8;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #999;
+    }
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     h2 {
       font-family: Oswald, system-ui, sans-serif;
@@ -1511,94 +1693,152 @@ function buildAssistantDocumentHtml() {
       max-width: 45%;
     }
     .assistant-empty { color: #666; font-size: 0.9rem; }
-    .agenda-grid {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      gap: 10px;
+    .agenda-section-title {
+      font-family: Oswald, system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111;
+      margin-bottom: 4px;
     }
-    .agenda-day-name {
+    .agenda-section-sub {
+      font-size: 0.78rem;
+      color: #666;
+      margin-bottom: 18px;
+    }
+    .agenda-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .agenda-table-corner {
+      width: 76px;
+      border-bottom: 2px solid transparent;
+    }
+    .agenda-day-head {
       font-family: Oswald, system-ui, sans-serif;
       font-size: 0.72rem;
       font-weight: 600;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
+      text-align: center;
       color: #111;
-      padding-bottom: 4px;
-      margin-bottom: 10px;
+      padding: 0 6px 8px;
       border-bottom: 2px solid #fdc500;
+      vertical-align: bottom;
     }
-    .agenda-meal {
-      margin-bottom: 3.5rem;
-    }
-    .agenda-meal:last-child {
-      margin-bottom: 0;
-    }
-    .agenda-meal-head {
+    .agenda-row-head {
       font-family: Oswald, system-ui, sans-serif;
-      font-size: 0.62rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: #444;
-      margin-bottom: 2px;
-      line-height: 1.35;
+      vertical-align: top;
+      text-align: right;
+      padding: 26px 10px 26px 0;
+      border-bottom: 1px solid #ececec;
+      width: 76px;
+    }
+    .agenda-row:last-child .agenda-row-head,
+    .agenda-row:last-child .agenda-cell {
+      border-bottom: none;
+    }
+    .agenda-cell {
+      vertical-align: top;
+      padding: 26px 10px;
+      border-bottom: 1px solid #ececec;
+      border-left: 1px solid #f2f2f2;
     }
     .agenda-time {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
       color: #111;
+      line-height: 1.2;
+    }
+    .agenda-meal-label {
+      display: block;
+      font-size: 0.56rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #777;
+      line-height: 1.25;
+      margin-top: 1px;
+    }
+    .agenda-cell-empty {
+      display: block;
+      color: #d8d8d8;
+      font-size: 0.85rem;
+      text-align: center;
+      line-height: 1;
     }
     .agenda-foods {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
     .agenda-foods li {
       display: flex;
-      justify-content: space-between;
-      gap: 6px;
-      font-size: 0.62rem;
+      flex-direction: column;
+      gap: 1px;
+      font-size: 0.72rem;
       line-height: 1.35;
-      padding: 2px 0;
-      border-bottom: 1px solid #f0f0f0;
     }
     .agenda-food {
-      flex: 1;
-      min-width: 0;
+      font-weight: 400;
+      color: #222;
     }
     .agenda-amount {
-      flex-shrink: 0;
       font-weight: 700;
+      font-size: 0.68rem;
       color: #111;
-      text-align: right;
     }
     @media print {
-      .assistant-toolbar { display: none; }
-      body.view-shopping { padding: 0; }
-      body.view-week { padding: 0; }
-      body.view-week .agenda-meal {
-        margin-bottom: 4.25rem;
+      body { background: #fff; }
+      .assistant-screen { display: none !important; }
+      .assistant-document {
+        padding: 0;
+        margin: 0;
+        max-width: none;
+      }
+      .assistant-doc-header {
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+      }
+      .assistant-logo {
+        width: 100px;
+      }
+      .assistant-doc-name {
+        font-size: 1.85rem;
+      }
+      .agenda-row-head,
+      .agenda-cell {
+        padding-top: 22px;
+        padding-bottom: 22px;
       }
       .assistant-panel[hidden] { display: none !important; }
     }
   </style>
 </head>
 <body class="view-week" data-print-view="week">
-  <div class="assistant-toolbar">
-    <button type="button" data-print-view="week" class="active">Week plan</button>
-    <button type="button" data-print-view="shopping">Shopping list</button>
-    <button type="button" class="primary" id="print-btn">Print</button>
+  <div class="assistant-screen">
+    <div class="assistant-toolbar">
+      <button type="button" data-print-view="week" class="active">Week plan</button>
+      <button type="button" data-print-view="shopping">Shopping list</button>
+      <button type="button" class="primary" id="print-btn">Print</button>
+    </div>
   </div>
-  <header class="assistant-brand">
-    <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="100" height="100" />
-  </header>
-  <section class="assistant-panel" id="panel-week">
-    <p class="assistant-subtitle">Weekly Meal Agenda</p>
-    ${weekHtml}
-  </section>
-  <section class="assistant-panel" id="panel-shopping" hidden>
-    <p class="assistant-subtitle">Shopping List</p>
-    ${shoppingHtml}
-  </section>
+  <article class="assistant-document">
+    <section class="assistant-panel" id="panel-week">
+      ${weekHeaderHtml}
+      ${weekHtml}
+      ${weekFooterHtml}
+    </section>
+    <section class="assistant-panel" id="panel-shopping" hidden>
+      ${shoppingHeaderHtml}
+      ${shoppingHtml}
+    </section>
+  </article>
   <script>
     (function () {
       const body = document.body;

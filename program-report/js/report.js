@@ -23,7 +23,7 @@ import {
   applyMenuPlannerProgram,
   bootMenuPlannerPage,
   persistMenuPlannerState,
-} from '../../menuplanner/js/planner.js?v=50';
+} from '../../menuplanner/js/planner.js?v=52';
 import { QUESTIONNAIRE_WELCOME_URL } from '../../js/siteUrls.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
