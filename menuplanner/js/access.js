@@ -131,31 +131,22 @@ export async function bootMenuPlannerAccess(onProgramReady) {
 
   const params = new URLSearchParams(location.search);
   const queryEmail = String(params.get('email') || '').trim();
+  const handoff = params.get('handoff') === '1';
 
   const bridged = loadProgramBridge();
-  if (programReady(bridged)) {
+  if (handoff && programReady(bridged)) {
     showPlanner();
     await onProgramReady(bridged);
-    return;
-  }
-
-  const remembered = queryEmail || getAppEmail();
-  if (isValidEmail(remembered)) {
-    setAccessBusy(true);
-    showAccessGate({ email: remembered });
-    const result = await loadProgramForEmail(remembered);
-    setAccessBusy(false);
-    if (result.ok) {
-      showPlanner();
-      await onProgramReady(result.package);
-      return;
+    if (params.has('handoff')) {
+      params.delete('handoff');
+      const qs = params.toString();
+      history.replaceState(null, '', `${location.pathname}${qs ? `?${qs}` : ''}${location.hash}`);
     }
-    const { error, hint } = accessMessage(result, remembered);
-    showAccessGate({ email: remembered, error, hint });
     return;
   }
 
-  showAccessGate();
+  const prefilled = queryEmail || getAppEmail();
+  showAccessGate({ email: isValidEmail(prefilled) ? prefilled : '' });
 }
 
 export function openAccessGate() {
