@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/questionnaire.css?v=10" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=11" />
 </head>
 <body>
   <div class="q-app">
@@ -101,21 +101,21 @@
                 </div>
               </div>
               <label class="q-field">
-                <span class="q-label">Birthdate</span>
-                <input class="q-input q-field__control" name="birthDate" type="date" />
-              </label>
-            </div>
-            <div class="q-grid q-grid--2">
-              <label class="q-field">
-                <span class="q-label">Age <span class="q-optional">(from birthdate)</span></span>
-                <input class="q-input q-input--short" name="age" readonly tabindex="-1" />
-              </label>
-              <label class="q-field">
                 <span class="q-label">Weight</span>
-                <div class="q-inline">
+                <div class="q-inline q-field__control">
                   <input class="q-input q-input--short" name="weight" inputmode="decimal" required />
                   <span class="q-unit">lbs</span>
                 </div>
+              </label>
+            </div>
+            <div class="q-stack-fields">
+              <label class="q-field">
+                <span class="q-label">Birthdate</span>
+                <input class="q-input" name="birthDate" type="date" />
+              </label>
+              <label class="q-field">
+                <span class="q-label">Age <span class="q-optional">(from birthdate)</span></span>
+                <input class="q-input q-input--short" name="age" readonly tabindex="-1" />
               </label>
             </div>
           </section>
@@ -250,6 +250,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/questionnaire.js?v=15"></script>
+  <script type="module" src="js/questionnaire.js?v=16"></script>
 </body>
 </html>

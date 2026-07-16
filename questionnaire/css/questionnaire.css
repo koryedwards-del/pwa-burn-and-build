@@ -296,6 +296,14 @@ body {
 .q-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .q-grid--tight { margin-top: 12px; }
 
+.q-stack-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: calc(50% - 8px);
+  margin-top: 12px;
+}
+
 .q-grid--row-align {
   align-items: stretch;
 }
