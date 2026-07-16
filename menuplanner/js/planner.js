@@ -1369,20 +1369,18 @@ function buildWeekAgendaContent() {
           <h2 class="agenda-day-name">${escapeHtml(day.label)}</h2>
           ${DAY_SLOTS.map((mealSlot) => {
             const foodLines = mealFoodLinesForPrint(mealSlot.id, day.id);
-            const foodsHtml = foodLines.length
-              ? `<ul class="agenda-foods">
+            if (!foodLines.length) return '';
+            return `
+              <div class="agenda-meal">
+                <p class="agenda-meal-head">${mealSlotHeadline(mealSlot.id)}</p>
+                <ul class="agenda-foods">
                   ${foodLines.map((line) => `
                     <li>
                       <span class="agenda-food">${escapeHtml(line.foodName)}</span>
                       <span class="agenda-amount">${escapeHtml(line.amount)}</span>
                     </li>
                   `).join('')}
-                </ul>`
-              : '';
-            return `
-              <div class="agenda-meal">
-                <p class="agenda-meal-head">${mealSlotHeadline(mealSlot.id)}</p>
-                ${foodsHtml}
+                </ul>
               </div>
             `;
           }).join('')}
