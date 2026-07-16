@@ -10,6 +10,12 @@ import {
   lbmCongratulationsLine,
   weightGoalBandsByLbm,
 } from '../../js/leanBodyAnalysisPrintout.js';
+import {
+  eightWeekProjectionFromPackage,
+  exerciseHoursSummary,
+  formatCalories,
+  macroTableRows,
+} from '../../js/foodPlanPrintout.js';
 
 const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 
@@ -25,7 +31,7 @@ const PREVIEW_FORM = {
   fatPercentText: '38.22',
   fatSource: 'recent',
   workPhysical: 'sitting',
-  workStress: 'busy',
+  workStress: 'comfortable',
   weightTrainingHours: 3,
   cardioHours: 0,
   fatBurningHours: 3,
@@ -38,7 +44,7 @@ const PREVIEW_FORM = {
 const PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1 },
   { id: 'lbm', label: 'Lean body analysis', step: 2 },
-  { id: 'projection', label: '8-week goal', step: 3, future: true },
+  { id: 'foodplan', label: 'Food plan', step: 3 },
   { id: 'servings', label: 'Servings', step: 4, future: true },
 ];
 
@@ -84,6 +90,7 @@ function wantsPreviewFromUrl() {
 function initialPageFromUrl() {
   const page = new URLSearchParams(location.search).get('page');
   if (page === '2' || page === 'lbm') return 1;
+  if (page === '3' || page === 'food' || page === 'foodplan') return 2;
   return 0;
 }
 
@@ -211,7 +218,7 @@ function renderWelcome(pkg) {
       </article>
 
       <footer class="r-actions">
-        <span class="r-note">Pages 3–4 coming next.</span>
+        <span class="r-note">Servings page coming next.</span>
         <button type="button" class="r-btn r-btn--primary" data-report-next>Lean body analysis →</button>
       </footer>
     </section>
@@ -311,8 +318,145 @@ function renderLbmAnalysis(pkg) {
 
       <footer class="r-actions">
         <button type="button" class="r-btn r-btn--ghost" data-report-back>← Welcome</button>
+        <button type="button" class="r-btn r-btn--primary" data-report-next-food>Food plan →</button>
+      </footer>
+    </section>
+  `;
+}
+
+function renderFoodPlan(pkg) {
+  const intake = pkg.intake;
+  const today = computeTodayBodyComposition(intake);
+  const projection = eightWeekProjectionFromPackage(pkg);
+  const hours = exerciseHoursSummary(intake);
+  const macroRows = macroTableRows(pkg.plan?.formula, intake.workIntensity);
+
+  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
+  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
+
+  const fatLost = projection ? projection.fatLostLbs.toFixed(1) : '—';
+  const weekly = projection ? projection.weeklyFatLossLbs.toFixed(1) : '—';
+  const goalLeanPct = projection ? `${projection.endLeanPct.toFixed(2)}%` : '—';
+  const goalLeanLbs = projection ? `${projection.leanLbs.toFixed(1)} lbs.` : '—';
+  const goalFatPct = projection ? `${projection.endBf.toFixed(2)}%` : '—';
+  const goalFatLbs = projection ? `${projection.endFatLbs.toFixed(1)} lbs.` : '—';
+  const goalTotalPct = '100.00%';
+  const goalTotalLbs = projection ? `${projection.endWeight.toFixed(1)} lbs.` : '—';
+
+  const macroBody = macroRows.map((row) => {
+    if (row.spacer) {
+      return '<tr class="r-macro-spacer"><td colspan="8"></td></tr>';
+    }
+    return `
+      <tr>
+        <th scope="row" class="r-macro-label">${escapeHtml(row.label)}</th>
+        <td>${row.proteinG}</td>
+        <td>${formatCalories(row.proteinCal)}</td>
+        <td>${row.carbsG}</td>
+        <td>${formatCalories(row.carbsCal)}</td>
+        <td>${row.fatsG}</td>
+        <td>${formatCalories(row.fatsCal)}</td>
+        <td>${formatCalories(row.totalCal)}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <section class="r-panel">
+      <div>
+        <p class="r-eyebrow">Page 3</p>
+        <h2 class="r-panel__title">Food plan</h2>
+      </div>
+
+      <article class="r-doc">
+        <header class="r-doc__head">
+          <p class="r-doc__meta">
+            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
+          </p>
+        </header>
+
+        <h3>Food Plan</h3>
+        <p>
+          The following food program contains a sophisticated calculation that is based on your individual lean
+          body mass (LBM), and on your activities. This is the most individualized food program available for
+          losing fat and getting more energy. In eight weeks, you could safely lose ${fatLost} pounds of fat. On your
+          information sheet, you indicated you plan to exercise a total of ${hours.total} hour(s) per week.
+          ${hours.wt} hour(s) of weight training, ${hours.cardio} hour(s) of cardiovascular activities,
+          ${hours.fatBurn} hour(s) of fat-burning activities
+        </p>
+
+        <table class="r-goal-table" aria-label="Today and eight week goal">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">TODAY</th>
+              <th scope="col"></th>
+              <th scope="col">EIGHT WEEK GOAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row" class="r-goal-row-label">LEAN</th>
+              <td>${today.leanPct} % ${today.leanLbs} lbs.</td>
+              <td></td>
+              <td>${goalLeanPct} ${goalLeanLbs}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="r-goal-row-label">FAT</th>
+              <td>${today.fatPct} % ${today.fatLbs} lbs.</td>
+              <td class="r-goal-fat-loss">−${fatLost} lbs. of fat</td>
+              <td>${goalFatPct} ${goalFatLbs}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="r-goal-row-label">TOTAL</th>
+              <td>${today.totalPct} % ${today.totalLbs} lbs.</td>
+              <td></td>
+              <td>${goalTotalPct} ${goalTotalLbs}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          You project to lose an average of ${weekly} pounds of fat per week. In addition, you could gain lean weight.
+          Gaining lean weight will increase your strength and energy and offset your fat loss.
+        </p>
+
+        <p>
+          How much food you need each day depends on how much LBM you have. Also, it depends on your
+          activity level and the type and amount of exercise you participate in. Based on the information you
+          provided, the following table gives you the number of calories and the amount of protein, carbohydrates
+          and fat you need per day to maintain your fat or to reduce body fat. Also listed is what your body
+          requires at rest (your resting metabolic rate), for your workday and for one hour of each type of exercise.
+        </p>
+
+        <table class="r-macro-table" aria-label="Daily macro and calorie requirements">
+          <thead>
+            <tr>
+              <th scope="col" rowspan="2"></th>
+              <th scope="colgroup" colspan="2">PROTEIN</th>
+              <th scope="colgroup" colspan="2">CARBS</th>
+              <th scope="colgroup" colspan="2">FATS</th>
+              <th scope="colgroup" rowspan="2">TOTAL</th>
+            </tr>
+            <tr>
+              <th scope="col">grams</th>
+              <th scope="col">calories</th>
+              <th scope="col">grams</th>
+              <th scope="col">calories</th>
+              <th scope="col">grams</th>
+              <th scope="col">calories</th>
+              <th scope="col">calories</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${macroBody}
+          </tbody>
+        </table>
+      </article>
+
+      <footer class="r-actions">
+        <button type="button" class="r-btn r-btn--ghost" data-report-back-lbm>← Lean body analysis</button>
         <div>
-          <p class="r-note" style="text-align:right;margin-bottom:8px;">8-week goal &amp; servings pages next — meal planner for now.</p>
+          <p class="r-note" style="text-align:right;margin-bottom:8px;">Servings page next — meal planner for now.</p>
           <a class="r-btn r-btn--primary" href="../mealplanner/">Continue to meal planner →</a>
         </div>
       </footer>
@@ -344,11 +488,13 @@ function renderPage() {
 
   main.innerHTML = activePage === 0
     ? renderWelcome(programPackage)
-    : renderLbmAnalysis(programPackage);
+    : activePage === 1
+      ? renderLbmAnalysis(programPackage)
+      : renderFoodPlan(programPackage);
 }
 
 function showPage(index) {
-  activePage = Math.max(0, Math.min(index, 1));
+  activePage = Math.max(0, Math.min(index, 2));
   renderNav();
   renderPage();
 }
@@ -366,6 +512,14 @@ function bindEvents() {
       return;
     }
     if (event.target.closest('[data-report-next]')) {
+      showPage(1);
+      return;
+    }
+    if (event.target.closest('[data-report-next-food]')) {
+      showPage(2);
+      return;
+    }
+    if (event.target.closest('[data-report-back-lbm]')) {
       showPage(1);
       return;
     }

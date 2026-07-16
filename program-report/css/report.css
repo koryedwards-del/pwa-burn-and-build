@@ -270,6 +270,60 @@ body {
   font-size: 0.76rem;
 }
 
+.r-goal-table,
+.r-macro-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 16px 0;
+}
+
+.r-goal-table th,
+.r-goal-table td,
+.r-macro-table th,
+.r-macro-table td {
+  border: 1px solid var(--doc-rule);
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+.r-goal-table thead th,
+.r-macro-table thead th {
+  background: #ebe8e2;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.r-goal-row-label,
+.r-macro-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: #f0ede6;
+  text-align: left;
+}
+
+.r-goal-fat-loss {
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.r-macro-table td {
+  text-align: center;
+}
+
+.r-macro-spacer td {
+  height: 10px;
+  border-left: none;
+  border-right: none;
+  background: var(--doc-paper);
+}
+
 .r-stats {
   display: flex;
   flex-wrap: wrap;
