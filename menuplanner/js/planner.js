@@ -87,6 +87,8 @@ const WEEK_MEAL_EMPTY_LABEL = {
   'evening-snack': 'Snack',
 };
 
+const SAVED_MEAL_NAME_MAX = 14;
+
 let foods = [];
 let programPackage = null;
 const mealSlotsById = {};
@@ -399,7 +401,7 @@ function mealIdFromName(name) {
 }
 
 function saveMealFromDay(mealSlotId, name) {
-  const trimmed = name.trim();
+  const trimmed = name.trim().slice(0, SAVED_MEAL_NAME_MAX);
   if (!trimmed) return;
 
   const meal = {
@@ -421,6 +423,7 @@ function saveMealFromDay(mealSlotId, name) {
 function openSaveMealDialog(mealSlotId) {
   const dialog = document.getElementById('save-meal-dialog');
   const input = document.getElementById('save-meal-name');
+  input.maxLength = SAVED_MEAL_NAME_MAX;
   pendingSaveDaySlotId = mealSlotId;
   input.value = mealSlotMeta(mealSlotId).mealName || '';
   dialog.showModal();
