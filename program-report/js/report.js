@@ -159,7 +159,6 @@ function renderWelcome(pkg) {
       <div>
         <p class="r-eyebrow">Page 1</p>
         <h2 class="r-panel__title">Welcome</h2>
-        <p class="r-panel__lead">The bridge between building your diet and living it — the same role the seminar printout played for decades.</p>
       </div>
 
       <article class="r-doc">
@@ -170,32 +169,52 @@ function renderWelcome(pkg) {
           </p>
         </header>
 
-        <h3>Congratulations</h3>
+        <h3>Welcome</h3>
         <p>
-          You have in your hands the most advanced diet available anywhere, at any price. It is the most
-          individualized program available for losing fat. This diet will not work effectively for anyone else
-          because it has been created just for you — using your lean body mass, your job, your lifestyle, and
-          your plan for exercise and activities.
+          Congratulations! You have in your hands the most advanced diet available anywhere, at any price. It is
+          the most individualized program available for losing fat. This diet will not work effectively for anyone
+          else because it has been created just for you, using your LBM, your job, your lifestyle and your daily
+          plan for exercise &amp; activities.
         </p>
 
-        <p class="r-doc__section-title">How we did it</p>
         <p>
-          We determined your lean weight from the body composition information you provided. Then you told us
-          about your job, lifestyle, exercise, and activities. With that, the Burn Engine generated this
-          program report.
+          How we did it. We determined your lean weight using sophisticated body composition testing. Then you
+          told us about your job, lifestyle, exercise and activities. With this information, the computer generated
+          this five-page report. Included is your ultrasound body composition report that I call your Lean Body
+          Analysis, your body composition history and the last two pages are your custom designed diet.
         </p>
 
-        <p class="r-doc__section-title">What&apos;s in your report</p>
-        <ul class="r-doc__list">
-          <li><strong>Lean body analysis</strong> — your lean mass today and where you&apos;re headed in eight weeks.</li>
-          <li><strong>8-week goal</strong> — projected fat loss (coming next on this bridge).</li>
-          <li><strong>Servings</strong> — your daily food targets, split into meals (then into the meal planner).</li>
-        </ul>
-
+        <h3>Lean Body Analysis</h3>
         <p>
-          Lean body mass is what the computer uses to calculate your metabolic rate. That number drives everything
-          that follows — including how much food you need and how fast you can lose fat while keeping your strength
-          and energy.
+          Page two is the results of your body composition test. Although very few people want to know how fat
+          they are, all of them want to how to lose fat. Our Lean Body Analysis page includes a breakdown of
+          your current body composition with an emphasis on the good stuff. LBM (lean body mass) is used by
+          the computer to calculate your metabolic rate (RMR). In addition, the Lean Body Analysis projects
+          appropriate weight goals based on your current lean body mass.
+        </p>
+
+        <h3>History</h3>
+        <p>
+          Page three is a record of your body composition history with me. Having a history of body compositions
+          can give you valuable information about how your eating habits are affecting your weight loss. That&apos;s
+          why I recommend having your body composition checked every 6-8 weeks. I call it a check-in.
+        </p>
+
+        <h3>Food Plan</h3>
+        <p>
+          Page four is your custom-designed diet. How much food you need each day depends on how much LBM
+          you have, your job, lifestyle and the type and amount of exercise you participate in. Based on the
+          information you provide, this diet gives you the amount of protein, carbohydrates and fat you need per
+          day to lose fat. It also tells you how much fat you can lose in eight weeks. And it shows you what your
+          body requires at rest (your resting metabolic rate), for your workday and for one hour of each type of
+          exercise.
+        </p>
+
+        <h3>Servings</h3>
+        <p>
+          Page five is the servings page. No need to count calories or macros in this diet. The computer breaks
+          down all the information from the table on page four and shows you the number of servings you need
+          daily to have maximum strength &amp; energy and to lose fat as fast as possible.
         </p>
       </article>
 
