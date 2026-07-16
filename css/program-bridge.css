@@ -2,6 +2,9 @@
 
 :root {
   --app-width: 1200px;
+  /* Nav stack (4 items) + gap before diet plans card — keeps dock aligned on all pages */
+  --pb-nav-stack-height: 11.5rem;
+  --pb-dock-gap: 24px;
 }
 
 .pb-layout {
@@ -13,29 +16,28 @@
 }
 
 .pb-aside {
-  display: grid;
-  grid-template-rows: auto 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   position: sticky;
   top: 24px;
   align-self: start;
-  height: calc(100vh - 48px);
   max-height: calc(100vh - 48px);
 }
 
 .pb-aside > nav {
-  grid-row: 1;
+  flex-shrink: 0;
 }
 
 .pb-aside__dock {
-  grid-row: 3;
-  align-self: start;
+  margin-top: var(--pb-dock-gap);
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
   min-height: 0;
-  max-height: 100%;
+  max-height: calc(100vh - 48px - var(--pb-nav-stack-height) - var(--pb-dock-gap));
   overflow-y: auto;
 }
 
