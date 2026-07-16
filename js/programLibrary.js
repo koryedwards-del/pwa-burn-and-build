@@ -50,6 +50,17 @@ let openingProgramId = null;
 let switchHandler = null;
 let beforeSwitchHandler = null;
 let getProgramPackageHandler = null;
+const expandedProgramCards = new Set();
+
+function isProgramCardCollapsed(programId) {
+  return !expandedProgramCards.has(programId);
+}
+
+function setProgramCardCollapsed(programId, collapsed) {
+  if (!programId) return;
+  if (collapsed) expandedProgramCards.delete(programId);
+  else expandedProgramCards.add(programId);
+}
 
 function bindLibraryEvents() {
   const library = libraryEl();
@@ -57,6 +68,20 @@ function bindLibraryEvents() {
   library.dataset.bound = '1';
 
   library.addEventListener('click', (event) => {
+    const toggle = event.target.closest('[data-toggle-program-card]');
+    if (toggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      const programId = toggle.getAttribute('data-toggle-program-card');
+      const card = toggle.closest('[data-program-card]');
+      if (!programId || !card) return;
+      const collapsed = card.classList.toggle('is-collapsed');
+      setProgramCardCollapsed(programId, !collapsed);
+      toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      toggle.setAttribute('aria-label', collapsed ? 'Show diet details' : 'Hide diet details');
+      return;
+    }
+
     const button = event.target.closest('[data-switch-program]');
     if (!button || button.disabled) return;
     const programId = button.getAttribute('data-switch-program');
@@ -109,6 +134,7 @@ function renderLibraryRows(rows, activeId) {
       ${rows.map((row) => renderSidebarProgramCard(row, {
         isActive: row.id === activeId,
         isOpening: row.id === openingProgramId,
+        isCollapsed: isProgramCardCollapsed(row.id),
       })).join('')}
     </div>`;
 }
