@@ -7,15 +7,25 @@ alwaysApply: true
 
 Repo: **`pwa-burn-and-build`** (this workspace)
 
+**Product:** Brand-new **desktop web application** on burnandbuilddiet.com — not the old phone/PWA daily app.
+
 | Path | Host | Role |
 |------|------|------|
-| `landing/` | burnandbuilddiet.com (GitHub Pages) | Marketing — Hardkor-style content rebranded as B&B; see `docs/LANDING-MERGE.md` |
-| `createyourfoodplan/` | Render `/createyourfoodplan/` | Program creator — email → intake → Stripe → save plan |
-| `myplan/` | GitHub Pages or Render `/myplan/` | Daily app — diet, grocery, logging |
-| `server/` | Render | API + SQLite for programs/contacts |
+| `landing/` | burnandbuilddiet.com (GitHub Pages) | Marketing CTAs → questionnaire |
+| `questionnaire/` | `/questionnaire/` | Intake steps → save plan → checkout handoff |
+| `createyourfoodplan/` | `/createyourfoodplan/` | Plan-ready screen + Stripe paywall ($149 per program) |
+| `program-report/` | `/program-report/` | Deliverable — projections, plan/servings |
+| `mealplanner/` | `/mealplanner/` | Menu planner + Print Assistant (desktop) |
+| `server/` | Render (`program-creator`) | API + SQLite — programs, per-program payment |
+| `myplan/` | `/myplan/` | **Legacy phone app** — daily logging; not the desktop funnel |
 
-**Flow:** Landing CTA → creator → myplan app.
+**Desktop user flow:**
+```
+Landing → questionnaire → Stripe (per program) → program-report → mealplanner
+```
 
-**Deploy landing:** push to `main` (changes under `landing/`) → GitHub Actions workflow `deploy-landing.yml`. In repo **Settings → Pages**, source must be **GitHub Actions** (not the old `burnandbuildlandingpage` repo).
+Each new program requires its own Stripe checkout. Access is per `programId`, not lifetime per email.
 
-**Hardkor Diet landing** (`hardkordietlandingpage/`) is being merged into `landing/` (step-by-step; tracker: `docs/LANDING-MERGE.md`). **Signal+** is a separate product.
+**Deploy site:** push to `main` (paths in `.github/workflows/deploy-landing.yml`) → GitHub Pages.
+
+**Hardkor Diet landing** merge tracker: `docs/LANDING-MERGE.md`. **Signal+** is a separate product.
