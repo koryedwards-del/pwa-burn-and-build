@@ -174,8 +174,7 @@ function renderWelcome(pkg) {
         </p>
       </article>
 
-      <footer class="r-actions">
-        <span class="r-note">Three-page program report — then menu planner.</span>
+      <footer class="r-actions r-actions--end">
         <button type="button" class="r-btn r-btn--primary" data-report-next>Food plan →</button>
       </footer>
     </section>

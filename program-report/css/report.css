@@ -494,6 +494,10 @@ a.r-nav__btn {
   border-top: 1px solid var(--border);
 }
 
+.r-actions--end {
+  justify-content: flex-end;
+}
+
 .r-btn {
   display: inline-flex;
   align-items: center;
