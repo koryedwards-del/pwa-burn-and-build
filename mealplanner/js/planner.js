@@ -899,7 +899,11 @@ function renderFoodFilterLabel() {
   }
   const daySlot = DAY_SLOTS.find((item) => item.id === activeSlot.daySlotId);
   const slot = SLOT_META[activeSlot.categorySlot];
-  label.textContent = `${daySlot.label} · ${slot.label}`;
+  const servings = requiredServings(activeSlot.daySlotId, activeSlot.categorySlot);
+  const servingNote = programPackage && !isFatSlot(activeSlot.categorySlot)
+    ? ` · ${fmtServings(servings)} serving${Math.abs(servings - 1) < 0.05 ? '' : 's'}`
+    : '';
+  label.textContent = `${daySlot.label} · ${slot.label}${servingNote}`;
   label.hidden = false;
 }
 
@@ -941,6 +945,17 @@ function renderFoodFilters() {
   });
 }
 
+function foodCardDetail(food) {
+  if (!activeSlot || isFatSlot(activeSlot.categorySlot)) {
+    return scaledLabel(food, 1);
+  }
+  const servings = requiredServings(activeSlot.daySlotId, activeSlot.categorySlot);
+  if (!programPackage || Math.abs(servings - 1) < 0.05) {
+    return scaledLabel(food, 1);
+  }
+  return `${fmtServings(servings)} × ${scaledLabel(food, 1)} = ${scaledLabel(food, servings)}`;
+}
+
 function renderFoodStack() {
   const container = document.getElementById('food-stack');
   const list = foodsForActiveSlot();
@@ -962,7 +977,7 @@ function renderFoodStack() {
       data-food-name="${food.name.replace(/"/g, '&quot;')}"
     >
       <p class="card__title">${escapeHtml(food.name)}</p>
-      <p class="card__detail">${scaledLabel(food, 1)}</p>
+      <p class="card__detail">${foodCardDetail(food)}</p>
     </div>
   `).join('');
 
