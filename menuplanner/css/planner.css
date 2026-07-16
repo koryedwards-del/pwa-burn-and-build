@@ -679,17 +679,36 @@ body {
 }
 
 .saved-meal {
-  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 10px 12px;
   overflow: hidden;
   position: relative;
   border-radius: 7px;
 }
 
+.saved-meal__apply {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-bright);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.saved-meal__apply:hover {
+  color: var(--gold);
+}
+
 .saved-meal__delete {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 1;
+  position: static;
+  flex-shrink: 0;
   width: 22px;
   height: 22px;
   padding: 0;
@@ -708,64 +727,12 @@ body {
   background: var(--orange-dim);
 }
 
-.saved-meal__header {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px 38px 10px 14px;
+.saved-meal__apply[draggable="true"] {
   cursor: grab;
 }
 
-.saved-meal__header:active {
+.saved-meal__apply[draggable="true"]:active {
   cursor: grabbing;
-}
-
-.saved-meal__summary {
-  flex: 1;
-  min-width: 0;
-}
-
-.saved-meal .card__title {
-  font-size: 0.9rem;
-  color: var(--text-bright);
-}
-
-.saved-meal .card__detail {
-  margin-top: 5px;
-  font-size: 0.74rem;
-}
-
-.saved-meal__items {
-  list-style: none;
-  margin: 0;
-  padding: 0 12px 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.saved-meal__item {
-  display: grid;
-  grid-template-columns: 72px 1fr auto;
-  gap: 6px;
-  align-items: baseline;
-  font-size: 0.7rem;
-}
-
-.saved-meal__slot {
-  color: var(--muted);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.saved-meal__food {
-  color: var(--text);
-}
-
-.saved-meal__amount {
-  color: var(--muted);
-  white-space: nowrap;
 }
 
 .card--slot {

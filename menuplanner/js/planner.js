@@ -821,47 +821,40 @@ function syncFoodSearchField() {
   }
 }
 
-function mealItemDetail(item) {
-  const food = foods.find((entry) => entry.name === item.foodName);
-  if (!food) return escapeHtml(item.foodName);
-  return servingAmountLabel(food, item.servings);
-}
-
-function mealSummary(meal) {
-  return meal.items.map((item) => item.foodName.split(',')[0]).join(' · ');
-}
-
 function mealDragHtml(meal) {
-  return `
-    <p class="card__title">${escapeHtml(meal.name)}</p>
-    <p class="card__detail">${escapeHtml(mealSummary(meal))}</p>
-  `;
+  return `<p class="card__title">${escapeHtml(meal.name)}</p>`;
+}
+
+function applySavedMealFromTap(mealId) {
+  const meal = savedMeals.find((item) => item.id === mealId);
+  if (!meal) return;
+  const daySlotId = activeSlot?.daySlotId;
+  if (!daySlotId || !acceptsSavedMealDrop(daySlotId)) {
+    showPlannerToast('Select breakfast, lunch, or dinner first, then tap a saved meal.', {
+      variant: 'info',
+    });
+    return;
+  }
+  applySavedMealToDay(daySlotId, meal);
 }
 
 function renderSavedMealCard(meal) {
-  const itemsHtml = meal.items.map((item) => `
-    <li class="saved-meal__item">
-      <span class="saved-meal__slot">${escapeHtml(item.slot)}</span>
-      <span class="saved-meal__food">${escapeHtml(item.foodName)}</span>
-      <span class="saved-meal__amount">${mealItemDetail(item)}</span>
-    </li>
-  `).join('');
-
   return `
     <article class="saved-meal card card--meal" data-meal-id="${meal.id}">
+      <button
+        type="button"
+        class="saved-meal__apply"
+        draggable="true"
+        data-meal-source
+        data-meal-apply="${meal.id}"
+        data-meal-id="${meal.id}"
+      >${escapeHtml(meal.name)}</button>
       <button
         type="button"
         class="saved-meal__delete"
         data-meal-delete="${meal.id}"
         aria-label="Delete ${escapeHtml(meal.name)}"
       >×</button>
-      <div class="saved-meal__header" draggable="true" data-meal-source data-meal-id="${meal.id}">
-        <div class="saved-meal__summary">
-          <p class="card__title">${escapeHtml(meal.name)}</p>
-          <p class="card__detail">${escapeHtml(mealSummary(meal))}</p>
-        </div>
-      </div>
-      <ul class="saved-meal__items">${itemsHtml}</ul>
     </article>
   `;
 }
@@ -896,7 +889,13 @@ function renderSavedMeals() {
   const meals = savedMealsByPopularity();
   container.innerHTML = meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
-    : '<p class="saved-meals__hint">It won\'t take long before you have a few go-to meals. Eggs and oatmeal. Chicken and rice. Save your go-to meals to speed up menu planning. If you build a meal and don\'t see Save Meal, it\'s because a required slot is still empty. Fill protein and grains/starches first.</p>';
+    : '<p class="saved-meals__hint">It won\'t take long before you have a few go-to meals. Eggs and oatmeal. Chicken and rice. Save your go-to meals to speed up menu planning. Tap a saved meal to add it to the meal you\'re working on.</p>';
+
+  document.querySelectorAll('[data-meal-apply]').forEach((button) => {
+    button.addEventListener('click', () => {
+      applySavedMealFromTap(button.dataset.mealApply);
+    });
+  });
 
   document.querySelectorAll('[data-meal-delete]').forEach((button) => {
     button.addEventListener('click', (event) => {
