@@ -16,6 +16,7 @@ import {
   formatCalories,
   macroTableRows,
 } from '../../js/foodPlanPrintout.js';
+import { extraFatLines, servingsGridRows } from '../../js/servingsPrintout.js';
 
 const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 
@@ -45,7 +46,7 @@ const PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1 },
   { id: 'lbm', label: 'Lean body analysis', step: 2 },
   { id: 'foodplan', label: 'Food plan', step: 3 },
-  { id: 'servings', label: 'Servings', step: 4, future: true },
+  { id: 'servings', label: 'Servings', step: 4 },
 ];
 
 let activePage = 0;
@@ -91,6 +92,7 @@ function initialPageFromUrl() {
   const page = new URLSearchParams(location.search).get('page');
   if (page === '2' || page === 'lbm') return 1;
   if (page === '3' || page === 'food' || page === 'foodplan') return 2;
+  if (page === '4' || page === 'servings') return 3;
   return 0;
 }
 
@@ -218,7 +220,7 @@ function renderWelcome(pkg) {
       </article>
 
       <footer class="r-actions">
-        <span class="r-note">Servings page coming next.</span>
+        <span class="r-note">Four-page program report — then meal planner.</span>
         <button type="button" class="r-btn r-btn--primary" data-report-next>Lean body analysis →</button>
       </footer>
     </section>
@@ -455,10 +457,84 @@ function renderFoodPlan(pkg) {
 
       <footer class="r-actions">
         <button type="button" class="r-btn r-btn--ghost" data-report-back-lbm>← Lean body analysis</button>
-        <div>
-          <p class="r-note" style="text-align:right;margin-bottom:8px;">Servings page next — meal planner for now.</p>
-          <a class="r-btn r-btn--primary" href="../mealplanner/">Continue to meal planner →</a>
-        </div>
+        <button type="button" class="r-btn r-btn--primary" data-report-next-servings>Servings →</button>
+      </footer>
+    </section>
+  `;
+}
+
+function renderServings(pkg) {
+  const intake = pkg.intake;
+  const gridRows = servingsGridRows(pkg);
+  const extraFats = extraFatLines(pkg);
+
+  const name = escapeHtml((intake.preferredName || 'You').toUpperCase());
+  const date = escapeHtml(formatReportDateShort(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
+
+  const gridBody = gridRows.map((row) => `
+    <tr>
+      <th scope="row" class="r-servings-label">${escapeHtml(row.label)}</th>
+      <td>${row.daily}</td>
+      <td>${row.breakfast}</td>
+      <td>${row.snack1}</td>
+      <td>${row.lunch}</td>
+      <td>${row.snack2}</td>
+      <td>${row.dinner}</td>
+      <td>${row.snack3}</td>
+    </tr>
+  `).join('');
+
+  const extraBody = extraFats.map((line) => `
+    <tr>
+      <th scope="row" class="r-servings-label">Extra Fats</th>
+      <td>${escapeHtml(line.value)}</td>
+      <td colspan="6">${escapeHtml(line.note)}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <section class="r-panel">
+      <div>
+        <p class="r-eyebrow">Page 4</p>
+        <h2 class="r-panel__title">Servings</h2>
+      </div>
+
+      <article class="r-doc">
+        <header class="r-doc__head">
+          <p class="r-doc__meta">
+            Prepared exclusively for: <strong>${name}</strong> On: <strong>${date}</strong>
+          </p>
+        </header>
+
+        <h3>Servings</h3>
+        <p class="r-doc__note">
+          NOTE: Always consult your physician before starting this plan or making any change in your eating
+          habits.
+        </p>
+
+        <table class="r-servings-table" aria-label="Daily servings by meal">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">Daily</th>
+              <th scope="col">Breakfast</th>
+              <th scope="col">Snack</th>
+              <th scope="col">Lunch</th>
+              <th scope="col">Snack</th>
+              <th scope="col">Dinner</th>
+              <th scope="col">Snack</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${gridBody}
+            ${extraBody}
+          </tbody>
+        </table>
+      </article>
+
+      <footer class="r-actions">
+        <button type="button" class="r-btn r-btn--ghost" data-report-back-food>← Food plan</button>
+        <a class="r-btn r-btn--primary" href="../mealplanner/">Continue to meal planner →</a>
       </footer>
     </section>
   `;
@@ -490,11 +566,13 @@ function renderPage() {
     ? renderWelcome(programPackage)
     : activePage === 1
       ? renderLbmAnalysis(programPackage)
-      : renderFoodPlan(programPackage);
+      : activePage === 2
+        ? renderFoodPlan(programPackage)
+        : renderServings(programPackage);
 }
 
 function showPage(index) {
-  activePage = Math.max(0, Math.min(index, 2));
+  activePage = Math.max(0, Math.min(index, 3));
   renderNav();
   renderPage();
 }
@@ -516,6 +594,14 @@ function bindEvents() {
       return;
     }
     if (event.target.closest('[data-report-next-food]')) {
+      showPage(2);
+      return;
+    }
+    if (event.target.closest('[data-report-next-servings]')) {
+      showPage(3);
+      return;
+    }
+    if (event.target.closest('[data-report-back-food]')) {
       showPage(2);
       return;
     }

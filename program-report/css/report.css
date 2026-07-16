@@ -324,6 +324,44 @@ body {
   background: var(--doc-paper);
 }
 
+.r-doc__note {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.r-servings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 16px 0;
+}
+
+.r-servings-table th,
+.r-servings-table td {
+  border: 1px solid var(--doc-rule);
+  padding: 8px 10px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.r-servings-table .r-servings-label {
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: #f0ede6;
+}
+
+.r-servings-table thead th {
+  background: #ebe8e2;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .r-stats {
   display: flex;
   flex-wrap: wrap;
