@@ -2,10 +2,10 @@
 
 :root {
   --app-width: 1200px;
-  /* Nav stack (4 items) + gap before diet plans card — keeps dock aligned on all pages */
-  --pb-nav-stack-height: 11.5rem;
+  /* Nav stack (4 items + print shop on menu planner) + gap before diet plans card */
+  --pb-nav-stack-height: 16rem;
   --pb-side-card-height: 4.5rem;
-  --pb-dock-gap: calc(3 * var(--pb-side-card-height));
+  --pb-dock-gap: calc(2 * var(--pb-side-card-height));
 }
 
 .pb-layout {
@@ -268,6 +268,15 @@ a.pb-nav__btn {
   background: var(--gold-dim);
   border-color: rgba(253, 197, 0, 0.35);
   color: var(--gold);
+}
+
+.pb-nav__item--print-shop {
+  margin-top: 8px;
+}
+
+.pb-nav__item--print-shop .pb-side-card {
+  min-height: 0;
+  width: 100%;
 }
 
 .pb-page-head {

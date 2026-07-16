@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/program-bridge.css?v=24" />
+  <link rel="stylesheet" href="../css/program-bridge.css?v=25" />
   <link rel="stylesheet" href="css/report.css?v=16" />
   <link rel="stylesheet" href="../menuplanner/css/planner.css?v=41" />
 </head>
@@ -86,14 +86,14 @@
     <div class="r-layout pb-layout">
       <aside class="pb-aside">
         <nav class="r-nav pb-nav" aria-label="Program report" id="r-nav-list"></nav>
+        <section class="pb-side-card pb-side-card--action" id="print-shop" aria-label="Print shop" hidden>
+          <button type="button" class="print-shop-card" id="print-shop-open">
+            <span class="pb-side-card__title">Print Shop</span>
+            <span class="print-shop-card__hint">Week at-a-glance · Grocery list</span>
+          </button>
+        </section>
         <div class="pb-aside__dock">
           <section class="pb-side-card" id="program-library" aria-label="Your diet plans" hidden></section>
-          <section class="pb-side-card pb-side-card--action" id="print-shop" aria-label="Print shop" hidden>
-            <button type="button" class="print-shop-card" id="print-shop-open">
-              <span class="pb-side-card__title">Print Shop</span>
-              <span class="print-shop-card__hint">Week at-a-glance · Grocery list</span>
-            </button>
-          </section>
         </div>
       </aside>
 
@@ -205,6 +205,6 @@
       event.preventDefault();
     });
   </script>
-  <script type="module" src="js/report.js?v=36"></script>
+  <script type="module" src="js/report.js?v=37"></script>
 </body>
 </html>

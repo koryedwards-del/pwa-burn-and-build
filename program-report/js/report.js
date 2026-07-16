@@ -133,12 +133,28 @@ function loadPreviewProgram() {
   showPage(initialPageFromUrl());
 }
 
+function mountPrintShopUnderMenuPlanner(nav) {
+  const printShop = document.getElementById('print-shop');
+  const list = nav?.querySelector('.pb-nav__list');
+  if (!printShop || !list) return;
+
+  const menuItem = list.querySelector('[data-nav-page="3"]')?.closest('.pb-nav__item');
+  let slot = list.querySelector('.pb-nav__item--print-shop');
+  if (!slot) {
+    slot = document.createElement('li');
+    slot.className = 'pb-nav__item pb-nav__item--print-shop';
+  }
+  slot.appendChild(printShop);
+  menuItem?.insertAdjacentElement('afterend', slot);
+}
+
 function renderNav() {
   const nav = document.getElementById('r-nav-list');
   if (!nav) return;
   const activeId = PAGES[activePage]?.id || 'welcome';
   nav.innerHTML = programNavHtml(activeId);
   nav.setAttribute('aria-label', 'Program report');
+  mountPrintShopUnderMenuPlanner(nav);
 }
 
 function renderWelcome(pkg) {
