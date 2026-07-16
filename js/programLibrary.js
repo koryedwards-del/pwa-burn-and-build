@@ -1,4 +1,4 @@
-/** Sidebar — purchased diet plans + quick links; switch active program. */
+/** Sidebar — purchased diet plans; switch active program. */
 
 import {
   fetchProgramByIdFromServer,
@@ -12,18 +12,10 @@ import { getActiveProgramId, setActiveProgramId } from './programActive.js';
 import { summarizeProgram, sortProgramHistory } from './programHistory.js';
 import { renderSidebarProgramCard } from './programHistoryUi.js';
 import { persistProgramBridge } from './programBridgeHandoff.js';
-import { flushProgramPersist, scheduleProgramPersist } from './menuPlannerState.js';
-import { programSettingsHtml } from './programBridgeUi.js';
-import { generateMealSlots } from './burnEngine.js';
-import { planFromPackage } from './programPackage.js';
-import { formatWakeDisplay, wakeTimeFromParts } from './onboardingEngine.js';
+import { flushProgramPersist } from './menuPlannerState.js';
 
 function libraryEl() {
   return document.getElementById('program-library');
-}
-
-function linksEl() {
-  return document.getElementById('program-links');
 }
 
 function resolveProgramEmail(programPackage) {
@@ -52,7 +44,6 @@ function summarizePaidPrograms(programRows = []) {
 let openingProgramId = null;
 let switchHandler = null;
 let beforeSwitchHandler = null;
-let settingsChangeHandler = null;
 let getProgramPackageHandler = null;
 const expandedProgramCards = new Set();
 
@@ -103,89 +94,6 @@ function bindLibraryEvents() {
   });
 }
 
-function readWakeSettingsFromPanel(panel) {
-  const hour = panel.querySelector('[data-wake-part="hour"]')?.value || '6';
-  const minute = panel.querySelector('[data-wake-part="minute"]')?.value || '00';
-  const ampm = panel.querySelector('[data-wake-part="ampm"]')?.value || 'AM';
-  return wakeTimeFromParts(hour, minute, ampm);
-}
-
-function packageWithWakeSettings(pkg, { wakeTime, wakeEnabled }) {
-  if (!pkg?.intake) return pkg;
-  const nextWakeTime = wakeTime || pkg.intake.wakeTime || pkg.intake.defaultWakeTime || '06:00';
-  const next = {
-    ...pkg,
-    intake: {
-      ...pkg.intake,
-      wakeTimeEnabled: wakeEnabled,
-      wakeTime: nextWakeTime,
-      defaultWakeTime: nextWakeTime,
-    },
-  };
-  const plan = planFromPackage(next);
-  if (plan) {
-    const [wh, wm] = nextWakeTime.split(':').map(Number);
-    next.plan = {
-      ...next.plan,
-      mealSlots: generateMealSlots(wh, wm, plan.servings),
-    };
-  }
-  return next;
-}
-
-function updateWakePanelState(panel, { wakeEnabled, wakeTime }) {
-  const toggle = panel.querySelector('[data-pb-wake-enabled]');
-  const wakePanel = panel.querySelector('[data-pb-wake-panel]');
-  const display = panel.querySelector('[data-pb-wake-display]');
-  if (toggle) {
-    toggle.classList.toggle('is-on', wakeEnabled);
-    toggle.setAttribute('aria-pressed', wakeEnabled ? 'true' : 'false');
-  }
-  if (wakePanel) wakePanel.classList.toggle('is-disabled', !wakeEnabled);
-  wakePanel?.querySelectorAll('[data-wake-part]').forEach((select) => {
-    select.disabled = !wakeEnabled;
-  });
-  if (display && wakeTime) display.textContent = formatWakeDisplay(wakeTime);
-}
-
-async function applyWakeSettings(nextPkg) {
-  persistProgramBridge(nextPkg);
-  scheduleProgramPersist(nextPkg);
-  if (settingsChangeHandler) {
-    await settingsChangeHandler(nextPkg);
-  }
-  renderSettings(nextPkg);
-}
-
-function bindSettingsEvents() {
-  const panel = linksEl();
-  if (!panel || panel.dataset.bound === '1') return;
-  panel.dataset.bound = '1';
-
-  panel.addEventListener('click', (event) => {
-    const toggle = event.target.closest('[data-pb-wake-enabled]');
-    if (!toggle) return;
-    event.preventDefault();
-    const pkg = typeof getProgramPackageHandler === 'function' ? getProgramPackageHandler() : null;
-    if (!pkg?.intake) return;
-    const wakeEnabled = !toggle.classList.contains('is-on');
-    const wakeTime = readWakeSettingsFromPanel(panel);
-    applyWakeSettings(packageWithWakeSettings(pkg, { wakeTime, wakeEnabled }))
-      .catch((err) => console.error(err));
-  });
-
-  panel.addEventListener('change', (event) => {
-    const select = event.target.closest('[data-wake-part]');
-    if (!select || select.disabled) return;
-    const pkg = typeof getProgramPackageHandler === 'function' ? getProgramPackageHandler() : null;
-    if (!pkg?.intake || pkg.intake.wakeTimeEnabled === false) return;
-    const wakeTime = readWakeSettingsFromPanel(panel);
-    updateWakePanelState(panel, { wakeEnabled: true, wakeTime });
-    applyWakeSettings(packageWithWakeSettings(pkg, { wakeTime, wakeEnabled: true }))
-      .catch((err) => console.error(err));
-  });
-}
-
 function renderLibraryLoading() {
   const library = libraryEl();
   if (!library) return;
@@ -219,22 +127,11 @@ function renderLibraryRows(rows, activeId) {
     </div>`;
 }
 
-function renderSettings(programPackage = null) {
-  const links = linksEl();
-  if (!links) return;
-  const pkg = programPackage
-    || (typeof getProgramPackageHandler === 'function' ? getProgramPackageHandler() : null);
-  links.hidden = false;
-  links.innerHTML = programSettingsHtml(pkg);
-}
-
 export async function refreshProgramLibrary({
   activeProgramId = getActiveProgramId(),
   programPackage = null,
 } = {}) {
   bindLibraryEvents();
-  bindSettingsEvents();
-  renderSettings(programPackage);
 
   const email = resolveProgramEmail(programPackage);
   if (!isValidEmail(email)) {
@@ -261,14 +158,11 @@ export async function refreshProgramLibrary({
   return rows;
 }
 
-export function initProgramLibrary({ onSwitch, beforeSwitch, onSettingsChange, getProgramPackage } = {}) {
+export function initProgramLibrary({ onSwitch, beforeSwitch, getProgramPackage } = {}) {
   switchHandler = onSwitch || null;
   beforeSwitchHandler = beforeSwitch || null;
-  settingsChangeHandler = onSettingsChange || null;
   getProgramPackageHandler = getProgramPackage || null;
   bindLibraryEvents();
-  bindSettingsEvents();
-  renderSettings(typeof getProgramPackage === 'function' ? getProgramPackage() : null);
 }
 
 export async function switchProgram(programId, { programPackage = null } = {}) {
@@ -315,14 +209,13 @@ export function bootProgramBridgeAside({
   getProgramPackage,
   onSwitch,
   beforeSwitch,
-  onSettingsChange,
   openAccessGate,
 } = {}) {
   if (typeof openAccessGate === 'function') {
     window.__bnbOpenAccessGate = openAccessGate;
   }
 
-  initProgramLibrary({ onSwitch, beforeSwitch, onSettingsChange, getProgramPackage });
+  initProgramLibrary({ onSwitch, beforeSwitch, getProgramPackage });
 
   const pkg = typeof getProgramPackage === 'function' ? getProgramPackage() : null;
   syncProgramEmail(pkg);

@@ -1522,9 +1522,6 @@ async function init(pkg) {
       onSwitch: async (nextPkg) => {
         await init(nextPkg);
       },
-      onSettingsChange: async (nextPkg) => {
-        programPackage = nextPkg;
-      },
     });
   } catch (err) {
     console.error('Program library sidebar failed to load:', err);
