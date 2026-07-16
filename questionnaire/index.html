@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1200" />
+  <script>
+    (function () {
+      try { sessionStorage.setItem('bnb_browse_mode', '1'); } catch (e) {}
+    })();
+  </script>
   <title>Burn &amp; Build — Program Questionnaire</title>
   <link rel="stylesheet" href="css/questionnaire.css?v=2" />
 </head>
@@ -13,7 +18,7 @@
         <img class="q-logo" src="../img/brand/bblogo.png" alt="Burn &amp; Build" width="56" height="56" />
         <div class="q-brand__text">
           <h1 class="q-title">Program Questionnaire</h1>
-          <p class="q-tag">Wireframe — desktop intake (seminar sheet)</p>
+          <p class="q-tag">Desktop intake — build your personalized program</p>
         </div>
       </div>
     </header>

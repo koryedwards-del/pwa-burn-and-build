@@ -16,7 +16,7 @@ import {
   programNavHtml,
 } from '../../js/programBridgeUi.js';
 import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js';
-import { CREATOR_ENTRY_URL } from '../../js/siteUrls.js';
+import { INTAKE_ENTRY_URL } from '../../js/siteUrls.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
 const PREVIEW_FORM = {
@@ -432,7 +432,7 @@ function renderMissingProgram() {
       <p class="r-note" style="margin-bottom:20px;">Preview the report with sample data, or complete intake to build yours.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
         <button type="button" class="r-btn r-btn--primary" data-report-preview>Preview sample report →</button>
-        <a class="r-btn r-btn--ghost" href="${CREATOR_ENTRY_URL}">Create your diet</a>
+        <a class="r-btn r-btn--ghost" href="${INTAKE_ENTRY_URL}">Create your diet</a>
       </div>
     </div>
   `;

@@ -43,5 +43,6 @@ export function myplanAppHref(email = '') {
   return `${url.pathname}${url.search}`;
 }
 
-export const CREATOR_ENTRY_PATH = '/createyourfoodplan/?browse=1';
-export { CREATOR_ENTRY_URL } from './siteUrls.js';
+export const INTAKE_ENTRY_PATH = '/questionnaire/?browse=1';
+export const CREATOR_CHECKOUT_PATH = '/createyourfoodplan/?browse=1';
+export { INTAKE_ENTRY_URL, CREATOR_CHECKOUT_URL, CREATOR_ENTRY_URL } from './siteUrls.js';

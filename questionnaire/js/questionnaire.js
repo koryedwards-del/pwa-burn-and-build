@@ -9,9 +9,7 @@ import { buildProgramPackage } from '../../js/programPackage.js';
 import { persistAppEmail, saveProgramToServer, isValidEmail } from '../../js/programApi.js';
 import { persistProgramBridge } from '../../js/programBridgeHandoff.js';
 
-import { CREATOR_ENTRY_URL } from '../../js/siteUrls.js';
-
-const CREATOR_CHECKOUT_URL = CREATOR_ENTRY_URL;
+import { CREATOR_CHECKOUT_URL } from '../../js/siteUrls.js';
 
 const STEPS = [
   { id: 'welcome', label: 'Welcome' },
