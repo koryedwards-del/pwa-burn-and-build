@@ -227,6 +227,8 @@ function initDefaults() {
   if (form.elements.intakeDate) {
     form.elements.intakeDate.value = today;
   }
+  const intakeDisplay = document.getElementById('q-intake-date-display');
+  if (intakeDisplay) intakeDisplay.textContent = formatBirthDateText(today);
   if (form.elements.signatureDate && !form.elements.signatureDate.value) {
     form.elements.signatureDate.value = today;
   }
@@ -284,7 +286,7 @@ function bindEvents() {
 
     continueBtn.disabled = true;
     const prevLabel = continueBtn.textContent;
-    continueBtn.textContent = 'Saving your program…';
+    continueBtn.textContent = 'Opening checkout…';
 
     try {
       const program = buildProgramFromValues(values);

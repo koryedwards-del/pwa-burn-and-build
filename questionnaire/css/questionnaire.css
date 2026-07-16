@@ -209,25 +209,50 @@ body {
   gap: 14px;
 }
 
-.q-panel--workday .q-card {
+.q-radio-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
   min-height: 104px;
   padding: 20px 18px;
-  justify-content: center;
-  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.q-panel--workday .q-card:hover {
+.q-radio-card:hover {
   border-color: rgba(253, 197, 0, 0.35);
 }
 
-.q-panel--workday .q-card__title {
+.q-radio-card:has(input:checked) {
+  border-color: var(--gold);
+  background: var(--gold-select-bg);
+}
+
+.q-radio-card input {
+  margin-top: 3px;
+  accent-color: var(--gold);
+  flex-shrink: 0;
+}
+
+.q-radio-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.q-radio-card__title {
+  font-weight: 700;
   font-size: 0.95rem;
   letter-spacing: 0.02em;
 }
 
-.q-panel--workday .q-card__sub {
+.q-radio-card__sub {
   font-size: 0.82rem;
+  color: var(--muted);
   line-height: 1.45;
 }
 
@@ -355,6 +380,16 @@ body {
 
 .q-input--short {
   max-width: 120px;
+}
+
+.q-static-value {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.95rem;
 }
 
 .q-inline {

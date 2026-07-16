@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/questionnaire.css?v=7" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=9" />
 </head>
 <body>
   <div class="q-app">
@@ -70,10 +70,11 @@
                 <span class="q-label">Phone <span class="q-optional">(optional)</span></span>
                 <input class="q-input" type="tel" name="phone" autocomplete="tel" />
               </label>
-              <label class="q-field">
+              <div class="q-field">
                 <span class="q-label">Today's date</span>
-                <input class="q-input" type="date" name="intakeDate" readonly tabindex="-1" />
-              </label>
+                <p class="q-static-value" id="q-intake-date-display"></p>
+                <input type="hidden" name="intakeDate" />
+              </div>
             </div>
             <div class="q-grid q-grid--3 q-grid--tight q-grid--row-align">
               <label class="q-field">
@@ -122,9 +123,9 @@
               <div class="q-field q-choice-group">
                 <span class="q-label">Typical exertion at work</span>
                 <div class="q-options q-options--cards">
-                  <label class="q-card"><input type="radio" name="workPhysical" value="sitting" /><span class="q-card__title">Sitting</span><span class="q-card__sub">Office, reception, desk work</span></label>
-                  <label class="q-card"><input type="radio" name="workPhysical" value="feet" /><span class="q-card__title">Moving</span><span class="q-card__sub">Delivery, warehouse, on your feet</span></label>
-                  <label class="q-card"><input type="radio" name="workPhysical" value="carrying" /><span class="q-card__title">Lifting</span><span class="q-card__sub">Heavy physical lifting and carrying</span></label>
+                  <label class="q-radio-card"><input type="radio" name="workPhysical" value="sitting" /><span class="q-radio-card__body"><span class="q-radio-card__title">Sitting</span><span class="q-radio-card__sub">Office, reception, desk work</span></span></label>
+                  <label class="q-radio-card"><input type="radio" name="workPhysical" value="feet" /><span class="q-radio-card__body"><span class="q-radio-card__title">Moving</span><span class="q-radio-card__sub">Delivery, warehouse, on your feet</span></span></label>
+                  <label class="q-radio-card"><input type="radio" name="workPhysical" value="carrying" /><span class="q-radio-card__body"><span class="q-radio-card__title">Lifting</span><span class="q-radio-card__sub">Heavy physical lifting and carrying</span></span></label>
                 </div>
               </div>
               <div class="q-field q-choice-group">
@@ -227,10 +228,10 @@
             <div class="q-panel__head">
               <p class="q-eyebrow">Step 7</p>
               <h2 class="q-panel__title">Review &amp; continue</h2>
-              <p class="q-panel__lead">Confirm your answers, then continue to your program report.</p>
+              <p class="q-panel__lead">Confirm your answers, then continue to secure checkout ($149).</p>
             </div>
             <dl class="q-review" id="q-review"></dl>
-            <a class="q-btn q-btn--primary" href="../program-report/" id="q-continue">View your program →</a>
+            <a class="q-btn q-btn--primary" href="../createyourfoodplan/?browse=1" id="q-continue">Complete purchase →</a>
           </section>
         </form>
 
@@ -242,6 +243,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/questionnaire.js?v=12"></script>
+  <script type="module" src="js/questionnaire.js?v=14"></script>
 </body>
 </html>
