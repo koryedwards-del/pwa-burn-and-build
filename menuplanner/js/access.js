@@ -200,17 +200,7 @@ function bindAccessGate(onProgramReady) {
       return;
     }
 
-    try {
-      await onProgramReady(result.package);
-      showPlanner();
-    } catch (err) {
-      console.error(err);
-      const messageEl = gate.querySelector('#access-error-message');
-      if (messageEl) {
-        messageEl.textContent = 'Something went wrong loading the menu planner. Refresh and try again.';
-      }
-      showAccessScreen('error', { email: result.email || email });
-    }
+    window.location.href = '../program-report/?page=welcome';
   });
 
   gate.querySelector('#access-unpaid-checkout')?.addEventListener('click', () => {
