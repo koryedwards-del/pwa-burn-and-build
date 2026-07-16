@@ -89,6 +89,10 @@ body {
   min-height: 0;
 }
 
+#r-main[hidden] {
+  display: none !important;
+}
+
 .r-nav__list {
   list-style: none;
   display: flex;

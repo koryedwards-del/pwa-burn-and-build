@@ -1079,7 +1079,8 @@ html.mp-handoff-pending #planner-root {
 }
 
 #access-gate[hidden],
-#planner-root[hidden] {
+#planner-root[hidden],
+#planner-page[hidden] {
   display: none !important;
 }
 
