@@ -1972,7 +1972,6 @@ function bindEvents() {
 }
 
 async function init() {
-  try { sessionStorage.removeItem('bnb_browse_mode'); } catch (e) {}
   load();
 
   if (!hasActiveProgram() && hasLocalBackup()) {

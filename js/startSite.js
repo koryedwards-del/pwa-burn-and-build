@@ -274,12 +274,9 @@ function shouldAllowCreatorInStandalone() {
 }
 
 function escapeStandaloneToMyplan() {
-  const standalone = isStandaloneDisplay();
-  if (!standalone || shouldAllowCreatorInStandalone()) return false;
-  const email = (store.email || getAppEmail() || '').trim();
-  const q = isValidEmail(email) ? `?email=${encodeURIComponent(email)}` : '';
-  window.location.replace(`/myplan/${q}`);
-  return true;
+  // Creator is web-first — never bounce an intake session into the daily app.
+  setBrowseModeFlag();
+  return false;
 }
 
 async function openProgramReport() {

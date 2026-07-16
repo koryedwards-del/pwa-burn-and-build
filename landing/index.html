@@ -10,6 +10,13 @@
           sessionStorage.setItem('bnb_browse_mode', '1');
         }
       } catch (e) {}
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('a[href*="/createyourfoodplan/"]').forEach((link) => {
+          link.addEventListener('click', () => {
+            try { sessionStorage.setItem('bnb_browse_mode', '1'); } catch (e) {}
+          });
+        });
+      });
       var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
       var browse = new URLSearchParams(location.search).has('browse')
         || sessionStorage.getItem('bnb_browse_mode') === '1';
