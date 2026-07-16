@@ -207,9 +207,6 @@ body {
 }
 
 .week-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
   padding: 12px;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -217,48 +214,59 @@ body {
   flex-shrink: 0;
 }
 
-.day-col {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 8px;
+.week-matrix {
+  display: grid;
+  grid-template-columns: 3.25rem repeat(6, minmax(0, 1fr));
+  gap: 6px 8px;
+  align-items: stretch;
+}
+
+.week-matrix__corner {
   min-height: 0;
-  transition: transform 0.2s ease, border-color 0.15s ease, background 0.15s ease;
-  cursor: pointer;
 }
 
-.day-col--active {
-  transform: scale(1.07);
-  z-index: 1;
-  border-color: var(--gold-muted);
-  background: var(--gold-select-bg);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+.week-matrix__col-head {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: center;
+  padding: 0 4px 6px;
+  border-bottom: 2px solid rgba(253, 197, 0, 0.35);
 }
 
-.day-col__name {
+.week-matrix__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 8px;
-  text-align: center;
+  cursor: pointer;
+  padding-right: 4px;
+  border-right: 1px solid var(--border);
 }
 
-.day-col--active .day-col__name {
+.week-matrix__day--active {
   color: rgba(253, 197, 0, 0.82);
 }
 
-.day-col__meals {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.week-matrix__cell {
+  min-width: 0;
+}
+
+.week-matrix__cell--active-row {
+  border-color: var(--gold-muted);
+  background: var(--gold-select-bg);
 }
 
 .mini-card {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   line-height: 1.3;
-  padding: 4px 6px;
+  padding: 5px 8px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -267,6 +275,7 @@ body {
   overflow: hidden;
   text-overflow: clip;
   transition: background 0.15s ease, border-color 0.2s ease;
+  cursor: pointer;
 }
 
 .mini-card.drop-zone--over {

@@ -649,34 +649,52 @@ function weekMealLabel(weekDay, mealSlotId) {
   return { text: WEEK_MEAL_EMPTY_LABEL[mealSlotId], empty: true };
 }
 
+function weekGridColumnLabel(mealSlotId) {
+  const slot = DAY_SLOTS.find((item) => item.id === mealSlotId);
+  if (!slot) return mealSlotId;
+  if (slot.template === 'snack') return 'Snack';
+  return slot.label;
+}
+
 function renderWeekGrid() {
   const container = document.getElementById('week-grid');
-  container.innerHTML = WEEK_DAYS.map((day) => {
+  const headCells = WEEK_GRID_MEALS.map((mealSlotId) => `
+    <div class="week-matrix__col-head">${escapeHtml(weekGridColumnLabel(mealSlotId))}</div>
+  `).join('');
+
+  const bodyRows = WEEK_DAYS.map((day) => {
     const active = day.id === activeWeekDay;
-    const mealsHtml = WEEK_GRID_MEALS.map((mealSlotId) => {
+    const dayCell = `
+      <div
+        class="week-matrix__day${active ? ' week-matrix__day--active' : ''}"
+        data-week-day-select
+        data-week-day="${day.id}"
+      >${escapeHtml(day.label)}</div>
+    `;
+    const mealCells = WEEK_GRID_MEALS.map((mealSlotId) => {
       const { text, empty } = weekMealLabel(day.id, mealSlotId);
       const titleAttr = empty ? '' : ` title="${escapeHtml(text)}"`;
       const dropAttrs = acceptsSavedMealDrop(mealSlotId) ? ' data-week-meal-drop' : '';
       return `
         <div
-          class="mini-card${empty ? ' mini-card--empty' : ''}"${dropAttrs}${titleAttr}
+          class="mini-card week-matrix__cell${empty ? ' mini-card--empty' : ''}${active ? ' week-matrix__cell--active-row' : ''}"
+          ${dropAttrs}${titleAttr}
+          data-week-day-select
           data-week-day="${day.id}"
           data-meal-slot="${mealSlotId}"
         >${escapeHtml(text)}</div>
       `;
     }).join('');
-
-    return `
-      <div
-        class="day-col${active ? ' day-col--active' : ''}"
-        data-week-day-select
-        data-week-day="${day.id}"
-      >
-        <p class="day-col__name">${day.label}</p>
-        <div class="day-col__meals">${mealsHtml}</div>
-      </div>
-    `;
+    return dayCell + mealCells;
   }).join('');
+
+  container.innerHTML = `
+    <div class="week-matrix" role="grid" aria-label="Week">
+      <div class="week-matrix__corner" aria-hidden="true"></div>
+      ${headCells}
+      ${bodyRows}
+    </div>
+  `;
 }
 
 function setActiveWeekDay(weekDay) {
