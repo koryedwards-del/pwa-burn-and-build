@@ -46,6 +46,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px 12px;
+  min-height: 4.5rem;
 }
 
 .pb-side-card__title {

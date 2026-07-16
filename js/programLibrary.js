@@ -7,12 +7,12 @@ import {
   isValidEmail,
   persistAppEmail,
   normalizeEmail,
-} from './programApi.js?v=17';
-import { getActiveProgramId, setActiveProgramId } from './programActive.js?v=17';
-import { summarizeProgram, sortProgramHistory } from './programHistory.js?v=17';
-import { renderSidebarProgramCard } from './programHistoryUi.js?v=17';
-import { persistProgramBridge } from './programBridgeHandoff.js?v=17';
-import { flushProgramPersist } from './menuPlannerState.js?v=17';
+} from './programApi.js?v=22';
+import { getActiveProgramId, setActiveProgramId } from './programActive.js?v=22';
+import { summarizeProgram, sortProgramHistory } from './programHistory.js?v=22';
+import { renderSidebarProgramCard } from './programHistoryUi.js?v=22';
+import { persistProgramBridge } from './programBridgeHandoff.js?v=22';
+import { flushProgramPersist } from './menuPlannerState.js?v=22';
 
 function libraryEl() {
   return document.getElementById('program-library');
@@ -46,6 +46,34 @@ let switchHandler = null;
 let beforeSwitchHandler = null;
 let getProgramPackageHandler = null;
 const expandedProgramCards = new Set();
+const LIBRARY_CACHE_KEY = 'bnb_sidebar_library';
+let lastRenderedSignature = '';
+
+function libraryCacheKey(email) {
+  return `${LIBRARY_CACHE_KEY}:${email}`;
+}
+
+function readLibraryCache(email) {
+  try {
+    const parsed = JSON.parse(sessionStorage.getItem(libraryCacheKey(email)) || 'null');
+    if (!parsed || !Array.isArray(parsed.rows)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeLibraryCache(email, rows, activeId) {
+  try {
+    sessionStorage.setItem(libraryCacheKey(email), JSON.stringify({ rows, activeId }));
+  } catch {
+    /* ignore quota errors */
+  }
+}
+
+function rowsSignature(rows, activeId) {
+  return `${activeId || ''}:${openingProgramId || ''}:${rows.map((row) => row.id).join(',')}`;
+}
 
 function isProgramCardCollapsed(programId) {
   return !expandedProgramCards.has(programId);
@@ -94,18 +122,16 @@ function bindLibraryEvents() {
   });
 }
 
-function renderLibraryLoading() {
-  const library = libraryEl();
-  if (!library) return;
-  library.hidden = false;
-  library.innerHTML = `
-    <h2 class="pb-side-card__title">Your diet plans</h2>
-    <p class="pb-side-card__loading">Loading plans…</p>`;
-}
-
 function renderLibraryRows(rows, activeId) {
   const library = libraryEl();
   if (!library) return;
+
+  const signature = rowsSignature(rows, activeId);
+  if (signature === lastRenderedSignature && library.querySelector('.pb-program-list, .pb-side-card__empty')) {
+    library.hidden = false;
+    return;
+  }
+  lastRenderedSignature = signature;
 
   if (!rows.length) {
     library.hidden = false;
@@ -137,24 +163,32 @@ export async function refreshProgramLibrary({
   if (!isValidEmail(email)) {
     const library = libraryEl();
     if (library) library.hidden = true;
+    lastRenderedSignature = '';
     return [];
   }
 
-  renderLibraryLoading();
+  const cached = readLibraryCache(email);
+  if (cached?.rows?.length) {
+    renderLibraryRows(cached.rows, activeProgramId);
+  }
 
   const result = await fetchProgramHistoryFromServer(email);
   if (!result.ok) {
     const library = libraryEl();
     if (library) {
-      library.innerHTML = `
-        <h2 class="pb-side-card__title">Your diet plans</h2>
-        <p class="pb-side-card__error">${result.message || 'Could not load your plans.'}</p>`;
+      if (!library.querySelector('.pb-program-list, .pb-program-card')) {
+        library.hidden = false;
+        library.innerHTML = `
+          <h2 class="pb-side-card__title">Your diet plans</h2>
+          <p class="pb-side-card__error">${result.message || 'Could not load your plans.'}</p>`;
+      }
     }
     return [];
   }
 
   const rows = sortProgramHistory(summarizePaidPrograms(result.programs), activeProgramId);
   renderLibraryRows(rows, activeProgramId);
+  writeLibraryCache(email, rows, activeProgramId);
   return rows;
 }
 

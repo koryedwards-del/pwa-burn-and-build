@@ -11,7 +11,7 @@ import {
   plannerStateFromPackage,
   scheduleProgramPersist,
 } from '../../js/menuPlannerState.js?v=17';
-import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=17';
+import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=22';
 import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=17';
 import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=11';
 
@@ -1484,46 +1484,67 @@ function initPrintAssistant() {
   document.getElementById('print-assistant').addEventListener('click', openPrintAssistant);
 }
 
-async function init(pkg) {
-  programPackage = pkg || loadProgramPackage();
+let programBridgeBooted = false;
+let plannerShellReady = false;
+
+function renderPlannerWorkspace() {
+  renderWeekGrid();
+  renderActiveDayLabel();
+  renderDayColumn();
+  renderSavedMeals();
+  renderFoodFilterLabel();
+  renderFoodFilters();
+  renderFoodStack();
+}
+
+function applyProgramPackage(pkg) {
+  programPackage = pkg;
   if (programPackage?.program?.id) {
     setActiveProgramId(programPackage.program.id);
   }
   applyPlannerState(plannerStateFromPackage(programPackage));
   initMealSlotsFromProgram(programPackage);
   renderProgramChrome();
-  bootProgramBridgeAside({
-    getProgramPackage: () => programPackage,
-    openAccessGate,
-    beforeSwitch: async () => {
-      persistPlannerToProgram({ immediate: true });
-    },
-    onSwitch: async (nextPkg) => {
-      await init(nextPkg);
-    },
-  }).catch((err) => {
-    console.error('Program library sidebar failed to load:', err);
-  });
-
-  const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
-  if (!response.ok) {
-    throw new Error('Could not load foods catalog.');
+  if (plannerShellReady) {
+    renderPlannerWorkspace();
   }
-  foods = await response.json();
-  renderWeekGrid();
-  initWeekGrid();
-  renderActiveDayLabel();
-  renderDayColumn();
-  renderSavedMeals();
-  renderFoodFilterLabel();
-  renderFoodFilters();
-  initSaveMealDialog();
-  initClearDayMenu();
-  initClearWeekMenu();
-  initFoodSearch();
-  initPrintAssistant();
-  renderFoodStack();
-  initFoodDropTargets();
+}
+
+async function init(pkg) {
+  applyProgramPackage(pkg || loadProgramPackage());
+
+  if (!programBridgeBooted) {
+    programBridgeBooted = true;
+    bootProgramBridgeAside({
+      getProgramPackage: () => programPackage,
+      openAccessGate,
+      beforeSwitch: async () => {
+        persistPlannerToProgram({ immediate: true });
+      },
+      onSwitch: async (nextPkg) => {
+        applyProgramPackage(nextPkg);
+      },
+    }).catch((err) => {
+      console.error('Program library sidebar failed to load:', err);
+    });
+  }
+
+  if (!plannerShellReady) {
+    const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
+    if (!response.ok) {
+      throw new Error('Could not load foods catalog.');
+    }
+    foods = await response.json();
+    initWeekGrid();
+    initSaveMealDialog();
+    initClearDayMenu();
+    initClearWeekMenu();
+    initFoodSearch();
+    initPrintAssistant();
+    initFoodDropTargets();
+    plannerShellReady = true;
+    renderPlannerWorkspace();
+  }
 }
 
 window.addEventListener('beforeunload', () => {
