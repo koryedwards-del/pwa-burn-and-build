@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=7" />
-  <link rel="stylesheet" href="css/planner.css?v=23" />
+  <link rel="stylesheet" href="css/planner.css?v=24" />
 </head>
 <body>
   <section id="access-gate" class="mp-access">
@@ -18,9 +18,9 @@
       <p class="mp-access__eyebrow">Burn &amp; Build</p>
 
       <div id="access-screen-email" class="mp-access__screen">
-        <h1 class="mp-access__title">Welcome back</h1>
-        <p class="mp-access__lead">Sign in with the email on your Burn &amp; Build program to open the menu planner.</p>
-        <form id="access-form" class="mp-access__form">
+        <h1 class="mp-access__title">Menu planner</h1>
+        <p class="mp-access__lead">Sign in with the email on your purchased program to plan meals here. This is not your program Welcome page — after sign-in, use the left sidebar for Welcome, Projections, Plan/Servings, and Menu planner.</p>
+        <form id="access-form" class="mp-access__form" action="#" method="post" novalidate>
           <label class="mp-access__field">
             <span class="mp-access__label">Email</span>
             <input
@@ -34,7 +34,7 @@
             />
           </label>
           <p id="access-form-error" class="mp-access__error" hidden></p>
-          <button type="submit" class="mp-access__submit" id="access-submit">Continue</button>
+          <button type="submit" class="mp-access__submit" id="access-submit">Open menu planner</button>
         </form>
         <div class="mp-access__footer">
           <p class="mp-access__footer-lead">Need a new diet?</p>
@@ -173,6 +173,11 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/planner.js?v=33"></script>
+  <script>
+    document.getElementById('access-form')?.addEventListener('submit', (event) => {
+      event.preventDefault();
+    });
+  </script>
+  <script type="module" src="js/planner.js?v=34"></script>
 </body>
 </html>

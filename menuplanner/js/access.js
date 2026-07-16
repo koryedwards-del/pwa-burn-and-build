@@ -47,7 +47,7 @@ function showAccessScreen(screen, { email = '' } = {}) {
     }
     if (submit) {
       submit.disabled = false;
-      submit.textContent = 'Continue';
+      submit.textContent = 'Open menu planner';
     }
     input?.focus();
   }
@@ -75,7 +75,21 @@ function setAccessBusy(busy) {
   const submit = gateEl()?.querySelector('#access-submit');
   if (!submit) return;
   submit.disabled = busy;
-  submit.textContent = busy ? 'Checking…' : 'Continue';
+  submit.textContent = busy ? 'Opening…' : 'Open menu planner';
+}
+
+function showEmailValidationError(message) {
+  const errorEl = gateEl()?.querySelector('#access-form-error');
+  if (!errorEl) return;
+  errorEl.textContent = message;
+  errorEl.hidden = false;
+}
+
+function clearEmailValidationError() {
+  const errorEl = gateEl()?.querySelector('#access-form-error');
+  if (!errorEl) return;
+  errorEl.textContent = '';
+  errorEl.hidden = true;
 }
 
 function resolveAccessScreen(result) {
@@ -152,13 +166,17 @@ function bindAccessGate(onProgramReady) {
     event.preventDefault();
     const input = gate.querySelector('#access-email');
     const email = String(input?.value || '').trim();
-    const errorEl = gate.querySelector('#access-form-error');
+    clearEmailValidationError();
+
+    if (!email) {
+      showEmailValidationError('Enter the email on your purchased program.');
+      input?.focus();
+      return;
+    }
 
     if (!isValidEmail(email)) {
-      if (errorEl) {
-        errorEl.textContent = 'Enter a valid email address.';
-        errorEl.hidden = false;
-      }
+      showEmailValidationError('Enter a valid email address.');
+      input?.focus();
       return;
     }
 
@@ -168,10 +186,8 @@ function bindAccessGate(onProgramReady) {
 
     if (!result.ok) {
       if (result.message === 'Enter a valid email address.') {
-        if (errorEl) {
-          errorEl.textContent = result.message;
-          errorEl.hidden = false;
-        }
+        showEmailValidationError(result.message);
+        input?.focus();
         return;
       }
       if (resolveAccessScreen(result) === 'error') {
@@ -209,6 +225,20 @@ function bindAccessGate(onProgramReady) {
       if (messageEl) messageEl.textContent = 'Something went wrong opening checkout. Try again.';
       showAccessScreen('error');
     });
+  });
+
+  gate.querySelector('#access-email')?.addEventListener('input', () => {
+    clearEmailValidationError();
+  });
+
+  gate.querySelector('#access-submit')?.addEventListener('click', (event) => {
+    // Ensure empty-email attempts show our message instead of doing nothing.
+    const input = gate.querySelector('#access-email');
+    if (!String(input?.value || '').trim()) {
+      event.preventDefault();
+      showEmailValidationError('Enter the email on your purchased program.');
+      input?.focus();
+    }
   });
 
   gate.querySelectorAll('[data-access-screen]').forEach((button) => {
