@@ -994,7 +994,7 @@ function renderFoodStack() {
   const list = foodsForActiveSlot();
 
   if (!activeSlot) {
-    container.innerHTML = '<p class="food-stack__hint">Tap a slot on the left, then tap or drag a food.</p>';
+    container.innerHTML = '<p class="food-stack__hint">From the first column, tap a food category — e.g. protein or grains/starches — to see the curated food choices appear in this column. Tap a food to add it to the first column.</p>';
     return;
   }
 
