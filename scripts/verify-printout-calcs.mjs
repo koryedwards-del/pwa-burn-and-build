@@ -104,7 +104,7 @@ const ok = [
     rmr: [40, 69, 72, 1080], workday: [32, 80, 51, 907], weight: [8, 86, 3, 400],
     cardio: [3, 78, 14, 454], fatburn: [4, 48, 20, 389],
     today: ['87.23', '12.77', '101.4', '14.8', '116.2'],
-    proj: [5.7, 0.7, 9.1, 110.5, 9, 91], desirable: 98, capped: true,
+    proj: [5.7, 0.7, 9.1, 110.5, 8.95, 91.05], desirable: 98, capped: true,
   }),
   verifyCase('Monica Anderson 2024', {
     lbm: 97.1, weight: 118, bf: 17.69, gender: 'female', heightIn: 62,
@@ -144,7 +144,7 @@ const ok = [
     rmr: [77, 135, 139, 2101], workday: [62, 156, 99, 1765], weight: [15, 167, 6, 777],
     cardio: [6, 152, 28, 883], fatburn: [8, 94, 39, 756],
     today: ['89.66', '10.34', '197.3', '22.7', '220.0'],
-    proj: [13.8, 1.6, 8.9, 206.2, 4.5, 95.5], desirable: 171, capped: true,
+    proj: [13.5, 1.6, 9.2, 206.5, 4.68, 95.32], desirable: 171, capped: true,
   }),
 ].every(Boolean);
 

@@ -5,8 +5,8 @@ export const FAT_SERVING_CALORIES = 45;
 /** PHP seminar report: eight-week goal uses 60 days (two months). */
 export const PROJECTION_CYCLE_DAYS = 60;
 export const PROJECTION_CYCLE_WEEKS = 8;
-/** PHP printout guardrail — female 9%, male 4.5% (createsankorplan.php / threepagereporthtml.php). */
-export const PROJECTION_BF_FLOOR = { male: 4.5, female: 9 };
+/** Showtime guardrail — female 8.95%, male 4.68%. */
+export const PROJECTION_BF_FLOOR = { male: 4.68, female: 8.95 };
 /** PHP weekly line: abs(Y9) / 8.6, not / 8. */
 export const PROJECTION_WEEKLY_DIVISOR = 8.6;
 
@@ -57,7 +57,7 @@ export function workIntensityMultiplier(intensity) {
 
 /**
  * Eight-week goal projection — PHP threepagereporthtml.php / createfoodpdf.php.
- * Total calorie gap over 60 days; guardrail caps end BF at 9% (F) or 4.5% (M).
+ * Total calorie gap over 60 days; guardrail caps end BF at 8.95% (F) or 4.68% (M).
  */
 export function computeEightWeekFatProjection({
   weightLbs,

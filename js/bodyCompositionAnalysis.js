@@ -103,18 +103,43 @@ export function computeDietProjectionTimeline({
 
   while (curFatLbs > goalFatLbs + 0.05) {
     const remaining = curFatLbs - goalFatLbs;
-    const isFloor = remaining <= cycleFatLossLbs;
-    const lostThisCycle = isFloor ? remaining : cycleFatLossLbs;
-    const weeksThisCycle = isFloor
-      ? (lostThisCycle > 0 ? (lostThisCycle / cycleFatLossLbs) * PROJECTION_CYCLE_WEEKS : 0)
-      : PROJECTION_CYCLE_WEEKS;
 
-    curFatLbs -= lostThisCycle;
+    if (remaining <= cycleFatLossLbs) {
+      const weeksThisCycle = remaining > 0
+        ? (remaining / cycleFatLossLbs) * PROJECTION_CYCLE_WEEKS
+        : 0;
+      cycleWeeks += weeksThisCycle;
+      curFatLbs = goalFatLbs;
+      curWeight = lbm + curFatLbs;
+
+      const timelineLabel = `${Math.round(cycleWeeks)} weeks`;
+      const last = rows[rows.length - 1];
+      if (last && !last.isCurrent && last.timeline === timelineLabel) {
+        rows.pop();
+      }
+
+      if (!shownBadges.Showtime) {
+        shownBadges.Showtime = true;
+        rows.push({
+          timeline: timelineLabel,
+          bodyFat: targetBf,
+          bodyFatDisplay: `${targetBf.toFixed(2)}%`,
+          weight: curWeight,
+          weightDisplay: `${curWeight.toFixed(1)} lbs`,
+          isCurrent: false,
+          badge: 'Showtime',
+          isShowtime: true,
+        });
+      }
+      break;
+    }
+
+    curFatLbs -= cycleFatLossLbs;
     curWeight = lbm + curFatLbs;
-    const newBf = isFloor ? targetBf : (curFatLbs / curWeight) * 100;
-    cycleWeeks += weeksThisCycle;
+    const newBf = (curFatLbs / curWeight) * 100;
+    cycleWeeks += PROJECTION_CYCLE_WEEKS;
 
-    const badge = aceBadge(newBf, g, isFloor);
+    const badge = aceBadge(newBf, g, false);
     let badgeLabel = null;
     if (badge && !shownBadges[badge.label]) {
       shownBadges[badge.label] = true;
@@ -122,16 +147,14 @@ export function computeDietProjectionTimeline({
     }
 
     rows.push({
-      timeline: isFloor ? `${Math.round(cycleWeeks)} weeks` : `${cycleWeeks} weeks`,
+      timeline: `${cycleWeeks} weeks`,
       bodyFat: newBf,
-      bodyFatDisplay: isFloor ? `${targetBf.toFixed(2)}%` : `${newBf.toFixed(2)}%`,
+      bodyFatDisplay: `${newBf.toFixed(2)}%`,
       weight: curWeight,
       weightDisplay: `${curWeight.toFixed(1)} lbs`,
       isCurrent: false,
       badge: badgeLabel,
     });
-
-    if (isFloor) break;
   }
 
   const wholeWeeks = Math.round(cycleWeeks);
