@@ -13,7 +13,6 @@ import {
 } from './programPackage.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail, fetchProgramFromServer } from './programApi.js';
 import { persistProgramBridge, programReportHref } from './programBridgeHandoff.js';
-import { lookupContact } from './contactsApi.js';
 import {
   completeCheckoutForTest,
   createCheckoutSession,
@@ -101,7 +100,6 @@ const store = {
   reviewViewed: false,
   accordionEditReturn: null,
   accordionPendingFocus: null,
-  accessGranted: false,
   apiReachable: true,
   stripeConfigured: false,
   checkoutTestBypass: false,
@@ -346,31 +344,13 @@ function renderPlanReadyAppHandoff(unlocked) {
           <p class="unlock-tagline">Projections, plan/servings, and menu planner.</p>`;
 }
 
-function syncFunnelCheckoutFlag() {
-  try {
-    if (new URLSearchParams(location.search).get('funnel') === '1') {
-      sessionStorage.setItem('bnb_funnel_checkout', '1');
-    }
-  } catch (e) {}
-}
-
-function funnelCheckoutRequired() {
-  syncFunnelCheckoutFlag();
-  return sessionStorage.getItem('bnb_funnel_checkout') === '1';
-}
-
 function renderPlanReady() {
   restoreBuiltPackage();
   const paidThisSession = store.checkoutVerified;
-  const canOpenProgram = store.accessGranted || paidThisSession;
-  const showPaywall = !paidThisSession && (funnelCheckoutRequired() || !store.accessGranted);
+  const showPaywall = !paidThisSession;
   let lead;
   if (paidThisSession) {
     lead = 'Payment complete. Your program is ready — open your food plan, servings, and menu planner.';
-  } else if (store.accessGranted && funnelCheckoutRequired()) {
-    lead = 'Your personalized diet is saved. Complete checkout to continue — or open your program if you already own Burn & Build.';
-  } else if (store.accessGranted) {
-    lead = 'Your account already has access. Your program is ready — open your food plan, servings, and menu planner.';
   } else if (store.saveError) {
     lead = 'Your diet is ready on this device. Save it to your account, then complete checkout.';
   } else {
@@ -409,7 +389,7 @@ function renderPlanReady() {
           ${store.checkoutMessage ? `<div class="ob-info"><span class="ob-info-icon">ℹ️</span><p>${store.checkoutMessage}</p></div>` : ''}
           ${checkoutBlock}
           ${saveActions}
-          ${renderPlanReadyAppHandoff(canOpenProgram)}
+          ${renderPlanReadyAppHandoff(paidThisSession)}
           ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
@@ -465,7 +445,6 @@ async function runPlanCreation() {
   const ok = await savePlanToServer();
   store.phase = 'plan-ready';
   sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
-  sessionStorage.setItem('bnb_funnel_checkout', '1');
   await renderPlanReadyPhase();
   if (!ok) render();
 }
@@ -703,15 +682,6 @@ async function savePlanToServer() {
   return true;
 }
 
-async function refreshAccessState() {
-  if (!isValidEmail(store.email)) {
-    store.accessGranted = false;
-    return;
-  }
-  const result = await lookupContact(store.email);
-  store.accessGranted = !!(result.ok && result.contact?.burnAndBuild);
-}
-
 function cleanCheckoutQuery() {
   const url = new URL(location.href);
   url.searchParams.delete('checkout');
@@ -759,8 +729,6 @@ async function handleCheckoutReturn() {
 
   store.checkoutMessage = 'Payment complete. Your program is unlocked.';
   store.checkoutVerified = true;
-  sessionStorage.removeItem('bnb_funnel_checkout');
-  await refreshAccessState();
 }
 
 async function retrySavePlan() {
@@ -805,15 +773,12 @@ async function completeTestCheckout() {
   }
   store.checkoutMessage = 'Test access granted. Your program is unlocked.';
   store.checkoutVerified = true;
-  sessionStorage.removeItem('bnb_funnel_checkout');
-  await refreshAccessState();
   render();
 }
 
 async function preparePlanReadyState() {
   await refreshCheckoutConfig();
   await handleCheckoutReturn();
-  await refreshAccessState();
 }
 
 function render() {
@@ -978,7 +943,6 @@ async function copyImportLink() {
 }
 
 function initStartSite() {
-  syncFunnelCheckoutFlag();
   restoreFlowState();
   syncAccordionSection(store);
   if (!store.onboardingForm) {

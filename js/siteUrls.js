@@ -13,10 +13,7 @@ export const QUESTIONNAIRE_ENTRY_URL = QUESTIONNAIRE_WELCOME_URL;
 export const INTAKE_ENTRY_URL = QUESTIONNAIRE_ENTRY_URL;
 
 /** Paywall + checkout return (after questionnaire builds the program) */
-export const CREATOR_CHECKOUT_URL = `${CREATOR_HOST_ORIGIN}/createyourfoodplan/?browse=1&funnel=1`;
-
-/** Browse creator without forcing checkout (marketing links) */
-export const CREATOR_BROWSE_URL = `${CREATOR_HOST_ORIGIN}/createyourfoodplan/?browse=1`;
+export const CREATOR_CHECKOUT_URL = `${CREATOR_HOST_ORIGIN}/createyourfoodplan/?browse=1`;
 
 /** @deprecated Use CREATOR_CHECKOUT_URL */
 export const CREATOR_ENTRY_URL = CREATOR_CHECKOUT_URL;

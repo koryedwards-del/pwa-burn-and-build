@@ -294,7 +294,6 @@ function bindEvents() {
       persistAppEmail(email);
       persistProgramBridge(program);
       sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
-      sessionStorage.setItem('bnb_funnel_checkout', '1');
       sessionStorage.setItem('bnb_browse_mode', '1');
 
       const saved = await saveProgramToServer(email, program);
