@@ -76,15 +76,15 @@ const WEEK_DAYS = [
   { id: 'sat', label: 'Sat', fullLabel: 'Saturday' },
 ];
 
-const WEEK_GRID_MEALS = ['breakfast', 'lunch', 'dinner', 'snack'];
-
-const WEEK_SNACK_SLOTS = ['morning-snack', 'afternoon-snack', 'evening-snack'];
+const WEEK_GRID_MEALS = DAY_SLOTS.map((slot) => slot.id);
 
 const WEEK_MEAL_EMPTY_LABEL = {
   breakfast: 'Breakfast —',
   lunch: 'Lunch —',
   dinner: 'Dinner —',
-  snack: 'Snack',
+  'morning-snack': 'Snack',
+  'afternoon-snack': 'Snack',
+  'evening-snack': 'Snack',
 };
 
 let foods = [];
@@ -616,22 +616,7 @@ function initClearWeekMenu() {
   document.getElementById('clear-week-menu').addEventListener('click', clearWeekMenu);
 }
 
-function weekSnackSummaryLabel(weekDay) {
-  for (const slotId of WEEK_SNACK_SLOTS) {
-    if (isFruitOnlySnack(slotId, weekDay)) {
-      return {
-        text: categorySelections(slotId, weekDay).fruit.foodName,
-        empty: false,
-      };
-    }
-  }
-  return { text: WEEK_MEAL_EMPTY_LABEL.snack, empty: true };
-}
-
 function weekMealLabel(weekDay, mealSlotId) {
-  if (mealSlotId === 'snack') {
-    return weekSnackSummaryLabel(weekDay);
-  }
   const meta = mealSlotMeta(mealSlotId, weekDay);
   if (meta.mealName) {
     return { text: meta.mealName, empty: false };
@@ -670,9 +655,7 @@ function renderWeekGrid() {
     const active = day.id === activeWeekDay;
     const mealsHtml = WEEK_GRID_MEALS.map((mealSlotId) => {
       const { text, empty } = weekMealLabel(day.id, mealSlotId);
-      const dropAttrs = mealSlotId === 'snack'
-        ? ''
-        : ' data-week-meal-drop';
+      const dropAttrs = acceptsSavedMealDrop(mealSlotId) ? ' data-week-meal-drop' : '';
       return `
         <div
           class="mini-card${empty ? ' mini-card--empty' : ''}"${dropAttrs}
