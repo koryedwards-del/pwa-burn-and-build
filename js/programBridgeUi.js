@@ -103,9 +103,15 @@ export function programNavHtml(activeId, { reportHref = '' } = {}) {
       ${PROGRAM_BRIDGE_PAGES.map((page) => {
         const isActive = page.id === activeId;
         if (page.href) {
+          if (isActive) {
+            return `
+            <li class="pb-nav__item">
+              <button type="button" class="pb-nav__btn is-active" aria-current="page">${page.step}. ${page.label}</button>
+            </li>`;
+          }
           return `
             <li class="pb-nav__item">
-              <a class="pb-nav__btn${isActive ? ' is-active' : ''}" href="${page.href}">${page.step}. ${page.label}</a>
+              <a class="pb-nav__btn" href="${page.href}">${page.step}. ${page.label}</a>
             </li>`;
         }
         if (activeId === 'menuplanner') {
