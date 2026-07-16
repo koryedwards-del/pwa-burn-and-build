@@ -90,7 +90,6 @@ let activeSlot = null;
 let activeFoodCategory = null;
 let foodSearchQuery = '';
 let weekPlan = {};
-const expandedMeals = new Set();
 let pendingSaveDaySlotId = null;
 
 function createEmptyDayState() {
@@ -140,7 +139,6 @@ function resetPlannerState() {
   weekPlan = createFreshWeekPlan();
   savedMeals = [];
   activeWeekDay = todayWeekDayId();
-  expandedMeals.clear();
   activeSlot = null;
   activeFoodCategory = null;
 }
@@ -151,7 +149,6 @@ function collectPlannerState() {
     activeWeekDay,
     weekPlan,
     savedMeals,
-    expandedMeals: [...expandedMeals],
   };
 }
 
@@ -167,9 +164,6 @@ function applyPlannerState(state) {
   }
   if (state.activeWeekDay && WEEK_DAYS.some((day) => day.id === state.activeWeekDay)) {
     activeWeekDay = state.activeWeekDay;
-  }
-  if (Array.isArray(state.expandedMeals)) {
-    state.expandedMeals.forEach((id) => expandedMeals.add(id));
   }
 }
 
@@ -439,16 +433,30 @@ function renderDaySlotHeader(daySlot) {
     const fruit = categorySelections(daySlot.id).fruit;
     nameHtml = `<span class="slot__food-choice"> · ${escapeHtml(fruit.foodName)}</span>`;
   }
-  const saveButtonHtml = showSaveMealButton(daySlot.id)
-    ? `<button type="button" class="slot__save" data-save-meal="${daySlot.id}">Save Meal</button>`
-    : '';
-
   return `
     <div class="slot-header">
       <p class="slot__label"><span class="slot__time">${daySlot.label}</span>${nameHtml}</p>
-      ${saveButtonHtml}
     </div>
   `;
+}
+
+function renderDaySlotSaveAction(daySlot) {
+  if (!showSaveMealButton(daySlot.id)) return '';
+  return `
+    <div class="slot__save-row">
+      <button type="button" class="slot__save" data-save-meal="${daySlot.id}">Save Meal</button>
+    </div>
+  `;
+}
+
+function scrollActiveMealSlotIntoView() {
+  const daySlotId = activeSlot?.daySlotId;
+  if (!daySlotId) return;
+  requestAnimationFrame(() => {
+    const slotEl = document.getElementById('day-slots')
+      ?.querySelector(`[data-meal-slot-id="${daySlotId}"]`);
+    slotEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  });
 }
 
 function renderFatItemCard({ item, daySlotId, index }) {
@@ -741,10 +749,11 @@ function renderDayColumn() {
     const mealDropAttr = acceptsSavedMealDrop(daySlot.id) ? ' data-day-meal-drop' : '';
 
     return `
-      <div class="slot">
+      <div class="slot" data-meal-slot-id="${daySlot.id}">
         ${renderDaySlotHeader(daySlot)}
         <div class="day-slot"${mealDropAttr} data-day-slot-id="${daySlot.id}">
           <div class="day-slot__categories">${categoryHtml}</div>
+          ${renderDaySlotSaveAction(daySlot)}
         </div>
       </div>
     `;
@@ -780,6 +789,7 @@ function renderDayColumn() {
   });
 
   initMealDragDrop();
+  scrollActiveMealSlotIntoView();
 }
 
 function foodsForActiveSlot() {
@@ -829,7 +839,6 @@ function mealDragHtml(meal) {
 }
 
 function renderSavedMealCard(meal) {
-  const expanded = expandedMeals.has(meal.id);
   const itemsHtml = meal.items.map((item) => `
     <li class="saved-meal__item">
       <span class="saved-meal__slot">${escapeHtml(item.slot)}</span>
@@ -839,7 +848,7 @@ function renderSavedMealCard(meal) {
   `).join('');
 
   return `
-    <article class="saved-meal card card--meal${expanded ? ' saved-meal--expanded' : ''}" data-meal-id="${meal.id}">
+    <article class="saved-meal card card--meal" data-meal-id="${meal.id}">
       <button
         type="button"
         class="saved-meal__delete"
@@ -847,19 +856,12 @@ function renderSavedMealCard(meal) {
         aria-label="Delete ${escapeHtml(meal.name)}"
       >×</button>
       <div class="saved-meal__header" draggable="true" data-meal-source data-meal-id="${meal.id}">
-        <button
-          type="button"
-          class="saved-meal__toggle"
-          data-meal-toggle="${meal.id}"
-          aria-expanded="${expanded}"
-          aria-label="${expanded ? 'Collapse' : 'Expand'} ${escapeHtml(meal.name)}"
-        >▾</button>
         <div class="saved-meal__summary">
           <p class="card__title">${escapeHtml(meal.name)}</p>
           <p class="card__detail">${escapeHtml(mealSummary(meal))}</p>
         </div>
       </div>
-      <ul class="saved-meal__items${expanded ? '' : ' saved-meal__items--hidden'}">${itemsHtml}</ul>
+      <ul class="saved-meal__items">${itemsHtml}</ul>
     </article>
   `;
 }
@@ -873,7 +875,6 @@ function deleteSavedMeal(mealId) {
   if (index === -1) return;
 
   savedMeals.splice(index, 1);
-  expandedMeals.delete(mealId);
 
   WEEK_DAYS.forEach((weekDay) => {
     DAY_SLOTS.forEach((daySlot) => {
@@ -896,20 +897,6 @@ function renderSavedMeals() {
   container.innerHTML = meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
     : '<p class="saved-meals__hint">It won\'t take long before you have a few go-to meals. Eggs and oatmeal. Chicken and rice. Save your go-to meals to speed up menu planning. If you build a meal and don\'t see Save Meal, it\'s because a required slot is still empty. Fill protein and grains/starches first.</p>';
-
-  document.querySelectorAll('[data-meal-toggle]').forEach((button) => {
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const mealId = button.dataset.mealToggle;
-      if (expandedMeals.has(mealId)) {
-        expandedMeals.delete(mealId);
-      } else {
-        expandedMeals.add(mealId);
-      }
-      renderSavedMeals();
-      initMealDragDrop();
-    });
-  });
 
   document.querySelectorAll('[data-meal-delete]').forEach((button) => {
     button.addEventListener('click', (event) => {

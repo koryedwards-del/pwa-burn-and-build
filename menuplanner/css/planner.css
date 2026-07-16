@@ -103,7 +103,7 @@ body {
 }
 
 .planner-frame {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -282,7 +282,7 @@ body {
 /* Workspace */
 
 .workspace {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   display: grid;
   grid-template-columns: 1.05fr 1fr 0.95fr;
@@ -359,6 +359,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .slot {
@@ -421,6 +427,12 @@ body {
 .slot__save:hover {
   background: var(--gold);
   color: var(--on-gold);
+}
+
+.slot__save-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 .save-dialog {
@@ -609,16 +621,13 @@ body {
 .workspace__col--foods {
   min-height: 0;
   overflow: hidden;
-}
-
-.workspace__col--day,
-.workspace__col--meals {
-  overflow-y: auto;
-}
-
-.workspace__col--foods {
   display: flex;
   flex-direction: column;
+}
+
+.food-filter-label,
+.food-search {
+  flex-shrink: 0;
 }
 
 .col-heading--secondary {
@@ -654,6 +663,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .saved-meals__hint {
@@ -697,34 +712,12 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 14px 38px 14px 14px;
+  padding: 14px 38px 10px 14px;
   cursor: grab;
 }
 
 .saved-meal__header:active {
   cursor: grabbing;
-}
-
-.saved-meal__toggle {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: auto;
-  height: auto;
-  min-width: 0;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--yellow);
-  font-size: calc(0.75rem * 5);
-  line-height: 1;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.saved-meal--expanded .saved-meal__toggle {
-  transform: rotate(180deg);
 }
 
 .saved-meal__summary {
@@ -745,14 +738,10 @@ body {
 .saved-meal__items {
   list-style: none;
   margin: 0;
-  padding: 0 12px 10px 42px;
+  padding: 0 12px 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.saved-meal__items--hidden {
-  display: none;
 }
 
 .saved-meal__item {
@@ -1016,11 +1005,6 @@ body {
   background: var(--surface-3);
 }
 
-.saved-meal__toggle:hover {
-  border-color: var(--gold);
-  background: var(--gold-dim);
-}
-
 .food-stack {
   display: flex;
   flex-direction: column;
@@ -1029,7 +1013,6 @@ body {
   overflow-x: hidden;
   flex: 1 1 auto;
   min-height: 0;
-  max-height: 100%;
   padding-right: 4px;
   -webkit-overflow-scrolling: touch;
 }
@@ -1057,10 +1040,14 @@ body {
   padding: 8px 2px;
 }
 
+.day-slots::-webkit-scrollbar,
+.saved-meals::-webkit-scrollbar,
 .food-stack::-webkit-scrollbar {
   width: 6px;
 }
 
+.day-slots::-webkit-scrollbar-thumb,
+.saved-meals::-webkit-scrollbar-thumb,
 .food-stack::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
