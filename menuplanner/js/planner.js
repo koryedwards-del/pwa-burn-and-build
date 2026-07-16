@@ -5,6 +5,7 @@ import {
   programNavHtml,
 } from '../../js/programBridgeUi.js';
 import { loadProgramBridge } from '../../js/programBridgeHandoff.js';
+import { bootMenuPlannerAccess } from './access.js';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',
@@ -1392,8 +1393,8 @@ function initPrintAssistant() {
   document.getElementById('print-assistant').addEventListener('click', openPrintAssistant);
 }
 
-async function init() {
-  programPackage = loadProgramPackage();
+async function init(pkg) {
+  programPackage = pkg || loadProgramPackage();
   initMealSlotsFromProgram(programPackage);
   renderProgramChrome();
 
@@ -1415,8 +1416,21 @@ async function init() {
   initFoodDropTargets();
 }
 
-init().catch((error) => {
+bootMenuPlannerAccess(async (pkg) => {
+  await init(pkg);
+}).catch((error) => {
   console.error(error);
+  const gate = document.getElementById('access-gate');
   const stack = document.getElementById('food-stack');
-  stack.innerHTML = '<p class="food-stack__error">Could not load foods. Open via a local server from the repo root.</p>';
+  if (gate) {
+    gate.hidden = false;
+    const errorEl = gate.querySelector('#access-error');
+    if (errorEl) {
+      errorEl.textContent = 'Something went wrong loading the menu planner. Refresh and try again.';
+      errorEl.hidden = false;
+    }
+  }
+  if (stack) {
+    stack.innerHTML = '<p class="food-stack__error">Could not load foods. Open via a local server from the repo root.</p>';
+  }
 });

@@ -4,11 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1200" />
   <title>Burn &amp; Build — Menu Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=5" />
-  <link rel="stylesheet" href="css/planner.css?v=17" />
+  <link rel="stylesheet" href="css/planner.css?v=18" />
 </head>
 <body>
-  <div class="planner-app">
+  <section id="access-gate" class="mp-access" hidden>
+    <div class="mp-access__panel">
+      <img class="mp-access__logo" src="../img/brand/bblogo.png" alt="" width="72" height="72" />
+      <p class="mp-access__eyebrow">Burn &amp; Build</p>
+      <h1 class="mp-access__title">Menu planner</h1>
+      <p class="mp-access__lead">Enter the email you used when you created your program.</p>
+      <form id="access-form" class="mp-access__form">
+        <label class="mp-access__field">
+          <span class="mp-access__label">Email</span>
+          <input
+            id="access-email"
+            class="mp-access__input"
+            type="email"
+            name="email"
+            autocomplete="email"
+            placeholder="you@example.com"
+            required
+          />
+        </label>
+        <p id="access-error" class="mp-access__error" hidden></p>
+        <p id="access-hint" class="mp-access__hint" hidden></p>
+        <button type="submit" class="mp-access__submit" id="access-submit">Open menu planner</button>
+      </form>
+      <p class="mp-access__footer">New here? <a class="mp-access__link" href="../questionnaire/#welcome">Create your diet</a></p>
+    </div>
+  </section>
+
+  <div id="planner-root" class="planner-app" hidden>
     <header class="planner-header">
       <div class="planner-brand">
         <img class="planner-logo" src="../img/brand/bblogo.png" alt="Burn &amp; Build" width="56" height="56" />
@@ -102,6 +132,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/planner.js?v=26"></script>
+  <script type="module" src="js/planner.js?v=27"></script>
 </body>
 </html>
