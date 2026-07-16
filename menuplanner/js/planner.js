@@ -459,14 +459,47 @@ function renderDaySlotSaveAction(daySlot) {
   `;
 }
 
-function scrollActiveMealSlotIntoView() {
-  const daySlotId = activeSlot?.daySlotId;
-  if (!daySlotId) return;
+function scrollMealSlotIntoView(mealSlotId) {
+  if (!mealSlotId) return;
   requestAnimationFrame(() => {
     const slotEl = document.getElementById('day-slots')
-      ?.querySelector(`[data-meal-slot-id="${daySlotId}"]`);
+      ?.querySelector(`[data-meal-slot-id="${mealSlotId}"]`);
     slotEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   });
+}
+
+function scrollActiveMealSlotIntoView() {
+  scrollMealSlotIntoView(activeSlot?.daySlotId);
+}
+
+function defaultCategorySlotForMeal(mealSlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
+  if (!daySlot) return null;
+  return templateSlots(daySlot.template)[0] || null;
+}
+
+function navigateToDayMealSlot(weekDay, mealSlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
+  const categorySlot = defaultCategorySlotForMeal(mealSlotId);
+  if (!daySlot || !categorySlot) return;
+
+  const dayChanged = weekDay !== activeWeekDay;
+  activeWeekDay = weekDay;
+  activeSlot = {
+    daySlotId: mealSlotId,
+    categorySlot,
+  };
+  activeFoodCategory = null;
+  ensureActiveFoodCategory();
+
+  renderWeekGrid();
+  renderActiveDayLabel();
+  renderDayColumn();
+  renderFoodFilterLabel();
+  renderFoodFilters();
+  renderFoodStack();
+  scrollMealSlotIntoView(mealSlotId);
+  if (dayChanged) persistPlannerToProgram();
 }
 
 function renderFatItemCard({ item, daySlotId, index }) {
@@ -835,9 +868,15 @@ function initWeekGrid() {
   grid.dataset.weekInit = '1';
 
   grid.addEventListener('click', (event) => {
-    const col = event.target.closest('[data-week-day-select]');
-    if (!col) return;
-    setActiveWeekDay(col.dataset.weekDay);
+    const mealCell = event.target.closest('[data-meal-slot]');
+    if (mealCell?.dataset.mealSlot) {
+      navigateToDayMealSlot(mealCell.dataset.weekDay, mealCell.dataset.mealSlot);
+      return;
+    }
+    const dayCell = event.target.closest('.week-matrix__day[data-week-day-select]');
+    if (dayCell) {
+      setActiveWeekDay(dayCell.dataset.weekDay);
+    }
   });
 
   grid.addEventListener('dragover', (event) => {
@@ -866,7 +905,7 @@ function initWeekGrid() {
     if (!meal) return;
 
     applySavedMealToMealSlot(cell.dataset.weekDay, cell.dataset.mealSlot, meal);
-    setActiveWeekDay(cell.dataset.weekDay);
+    navigateToDayMealSlot(cell.dataset.weekDay, cell.dataset.mealSlot);
   });
 }
 
@@ -888,8 +927,8 @@ function renderDayColumn() {
       <div class="slot" data-meal-slot-id="${daySlot.id}">
         ${renderDaySlotHeader(daySlot)}
         <div class="day-slot"${mealDropAttr} data-day-slot-id="${daySlot.id}">
-          <div class="day-slot__categories">${categoryHtml}</div>
           ${renderDaySlotSaveAction(daySlot)}
+          <div class="day-slot__categories">${categoryHtml}</div>
         </div>
       </div>
     `;

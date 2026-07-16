@@ -478,7 +478,7 @@ body {
 .slot__save-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .save-dialog {
