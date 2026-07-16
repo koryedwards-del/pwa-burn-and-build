@@ -18,7 +18,7 @@ import {
 import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js?v=22';
 import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=22';
 import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=22';
-import { bindProgramAccess, bootProgramAccess, openAccessGate } from '../../js/programAccess.js?v=1';
+import { bindProgramAccess, bootProgramAccess, openAccessGate } from '../../js/programAccess.js?v=2';
 import {
   applyMenuPlannerProgram,
   bootMenuPlannerPage,

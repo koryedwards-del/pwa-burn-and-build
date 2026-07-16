@@ -8,18 +8,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=22" />
-  <link rel="stylesheet" href="css/report.css?v=14" />
-  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=28" />
+  <link rel="stylesheet" href="css/report.css?v=15" />
+  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=29" />
 </head>
 <body>
   <section id="access-gate" class="mp-access" hidden>
     <div class="mp-access__panel">
-      <img class="mp-access__logo" src="../img/brand/bblogo.png" alt="" width="72" height="72" />
+      <img class="mp-access__logo" src="../img/brand/bblogo.png" alt="Burn &amp; Build" width="72" height="72" />
       <p class="mp-access__eyebrow">Burn &amp; Build</p>
 
       <div id="access-screen-email" class="mp-access__screen">
         <h1 class="mp-access__title">Welcome back</h1>
-        <p class="mp-access__lead">Sign in with the email on your Burn &amp; Build program to open your diet.</p>
+        <p class="mp-access__lead">Sign in with the email on your Burn &amp; Build program.</p>
         <form id="access-form" class="mp-access__form" action="#" method="post" novalidate>
           <label class="mp-access__field">
             <span class="mp-access__label">Email</span>
@@ -36,10 +36,10 @@
           <p id="access-form-error" class="mp-access__error" hidden></p>
           <button type="submit" class="mp-access__submit" id="access-submit">Go to your diet</button>
         </form>
-        <div class="mp-access__footer">
-          <p class="mp-access__footer-lead">Need a new diet?</p>
-          <a class="mp-access__submit mp-access__submit--link" href="/questionnaire/#welcome">Create your diet</a>
-        </div>
+        <p class="mp-access__footer-note">
+          Need a new diet?
+          <a class="mp-access__link" href="/questionnaire/#welcome">Create your diet</a>
+        </p>
       </div>
 
       <div id="access-screen-unpaid" class="mp-access__screen" hidden>
@@ -180,6 +180,6 @@
       event.preventDefault();
     });
   </script>
-  <script type="module" src="js/report.js?v=35"></script>
+  <script type="module" src="js/report.js?v=36"></script>
 </body>
 </html>

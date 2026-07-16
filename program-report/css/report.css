@@ -93,6 +93,213 @@ body {
   display: none !important;
 }
 
+/* Sign-in gate — return visits without a session program */
+body.mp-access-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body.mp-access-mode #access-gate {
+  width: 100%;
+  max-width: var(--layout-width);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 72px);
+  padding: 32px 16px;
+}
+
+body.mp-access-mode #r-app {
+  display: none !important;
+}
+
+#access-gate .mp-access__panel {
+  width: min(100%, 400px);
+  padding: 36px 32px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+#access-gate .mp-access__logo {
+  display: block;
+  margin: 0 auto 16px;
+}
+
+#access-gate .mp-access__eyebrow {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+#access-gate .mp-access__title {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+#access-gate .mp-access__lead {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+#access-gate .mp-access__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+}
+
+#access-gate .mp-access__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#access-gate .mp-access__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+#access-gate .mp-access__input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+#access-gate .mp-access__input:focus {
+  outline: none;
+  border-color: rgba(253, 197, 0, 0.45);
+  box-shadow: 0 0 0 3px var(--gold-dim);
+}
+
+#access-gate .mp-access__error {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #ff8a7a;
+}
+
+#access-gate .mp-access__submit {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--gold);
+  color: var(--on-gold);
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+#access-gate .mp-access__submit:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+#access-gate .mp-access__submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+#access-gate .mp-access__footer-note {
+  margin: 20px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+#access-gate .mp-access__link {
+  color: var(--gold);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#access-gate .mp-access__link:hover {
+  text-decoration: underline;
+}
+
+#access-gate .mp-access__copy {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+#access-gate .mp-access__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#access-gate .mp-access__ghost {
+  width: 100%;
+  padding: 11px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#access-gate .mp-access__ghost:hover {
+  border-color: rgba(253, 197, 0, 0.35);
+  color: var(--text);
+}
+
+#access-gate .mp-access__ghost--link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+#access-gate .mp-access__lead strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+#access-gate .mp-access__submit--link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+#access-gate .mp-access__screen[hidden] {
+  display: none !important;
+}
+
+#access-gate[hidden] {
+  display: none !important;
+}
+
 .r-nav__list {
   list-style: none;
   display: flex;

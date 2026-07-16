@@ -33,6 +33,7 @@ function showAccessScreen(screen, { email = '' } = {}) {
   const app = appEl();
   if (!gate) return;
   document.documentElement.classList.remove('mp-handoff-pending');
+  document.body.classList.add('mp-access-mode');
   gate.hidden = false;
   if (app) app.hidden = true;
 
@@ -71,6 +72,7 @@ function showAccessScreen(screen, { email = '' } = {}) {
 
 function showApp() {
   document.documentElement.classList.remove('mp-handoff-pending');
+  document.body.classList.remove('mp-access-mode');
   const gate = gateEl();
   const app = appEl();
   if (gate) gate.hidden = true;
