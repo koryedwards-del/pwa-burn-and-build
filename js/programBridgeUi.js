@@ -1,5 +1,7 @@
 /** Shared chrome for program report (pages 1–3) and menu planner (page 4). */
 
+import { formatWakeDisplay, parseWakeTime } from './onboardingEngine.js';
+
 export const PROGRAM_BRIDGE_PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1, reportPage: 0, reportQuery: 'welcome' },
   { id: 'projections', label: 'Projections', step: 2, reportPage: 1, reportQuery: 'projections' },
@@ -41,14 +43,52 @@ export function programMetaHtml(pkg) {
     </header>`;
 }
 
-export function programLinksHtml() {
+export function programSettingsHtml(pkg = null) {
+  if (!pkg?.intake) {
+    return `
+      <h2 class="pb-side-card__title">Settings</h2>
+      <p class="pb-side-card__empty">Sign in to adjust settings.</p>`;
+  }
+
+  const wakeTime = pkg.intake.wakeTime || pkg.intake.defaultWakeTime || '06:00';
+  const wakeEnabled = pkg.intake.wakeTimeEnabled !== false;
+  const { hour12, minute, ampm } = parseWakeTime(wakeTime);
+  const hours = Array.from({ length: 12 }, (_, i) => i + 1);
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+  const hourOpts = hours.map((h) => `<option value="${h}"${h === hour12 ? ' selected' : ''}>${h}</option>`).join('');
+  const minOpts = minutes.map((m) => `<option value="${m}"${m === minute ? ' selected' : ''}>${m}</option>`).join('');
+
   return `
-    <h2 class="pb-side-card__title">Links</h2>
-    <nav class="pb-link-list" aria-label="Quick links">
-      <a class="pb-link-list__item" href="/questionnaire/#welcome">Create new diet</a>
-      <button type="button" class="pb-link-list__item" data-open-access-gate>Sign in with different email</button>
-      <a class="pb-link-list__item" href="/">Back to website</a>
-    </nav>`;
+    <h2 class="pb-side-card__title">Settings</h2>
+    <div class="pb-settings" aria-label="Settings">
+      <button
+        type="button"
+        class="pb-settings-toggle${wakeEnabled ? ' is-on' : ''}"
+        data-pb-wake-enabled
+        aria-pressed="${wakeEnabled ? 'true' : 'false'}"
+      >
+        <span class="pb-settings-toggle__label">Wake time</span>
+        <span class="pb-settings-toggle__pill" aria-hidden="true"></span>
+      </button>
+      <div class="pb-settings-wake${wakeEnabled ? '' : ' is-disabled'}" data-pb-wake-panel>
+        <p class="pb-settings-field-label">Time</p>
+        <div class="pb-wake-picker">
+          <select class="pb-wake-select" data-wake-part="hour" aria-label="Wake hour"${wakeEnabled ? '' : ' disabled'}>${hourOpts}</select>
+          <span class="pb-wake-colon">:</span>
+          <select class="pb-wake-select" data-wake-part="minute" aria-label="Wake minute"${wakeEnabled ? '' : ' disabled'}>${minOpts}</select>
+          <select class="pb-wake-select pb-wake-select--ampm" data-wake-part="ampm" aria-label="AM or PM"${wakeEnabled ? '' : ' disabled'}>
+            <option value="AM"${ampm === 'AM' ? ' selected' : ''}>AM</option>
+            <option value="PM"${ampm === 'PM' ? ' selected' : ''}>PM</option>
+          </select>
+        </div>
+        <p class="pb-wake-display" data-pb-wake-display>${escapeHtml(formatWakeDisplay(wakeTime))}</p>
+      </div>
+    </div>`;
+}
+
+/** @deprecated Use programSettingsHtml */
+export function programLinksHtml() {
+  return programSettingsHtml();
 }
 
 export function programNavHtml(activeId, { reportHref = '' } = {}) {

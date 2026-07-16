@@ -522,6 +522,10 @@ function init() {
       renderNav();
       renderPage();
     },
+    onSettingsChange: async (pkg) => {
+      programPackage = pkg;
+      persistProgram(programPackage);
+    },
   }).catch((err) => console.error(err));
 }
 
