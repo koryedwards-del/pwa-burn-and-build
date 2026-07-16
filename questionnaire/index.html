@@ -20,8 +20,8 @@
       <div class="q-brand">
         <img class="q-logo" src="../img/brand/bblogo.png" alt="Burn &amp; Build" width="56" height="56" />
         <div class="q-brand__text">
-          <h1 class="q-title">Program Questionnaire</h1>
-          <p class="q-tag">Desktop intake — build your personalized program</p>
+          <h1 class="q-title">Create Your Diet</h1>
+          <p class="q-tag">Build your personalized 8-week program</p>
         </div>
       </div>
     </header>
@@ -29,7 +29,7 @@
     <div class="q-layout">
       <nav class="q-nav" aria-label="Questionnaire steps">
         <ol class="q-nav__list" id="q-nav-list">
-          <li><span class="q-nav__item is-active">1. Welcome</span></li>
+          <li><span class="q-nav__item is-active">1. Personal info</span></li>
         </ol>
       </nav>
 
@@ -38,20 +38,8 @@
           <section class="q-panel" data-step="0">
             <div class="q-panel__head">
               <p class="q-eyebrow">Step 1</p>
-              <h2 class="q-panel__title">Ready to build your program</h2>
-              <p class="q-panel__lead">This is the live-seminar intake sheet, reshaped for a desktop session. One sitting, then straight into meal planning.</p>
-            </div>
-            <div class="q-callout">
-              <p><strong>What changed from the phone app:</strong> fewer screens, exercise hours on one page, no wake-time or reminder setup here — that moves to optional settings later.</p>
-            </div>
-            <button type="button" class="q-btn q-btn--primary" data-q-next>Start questionnaire</button>
-          </section>
-
-          <section class="q-panel" data-step="1" hidden>
-            <div class="q-panel__head">
-              <p class="q-eyebrow">Step 2</p>
               <h2 class="q-panel__title">Personal information</h2>
-              <p class="q-panel__lead">From the ETLF information sheet — the basics we need before calculating servings.</p>
+              <p class="q-panel__lead">The basics we need before calculating your servings and food plan.</p>
             </div>
             <div class="q-grid q-grid--2">
               <label class="q-field">
@@ -126,11 +114,11 @@
             </details>
           </section>
 
-          <section class="q-panel" data-step="2" hidden>
+          <section class="q-panel" data-step="1" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 3</p>
+              <p class="q-eyebrow">Step 2</p>
               <h2 class="q-panel__title">Body composition</h2>
-              <p class="q-panel__lead">Not on the paper seminar sheet, but required for Burn &amp; Build servings. Keep this step — accuracy drives the whole plan.</p>
+              <p class="q-panel__lead">Required for accurate servings. Your body fat percentage drives the whole plan.</p>
             </div>
             <fieldset class="q-field">
               <legend class="q-label">How do you know your body fat %?</legend>
@@ -149,11 +137,11 @@
             </label>
           </section>
 
-          <section class="q-panel" data-step="3" hidden>
+          <section class="q-panel" data-step="2" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 4</p>
+              <p class="q-eyebrow">Step 3</p>
               <h2 class="q-panel__title">Workday &amp; occupation</h2>
-              <p class="q-panel__lead">Seminar sheet: sitting vs. moving vs. lifting, plus how stressful a typical day feels.</p>
+              <p class="q-panel__lead">How active is your job, and how stressful is a typical day?</p>
             </div>
             <fieldset class="q-field">
               <legend class="q-label">Typical exertion at work</legend>
@@ -173,11 +161,11 @@
             </fieldset>
           </section>
 
-          <section class="q-panel" data-step="4" hidden>
+          <section class="q-panel" data-step="3" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 5</p>
+              <p class="q-eyebrow">Step 4</p>
               <h2 class="q-panel__title">Weekly exercise — next 8 weeks</h2>
-              <p class="q-panel__lead">Seminar sheet grouped all three activity types on one page. Be realistic — conservative is better.</p>
+              <p class="q-panel__lead">Be realistic about the exercise you will commit to for the next 8 weeks. Conservative is better.</p>
             </div>
             <p class="q-hint">Enter hours per week down to the quarter hour (15 minutes).</p>
             <div class="q-activity-list">
@@ -210,11 +198,11 @@
             </div>
           </section>
 
-          <section class="q-panel" data-step="5" hidden>
+          <section class="q-panel" data-step="4" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 6</p>
+              <p class="q-eyebrow">Step 5</p>
               <h2 class="q-panel__title">Agreement</h2>
-              <p class="q-panel__lead">Waiver from the seminar sheet — required before we calculate your program.</p>
+              <p class="q-panel__lead">Required before we calculate your program.</p>
             </div>
             <div class="q-waiver">
               <p>I agree the results of this questionnaire and computer printout are meant to be informative and <strong>are not</strong> a recommendation or a prescription. I also agree I should consult my doctor before making any changes to my diet or exercise habits. In addition I will not hold Kory Edwards or his employees or representatives responsible for damage or injury to my person or property.</p>
@@ -235,11 +223,11 @@
             </div>
           </section>
 
-          <section class="q-panel" data-step="6" hidden>
+          <section class="q-panel" data-step="5" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 7</p>
+              <p class="q-eyebrow">Step 6</p>
               <h2 class="q-panel__title">Review &amp; continue</h2>
-              <p class="q-panel__lead">Confirm the intake, then review your program report before meal planning.</p>
+              <p class="q-panel__lead">Confirm your answers, then continue to your program report.</p>
             </div>
             <dl class="q-review" id="q-review"></dl>
             <section class="q-servings" id="q-servings" hidden>
@@ -250,7 +238,7 @@
           </section>
         </form>
 
-        <footer class="q-actions" id="q-actions" hidden>
+        <footer class="q-actions" id="q-actions">
           <button type="button" class="q-btn q-btn--ghost" data-q-back hidden>Back</button>
           <button type="button" class="q-btn q-btn--primary" data-q-next>Next</button>
         </footer>
@@ -258,6 +246,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/questionnaire.js?v=6"></script>
+  <script type="module" src="js/questionnaire.js?v=7"></script>
 </body>
 </html>
