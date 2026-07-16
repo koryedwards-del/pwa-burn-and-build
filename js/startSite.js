@@ -13,6 +13,7 @@ import {
 } from './programPackage.js';
 import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail, fetchProgramFromServer } from './programApi.js';
 import { persistProgramBridge, programReportHref } from './programBridgeHandoff.js';
+import { lookupContact } from './contactsApi.js';
 import {
   completeCheckoutForTest,
   createCheckoutSession,
@@ -100,6 +101,7 @@ const store = {
   reviewViewed: false,
   accordionEditReturn: null,
   accordionPendingFocus: null,
+  accessGranted: false,
   apiReachable: true,
   stripeConfigured: false,
   checkoutTestBypass: false,
@@ -344,13 +346,43 @@ function renderPlanReadyAppHandoff(unlocked) {
           <p class="unlock-tagline">Projections, plan/servings, and menu planner.</p>`;
 }
 
+function ensurePlanReadyEmail() {
+  restoreBuiltPackage();
+  const fromStore = String(store.email || '').trim();
+  if (isValidEmail(fromStore)) return fromStore;
+
+  const fromSaved = getAppEmail();
+  if (isValidEmail(fromSaved)) {
+    store.email = fromSaved;
+    return fromSaved;
+  }
+
+  const fromPackage = String(store.builtPackage?.intake?.email || '').trim();
+  if (isValidEmail(fromPackage)) {
+    store.email = persistAppEmail(fromPackage);
+    return store.email;
+  }
+
+  const fromForm = String(store.onboardingForm?.email || '').trim();
+  if (isValidEmail(fromForm)) {
+    store.email = persistAppEmail(fromForm);
+    return store.email;
+  }
+
+  return '';
+}
+
 function renderPlanReady() {
   restoreBuiltPackage();
+  ensurePlanReadyEmail();
   const paidThisSession = store.checkoutVerified;
-  const showPaywall = !paidThisSession;
+  const hasPaidAccess = paidThisSession || store.accessGranted;
+  const showPaywall = !hasPaidAccess;
   let lead;
   if (paidThisSession) {
     lead = 'Payment complete. Your program is ready — open your food plan, servings, and menu planner.';
+  } else if (store.accessGranted) {
+    lead = 'Your program is unlocked. Open your food plan, servings, and menu planner.';
   } else if (store.saveError) {
     lead = 'Your diet is ready on this device. Save it to your account, then complete checkout.';
   } else {
@@ -365,7 +397,7 @@ function renderPlanReady() {
           <button type="button" class="btn-primary unlock-cta" data-start-checkout ${store.checkoutBusy ? 'disabled' : ''}>
             ${store.checkoutBusy ? 'OPENING CHECKOUT…' : 'COMPLETE PURCHASE — $149'}
           </button>
-          <p class="unlock-hint">Secure checkout · Have a coupon? Enter it at checkout · One-time · Yours for life</p>
+          <p class="unlock-hint">Secure checkout · One-time $149 · Yours for life</p>
           ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (local test)</button>' : ''}`
       : `
           <p class="unlock-hint">Checkout is not available yet. Contact support@burnandbuilddiet.com if you need help.</p>
@@ -389,7 +421,7 @@ function renderPlanReady() {
           ${store.checkoutMessage ? `<div class="ob-info"><span class="ob-info-icon">ℹ️</span><p>${store.checkoutMessage}</p></div>` : ''}
           ${checkoutBlock}
           ${saveActions}
-          ${renderPlanReadyAppHandoff(paidThisSession)}
+          ${renderPlanReadyAppHandoff(hasPaidAccess)}
           ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
@@ -682,6 +714,16 @@ async function savePlanToServer() {
   return true;
 }
 
+async function refreshAccessState() {
+  const email = ensurePlanReadyEmail();
+  if (!isValidEmail(email)) {
+    store.accessGranted = false;
+    return;
+  }
+  const result = await lookupContact(email);
+  store.accessGranted = !!(result.ok && result.contact?.burnAndBuild);
+}
+
 function cleanCheckoutQuery() {
   const url = new URL(location.href);
   url.searchParams.delete('checkout');
@@ -729,6 +771,7 @@ async function handleCheckoutReturn() {
 
   store.checkoutMessage = 'Payment complete. Your program is unlocked.';
   store.checkoutVerified = true;
+  await refreshAccessState();
 }
 
 async function retrySavePlan() {
@@ -739,8 +782,9 @@ async function retrySavePlan() {
 }
 
 async function startCheckout() {
-  if (!isValidEmail(store.email)) {
-    store.checkoutError = 'Enter a valid email address before checkout.';
+  const email = ensurePlanReadyEmail();
+  if (!isValidEmail(email)) {
+    store.checkoutError = 'We need your email from the questionnaire before checkout. Go back and confirm your email.';
     render();
     return;
   }
@@ -750,7 +794,7 @@ async function startCheckout() {
   render();
 
   const programId = store.builtPackage?.program?.id;
-  const result = await createCheckoutSession(store.email, programId);
+  const result = await createCheckoutSession(email, programId);
   store.checkoutBusy = false;
 
   if (!result.ok || !result.url) {
@@ -773,12 +817,15 @@ async function completeTestCheckout() {
   }
   store.checkoutMessage = 'Test access granted. Your program is unlocked.';
   store.checkoutVerified = true;
+  await refreshAccessState();
   render();
 }
 
 async function preparePlanReadyState() {
+  ensurePlanReadyEmail();
   await refreshCheckoutConfig();
   await handleCheckoutReturn();
+  await refreshAccessState();
 }
 
 function render() {
