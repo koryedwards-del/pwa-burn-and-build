@@ -943,12 +943,7 @@ async function init() {
   }
 
   if (!hasActiveProgram() && getAppEmail()) {
-    const access = await ensureBurnAndBuildContact(getAppEmail());
-    if (access.ok) {
-      await loadProgramFromServer(getAppEmail());
-    } else {
-      store.loadError = access.message;
-    }
+    await loadProgramFromServer(getAppEmail());
   }
 
   if (hasActiveProgram()) {
