@@ -60,6 +60,23 @@ body {
   padding-bottom: 16px;
 }
 
+.planner-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.planner-logo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.planner-brand__text {
+  min-width: 0;
+}
+
 .planner-title {
   font-family: "Oswald", system-ui, sans-serif;
   font-size: 1.75rem;

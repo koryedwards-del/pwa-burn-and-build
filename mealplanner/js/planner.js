@@ -1,3 +1,5 @@
+import { formatGroceryQuantity } from '../../js/groceryEngine.js';
+
 const FOOD_CATEGORIES = [
   { id: 'protein', label: 'Protein' },
   { id: 'dairy', label: 'Dairy' },
@@ -1126,10 +1128,14 @@ function iterWeekFoodSelections(callback) {
 
 function foodAmountLabel(food, servings) {
   if (!food) return `${servings} servings`;
-  if (food.gramWeight) return `${Math.round(food.gramWeight * servings)} g`;
-  if (food.unitsPerServing > 0) {
-    const count = Math.ceil(food.unitsPerServing * servings);
-    return `${count} ${food.servingDescription}`;
+  const isCountBased = (food.unitsPerServing || 0) > 0;
+  if (food.gramWeight || isCountBased) {
+    return formatGroceryQuantity({
+      foodName: food.name,
+      weeklyGrams: (food.gramWeight || 0) * servings,
+      weeklyUnits: isCountBased ? food.unitsPerServing * servings : 0,
+      isCountBased,
+    });
   }
   if (food.servingDescription) {
     if (servings === 1) return food.servingDescription;
@@ -1259,7 +1265,8 @@ function buildAssistantDocumentHtml() {
     .assistant-amount {
       color: #333;
       font-weight: 600;
-      white-space: nowrap;
+      text-align: right;
+      max-width: 45%;
     }
     .assistant-empty { color: #666; font-size: 0.9rem; }
     @media print {
