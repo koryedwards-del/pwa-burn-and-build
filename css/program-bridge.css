@@ -4,7 +4,8 @@
   --app-width: 1200px;
   /* Nav stack (4 items) + gap before diet plans card — keeps dock aligned on all pages */
   --pb-nav-stack-height: 11.5rem;
-  --pb-dock-gap: 24px;
+  --pb-side-card-height: 4.5rem;
+  --pb-dock-gap: calc(3 * var(--pb-side-card-height));
 }
 
 .pb-layout {
@@ -53,7 +54,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 14px 12px;
-  min-height: 4.5rem;
+  min-height: var(--pb-side-card-height);
 }
 
 .pb-side-card__title {
