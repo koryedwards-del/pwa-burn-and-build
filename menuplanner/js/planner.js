@@ -652,7 +652,14 @@ function initClearDayMenu() {
 }
 
 function initClearWeekMenu() {
-  document.getElementById('clear-week-menu').addEventListener('click', clearWeekMenu);
+  const grid = document.getElementById('week-grid');
+  if (!grid || grid.dataset.clearWeekInit) return;
+  grid.dataset.clearWeekInit = '1';
+  grid.addEventListener('click', (event) => {
+    if (event.target.closest('#clear-week-menu')) {
+      clearWeekMenu();
+    }
+  });
 }
 
 function setWeekGridCollapsed(collapsed, { persist = true } = {}) {
@@ -836,7 +843,9 @@ function renderWeekGrid() {
 
   container.innerHTML = `
     <div class="week-matrix" role="grid" aria-label="Week">
-      <div class="week-matrix__corner" aria-hidden="true"></div>
+      <div class="week-matrix__corner">
+        <button type="button" class="day-col__clear week-matrix__clear" id="clear-week-menu">Clear Week</button>
+      </div>
       ${headCells}
       ${bodyRows}
     </div>
@@ -1511,7 +1520,7 @@ function mealSlotHasAnyContent(mealSlotId) {
 
 function buildWeekAgendaContent() {
   if (!weekPlanHasContent()) {
-    return '<p class="assistant-empty">No meals planned for this week yet. Fill in your menu planner, then open Print Assistant again.</p>';
+    return '<p class="assistant-empty">No meals planned for this week yet. Fill in your menu planner, then open Print Shop again.</p>';
   }
 
   const name = escapeHtml(programClientName(programPackage));
@@ -1671,7 +1680,7 @@ function buildPrintDocumentHtml(view = 'week') {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Burn &amp; Build — Print Assistant</title>
+  <title>Burn &amp; Build — Print Shop</title>
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2052,7 +2061,7 @@ function initPrintChoiceDialog() {
   });
 }
 
-function openPrintAssistant() {
+function openPrintShop() {
   const dialog = document.getElementById('print-choice-dialog');
   if (dialog) {
     dialog.showModal();
@@ -2070,8 +2079,8 @@ function initFoodSearch() {
   });
 }
 
-function initPrintAssistant() {
-  document.getElementById('print-assistant').addEventListener('click', openPrintAssistant);
+function initPrintShop() {
+  document.getElementById('print-shop-open')?.addEventListener('click', openPrintShop);
   initPrintChoiceDialog();
 }
 
@@ -2129,7 +2138,7 @@ export async function bootMenuPlannerPage() {
     initClearDayMenu();
     initClearWeekMenu();
     initFoodSearch();
-    initPrintAssistant();
+    initPrintShop();
     initFoodDropTargets();
     plannerShellReady = true;
   })();

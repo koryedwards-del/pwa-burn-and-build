@@ -23,7 +23,7 @@ import {
   applyMenuPlannerProgram,
   bootMenuPlannerPage,
   persistMenuPlannerState,
-} from '../../menuplanner/js/planner.js?v=67';
+} from '../../menuplanner/js/planner.js?v=69';
 import { QUESTIONNAIRE_WELCOME_URL } from '../../js/siteUrls.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
@@ -475,6 +475,7 @@ function renderPage() {
 
   if (!programPackage?.intake?.leanBodyMass) {
     plannerPage.hidden = true;
+    document.getElementById('print-shop')?.setAttribute('hidden', '');
     main.hidden = false;
     main.innerHTML = renderMissingProgram();
     return;
@@ -484,6 +485,7 @@ function renderPage() {
     main.hidden = true;
     main.innerHTML = '';
     plannerPage.hidden = false;
+    document.getElementById('print-shop')?.removeAttribute('hidden');
     bootMenuPlannerPage()
       .then(() => {
         applyMenuPlannerProgram(programPackage);
@@ -493,6 +495,7 @@ function renderPage() {
   }
 
   plannerPage.hidden = true;
+  document.getElementById('print-shop')?.setAttribute('hidden', '');
   main.hidden = false;
   main.innerHTML = activePage === 0
     ? renderWelcome(programPackage)

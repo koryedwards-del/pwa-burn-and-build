@@ -171,15 +171,11 @@ body {
 }
 
 .week-panel__actions {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-}
-
-.print-assistant-anchor {
-  position: relative;
-  display: inline-flex;
 }
 
 .planner-toast-host {
@@ -259,7 +255,20 @@ body {
 }
 
 .week-matrix__corner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 2px 6px;
   min-height: 0;
+}
+
+.week-matrix__clear {
+  width: 100%;
+  max-width: 3.25rem;
+  padding-left: 2px;
+  padding-right: 2px;
+  text-align: center;
+  line-height: 1.25;
 }
 
 .week-matrix__col-head {

@@ -7,9 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/program-bridge.css?v=23" />
+  <link rel="stylesheet" href="../css/program-bridge.css?v=24" />
   <link rel="stylesheet" href="css/report.css?v=16" />
-  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=39" />
+  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=41" />
 </head>
 <body>
   <section id="access-gate" class="mp-access" hidden>
@@ -88,6 +88,12 @@
         <nav class="r-nav pb-nav" aria-label="Program report" id="r-nav-list"></nav>
         <div class="pb-aside__dock">
           <section class="pb-side-card" id="program-library" aria-label="Your diet plans" hidden></section>
+          <section class="pb-side-card pb-side-card--action" id="print-shop" aria-label="Print shop" hidden>
+            <button type="button" class="print-shop-card" id="print-shop-open">
+              <span class="pb-side-card__title">Print Shop</span>
+              <span class="print-shop-card__hint">Week at-a-glance · Grocery list</span>
+            </button>
+          </section>
         </div>
       </aside>
 
@@ -119,11 +125,7 @@
                   <p class="col-heading col-heading--week">Week</p>
                 </div>
                 <div class="week-panel__actions">
-                  <div class="print-assistant-anchor">
-                    <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>
-                    <div class="planner-toast-host" id="planner-toast-host" aria-live="polite" role="status"></div>
-                  </div>
-                  <button type="button" class="day-col__clear" id="clear-week-menu">Clear Week</button>
+                  <div class="planner-toast-host" id="planner-toast-host" aria-live="polite" role="status"></div>
                 </div>
               </div>
               <section class="week-grid" id="week-grid" aria-label="Week"></section>
@@ -133,7 +135,7 @@
               <div class="workspace__col workspace__col--day">
                 <div class="day-col-header">
                   <p class="col-heading col-heading--day" id="active-day-label">Today</p>
-                  <button type="button" class="day-col__clear" id="clear-day-menu">Clear Menu</button>
+                  <button type="button" class="day-col__clear" id="clear-day-menu">Clear Day</button>
                 </div>
                 <div class="day-slots" id="day-slots"></div>
               </div>
@@ -170,10 +172,10 @@
 
   <dialog id="print-choice-dialog" class="save-dialog">
     <div class="save-dialog__form">
-      <p class="save-dialog__title">Print</p>
+      <p class="save-dialog__title">Print Shop</p>
       <div class="save-dialog__actions save-dialog__actions--stack">
-        <button type="button" class="save-dialog__btn save-dialog__btn--primary" data-print-view="week">Week plan</button>
-        <button type="button" class="save-dialog__btn save-dialog__btn--primary" data-print-view="shopping">Shopping list</button>
+        <button type="button" class="save-dialog__btn save-dialog__btn--primary" data-print-view="week">Week at-a-glance</button>
+        <button type="button" class="save-dialog__btn save-dialog__btn--primary" data-print-view="shopping">Grocery list</button>
         <button type="button" class="save-dialog__btn save-dialog__btn--ghost" id="print-choice-cancel">Cancel</button>
       </div>
     </div>

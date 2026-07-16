@@ -79,6 +79,40 @@
   color: #e8a040;
 }
 
+.pb-side-card--action {
+  padding: 0;
+}
+
+.print-shop-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  padding: 14px 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.print-shop-card:hover {
+  background: rgba(253, 197, 0, 0.06);
+}
+
+.print-shop-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
+.print-shop-card__hint {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
 .pb-program-list {
   display: flex;
   flex-direction: column;
