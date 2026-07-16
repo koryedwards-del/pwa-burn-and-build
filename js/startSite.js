@@ -334,38 +334,16 @@ async function openMyplanApp() {
   window.location.href = `/myplan/${q}`;
 }
 
-function isStandaloneDisplay() {
-  return window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
-}
-
-function renderPwaInstallBox() {
-  if (isStandaloneDisplay()) return '';
-  return `
-          <div class="install-box">
-            <h3>Add to your home screen</h3>
-            <p class="install-lead">Open the app first — then add <strong>that page</strong> to your home screen (not this creator page).</p>
-            <ol class="install-steps">
-              <li>Tap <strong>View your program</strong> to open your food plan and menu planner</li>
-              <li>Then tap <strong>Open daily app</strong> and wait for your diet to load</li>
-              <li><strong>iPhone:</strong> Share → <strong>Add to Home Screen</strong> · <strong>Android:</strong> Install app</li>
-            </ol>
-          </div>`;
-}
-
 function renderPlanReadyAppHandoff(unlocked) {
   if (!unlocked) {
-    return '<p class="unlock-tagline">Complete purchase to unlock your program and daily app.</p>';
+    return '<p class="unlock-tagline">Complete purchase to unlock your program.</p>';
   }
   restoreBuiltPackage();
   if (store.builtPackage) persistProgramBridge(store.builtPackage);
-  const email = (store.email || getAppEmail() || store.builtPackage?.intake?.email || '').trim();
   const reportUrl = programReportHref();
-  const appUrl = myplanHandoffUrl();
   return `
           <a class="btn-primary unlock-cta plan-ready-open-program" href="${reportUrl}" data-open-program-report>View your program →</a>
-          <p class="unlock-tagline">Food plan, servings, and menu planner — then use the app every day.</p>
-          <a class="btn-secondary unlock-cta-secondary plan-ready-open-app" href="${appUrl}" data-open-myplan>Open daily app →</a>
-          ${renderPwaInstallBox()}`;
+          <p class="unlock-tagline">Welcome letter, food plan, servings, and menu planner.</p>`;
 }
 
 function renderPlanReady() {
@@ -373,11 +351,11 @@ function renderPlanReady() {
   const unlocked = store.accessGranted || store.checkoutVerified;
   let lead;
   if (unlocked) {
-    lead = 'Payment complete. Your personalized program is ready — view your food plan, then open the daily app when you are ready.';
+    lead = 'Payment complete. Your program is ready — open your food plan, servings, and menu planner.';
   } else if (store.saveError) {
     lead = 'Your diet is ready on this device. Save it to your account, then complete checkout.';
   } else {
-    lead = 'Your personalized diet is saved. Complete checkout to unlock the app.';
+    lead = 'Your personalized diet is saved. Complete checkout to unlock your program.';
   }
 
   const checkoutBlock = !unlocked
@@ -413,7 +391,6 @@ function renderPlanReady() {
           ${checkoutBlock}
           ${saveActions}
           ${renderPlanReadyAppHandoff(unlocked)}
-          ${unlocked ? '' : renderPwaInstallBox()}
           ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
@@ -555,7 +532,7 @@ function renderUnlockEmail() {
         <div class="unlock-panel">
           <div class="teach-kicker">Step 1 of 3 · Unlock</div>
           <h2 class="unlock-title">Get your custom diet</h2>
-          <p class="unlock-lead">Your 8-week Burn &amp; Build program has been created${name ? ` for ${name}` : ''}${lbm ? ` from ${lbm.toFixed(1)} lbs of lean body mass` : ''}. Enter your email to connect it to your phone and continue.</p>
+          <p class="unlock-lead">Your 8-week Burn &amp; Build program has been created${name ? ` for ${name}` : ''}${lbm ? ` from ${lbm.toFixed(1)} lbs of lean body mass` : ''}. Enter your email to save your program and continue.</p>
           ${store.emailError ? `<div class="unlock-error">${store.emailError}</div>` : ''}
           <label class="unlock-label" for="unlock-email">Email address</label>
           <input id="unlock-email" class="ob-input ob-input-lg" type="email" name="unlockEmail" value="${store.email}" placeholder="you@example.com" autocomplete="email" />
@@ -634,7 +611,7 @@ function renderAdvancedFallback() {
   return `
     <details class="unlock-advanced">
       <summary>Having trouble opening your program?</summary>
-      <p>For support staff or edge cases only — most users should tap Open My Program above.</p>
+      <p>For support staff or edge cases only — most users should open View your program above.</p>
       <div class="export-actions">
         <button type="button" class="btn-secondary" data-download-package>Save program file</button>
         <button type="button" class="btn-secondary" data-copy-import-link>Copy app link</button>

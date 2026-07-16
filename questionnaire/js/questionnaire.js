@@ -14,9 +14,9 @@ import { CREATOR_CHECKOUT_URL } from '../../js/siteUrls.js';
 const STEPS = [
   { id: 'welcome', label: 'Welcome' },
   { id: 'personal', label: 'Personal info' },
-  { id: 'body', label: 'Body fat' },
   { id: 'work', label: 'Workday' },
   { id: 'exercise', label: 'Exercise' },
+  { id: 'body', label: 'Body fat' },
   { id: 'waiver', label: 'Agreement' },
   { id: 'review', label: 'Review' },
 ];
@@ -24,8 +24,6 @@ const STEPS = [
 const form = document.getElementById('q-form');
 const navList = document.getElementById('q-nav-list');
 const reviewEl = document.getElementById('q-review');
-const servingsSection = document.getElementById('q-servings');
-const servingsList = document.getElementById('q-servings-list');
 const continueBtn = document.getElementById('q-continue');
 const backBtn = document.querySelector('[data-q-back]');
 const nextBtn = document.querySelector('#q-actions [data-q-next]');
@@ -135,13 +133,6 @@ function heightLabel(values) {
   return `${feet || 0}'${inches || 0}"`;
 }
 
-function fmtServings(n) {
-  const value = Number(n);
-  if (!Number.isFinite(value)) return '0';
-  if (Math.abs(value - Math.round(value)) < 0.05) return String(Math.round(value));
-  return value.toFixed(1);
-}
-
 function canProceed(stepIndex) {
   const values = readForm();
   switch (stepIndex) {
@@ -150,13 +141,13 @@ function canProceed(stepIndex) {
     case 1:
       return values.preferredName && values.email && values.weight && values.sex && values.birthDate;
     case 2:
-      return values.fatSource && Number(values.fatPercent) > 0;
-    case 3:
       return values.workPhysical && values.workStress;
-    case 4:
+    case 3:
       return values.weightTrainingHours !== ''
         && values.cardioHours !== ''
         && values.fatBurningHours !== '';
+    case 4:
+      return values.fatSource && Number(values.fatPercent) > 0;
     case 5:
       return values.waiverAccepted && values.signature;
     default:
@@ -206,25 +197,6 @@ function renderReview() {
   reviewEl.innerHTML = rows.map(([label, value]) => `
     <div><dt>${label}</dt><dd>${value}</dd></div>
   `).join('');
-
-  if (program?.plan?.servings) {
-    const servings = program.plan.servings;
-    const summary = program.plan.summary;
-    servingsSection.hidden = false;
-    servingsList.innerHTML = [
-      ['Protein', `${fmtServings(servings.protein)} / day`],
-      ['Grains & starches', `${fmtServings(servings.grainsStarches)} / day`],
-      ['Fruit', `${fmtServings(servings.fruits)} / day`],
-      ['Vegetables', `${fmtServings(servings.vegetables)} / day`],
-      ['Fat points', `${fmtServings(servings.fatMaintain)} / day`],
-      ['Reduce calories', summary?.reduceTotalCals ? `${Math.round(summary.reduceTotalCals)} / day` : '—'],
-    ].map(([label, value]) => `
-      <div><dt>${label}</dt><dd>${value}</dd></div>
-    `).join('');
-  } else {
-    servingsSection.hidden = true;
-    servingsList.innerHTML = '';
-  }
 }
 
 function showStep(index) {
@@ -252,7 +224,7 @@ function showStep(index) {
 
 function initDefaults() {
   const today = new Date().toISOString().slice(0, 10);
-  if (form.elements.intakeDate && !form.elements.intakeDate.value) {
+  if (form.elements.intakeDate) {
     form.elements.intakeDate.value = today;
   }
   if (form.elements.signatureDate && !form.elements.signatureDate.value) {
