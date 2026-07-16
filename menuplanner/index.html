@@ -24,13 +24,17 @@
   </script>
   <style>
     html.mp-handoff-pending #access-gate { display: none !important; }
-    html.mp-handoff-pending #planner-root { display: block !important; }
+    html.mp-handoff-pending #planner-root {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 20px !important;
+    }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=20" />
-  <link rel="stylesheet" href="css/planner.css?v=25" />
+  <link rel="stylesheet" href="css/planner.css?v=26" />
 </head>
 <body>
   <section id="access-gate" class="mp-access">
@@ -198,6 +202,6 @@
       event.preventDefault();
     });
   </script>
-  <script type="module" src="js/planner.js?v=37"></script>
+  <script type="module" src="js/planner.js?v=38"></script>
 </body>
 </html>

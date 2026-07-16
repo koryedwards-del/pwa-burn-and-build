@@ -13,7 +13,7 @@ import {
 } from '../../js/menuPlannerState.js?v=17';
 import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=17';
 import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=17';
-import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=10';
+import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=11';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',
