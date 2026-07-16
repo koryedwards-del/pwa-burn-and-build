@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=5" />
-  <link rel="stylesheet" href="css/planner.css?v=21" />
+  <link rel="stylesheet" href="css/planner.css?v=22" />
 </head>
 <body>
   <section id="access-gate" class="mp-access" hidden>
@@ -36,7 +36,10 @@
           <p id="access-form-error" class="mp-access__error" hidden></p>
           <button type="submit" class="mp-access__submit" id="access-submit">Continue</button>
         </form>
-        <p class="mp-access__footer">Need a program? <a class="mp-access__link" href="/questionnaire/#welcome">Start with the questionnaire</a></p>
+        <div class="mp-access__footer">
+          <p class="mp-access__footer-lead">Need a diet?</p>
+          <a class="mp-access__submit mp-access__submit--link" href="/questionnaire/#welcome">Create your diet</a>
+        </div>
       </div>
 
       <div id="access-screen-unpaid" class="mp-access__screen" hidden>
