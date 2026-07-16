@@ -1529,7 +1529,7 @@ function buildAssistantDocumentHtml() {
       border-bottom: 2px solid #fdc500;
     }
     .agenda-meal {
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .agenda-meal-head {
       font-family: Oswald, system-ui, sans-serif;
@@ -1538,7 +1538,7 @@ function buildAssistantDocumentHtml() {
       letter-spacing: 0.04em;
       text-transform: uppercase;
       color: #444;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
       line-height: 1.35;
     }
     .agenda-time {
