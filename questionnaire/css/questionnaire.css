@@ -446,6 +446,10 @@ body {
   font-size: 0.95rem;
 }
 
+.q-static-value--short {
+  max-width: 120px;
+}
+
 .q-inline {
   display: flex;
   align-items: center;

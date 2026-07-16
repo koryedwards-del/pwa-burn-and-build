@@ -110,10 +110,10 @@ function buildProgramFromValues(values) {
 
 function syncAgeField() {
   const birthInput = form.elements.birthDate;
-  const ageInput = form.elements.age;
-  if (!birthInput || !ageInput) return;
+  const ageDisplay = document.getElementById('q-age-display');
+  if (!birthInput || !ageDisplay) return;
   const age = birthInput.value ? ageFromBirthDate(birthInput.value) : null;
-  ageInput.value = age != null ? String(age) : '';
+  ageDisplay.textContent = age != null ? String(age) : '—';
   syncHeartRateHints(age);
 }
 
