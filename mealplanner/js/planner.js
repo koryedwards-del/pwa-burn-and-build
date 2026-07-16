@@ -1344,11 +1344,44 @@ function buildAssistantDocumentHtml() {
 </html>`;
 }
 
+function showPlannerToast(message, { variant = 'info', durationMs = 6000 } = {}) {
+  let host = document.getElementById('planner-toast-host');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'planner-toast-host';
+    host.className = 'planner-toast-host';
+    host.setAttribute('aria-live', 'polite');
+    host.setAttribute('role', 'status');
+    document.body.appendChild(host);
+  }
+
+  const toast = document.createElement('p');
+  toast.className = `planner-toast planner-toast--${variant}`;
+  toast.textContent = message;
+  host.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
+
+  window.setTimeout(() => {
+    toast.classList.remove('is-visible');
+    window.setTimeout(() => toast.remove(), 320);
+  }, durationMs);
+}
+
 function openPrintAssistant() {
   const doc = window.open('', '_blank');
-  if (!doc) return;
+  if (!doc) {
+    showPlannerToast('Pop-up blocked — allow new tabs for this site, then try Print Assistant again.', {
+      variant: 'error',
+      durationMs: 8000,
+    });
+    return;
+  }
   doc.document.write(buildAssistantDocumentHtml());
   doc.document.close();
+  doc.focus();
+  showPlannerToast('Print Assistant opened in a new tab. Review your list there, then use Print.', {
+    variant: 'success',
+  });
 }
 
 function initFoodSearch() {

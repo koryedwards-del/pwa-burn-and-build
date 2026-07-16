@@ -991,3 +991,46 @@ body {
   background: var(--border);
   border-radius: 3px;
 }
+
+.planner-toast-host {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: min(420px, calc(100vw - 48px));
+  pointer-events: none;
+}
+
+.planner-toast {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.planner-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.planner-toast--success {
+  border-color: rgba(253, 197, 0, 0.45);
+  background: rgba(253, 197, 0, 0.1);
+}
+
+.planner-toast--error {
+  border-color: rgba(255, 122, 0, 0.5);
+  background: rgba(255, 122, 0, 0.12);
+  color: #ffb347;
+}
