@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=23" />
   <link rel="stylesheet" href="css/report.css?v=16" />
-  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=37" />
+  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=38" />
 </head>
 <body>
   <section id="access-gate" class="mp-access" hidden>
@@ -103,9 +103,21 @@
           <div class="pb-doc planner-meta" id="planner-meta"></div>
 
           <main class="planner-frame">
-            <div class="week-panel">
+            <div class="week-panel" id="week-panel">
               <div class="week-panel__header">
-                <p class="col-heading col-heading--week">Week</p>
+                <div class="week-panel__title-row">
+                  <button
+                    type="button"
+                    class="week-panel__toggle"
+                    id="week-grid-toggle"
+                    aria-expanded="true"
+                    aria-controls="week-grid"
+                    aria-label="Hide week grid"
+                  >
+                    <span data-week-toggle-icon aria-hidden="true">▾</span>
+                  </button>
+                  <p class="col-heading col-heading--week">Week</p>
+                </div>
                 <div class="week-panel__actions">
                   <div class="print-assistant-anchor">
                     <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>

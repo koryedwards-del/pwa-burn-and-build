@@ -127,6 +127,43 @@ body {
   padding: 0 4px;
 }
 
+.week-panel__title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.week-panel__toggle {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.week-panel__toggle:hover {
+  border-color: var(--gold-muted);
+  color: var(--text);
+}
+
+.week-panel.is-collapsed {
+  gap: 0;
+}
+
+.week-panel.is-collapsed .week-grid {
+  display: none;
+}
+
 .col-heading--week {
   padding-bottom: 0;
   border-bottom: none;

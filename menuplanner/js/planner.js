@@ -63,6 +63,7 @@ const TEMPLATE_SLOTS = {
 };
 
 let savedMeals = [];
+let weekGridCollapsed = false;
 
 const FOODS_DATA_VERSION = '2';
 
@@ -145,6 +146,7 @@ function resetPlannerState() {
   activeWeekDay = todayWeekDayId();
   activeSlot = null;
   activeFoodCategory = null;
+  weekGridCollapsed = false;
 }
 
 function collectPlannerState() {
@@ -153,6 +155,7 @@ function collectPlannerState() {
     activeWeekDay,
     weekPlan,
     savedMeals,
+    weekGridCollapsed,
   };
 }
 
@@ -168,6 +171,9 @@ function applyPlannerState(state) {
   }
   if (state.activeWeekDay && WEEK_DAYS.some((day) => day.id === state.activeWeekDay)) {
     activeWeekDay = state.activeWeekDay;
+  }
+  if (state.weekGridCollapsed === true) {
+    weekGridCollapsed = true;
   }
 }
 
@@ -614,6 +620,32 @@ function initClearDayMenu() {
 
 function initClearWeekMenu() {
   document.getElementById('clear-week-menu').addEventListener('click', clearWeekMenu);
+}
+
+function setWeekGridCollapsed(collapsed, { persist = true } = {}) {
+  weekGridCollapsed = collapsed;
+  const panel = document.getElementById('week-panel');
+  const toggle = document.getElementById('week-grid-toggle');
+  if (panel) {
+    panel.classList.toggle('is-collapsed', collapsed);
+  }
+  if (toggle) {
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    toggle.setAttribute('aria-label', collapsed ? 'Show week grid' : 'Hide week grid');
+    const icon = toggle.querySelector('[data-week-toggle-icon]');
+    if (icon) icon.textContent = collapsed ? '▸' : '▾';
+  }
+  if (persist) persistPlannerToProgram();
+}
+
+function initWeekGridCollapse() {
+  const toggle = document.getElementById('week-grid-toggle');
+  if (!toggle || toggle.dataset.weekCollapseInit) return;
+  toggle.dataset.weekCollapseInit = '1';
+  setWeekGridCollapsed(weekGridCollapsed, { persist: false });
+  toggle.addEventListener('click', () => {
+    setWeekGridCollapsed(!weekGridCollapsed);
+  });
 }
 
 let weekGridLabelProbe = null;
@@ -2008,6 +2040,7 @@ let plannerShellReady = false;
 let plannerBootPromise = null;
 
 function renderPlannerWorkspace() {
+  setWeekGridCollapsed(weekGridCollapsed, { persist: false });
   renderWeekGrid();
   renderActiveDayLabel();
   renderDayColumn();
@@ -2052,6 +2085,7 @@ export async function bootMenuPlannerPage() {
     }
     foods = await response.json();
     initWeekGrid();
+    initWeekGridCollapse();
     initSaveMealDialog();
     initClearDayMenu();
     initClearWeekMenu();
