@@ -65,7 +65,7 @@ export function buildProgramPackage(form, { startDate, programId, label, meta } 
       engineSource: 'burnEngine.js',
       foodsCatalogVersion: FOODS_CATALOG_VERSION,
       generatedBy: 'burn-engine-web',
-      websiteUrl: 'https://gettheburnandbuildapp.com',
+      websiteUrl: 'https://burnandbuilddiet.com',
     },
     meta: {
       customerRef: null,

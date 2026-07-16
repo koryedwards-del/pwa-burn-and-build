@@ -55,8 +55,8 @@ import {
   syncMealReminders,
 } from './reminderScheduler.js';
 
-const BNB_WEBSITE_URL = 'https://gettheburnandbuildapp.com/?browse=1';
-const BNB_CREATOR_URL = 'https://gettheburnandbuildapp.com/createyourfoodplan/?browse=1';
+const BNB_WEBSITE_URL = 'https://burnandbuilddiet.com/?browse=1';
+const BNB_CREATOR_URL = 'https://burnandbuilddiet.com/createyourfoodplan/?browse=1';
 
 let backupTimer = null;
 function scheduleLocalBackup() {

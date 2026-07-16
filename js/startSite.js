@@ -23,7 +23,7 @@ import {
 import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js?v=102';
 import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
-const LANDING_URL = 'https://gettheburnandbuildapp.com';
+const LANDING_URL = 'https://burnandbuilddiet.com';
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',
@@ -214,7 +214,7 @@ function restoreBuiltPackage() {
   if (!raw) return;
   try {
     store.builtPackage = JSON.parse(raw);
-    store.importUrl = packageToImportUrl(store.builtPackage, '../myplan/');
+    store.importUrl = packageToImportUrl(store.builtPackage, '/myplan/');
   } catch {
     sessionStorage.removeItem('bnb_built_package');
   }
@@ -226,7 +226,7 @@ async function restoreBuiltPackageFromServer(email) {
   const result = await fetchProgramFromServer(email);
   if (!result.ok || !result.package) return false;
   store.builtPackage = result.package;
-  store.importUrl = packageToImportUrl(store.builtPackage, '../myplan/');
+  store.importUrl = packageToImportUrl(store.builtPackage, '/myplan/');
   persistBuiltPackage();
   return true;
 }
@@ -234,13 +234,13 @@ async function restoreBuiltPackageFromServer(email) {
 function myplanHandoffUrl() {
   restoreBuiltPackage();
   if (store.builtPackage) {
-    return packageToImportUrl(store.builtPackage, '../myplan/');
+    return packageToImportUrl(store.builtPackage, '/myplan/');
   }
   const email = (store.email || getAppEmail() || '').trim();
   if (isValidEmail(email)) {
-    return `../myplan/?email=${encodeURIComponent(email)}`;
+    return `/myplan/?email=${encodeURIComponent(email)}`;
   }
-  return '../myplan/';
+  return '/myplan/';
 }
 
 const BROWSE_MODE_KEY = 'bnb_browse_mode';
@@ -276,7 +276,7 @@ function escapeStandaloneToMyplan() {
   if (!standalone || shouldAllowCreatorInStandalone()) return false;
   const email = (store.email || getAppEmail() || '').trim();
   const q = isValidEmail(email) ? `?email=${encodeURIComponent(email)}` : '';
-  window.location.replace(`../myplan/${q}`);
+  window.location.replace(`/myplan/${q}`);
   return true;
 }
 
@@ -332,7 +332,7 @@ async function openMyplanApp() {
     }
   }
   const q = isValidEmail(email) ? `?email=${encodeURIComponent(email)}` : '';
-  window.location.href = `../myplan/${q}`;
+  window.location.href = `/myplan/${q}`;
 }
 
 function isStandaloneDisplay() {
@@ -346,9 +346,9 @@ function renderPwaInstallBox() {
             <h3>Add to your home screen</h3>
             <p class="install-lead">Open the app first — then add <strong>that page</strong> to your home screen (not this creator page).</p>
             <ol class="install-steps">
-              <li>Tap <strong>Open Burn &amp; Build app</strong> above and wait for your diet to load</li>
-              <li><strong>iPhone:</strong> Share → <strong>Add to Home Screen</strong></li>
-              <li><strong>Android:</strong> Menu → <strong>Install app</strong> or <strong>Add to Home Screen</strong></li>
+              <li>Tap <strong>View your program</strong> to open your food plan and menu planner</li>
+              <li>Then tap <strong>Open daily app</strong> and wait for your diet to load</li>
+              <li><strong>iPhone:</strong> Share → <strong>Add to Home Screen</strong> · <strong>Android:</strong> Install app</li>
             </ol>
           </div>`;
 }
@@ -357,10 +357,15 @@ function renderPlanReadyAppHandoff(unlocked) {
   if (!unlocked) {
     return '<p class="unlock-tagline">Complete purchase to unlock your program and daily app.</p>';
   }
+  restoreBuiltPackage();
+  if (store.builtPackage) persistProgramBridge(store.builtPackage);
+  const email = (store.email || getAppEmail() || store.builtPackage?.intake?.email || '').trim();
+  const reportUrl = programReportHref();
+  const appUrl = myplanHandoffUrl();
   return `
-          <button type="button" class="btn-primary unlock-cta plan-ready-open-program" data-open-program-report>View your program →</button>
+          <a class="btn-primary unlock-cta plan-ready-open-program" href="${reportUrl}" data-open-program-report>View your program →</a>
           <p class="unlock-tagline">Food plan, servings, and menu planner — then use the app every day.</p>
-          <button type="button" class="btn-secondary unlock-cta-secondary plan-ready-open-app" data-open-myplan>Open daily app →</button>
+          <a class="btn-secondary unlock-cta-secondary plan-ready-open-app" href="${appUrl}" data-open-myplan>Open daily app →</a>
           ${renderPwaInstallBox()}`;
 }
 
@@ -387,7 +392,7 @@ function renderPlanReady() {
           <p class="unlock-hint">Secure checkout · Promo codes accepted · One-time · Yours for life</p>
           ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
       : `
-          <p class="unlock-hint">Checkout is not available yet. Contact support@gettheburnandbuildapp.com if you need help.</p>
+          <p class="unlock-hint">Checkout is not available yet. Contact support@burnandbuilddiet.com if you need help.</p>
           ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
     : '';
 
@@ -454,7 +459,7 @@ function ensureBuiltPackage() {
     startDate: store.startDate || undefined,
     label: `${store.onboardingForm.preferredName}'s 8-Week Program`,
   });
-  store.importUrl = packageToImportUrl(store.builtPackage, '../myplan/');
+  store.importUrl = packageToImportUrl(store.builtPackage, '/myplan/');
   persistBuiltPackage();
   return store.builtPackage;
 }
@@ -801,7 +806,8 @@ async function completeTestCheckout() {
     render();
     return;
   }
-  store.checkoutMessage = 'Test access granted.';
+  store.checkoutMessage = 'Test access granted. Your program is unlocked.';
+  store.checkoutVerified = true;
   await refreshAccessState();
   render();
 }
@@ -938,10 +944,12 @@ function bindGlobal() {
       return;
     }
     if (e.target.closest('[data-open-program-report]')) {
+      e.preventDefault();
       openProgramReport().catch((err) => console.error(err));
       return;
     }
     if (e.target.closest('[data-open-myplan]')) {
+      e.preventDefault();
       openMyplanApp().catch((err) => console.error(err));
       return;
     }

@@ -30,6 +30,8 @@ const port = Number(process.env.PORT) || 3001;
 const isProd = process.env.NODE_ENV === 'production';
 
 const defaultCorsOrigins = [
+  'https://burnandbuilddiet.com',
+  'https://www.burnandbuilddiet.com',
   'https://gettheburnandbuildapp.com',
   'https://www.gettheburnandbuildapp.com',
   'http://localhost:3000',

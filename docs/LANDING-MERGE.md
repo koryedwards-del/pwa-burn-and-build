@@ -7,11 +7,11 @@
 | Item | Value |
 |------|--------|
 | Source content | `~/code/hardkordietlandingpage/` (Hardkor landing) |
-| Destination | `pwa-burn-and-build/landing/` → **gettheburnandbuildapp.com** |
+| Destination | `pwa-burn-and-build/landing/` → **burnandbuilddiet.com** |
 | Brand on site | **Burn & Build** (Hardkor naming removed) |
 | Product price (marketing) | **$149** |
 | Checkout / CTA | `/createyourfoodplan/?browse=1` |
-| Support email | support@gettheburnandbuildapp.com |
+| Support email | support@burnandbuilddiet.com |
 | Food count in copy | **278** (matches app catalog; Hardkor says 247) |
 | Engine name in copy | **Burn Engine** (was “HARDKOR engine”) |
 | Hardkor content | **Keeper** — layout, sections, athlete tone |
@@ -45,7 +45,7 @@
 | `privacypolicy.html` | Full privacy legal | Keep body; Hardkor shell optional (Step 5) |
 | `js/calculator.js` + `js/previewCalculator.js` | What's Possible calculator | Prefer over Hardkor inline JS (Step 3 optional) |
 | `images/BBclearlogo.png` | Logo | Use in hero (Step 2) |
-| `CNAME` | gettheburnandbuildapp.com | **No change** |
+| `CNAME` | burnandbuilddiet.com | **No change** |
 | Favicons | B&B icons | **Keep** |
 
 ## Rebrand find/replace matrix
@@ -64,8 +64,8 @@ Apply on each ported file:
 | wordmark `HARDKOR` | B&B logo or “Burn & Build” |
 | `$249` | `$149` |
 | `247` (foods) | `278` |
-| thehardkordiet.com | gettheburnandbuildapp.com |
-| support@thehardkordiet.com | support@gettheburnandbuildapp.com |
+| thehardkordiet.com | burnandbuilddiet.com |
+| support@thehardkordiet.com | support@burnandbuilddiet.com |
 | privacy.html | privacypolicy.html (B&B path) |
 
 ## B&B-only behaviors to preserve

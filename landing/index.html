@@ -37,6 +37,19 @@
     .hero-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--yellow); margin-bottom: 20px; opacity: 0; animation: fadeUp 0.7s 0.1s forwards; }
     .hero-headline { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: clamp(2rem, 6vw, 4.5rem); line-height: 1.05; text-transform: uppercase; letter-spacing: 0.02em; max-width: 900px; margin: 24px 0 16px; opacity: 0; animation: fadeUp 0.7s 0.6s forwards; color: var(--gray-heading); }
     .hero-headline .hero-line-accent { color: var(--yellow); }
+    .hero-cta { margin-top: 32px; opacity: 0; animation: fadeUp 0.7s 0.85s forwards; }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px !important;
+      background: var(--yellow) !important;
+      color: var(--black) !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.08em !important;
+    }
+    .nav-cta:hover { opacity: 0.85; color: var(--black) !important; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
     .btn-cta {
@@ -213,7 +226,7 @@
       <li><a href="#calculator">What's Possible</a></li>
       <li><a href="#how">What You Get</a></li>
       <li><a href="#who">Who It's For</a></li>
-      <li><a href="#pricing">Get Started</a></li>
+      <li><a href="/createyourfoodplan/?browse=1" class="nav-cta">Create Your Diet</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -223,7 +236,8 @@
     <a href="#calculator">What's Possible</a>
     <a href="#how">What You Get</a>
     <a href="#who">Who It's For</a>
-    <a href="#pricing">Get Started</a>
+    <a href="/createyourfoodplan/?browse=1">Create Your Diet</a>
+    <a href="#pricing">Pricing</a>
     <a href="/privacypolicy">Privacy Policy</a>
     <a href="/support">Support</a>
   </div>
@@ -232,6 +246,7 @@
     <p class="hero-eyebrow">Contest Prep Diet Program</p>
     <img class="hero-logo" src="/img/brand/bblogo.png" alt="Burn &amp; Build" />
     <h1 class="hero-headline"><span class="hero-line-accent">Lose the Fat.</span><br />Keep the Muscle.</h1>
+    <a class="btn-cta hero-cta" href="/createyourfoodplan/?browse=1">Create Your Diet &rarr;</a>
   </section>
 
   <section class="guide" id="guide">

@@ -28,8 +28,17 @@ export function loadProgramBridge() {
 }
 
 export function programReportHref({ preview = false, page } = {}) {
-  const url = new URL('../program-report/', window.location.href);
+  const url = new URL('/program-report/', window.location.origin);
   if (preview) url.searchParams.set('preview', '1');
   if (page) url.searchParams.set('page', page);
   return `${url.pathname}${url.search}`;
 }
+
+export function myplanAppHref(email = '') {
+  const url = new URL('/myplan/', window.location.origin);
+  const normalized = String(email || '').trim().toLowerCase();
+  if (normalized) url.searchParams.set('email', normalized);
+  return `${url.pathname}${url.search}`;
+}
+
+export const CREATOR_ENTRY_PATH = '/createyourfoodplan/?browse=1';
