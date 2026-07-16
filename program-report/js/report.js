@@ -45,7 +45,6 @@ const PAGES = [
 
 let activePage = 0;
 let programPackage = null;
-let usingPreview = false;
 
 function escapeHtml(text) {
   return String(text ?? '')
@@ -96,9 +95,7 @@ function persistProgram(pkg) {
 
 function loadPreviewProgram() {
   programPackage = buildPreviewProgram();
-  usingPreview = true;
   persistProgram(programPackage);
-  renderPreparedLine(programPackage);
   showPage(initialPageFromUrl());
 }
 
@@ -129,15 +126,6 @@ function renderNav() {
   `).join('');
 }
 
-function renderPreparedLine(pkg) {
-  const el = document.getElementById('r-prepared');
-  if (!el || !pkg) return;
-  const name = pkg.intake?.preferredName || 'You';
-  const date = formatReportDate(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate);
-  const previewNote = usingPreview ? ' · Sample program' : '';
-  el.textContent = `${name} · ${date}${previewNote}`;
-}
-
 function renderPageMeta(pkg) {
   const name = escapeHtml(pkg.intake?.preferredName || 'You');
   const date = escapeHtml(formatReportDate(pkg.program?.issuedAt || pkg.program?.foodPlanCreatedDate));
@@ -154,7 +142,6 @@ function renderWelcome(pkg) {
       <div>
         <p class="r-eyebrow">Step 1 of 4</p>
         <h2 class="r-panel__title">Welcome</h2>
-        <p class="r-panel__lead">Your program was built from your intake — review it here, then plan your week in the meal planner.</p>
       </div>
 
       <article class="r-doc">
@@ -539,15 +526,12 @@ function bindEvents() {
 
 function init() {
   programPackage = loadProgramPackage();
-  usingPreview = programPackage?.meta?.source === 'program-report-preview';
 
   if (!programPackage?.intake?.leanBodyMass && wantsPreviewFromUrl()) {
     programPackage = buildPreviewProgram();
-    usingPreview = true;
     persistProgram(programPackage);
   }
 
-  renderPreparedLine(programPackage);
   if (programPackage?.intake?.leanBodyMass) {
     activePage = initialPageFromUrl();
   }
