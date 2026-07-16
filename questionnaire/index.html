@@ -9,7 +9,10 @@
     })();
   </script>
   <title>Burn &amp; Build — Program Questionnaire</title>
-  <link rel="stylesheet" href="css/questionnaire.css?v=2" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=3" />
 </head>
 <body>
   <div class="q-app">
@@ -25,12 +28,14 @@
 
     <div class="q-layout">
       <nav class="q-nav" aria-label="Questionnaire steps">
-        <ol class="q-nav__list" id="q-nav-list"></ol>
+        <ol class="q-nav__list" id="q-nav-list">
+          <li><span class="q-nav__item is-active">1. Welcome</span></li>
+        </ol>
       </nav>
 
       <main class="q-main">
         <form class="q-form" id="q-form" novalidate>
-          <section class="q-panel" data-step="0" hidden>
+          <section class="q-panel" data-step="0">
             <div class="q-panel__head">
               <p class="q-eyebrow">Step 1</p>
               <h2 class="q-panel__title">Ready to build your program</h2>
@@ -245,7 +250,7 @@
           </section>
         </form>
 
-        <footer class="q-actions" id="q-actions">
+        <footer class="q-actions" id="q-actions" hidden>
           <button type="button" class="q-btn q-btn--ghost" data-q-back hidden>Back</button>
           <button type="button" class="q-btn q-btn--primary" data-q-next>Next</button>
         </footer>
@@ -253,6 +258,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/questionnaire.js?v=5"></script>
+  <script type="module" src="js/questionnaire.js?v=6"></script>
 </body>
 </html>

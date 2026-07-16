@@ -234,10 +234,13 @@ function showStep(index) {
   });
   renderNav();
   if (step === 6) renderReview();
-  backBtn.hidden = step === 0;
-  nextBtn.hidden = step === 0 || step === panels.length - 1;
-  nextBtn.disabled = !canProceed(step);
-  document.querySelector('#q-actions').hidden = step === 0 || step === panels.length - 1;
+  if (backBtn) backBtn.hidden = step === 0;
+  if (nextBtn) {
+    nextBtn.hidden = step === 0 || step === panels.length - 1;
+    nextBtn.disabled = !canProceed(step);
+  }
+  const actions = document.getElementById('q-actions');
+  if (actions) actions.hidden = step === 0 || step === panels.length - 1;
 }
 
 function initDefaults() {
@@ -253,76 +256,103 @@ function initDefaults() {
   }
 }
 
-navList.addEventListener('click', (event) => {
-  const btn = event.target.closest('[data-nav-step]');
-  if (!btn) return;
-  const target = Number(btn.dataset.navStep);
-  if (target <= step) showStep(target);
-});
-
-form.addEventListener('input', () => {
-  syncAgeField();
-  if (step < panels.length - 1) nextBtn.disabled = !canProceed(step);
-});
-
-form.addEventListener('change', () => {
-  syncAgeField();
-  if (step < panels.length - 1) nextBtn.disabled = !canProceed(step);
-});
-
-document.querySelectorAll('[data-q-next]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    if (step < panels.length - 1 && !canProceed(step)) return;
-    showStep(step + 1);
-  });
-});
-
-backBtn.addEventListener('click', () => showStep(step - 1));
-
-continueBtn.addEventListener('click', async (event) => {
-  event.preventDefault();
-  const values = readForm();
-  if (!canProceed(5)) return;
-
-  const email = String(values.email || '').trim();
-  if (!isValidEmail(email)) {
-    window.alert('Enter a valid email address before continuing.');
-    showStep(1);
-    return;
+function bindEvents() {
+  if (!form || !navList) {
+    throw new Error('Questionnaire markup is missing required elements.');
   }
 
-  continueBtn.disabled = true;
-  const prevLabel = continueBtn.textContent;
-  continueBtn.textContent = 'Saving your program…';
+  navList.addEventListener('click', (event) => {
+    const btn = event.target.closest('[data-nav-step]');
+    if (!btn) return;
+    const target = Number(btn.dataset.navStep);
+    if (target <= step) showStep(target);
+  });
 
-  try {
-    const program = buildProgramFromValues(values);
-    persistAppEmail(email);
-    persistProgramBridge(program);
-    sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
-    sessionStorage.setItem('bnb_browse_mode', '1');
+  form.addEventListener('input', () => {
+    syncAgeField();
+    if (nextBtn && step < panels.length - 1) nextBtn.disabled = !canProceed(step);
+  });
 
-    const saved = await saveProgramToServer(email, program);
-    if (!saved.ok) {
-      window.alert(saved.message || 'Could not save your plan. Check your connection and try again.');
-      continueBtn.disabled = false;
-      continueBtn.textContent = prevLabel;
+  form.addEventListener('change', () => {
+    syncAgeField();
+    if (nextBtn && step < panels.length - 1) nextBtn.disabled = !canProceed(step);
+  });
+
+  document.querySelectorAll('[data-q-next]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (step < panels.length - 1 && !canProceed(step)) return;
+      showStep(step + 1);
+    });
+  });
+
+  backBtn?.addEventListener('click', () => showStep(step - 1));
+
+  continueBtn?.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const values = readForm();
+    if (!canProceed(5)) return;
+
+    const email = String(values.email || '').trim();
+    if (!isValidEmail(email)) {
+      window.alert('Enter a valid email address before continuing.');
+      showStep(1);
       return;
     }
-    if (saved.programId && program.program) {
-      program.program.id = saved.programId;
-      persistProgramBridge(program);
-    }
 
-    window.location.href = CREATOR_CHECKOUT_URL;
+    continueBtn.disabled = true;
+    const prevLabel = continueBtn.textContent;
+    continueBtn.textContent = 'Saving your program…';
+
+    try {
+      const program = buildProgramFromValues(values);
+      persistAppEmail(email);
+      persistProgramBridge(program);
+      sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
+      sessionStorage.setItem('bnb_browse_mode', '1');
+
+      const saved = await saveProgramToServer(email, program);
+      if (!saved.ok) {
+        window.alert(saved.message || 'Could not save your plan. Check your connection and try again.');
+        continueBtn.disabled = false;
+        continueBtn.textContent = prevLabel;
+        return;
+      }
+      if (saved.programId && program.program) {
+        program.program.id = saved.programId;
+        persistProgramBridge(program);
+      }
+
+      window.location.href = CREATOR_CHECKOUT_URL;
+    } catch (error) {
+      console.error(error);
+      window.alert('Could not build your program. Check your answers and try again.');
+      continueBtn.disabled = false;
+      continueBtn.textContent = prevLabel;
+    }
+  });
+}
+
+function showBootError(message) {
+  const main = document.querySelector('.q-main');
+  if (!main) return;
+  const panel = document.querySelector('.q-panel[data-step="0"]');
+  if (panel) panel.hidden = false;
+  const note = document.createElement('p');
+  note.className = 'q-boot-error';
+  note.textContent = message;
+  main.prepend(note);
+}
+
+function boot() {
+  try {
+    bindEvents();
+    initDefaults();
+    syncAgeField();
+    showStep(0);
   } catch (error) {
     console.error(error);
-    window.alert('Could not build your program. Check your answers and try again.');
-    continueBtn.disabled = false;
-    continueBtn.textContent = prevLabel;
+    showBootError('Could not start the questionnaire. Hard refresh and try again.');
   }
-});
+}
 
-initDefaults();
-syncAgeField();
-showStep(0);
+boot();
