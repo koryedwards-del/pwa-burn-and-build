@@ -12,6 +12,7 @@ import { persistProgramBridge } from '../../js/programBridgeHandoff.js';
 import { CREATOR_CHECKOUT_URL } from '../../js/siteUrls.js';
 
 const STEPS = [
+  { id: 'welcome', label: 'Welcome' },
   { id: 'personal', label: 'Personal info' },
   { id: 'body', label: 'Body fat' },
   { id: 'work', label: 'Workday' },
@@ -145,16 +146,18 @@ function canProceed(stepIndex) {
   const values = readForm();
   switch (stepIndex) {
     case 0:
-      return values.preferredName && values.email && values.weight && values.sex && values.birthDate;
+      return true;
     case 1:
-      return values.fatSource && Number(values.fatPercent) > 0;
+      return values.preferredName && values.email && values.weight && values.sex && values.birthDate;
     case 2:
-      return values.workPhysical && values.workStress;
+      return values.fatSource && Number(values.fatPercent) > 0;
     case 3:
+      return values.workPhysical && values.workStress;
+    case 4:
       return values.weightTrainingHours !== ''
         && values.cardioHours !== ''
         && values.fatBurningHours !== '';
-    case 4:
+    case 5:
       return values.waiverAccepted && values.signature;
     default:
       return true;
@@ -230,14 +233,14 @@ function showStep(index) {
     panel.hidden = i !== step;
   });
   renderNav();
-  if (step === 5) renderReview();
+  if (step === 6) renderReview();
   if (backBtn) backBtn.hidden = step === 0;
   if (nextBtn) {
-    nextBtn.hidden = step === panels.length - 1;
+    nextBtn.hidden = step === 0 || step === panels.length - 1;
     nextBtn.disabled = !canProceed(step);
   }
   const actions = document.getElementById('q-actions');
-  if (actions) actions.hidden = step === panels.length - 1;
+  if (actions) actions.hidden = step === 0 || step === panels.length - 1;
 }
 
 function initDefaults() {
@@ -287,12 +290,12 @@ function bindEvents() {
   continueBtn?.addEventListener('click', async (event) => {
     event.preventDefault();
     const values = readForm();
-    if (!canProceed(4)) return;
+    if (!canProceed(5)) return;
 
     const email = String(values.email || '').trim();
     if (!isValidEmail(email)) {
       window.alert('Enter a valid email address before continuing.');
-      showStep(0);
+      showStep(1);
       return;
     }
 

@@ -16,7 +16,7 @@ import {
   programNavHtml,
 } from '../../js/programBridgeUi.js';
 import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js';
-import { INTAKE_ENTRY_URL } from '../../js/siteUrls.js';
+import { QUESTIONNAIRE_ENTRY_URL } from '../../js/siteUrls.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
 const PREVIEW_FORM = {
@@ -440,7 +440,7 @@ function renderMissingProgram() {
         <li><strong>Menu planner</strong> — build your week and grocery list</li>
       </ol>
       <div class="r-empty__actions">
-        <a class="r-btn r-btn--primary" href="${INTAKE_ENTRY_URL}">Create your diet →</a>
+        <a class="r-btn r-btn--primary" href="${QUESTIONNAIRE_ENTRY_URL}">Create your diet →</a>
         <button type="button" class="r-btn r-btn--ghost" data-report-preview>Preview sample report</button>
       </div>
       <p class="r-note r-empty__hint">Preview uses Kristi Warner&rsquo;s seminar sample before you build yours.</p>

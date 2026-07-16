@@ -55,10 +55,10 @@ import {
   syncMealReminders,
 } from './reminderScheduler.js';
 
-import { INTAKE_ENTRY_URL, CREATOR_HOST_ORIGIN, MARKETING_ORIGIN } from './siteUrls.js';
+import { QUESTIONNAIRE_ENTRY_URL, CREATOR_HOST_ORIGIN, MARKETING_ORIGIN } from './siteUrls.js';
 
 const BNB_WEBSITE_URL = `${MARKETING_ORIGIN}/?browse=1`;
-const BNB_CREATOR_URL = INTAKE_ENTRY_URL;
+const BNB_CREATOR_URL = QUESTIONNAIRE_ENTRY_URL;
 
 let backupTimer = null;
 function scheduleLocalBackup() {
@@ -1363,7 +1363,7 @@ function renderImport() {
         <div class="import-divider">or paste JSON</div>
         <textarea class="import-paste" data-import-paste placeholder='{"schemaVersion":"1.0.0","packageType":"burn-and-build-program",...}'></textarea>
         <button type="button" class="btn-primary" data-import-submit style="margin-top:16px">OPEN PROGRAM</button>
-        <p class="import-note">Need a new program? <a href="../questionnaire/?browse=1">Create one on the website →</a></p>
+        <p class="import-note">Need a new program? <a href="../questionnaire/">Create one on the website →</a></p>
       </div>
     </div>`;
 }

@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/questionnaire.css?v=3" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=4" />
 </head>
 <body>
   <div class="q-app">
@@ -29,7 +29,7 @@
     <div class="q-layout">
       <nav class="q-nav" aria-label="Questionnaire steps">
         <ol class="q-nav__list" id="q-nav-list">
-          <li><span class="q-nav__item is-active">1. Personal info</span></li>
+          <li><span class="q-nav__item is-active">1. Welcome</span></li>
         </ol>
       </nav>
 
@@ -37,7 +37,27 @@
         <form class="q-form" id="q-form" novalidate>
           <section class="q-panel" data-step="0">
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 1</p>
+              <p class="q-eyebrow">Welcome</p>
+              <h2 class="q-panel__title">You&rsquo;re in the right place</h2>
+              <p class="q-panel__lead">
+                You tapped <strong>Create Your Diet</strong> — this is where your personalized 8-week program starts.
+                About 10 minutes of intake, then the Burn Engine builds your servings and full program.
+              </p>
+            </div>
+            <ol class="q-intro-steps">
+              <li><strong>Questionnaire</strong> — body composition, workday, and exercise</li>
+              <li><strong>Your program</strong> — welcome letter, food plan, servings, and menu planner</li>
+            </ol>
+            <div class="q-intro-actions">
+              <button type="button" class="q-btn q-btn--primary" data-q-next>Create your diet →</button>
+              <a class="q-btn q-btn--ghost" href="../program-report/?preview=1">Preview sample program</a>
+            </div>
+            <p class="q-intro-price">$149 one-time purchase · own your program forever</p>
+          </section>
+
+          <section class="q-panel" data-step="1" hidden>
+            <div class="q-panel__head">
+              <p class="q-eyebrow">Step 2</p>
               <h2 class="q-panel__title">Personal information</h2>
               <p class="q-panel__lead">The basics we need before calculating your servings and food plan.</p>
             </div>
@@ -114,9 +134,9 @@
             </details>
           </section>
 
-          <section class="q-panel" data-step="1" hidden>
+          <section class="q-panel" data-step="2" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 2</p>
+              <p class="q-eyebrow">Step 3</p>
               <h2 class="q-panel__title">Body composition</h2>
               <p class="q-panel__lead">Required for accurate servings. Your body fat percentage drives the whole plan.</p>
             </div>
@@ -137,9 +157,9 @@
             </label>
           </section>
 
-          <section class="q-panel" data-step="2" hidden>
+          <section class="q-panel" data-step="3" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 3</p>
+              <p class="q-eyebrow">Step 4</p>
               <h2 class="q-panel__title">Workday &amp; occupation</h2>
               <p class="q-panel__lead">How active is your job, and how stressful is a typical day?</p>
             </div>
@@ -161,9 +181,9 @@
             </fieldset>
           </section>
 
-          <section class="q-panel" data-step="3" hidden>
+          <section class="q-panel" data-step="4" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 4</p>
+              <p class="q-eyebrow">Step 5</p>
               <h2 class="q-panel__title">Weekly exercise — next 8 weeks</h2>
               <p class="q-panel__lead">Be realistic about the exercise you will commit to for the next 8 weeks. Conservative is better.</p>
             </div>
@@ -198,9 +218,9 @@
             </div>
           </section>
 
-          <section class="q-panel" data-step="4" hidden>
+          <section class="q-panel" data-step="5" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 5</p>
+              <p class="q-eyebrow">Step 6</p>
               <h2 class="q-panel__title">Agreement</h2>
               <p class="q-panel__lead">Required before we calculate your program.</p>
             </div>
@@ -223,9 +243,9 @@
             </div>
           </section>
 
-          <section class="q-panel" data-step="5" hidden>
+          <section class="q-panel" data-step="6" hidden>
             <div class="q-panel__head">
-              <p class="q-eyebrow">Step 6</p>
+              <p class="q-eyebrow">Step 7</p>
               <h2 class="q-panel__title">Review &amp; continue</h2>
               <p class="q-panel__lead">Confirm your answers, then continue to your program report.</p>
             </div>
@@ -238,7 +258,7 @@
           </section>
         </form>
 
-        <footer class="q-actions" id="q-actions">
+        <footer class="q-actions" id="q-actions" hidden>
           <button type="button" class="q-btn q-btn--ghost" data-q-back hidden>Back</button>
           <button type="button" class="q-btn q-btn--primary" data-q-next>Next</button>
         </footer>
@@ -246,6 +266,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/questionnaire.js?v=7"></script>
+  <script type="module" src="js/questionnaire.js?v=8"></script>
 </body>
 </html>
