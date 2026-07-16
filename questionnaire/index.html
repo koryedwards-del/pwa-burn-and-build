@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/questionnaire.css?v=11" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=12" />
 </head>
 <body>
   <div class="q-app">
@@ -93,13 +93,6 @@
                   <span class="q-unit">in</span>
                 </div>
               </label>
-              <div class="q-field" role="group" aria-labelledby="q-gender-label">
-                <span class="q-label" id="q-gender-label">Gender</span>
-                <div class="q-segmented q-field__control">
-                  <label class="q-segment"><input type="radio" name="sex" value="female" /> Female</label>
-                  <label class="q-segment"><input type="radio" name="sex" value="male" /> Male</label>
-                </div>
-              </div>
               <label class="q-field">
                 <span class="q-label">Weight</span>
                 <div class="q-inline q-field__control">
@@ -107,15 +100,22 @@
                   <span class="q-unit">lbs</span>
                 </div>
               </label>
+              <div class="q-field" role="group" aria-labelledby="q-gender-label">
+                <span class="q-label" id="q-gender-label">Gender</span>
+                <div class="q-segmented q-field__control">
+                  <label class="q-segment"><input type="radio" name="sex" value="female" /> Female</label>
+                  <label class="q-segment"><input type="radio" name="sex" value="male" /> Male</label>
+                </div>
+              </div>
             </div>
-            <div class="q-stack-fields">
+            <div class="q-grid q-grid--2 q-grid--tight q-grid--row-align">
               <label class="q-field">
                 <span class="q-label">Birthdate</span>
-                <input class="q-input" name="birthDate" type="date" />
+                <input class="q-input q-field__control" name="birthDate" type="date" />
               </label>
               <label class="q-field">
                 <span class="q-label">Age <span class="q-optional">(from birthdate)</span></span>
-                <input class="q-input q-input--short" name="age" readonly tabindex="-1" />
+                <input class="q-input q-input--short q-field__control" name="age" readonly tabindex="-1" />
               </label>
             </div>
           </section>
