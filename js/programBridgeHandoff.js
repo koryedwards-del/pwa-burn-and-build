@@ -44,9 +44,11 @@ export function myplanAppHref(email = '') {
 }
 
 export const PROGRAM_ENTRY_PATH = '/program-report/';
-export const QUESTIONNAIRE_ENTRY_PATH = '/questionnaire/';
+export const QUESTIONNAIRE_WELCOME_PATH = '/questionnaire/#welcome';
+export const QUESTIONNAIRE_ENTRY_PATH = QUESTIONNAIRE_WELCOME_PATH;
 export const CREATOR_CHECKOUT_PATH = '/createyourfoodplan/?browse=1';
 export {
+  QUESTIONNAIRE_WELCOME_URL,
   QUESTIONNAIRE_ENTRY_URL,
   INTAKE_ENTRY_URL,
   PROGRAM_REPORT_URL,

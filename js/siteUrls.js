@@ -3,8 +3,11 @@
 export const MARKETING_ORIGIN = 'https://burnandbuilddiet.com';
 export const CREATOR_HOST_ORIGIN = MARKETING_ORIGIN;
 
-/** Landing + intake entry — welcome intro, then questionnaire steps */
-export const QUESTIONNAIRE_ENTRY_URL = `${CREATOR_HOST_ORIGIN}/questionnaire/`;
+/** Landing CTAs — questionnaire welcome only */
+export const QUESTIONNAIRE_WELCOME_URL = `${CREATOR_HOST_ORIGIN}/questionnaire/#welcome`;
+
+/** @deprecated Use QUESTIONNAIRE_WELCOME_URL */
+export const QUESTIONNAIRE_ENTRY_URL = QUESTIONNAIRE_WELCOME_URL;
 
 /** @deprecated Use QUESTIONNAIRE_ENTRY_URL */
 export const INTAKE_ENTRY_URL = QUESTIONNAIRE_ENTRY_URL;

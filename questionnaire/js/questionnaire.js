@@ -241,6 +241,13 @@ function showStep(index) {
   }
   const actions = document.getElementById('q-actions');
   if (actions) actions.hidden = step === 0 || step === panels.length - 1;
+
+  const base = `${location.pathname}${location.search}`;
+  if (step === 0) {
+    history.replaceState(null, '', `${base}#welcome`);
+  } else if (location.hash === '#welcome') {
+    history.replaceState(null, '', base);
+  }
 }
 
 function initDefaults() {
@@ -286,6 +293,10 @@ function bindEvents() {
   });
 
   backBtn?.addEventListener('click', () => showStep(step - 1));
+
+  window.addEventListener('hashchange', () => {
+    if (location.hash === '#welcome' && step !== 0) showStep(0);
+  });
 
   continueBtn?.addEventListener('click', async (event) => {
     event.preventDefault();
