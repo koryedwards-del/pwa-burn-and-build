@@ -198,6 +198,12 @@ function renderWelcome(pkg) {
           down all the information from the table on page four and shows you the number of servings you need
           daily to have maximum strength &amp; energy and to lose fat as fast as possible.
         </p>
+
+        <h3>Menu Planner</h3>
+        <p>
+          After your servings page, the Menu Planner is where you build your week. Choose meals for breakfast,
+          lunch, dinner, and snacks that hit your daily serving targets — and get your grocery list.
+        </p>
       </article>
 
       <footer class="r-actions">
