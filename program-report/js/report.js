@@ -14,10 +14,16 @@ import {
   escapeHtml,
   programMetaHtml,
   programNavHtml,
-} from '../../js/programBridgeUi.js?v=17';
-import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js?v=17';
-import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=17';
+} from '../../js/programBridgeUi.js?v=22';
+import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js?v=22';
+import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=22';
 import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=22';
+import { bindProgramAccess, bootProgramAccess, openAccessGate } from '../../js/programAccess.js?v=1';
+import {
+  applyMenuPlannerProgram,
+  bootMenuPlannerPage,
+  persistMenuPlannerState,
+} from '../../menuplanner/js/planner.js?v=41';
 import { QUESTIONNAIRE_WELCOME_URL } from '../../js/siteUrls.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
@@ -97,9 +103,23 @@ function wantsPreviewFromUrl() {
 
 function initialPageFromUrl() {
   const page = new URLSearchParams(location.search).get('page');
+  if (page === 'menuplanner' || page === 'menu' || page === 'planner') return 3;
   if (page === '2' || page === 'food' || page === 'foodplan' || page === 'lbm' || page === 'projections') return 1;
   if (page === '3' || page === '4' || page === 'servings') return 2;
   return 0;
+}
+
+function wantsMenuPlannerFromUrl() {
+  const page = new URLSearchParams(location.search).get('page');
+  return page === 'menuplanner' || page === 'menu' || page === 'planner';
+}
+
+function syncPageUrl() {
+  const query = PAGES[activePage]?.reportQuery || 'welcome';
+  const url = new URL(location.href);
+  if (url.searchParams.get('page') === query) return;
+  url.searchParams.set('page', query);
+  history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
 function persistProgram(pkg) {
@@ -419,7 +439,7 @@ function renderServings(pkg) {
 
       <footer class="r-actions">
         <button type="button" class="r-btn r-btn--ghost" data-report-back-food>← Projections</button>
-        <a class="r-btn r-btn--primary" href="../menuplanner/?handoff=1">Continue to menu planner →</a>
+        <button type="button" class="r-btn r-btn--primary" data-report-next-planner>Menu planner →</button>
       </footer>
     </section>
   `;
@@ -450,13 +470,30 @@ function renderMissingProgram() {
 
 function renderPage() {
   const main = document.getElementById('r-main');
-  if (!main) return;
+  const plannerPage = document.getElementById('planner-page');
+  if (!main || !plannerPage) return;
 
   if (!programPackage?.intake?.leanBodyMass) {
+    plannerPage.hidden = true;
+    main.hidden = false;
     main.innerHTML = renderMissingProgram();
     return;
   }
 
+  if (activePage === 3) {
+    main.hidden = true;
+    main.innerHTML = '';
+    plannerPage.hidden = false;
+    bootMenuPlannerPage()
+      .then(() => {
+        applyMenuPlannerProgram(programPackage);
+      })
+      .catch((err) => console.error('Menu planner failed to load:', err));
+    return;
+  }
+
+  plannerPage.hidden = true;
+  main.hidden = false;
   main.innerHTML = activePage === 0
     ? renderWelcome(programPackage)
     : activePage === 1
@@ -465,7 +502,8 @@ function renderPage() {
 }
 
 function showPage(index) {
-  activePage = Math.max(0, Math.min(index, 2));
+  activePage = Math.max(0, Math.min(index, PAGES.length - 1));
+  syncPageUrl();
   renderNav();
   renderPage();
 }
@@ -477,7 +515,7 @@ function bindEvents() {
     showPage(Number(btn.dataset.navPage));
   });
 
-  document.getElementById('r-main')?.addEventListener('click', (event) => {
+  document.getElementById('r-app')?.addEventListener('click', (event) => {
     if (event.target.closest('[data-report-preview]')) {
       loadPreviewProgram();
       return;
@@ -490,6 +528,14 @@ function bindEvents() {
       showPage(2);
       return;
     }
+    if (event.target.closest('[data-report-back-servings]')) {
+      showPage(2);
+      return;
+    }
+    if (event.target.closest('[data-report-next-planner]')) {
+      showPage(3);
+      return;
+    }
     if (event.target.closest('[data-report-back-food]')) {
       showPage(1);
       return;
@@ -500,7 +546,30 @@ function bindEvents() {
   });
 }
 
-function init() {
+function launchApp() {
+  renderNav();
+  renderPage();
+  bindEvents();
+  bootProgramBridgeAside({
+    getProgramPackage: () => programPackage,
+    openAccessGate,
+    beforeSwitch: async () => {
+      if (activePage === 3) persistMenuPlannerState();
+    },
+    onSwitch: async (pkg) => {
+      programPackage = pkg;
+      persistProgram(programPackage);
+      renderNav();
+      if (activePage === 3) {
+        applyMenuPlannerProgram(programPackage);
+      } else {
+        renderPage();
+      }
+    },
+  }).catch((err) => console.error(err));
+}
+
+async function init() {
   if (wantsPreviewFromUrl()) {
     programPackage = buildPreviewProgram();
     persistProgram(programPackage);
@@ -508,21 +577,22 @@ function init() {
     programPackage = loadProgramPackage();
   }
 
+  bindProgramAccess(async (pkg) => {
+    programPackage = pkg;
+    persistProgram(programPackage);
+    activePage = 0;
+    launchApp();
+  });
+
+  if (!programPackage?.intake?.leanBodyMass && wantsMenuPlannerFromUrl()) {
+    await bootProgramAccess();
+    return;
+  }
+
   if (programPackage?.intake?.leanBodyMass) {
     activePage = initialPageFromUrl();
   }
-  renderNav();
-  renderPage();
-  bindEvents();
-  bootProgramBridgeAside({
-    getProgramPackage: () => programPackage,
-    onSwitch: async (pkg) => {
-      programPackage = pkg;
-      persistProgram(programPackage);
-      renderNav();
-      renderPage();
-    },
-  }).catch((err) => console.error(err));
+  launchApp();
 }
 
 init();

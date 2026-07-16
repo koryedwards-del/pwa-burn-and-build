@@ -18,9 +18,10 @@ export const CREATOR_CHECKOUT_URL = `${CREATOR_HOST_ORIGIN}/createyourfoodplan/?
 /** @deprecated Use CREATOR_CHECKOUT_URL */
 export const CREATOR_ENTRY_URL = CREATOR_CHECKOUT_URL;
 
-/** Purchased program deliverable — welcome, food plan, servings */
+/** Unified program shell — welcome through menu planner (page 4) */
 export const PROGRAM_REPORT_URL = `${CREATOR_HOST_ORIGIN}/program-report/`;
-export const MENUPLANNER_URL = `${CREATOR_HOST_ORIGIN}/menuplanner/`;
+/** Deep link — redirects into program-report page 4 */
+export const MENUPLANNER_URL = `${CREATOR_HOST_ORIGIN}/program-report/?page=menuplanner`;
 
 /** Desktop questionnaire — start a new program */
 export const DESKTOP_PROGRAM_START_URL = QUESTIONNAIRE_WELCOME_URL;

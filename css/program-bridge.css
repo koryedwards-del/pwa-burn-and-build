@@ -15,6 +15,13 @@
   min-height: 0;
 }
 
+.pb-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
 .pb-aside {
   display: flex;
   flex-direction: column;

@@ -9,7 +9,7 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 
 **Keep top products separate.** Do not merge flows, copy, CTAs, or implementation between them unless the user explicitly asks.
 
-**Product name:** **Menu planner** (folder/URL: `menuplanner/`). Never use “meal planner” in user-facing copy or docs.
+**Product name:** **Menu planner** (folder/URL alias: `menuplanner/` → redirects). Never use “meal planner” in user-facing copy or docs.
 
 ---
 
@@ -22,20 +22,21 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 | `landing/` | Marketing → questionnaire |
 | `questionnaire/` | Intake → save plan → checkout handoff |
 | `createyourfoodplan/` | Plan-ready + Stripe paywall ($149 per program) |
-| `program-report/` | Deliverable — projections, plan/servings |
-| `menuplanner/` | **Menu planner** shell + Print Assistant |
-| `mealplanner/` | Redirect stub only → `/menuplanner/` |
+| `program-report/` | **Unified program shell** — Welcome, Projections, Plan/Servings, Menu planner |
+| `menuplanner/` | Redirect → `program-report/?page=menuplanner` |
+| `menuplanner/js/planner.js` | Menu planner workspace module (mounted as page 4) |
+| `mealplanner/` | Redirect stub → menu planner deep link |
 | `server/` | API + SQLite — programs, per-program payment |
 
 **Desktop flow:**
 ```
-Landing → questionnaire → Stripe (per program) → program-report → menuplanner
+Landing → questionnaire → Stripe (per program) → program-report (pages 1–4)
 ```
 
-**Return access:** `burnandbuilddiet.com/menuplanner/` + email → unlock planner and paid program(s).
+**Return access:** `burnandbuilddiet.com/menuplanner/` or `program-report/?page=menuplanner` + email → unlock program.
 
 - Each new program = its own Stripe checkout (`programId`).
-- **End of desktop product** = menu planner shell.
+- **End of desktop product** = Menu planner (page 4 inside program-report).
 
 ---
 

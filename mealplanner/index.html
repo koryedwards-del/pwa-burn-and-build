@@ -2,11 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=/menuplanner/" />
-  <script>location.replace('/menuplanner/' + location.search + location.hash);</script>
-  <title>Redirecting to Menu planner…</title>
+  <meta http-equiv="refresh" content="0; url=/program-report/?page=menuplanner" />
+  <title>Redirect — Menu planner</title>
+  <script>
+    (function () {
+      var target = new URL('/program-report/', location.origin);
+      target.searchParams.set('page', 'menuplanner');
+      var incoming = new URLSearchParams(location.search);
+      incoming.forEach(function (value, key) {
+        if (key !== 'page') target.searchParams.set(key, value);
+      });
+      location.replace(target.pathname + target.search + location.hash);
+    })();
+  </script>
 </head>
 <body>
-  <p><a href="/menuplanner/">Continue to Menu planner</a></p>
+  <p><a href="/program-report/?page=menuplanner">Continue to Menu planner</a></p>
 </body>
 </html>

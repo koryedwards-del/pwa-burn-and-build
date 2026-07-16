@@ -1,10 +1,10 @@
-/** Shared chrome for program report (pages 1–3) and menu planner (page 4). */
+/** Shared chrome for program report (pages 1–4). */
 
 export const PROGRAM_BRIDGE_PAGES = [
   { id: 'welcome', label: 'Welcome', step: 1, reportPage: 0, reportQuery: 'welcome' },
   { id: 'projections', label: 'Projections', step: 2, reportPage: 1, reportQuery: 'projections' },
   { id: 'servings', label: 'Plan/Servings', step: 3, reportPage: 2, reportQuery: 'servings' },
-  { id: 'menuplanner', label: 'Menu planner', step: 4, href: '../menuplanner/?handoff=1' },
+  { id: 'menuplanner', label: 'Menu planner', step: 4, reportPage: 3, reportQuery: 'menuplanner' },
 ];
 
 export function escapeHtml(text) {
@@ -41,41 +41,18 @@ export function programMetaHtml(pkg) {
     </header>`;
 }
 
-export function programNavHtml(activeId, { reportHref = '' } = {}) {
-  const stepHref = (query) => {
-    if (!reportHref) return `?page=${query}`;
-    const root = reportHref.endsWith('/') ? reportHref.slice(0, -1) : reportHref;
-    return `${root}/?page=${query}`;
-  };
-
+export function programNavHtml(activeId) {
   return `
     <ol class="pb-nav__list">
       ${PROGRAM_BRIDGE_PAGES.map((page) => {
         const isActive = page.id === activeId;
-        if (page.href) {
-          if (isActive) {
-            return `
-            <li class="pb-nav__item">
-              <button type="button" class="pb-nav__btn is-active" aria-current="page">${page.step}. ${page.label}</button>
-            </li>`;
-          }
-          return `
-            <li class="pb-nav__item">
-              <a class="pb-nav__btn" href="${page.href}">${page.step}. ${page.label}</a>
-            </li>`;
-        }
-        if (activeId === 'menuplanner') {
-          return `
-            <li class="pb-nav__item">
-              <a class="pb-nav__btn${isActive ? ' is-active' : ''}" href="${stepHref(page.reportQuery)}">${page.step}. ${page.label}</a>
-            </li>`;
-        }
         return `
           <li class="pb-nav__item">
             <button
               type="button"
               class="pb-nav__btn${isActive ? ' is-active' : ''}"
               data-nav-page="${page.reportPage}"
+              ${isActive ? ' aria-current="page"' : ''}
             >${page.step}. ${page.label}</button>
           </li>`;
       }).join('')}

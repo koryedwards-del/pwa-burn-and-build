@@ -2,18 +2,15 @@ import { formatGroceryQuantity } from '../../js/groceryEngine.js';
 import {
   programClientName,
   programMetaHtml,
-  programNavHtml,
-} from '../../js/programBridgeUi.js?v=17';
-import { loadProgramBridge } from '../../js/programBridgeHandoff.js?v=17';
+} from '../../js/programBridgeUi.js?v=22';
+import { loadProgramBridge } from '../../js/programBridgeHandoff.js?v=22';
 import {
   attachPlannerStateToPackage,
   flushProgramPersist,
   plannerStateFromPackage,
   scheduleProgramPersist,
-} from '../../js/menuPlannerState.js?v=17';
-import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=22';
-import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=17';
-import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=11';
+} from '../../js/menuPlannerState.js?v=22';
+import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=22';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',
@@ -248,23 +245,7 @@ function servingHint(daySlotId, categorySlot) {
   return `${fmtServings(required)} serving${Math.abs(required - 1) < 0.05 ? '' : 's'}`;
 }
 
-function reportBackHref(page) {
-  const href = `../program-report/?page=${page}`;
-  if (new URLSearchParams(location.search).has('preview')) {
-    return `${href}&preview=1`;
-  }
-  return href;
-}
-
-function renderProgramChrome() {
-  const nav = document.getElementById('program-nav');
-  if (nav) {
-    nav.innerHTML = programNavHtml('menuplanner', { reportHref: '../program-report/' });
-  }
-
-  const back = document.getElementById('planner-back');
-  if (back) back.href = reportBackHref('servings');
-
+function renderPlannerMeta() {
   const meta = document.getElementById('planner-meta');
   if (!meta) return;
 
@@ -1484,8 +1465,8 @@ function initPrintAssistant() {
   document.getElementById('print-assistant').addEventListener('click', openPrintAssistant);
 }
 
-let programBridgeBooted = false;
 let plannerShellReady = false;
+let plannerBootPromise = null;
 
 function renderPlannerWorkspace() {
   renderWeekGrid();
@@ -1504,32 +1485,28 @@ function applyProgramPackage(pkg) {
   }
   applyPlannerState(plannerStateFromPackage(programPackage));
   initMealSlotsFromProgram(programPackage);
-  renderProgramChrome();
+  renderPlannerMeta();
   if (plannerShellReady) {
     renderPlannerWorkspace();
   }
 }
 
-async function init(pkg) {
-  applyProgramPackage(pkg || loadProgramPackage());
+export function applyMenuPlannerProgram(pkg) {
+  applyProgramPackage(pkg);
+}
 
-  if (!programBridgeBooted) {
-    programBridgeBooted = true;
-    bootProgramBridgeAside({
-      getProgramPackage: () => programPackage,
-      openAccessGate,
-      beforeSwitch: async () => {
-        persistPlannerToProgram({ immediate: true });
-      },
-      onSwitch: async (nextPkg) => {
-        applyProgramPackage(nextPkg);
-      },
-    }).catch((err) => {
-      console.error('Program library sidebar failed to load:', err);
-    });
+export function persistMenuPlannerState() {
+  persistPlannerToProgram({ immediate: true });
+}
+
+export async function bootMenuPlannerPage() {
+  if (plannerShellReady) return;
+  if (plannerBootPromise) {
+    await plannerBootPromise;
+    return;
   }
 
-  if (!plannerShellReady) {
+  plannerBootPromise = (async () => {
     const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
     if (!response.ok) {
       throw new Error('Could not load foods catalog.');
@@ -1543,32 +1520,11 @@ async function init(pkg) {
     initPrintAssistant();
     initFoodDropTargets();
     plannerShellReady = true;
-    renderPlannerWorkspace();
-  }
+  })();
+
+  await plannerBootPromise;
 }
 
 window.addEventListener('beforeunload', () => {
   persistPlannerToProgram({ immediate: true });
-});
-
-bootMenuPlannerAccess(async (pkg) => {
-  await init(pkg);
-}).catch((error) => {
-  console.error(error);
-  const gate = document.getElementById('access-gate');
-  const stack = document.getElementById('food-stack');
-  if (gate) {
-    gate.hidden = false;
-    const messageEl = gate.querySelector('#access-error-message');
-    if (messageEl) {
-      messageEl.textContent = 'Something went wrong loading the menu planner. Refresh and try again.';
-    }
-    const emailScreen = gate.querySelector('#access-screen-email');
-    const errorScreen = gate.querySelector('#access-screen-error');
-    if (emailScreen) emailScreen.hidden = true;
-    if (errorScreen) errorScreen.hidden = false;
-  }
-  if (stack) {
-    stack.innerHTML = '<p class="food-stack__error">Could not load foods. Open via a local server from the repo root.</p>';
-  }
 });

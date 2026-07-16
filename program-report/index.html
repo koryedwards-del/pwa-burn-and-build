@@ -7,10 +7,72 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="../css/program-bridge.css?v=21" />
-  <link rel="stylesheet" href="css/report.css?v=12" />
+  <link rel="stylesheet" href="../css/program-bridge.css?v=22" />
+  <link rel="stylesheet" href="css/report.css?v=13" />
+  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=27" />
 </head>
 <body>
+  <section id="access-gate" class="mp-access" hidden>
+    <div class="mp-access__panel">
+      <img class="mp-access__logo" src="../img/brand/bblogo.png" alt="" width="72" height="72" />
+      <p class="mp-access__eyebrow">Burn &amp; Build</p>
+
+      <div id="access-screen-email" class="mp-access__screen">
+        <h1 class="mp-access__title">Welcome back</h1>
+        <p class="mp-access__lead">Sign in with the email on your Burn &amp; Build program to open your diet.</p>
+        <form id="access-form" class="mp-access__form" action="#" method="post" novalidate>
+          <label class="mp-access__field">
+            <span class="mp-access__label">Email</span>
+            <input
+              id="access-email"
+              class="mp-access__input"
+              type="email"
+              name="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              required
+            />
+          </label>
+          <p id="access-form-error" class="mp-access__error" hidden></p>
+          <button type="submit" class="mp-access__submit" id="access-submit">Go to your diet</button>
+        </form>
+        <div class="mp-access__footer">
+          <p class="mp-access__footer-lead">Need a new diet?</p>
+          <a class="mp-access__submit mp-access__submit--link" href="/questionnaire/#welcome">Create your diet</a>
+        </div>
+      </div>
+
+      <div id="access-screen-unpaid" class="mp-access__screen" hidden>
+        <h1 class="mp-access__title">Purchase required</h1>
+        <p class="mp-access__lead">We found a program for <strong id="access-unpaid-email"></strong>, but checkout is not complete yet.</p>
+        <p class="mp-access__copy">The menu planner unlocks after your one-time $149 purchase. Finish checkout to load your servings and start planning meals.</p>
+        <div class="mp-access__actions">
+          <button type="button" class="mp-access__submit" id="access-unpaid-checkout">Complete purchase — $149</button>
+          <button type="button" class="mp-access__ghost" data-access-screen="email">Use a different email</button>
+        </div>
+      </div>
+
+      <div id="access-screen-missing" class="mp-access__screen" hidden>
+        <h1 class="mp-access__title">No program found</h1>
+        <p class="mp-access__lead">We do not have a Burn &amp; Build program saved for <strong id="access-missing-email"></strong>.</p>
+        <p class="mp-access__copy">New programs start with the desktop questionnaire, then checkout, then your program report and menu planner.</p>
+        <div class="mp-access__actions">
+          <a class="mp-access__submit mp-access__submit--link" href="/questionnaire/#welcome">Start your program</a>
+          <button type="button" class="mp-access__ghost" data-access-screen="email">Try a different email</button>
+        </div>
+      </div>
+
+      <div id="access-screen-error" class="mp-access__screen" hidden>
+        <h1 class="mp-access__title">Could not sign in</h1>
+        <p class="mp-access__lead" id="access-error-message"></p>
+        <div class="mp-access__actions">
+          <button type="button" class="mp-access__submit" data-access-screen="email">Try again</button>
+          <a class="mp-access__ghost mp-access__ghost--link" href="/">Back to website</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div class="r-app" id="r-app">
     <header class="r-header">
       <div class="r-brand">
@@ -29,10 +91,95 @@
         </div>
       </aside>
 
-      <main class="r-main" id="r-main"></main>
+      <div class="pb-main">
+        <main class="r-main" id="r-main"></main>
+
+        <section id="planner-page" class="planner-main" hidden>
+          <div class="pb-page-head">
+            <p class="pb-eyebrow">Page 4</p>
+            <h2 class="pb-panel__title">Menu planner</h2>
+          </div>
+
+          <div class="pb-doc planner-meta" id="planner-meta"></div>
+
+          <main class="planner-frame">
+            <div class="week-panel">
+              <div class="week-panel__header">
+                <p class="col-heading col-heading--week">Week</p>
+                <div class="week-panel__actions">
+                  <div class="print-assistant-anchor">
+                    <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>
+                    <div class="planner-toast-host" id="planner-toast-host" aria-live="polite" role="status"></div>
+                  </div>
+                  <button type="button" class="day-col__clear" id="clear-week-menu">Clear Week</button>
+                </div>
+              </div>
+              <section class="week-grid" id="week-grid" aria-label="Week"></section>
+            </div>
+
+            <section class="workspace" aria-label="Planner workspace">
+              <div class="workspace__col workspace__col--day">
+                <div class="day-col-header">
+                  <p class="col-heading col-heading--day" id="active-day-label">Today</p>
+                  <button type="button" class="day-col__clear" id="clear-day-menu">Clear Menu</button>
+                </div>
+                <div class="day-slots" id="day-slots"></div>
+              </div>
+
+              <div class="workspace__col workspace__col--meals">
+                <p class="col-heading">Saved Meals</p>
+                <div class="saved-meals" id="saved-meals"></div>
+              </div>
+
+              <div class="workspace__col workspace__col--foods">
+                <p class="col-heading">Foods</p>
+                <p class="food-filter-label" id="food-filter-label" hidden></p>
+                <input
+                  type="search"
+                  class="food-search"
+                  id="food-search"
+                  placeholder="Search foods…"
+                  autocomplete="off"
+                  hidden
+                />
+                <div class="food-filters" id="food-filters"></div>
+                <div class="food-stack" id="food-stack"></div>
+              </div>
+            </section>
+          </main>
+
+          <footer class="pb-actions">
+            <button type="button" class="pb-btn pb-btn--ghost" data-report-back-servings>← Servings</button>
+          </footer>
+        </section>
+      </div>
     </div>
   </div>
 
-  <script type="module" src="js/report.js?v=34"></script>
+  <dialog id="save-meal-dialog" class="save-dialog">
+    <form method="dialog" class="save-dialog__form" id="save-meal-form">
+      <p class="save-dialog__title">Name this meal</p>
+      <input
+        type="text"
+        id="save-meal-name"
+        class="save-dialog__input"
+        placeholder="e.g. Chicken Bowl"
+        maxlength="48"
+        required
+        autocomplete="off"
+      />
+      <div class="save-dialog__actions">
+        <button type="button" class="save-dialog__btn save-dialog__btn--ghost" id="save-meal-cancel">Cancel</button>
+        <button type="submit" class="save-dialog__btn save-dialog__btn--primary">Save Meal</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    document.getElementById('access-form')?.addEventListener('submit', (event) => {
+      event.preventDefault();
+    });
+  </script>
+  <script type="module" src="js/report.js?v=35"></script>
 </body>
 </html>

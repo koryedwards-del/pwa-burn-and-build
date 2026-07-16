@@ -1,4 +1,4 @@
-/** Session handoff — creator / questionnaire → program-report → menuplanner */
+/** Session handoff — creator / questionnaire → unified program-report shell */
 
 import { setActiveProgramId, activeProgramIdFromPackage } from './programActive.js';
 import { CREATOR_HOST_ORIGIN } from './siteUrls.js';
