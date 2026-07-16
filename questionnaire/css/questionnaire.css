@@ -523,6 +523,30 @@ body {
   margin: 16px 0;
 }
 
+.q-check--compact {
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.q-field--email .q-input {
+  margin-bottom: 0;
+}
+
+.q-newsletter {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.q-newsletter__lead {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--muted);
+  font-style: italic;
+}
+
 .q-check input {
   margin-top: 3px;
   accent-color: var(--gold);

@@ -177,6 +177,7 @@ function renderReview() {
   const rows = [
     ['Name', values.preferredName || '—'],
     ['Email', values.email || '—'],
+    ['Weekly newsletter', values.newsletterOptIn ? 'Yes' : 'No'],
     ['Height', heightLabel(values)],
     ['Gender', values.sex || '—'],
     ['Age', values.age != null ? String(values.age) : '—'],
