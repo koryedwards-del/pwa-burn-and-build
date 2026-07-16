@@ -28,6 +28,7 @@ function showAccessScreen(screen, { email = '' } = {}) {
   const gate = gateEl();
   const root = plannerRoot();
   if (!gate) return;
+  document.documentElement.classList.remove('mp-handoff-pending');
   gate.hidden = false;
   if (root) root.hidden = true;
 

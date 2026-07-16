@@ -5,11 +5,32 @@
   <meta name="viewport" content="width=1200" />
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>Burn &amp; Build — Menu Planner</title>
+  <script>
+    (function () {
+      if (new URLSearchParams(location.search).get('handoff') !== '1') return;
+      var keys = ['bnb_menuplanner_program', 'bnb_mealplanner_program', 'bnb_built_package'];
+      for (var i = 0; i < keys.length; i++) {
+        try {
+          var raw = sessionStorage.getItem(keys[i]);
+          if (!raw) continue;
+          var pkg = JSON.parse(raw);
+          if (pkg && pkg.intake && pkg.intake.leanBodyMass && pkg.plan && pkg.plan.mealSlots && pkg.plan.mealSlots.length) {
+            document.documentElement.classList.add('mp-handoff-pending');
+            break;
+          }
+        } catch (err) {}
+      }
+    })();
+  </script>
+  <style>
+    html.mp-handoff-pending #access-gate { display: none !important; }
+    html.mp-handoff-pending #planner-root { display: block !important; }
+  </style>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=12" />
-  <link rel="stylesheet" href="css/planner.css?v=23" />
+  <link rel="stylesheet" href="css/planner.css?v=24" />
 </head>
 <body>
   <section id="access-gate" class="mp-access">
