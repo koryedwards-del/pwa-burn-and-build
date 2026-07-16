@@ -1148,6 +1148,7 @@ function buildShoppingTotals() {
 
 function buildAssistantDocumentHtml() {
   const totals = buildShoppingTotals();
+  const logoUrl = escapeHtml(new URL('../img/brand/bblogo.png', window.location.href).href);
   const categoryOrder = FOOD_CATEGORIES.map((cat) => cat.id);
   const categoryLabels = Object.fromEntries(FOOD_CATEGORIES.map((cat) => [cat.id, cat.label]));
 
@@ -1216,18 +1217,19 @@ function buildAssistantDocumentHtml() {
       background: #fdc500;
       color: #111;
     }
-    h1 {
-      font-family: Oswald, system-ui, sans-serif;
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
+    .assistant-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .assistant-logo {
+      display: block;
+      width: 140px;
+      height: auto;
+      margin: 0 auto 12px;
     }
     .assistant-subtitle {
       color: #666;
       font-size: 0.9rem;
-      margin-bottom: 28px;
     }
     h2 {
       font-family: Oswald, system-ui, sans-serif;
@@ -1270,8 +1272,10 @@ function buildAssistantDocumentHtml() {
   <div class="assistant-toolbar">
     <button type="button" class="primary" onclick="window.print()">Print</button>
   </div>
-  <h1>Burn &amp; Build</h1>
-  <p class="assistant-subtitle">Shopping &amp; Food Prep Assistant</p>
+  <header class="assistant-brand">
+    <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="140" height="140" />
+    <p class="assistant-subtitle">Shopping &amp; Food Prep Assistant</p>
+  </header>
   ${shoppingHtml}
 </body>
 </html>`;
