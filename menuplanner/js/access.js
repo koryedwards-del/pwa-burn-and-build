@@ -47,7 +47,7 @@ function showAccessScreen(screen, { email = '' } = {}) {
     }
     if (submit) {
       submit.disabled = false;
-      submit.textContent = 'Open menu planner';
+      submit.textContent = 'Continue';
     }
     input?.focus();
   }
@@ -75,7 +75,7 @@ function setAccessBusy(busy) {
   const submit = gateEl()?.querySelector('#access-submit');
   if (!submit) return;
   submit.disabled = busy;
-  submit.textContent = busy ? 'Opening…' : 'Open menu planner';
+  submit.textContent = busy ? 'Checking…' : 'Continue';
 }
 
 function showEmailValidationError(message) {
@@ -169,7 +169,7 @@ function bindAccessGate(onProgramReady) {
     clearEmailValidationError();
 
     if (!email) {
-      showEmailValidationError('Enter the email on your purchased program.');
+      showEmailValidationError('Enter a valid email address.');
       input?.focus();
       return;
     }
@@ -236,7 +236,7 @@ function bindAccessGate(onProgramReady) {
     const input = gate.querySelector('#access-email');
     if (!String(input?.value || '').trim()) {
       event.preventDefault();
-      showEmailValidationError('Enter the email on your purchased program.');
+      showEmailValidationError('Enter a valid email address.');
       input?.focus();
     }
   });
