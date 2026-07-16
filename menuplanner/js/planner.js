@@ -13,7 +13,7 @@ import {
 } from '../../js/menuPlannerState.js';
 import { bootProgramBridgeAside } from '../../js/programLibrary.js';
 import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js';
-import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=3';
+import { bootMenuPlannerAccess, openAccessGate } from './access.js?v=4';
 
 const SLOT_LABEL_TO_ID = {
   Breakfast: 'breakfast',
@@ -1494,6 +1494,9 @@ async function init(pkg) {
   renderProgramChrome();
 
   const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error('Could not load foods catalog.');
+  }
   foods = await response.json();
   renderWeekGrid();
   initWeekGrid();
@@ -1509,16 +1512,20 @@ async function init(pkg) {
   initPrintAssistant();
   renderFoodStack();
   initFoodDropTargets();
-  await bootProgramBridgeAside({
-    getProgramPackage: () => programPackage,
-    openAccessGate,
-    beforeSwitch: async () => {
-      persistPlannerToProgram({ immediate: true });
-    },
-    onSwitch: async (pkg) => {
-      await init(pkg);
-    },
-  });
+  try {
+    await bootProgramBridgeAside({
+      getProgramPackage: () => programPackage,
+      openAccessGate,
+      beforeSwitch: async () => {
+        persistPlannerToProgram({ immediate: true });
+      },
+      onSwitch: async (nextPkg) => {
+        await init(nextPkg);
+      },
+    });
+  } catch (err) {
+    console.error('Program library sidebar failed to load:', err);
+  }
 }
 
 window.addEventListener('beforeunload', () => {

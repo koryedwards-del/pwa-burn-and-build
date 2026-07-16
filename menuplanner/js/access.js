@@ -184,8 +184,17 @@ function bindAccessGate(onProgramReady) {
       return;
     }
 
-    showPlanner();
-    await onProgramReady(result.package);
+    try {
+      await onProgramReady(result.package);
+      showPlanner();
+    } catch (err) {
+      console.error(err);
+      const messageEl = gate.querySelector('#access-error-message');
+      if (messageEl) {
+        messageEl.textContent = 'Something went wrong loading the menu planner. Refresh and try again.';
+      }
+      showAccessScreen('error', { email: result.email || email });
+    }
   });
 
   gate.querySelector('#access-unpaid-checkout')?.addEventListener('click', () => {
@@ -220,8 +229,17 @@ export async function bootMenuPlannerAccess(onProgramReady) {
 
   const bridged = loadProgramBridge();
   if (handoff && programReady(bridged)) {
-    showPlanner();
-    await onProgramReady(bridged);
+    try {
+      await onProgramReady(bridged);
+      showPlanner();
+    } catch (err) {
+      console.error(err);
+      const messageEl = gateEl()?.querySelector('#access-error-message');
+      if (messageEl) {
+        messageEl.textContent = 'Something went wrong loading the menu planner. Refresh and try again.';
+      }
+      showAccessScreen('error');
+    }
     if (params.has('handoff')) {
       params.delete('handoff');
       const qs = params.toString();
