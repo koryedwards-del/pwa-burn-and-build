@@ -41,6 +41,7 @@ export function grantAccessFromCheckoutSession(session) {
   if (!paid) {
     return { ok: false, message: 'Payment not completed.' };
   }
+  // Only Stripe checkout (full price or coupon) grants access.
   const contact = setBurnAndBuild(email, true);
   return { ok: true, email, contact, programId: session.metadata?.programId || null };
 }

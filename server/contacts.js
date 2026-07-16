@@ -119,7 +119,7 @@ export function ensureBurnAndBuildAccess(email) {
     return { ok: false, message: 'This email is not in the contact list yet.' };
   }
   if (!contact.burnAndBuild) {
-    return { ok: false, message: 'Burn & Build is not enabled for this contact yet.' };
+    return { ok: false, message: 'Complete Stripe checkout to unlock your program.' };
   }
   return { ok: true, contact };
 }
@@ -155,8 +155,8 @@ export function resolveProgramLoad(email, { getLatestProgram: getLatest, countPr
 
   const access = ensureBurnAndBuildAccess(email);
   if (!access.ok) {
-    const message = access.message.includes('not enabled')
-      ? 'Your plan is saved. Complete purchase to open it in the app.'
+    const message = access.message.includes('Stripe checkout')
+      ? 'Your plan is saved. Complete Stripe checkout to open it in the app.'
       : access.message;
     return {
       ok: false,

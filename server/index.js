@@ -243,10 +243,18 @@ app.put('/api/contacts', requireContactsAdmin, (req, res) => {
     return;
   }
 
+  if (req.body?.burnAndBuild) {
+    res.status(403).json({
+      ok: false,
+      message: 'Access is granted through Stripe checkout only. Create a coupon in Stripe for complimentary access.',
+    });
+    return;
+  }
+
   const contact = upsertContact({
     email,
     displayName: String(req.body?.displayName || '').trim(),
-    burnAndBuild: !!req.body?.burnAndBuild,
+    burnAndBuild: false,
   });
   res.json({ ok: true, contact });
 });
@@ -263,7 +271,15 @@ app.patch('/api/contacts', requireContactsAdmin, (req, res) => {
     return;
   }
 
-  const contact = setBurnAndBuild(email, req.body.burnAndBuild);
+  if (req.body.burnAndBuild) {
+    res.status(403).json({
+      ok: false,
+      message: 'Access is granted through Stripe checkout only. Create a coupon in Stripe for complimentary access.',
+    });
+    return;
+  }
+
+  const contact = setBurnAndBuild(email, false);
   res.json({ ok: true, contact });
 });
 

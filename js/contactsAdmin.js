@@ -3,8 +3,8 @@ import {
   fetchContacts,
   getContactsAdminKey,
   persistContactsAdminKey,
+  revokeContactAccess,
   saveContact,
-  setContactBurnAndBuild,
 } from './contactsApi.js';
 
 const store = {
@@ -13,7 +13,6 @@ const store = {
   loading: true,
   newEmail: '',
   newName: '',
-  newBurnAndBuild: false,
 };
 
 function render() {
@@ -22,23 +21,19 @@ function render() {
     <div class="contacts-page">
       <div class="contacts-header">
         <h1>Admin — Contact list</h1>
-        <p>One list for all apps. Creating a diet adds the contact and checks B&amp;B. You can also toggle B&amp;B here.</p>
+        <p>Creating a diet adds the contact. Access unlocks only after Stripe checkout — use a Stripe coupon for complimentary access.</p>
       </div>
       <div class="contacts-panel">
         ${store.error ? `<div class="contacts-error">${store.error}</div>` : ''}
         <div class="contacts-toolbar">
           <input class="ob-input" type="email" name="newEmail" placeholder="Email" value="${store.newEmail}" />
           <input class="ob-input" type="text" name="newName" placeholder="Name" value="${store.newName}" />
-          <label class="contacts-checkbox">
-            <input type="checkbox" name="newBurnAndBuild" ${store.newBurnAndBuild ? 'checked' : ''} />
-            B&amp;B
-          </label>
           <button type="button" class="btn-primary" data-add-contact>Add contact</button>
         </div>
         <div class="contacts-table-wrap">
           ${store.loading ? '<div class="contacts-empty">Loading contacts…</div>' : renderTable()}
         </div>
-        <p class="contacts-meta">Same email everywhere — not two accounts. Diet creation checks B&amp;B automatically.</p>
+        <p class="contacts-meta">Paid status reflects Stripe checkout only. Revoke clears mistaken or test access.</p>
       </div>
     </div>`;
 
@@ -54,14 +49,10 @@ function renderTable() {
     <tr>
       <td class="email">${contact.email}</td>
       <td>${contact.displayName || '—'}</td>
-      <td>
-        <label class="contacts-checkbox">
-          <input type="checkbox" data-toggle-bnb="${contact.email}" ${contact.burnAndBuild ? 'checked' : ''} />
-          B&amp;B
-        </label>
-      </td>
+      <td>${contact.burnAndBuild ? '<span class="contacts-paid">Paid</span>' : '—'}</td>
       <td>${contact.programCount || 0}</td>
       <td class="actions">
+        ${contact.burnAndBuild ? `<button type="button" class="btn-secondary" data-revoke-access="${contact.email}">Revoke access</button>` : ''}
         <button type="button" class="btn-secondary" data-delete-contact="${contact.email}">Delete</button>
       </td>
     </tr>
@@ -73,7 +64,7 @@ function renderTable() {
         <tr>
           <th>Email</th>
           <th>Name</th>
-          <th>B&amp;B</th>
+          <th>Access</th>
           <th>Plans</th>
           <th></th>
         </tr>
@@ -89,19 +80,17 @@ function bindEvents() {
   document.querySelector('[name="newName"]')?.addEventListener('input', (e) => {
     store.newName = e.target.value;
   });
-  document.querySelector('[name="newBurnAndBuild"]')?.addEventListener('change', (e) => {
-    store.newBurnAndBuild = e.target.checked;
-  });
 
   document.querySelector('[data-add-contact]')?.addEventListener('click', addContact);
 
-  document.querySelectorAll('[data-toggle-bnb]').forEach((input) => {
-    input.addEventListener('change', async () => {
+  document.querySelectorAll('[data-revoke-access]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const email = btn.dataset.revokeAccess;
+      if (!window.confirm(`Revoke Burn & Build access for ${email}? They will need to complete Stripe checkout again.`)) return;
       store.error = '';
-      const result = await setContactBurnAndBuild(input.dataset.toggleBnb, input.checked);
+      const result = await revokeContactAccess(email);
       if (!result.ok) {
         store.error = result.message;
-        input.checked = !input.checked;
         render();
         return;
       }
@@ -136,7 +125,6 @@ async function addContact() {
   const result = await saveContact({
     email,
     displayName: store.newName.trim(),
-    burnAndBuild: store.newBurnAndBuild,
   });
 
   if (!result.ok) {
@@ -147,7 +135,6 @@ async function addContact() {
 
   store.newEmail = '';
   store.newName = '';
-  store.newBurnAndBuild = false;
   await loadContacts();
 }
 

@@ -107,6 +107,18 @@
   line-height: 1.5;
 }
 
+.contacts-paid {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(253, 197, 0, 0.15);
+  color: var(--gold, #fdc500);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 720px) {
   .contacts-toolbar {
     grid-template-columns: 1fr;

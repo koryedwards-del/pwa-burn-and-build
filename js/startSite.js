@@ -365,11 +365,11 @@ function renderPlanReady() {
           <button type="button" class="btn-primary unlock-cta" data-start-checkout ${store.checkoutBusy ? 'disabled' : ''}>
             ${store.checkoutBusy ? 'OPENING CHECKOUT…' : 'COMPLETE PURCHASE — $149'}
           </button>
-          <p class="unlock-hint">Secure checkout · Promo codes accepted · One-time · Yours for life</p>
-          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
+          <p class="unlock-hint">Secure checkout · Have a coupon? Enter it at checkout · One-time · Yours for life</p>
+          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (local test)</button>' : ''}`
       : `
           <p class="unlock-hint">Checkout is not available yet. Contact support@burnandbuilddiet.com if you need help.</p>
-          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
+          ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (local test)</button>' : ''}`
     : '';
 
   const saveActions = showPaywall && store.saveError && store.apiReachable
@@ -652,7 +652,7 @@ async function refreshCheckoutConfig() {
   const status = await fetchCheckoutStatus();
   store.apiReachable = status.reachable !== false;
   store.stripeConfigured = !!status.configured;
-  store.checkoutTestBypass = !!status.testBypass || isTestMode();
+  store.checkoutTestBypass = isTestMode();
 }
 
 async function savePlanToServer() {

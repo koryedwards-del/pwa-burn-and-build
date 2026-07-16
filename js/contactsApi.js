@@ -41,12 +41,12 @@ export async function fetchContacts() {
   }
 }
 
-export async function saveContact({ email, displayName, burnAndBuild }) {
+export async function saveContact({ email, displayName }) {
   try {
     const res = await fetch(apiUrl('/api/contacts'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...adminHeaders() },
-      body: JSON.stringify({ email: normalizeEmail(email), displayName, burnAndBuild }),
+      body: JSON.stringify({ email: normalizeEmail(email), displayName }),
     });
     const data = await res.json();
     if (!res.ok) return { ok: false, message: data.message || 'Could not save contact.' };
@@ -56,19 +56,30 @@ export async function saveContact({ email, displayName, burnAndBuild }) {
   }
 }
 
-export async function setContactBurnAndBuild(email, burnAndBuild) {
+export async function revokeContactAccess(email) {
   try {
     const res = await fetch(apiUrl('/api/contacts'), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', ...adminHeaders() },
-      body: JSON.stringify({ email: normalizeEmail(email), burnAndBuild }),
+      body: JSON.stringify({ email: normalizeEmail(email), burnAndBuild: false }),
     });
     const data = await res.json();
-    if (!res.ok) return { ok: false, message: data.message || 'Could not update contact.' };
+    if (!res.ok) return { ok: false, message: data.message || 'Could not revoke access.' };
     return data;
   } catch {
-    return { ok: false, message: 'Network error updating contact.' };
+    return { ok: false, message: 'Network error revoking access.' };
   }
+}
+
+/** @deprecated Use revokeContactAccess — access cannot be granted manually. */
+export async function setContactBurnAndBuild(email, burnAndBuild) {
+  if (burnAndBuild) {
+    return {
+      ok: false,
+      message: 'Access is granted through Stripe checkout only. Create a coupon in Stripe for complimentary access.',
+    };
+  }
+  return revokeContactAccess(email);
 }
 
 export async function deleteContact(email) {
@@ -87,7 +98,7 @@ export async function deleteContact(email) {
 }
 
 export function burnAndBuildAccessMessage() {
-  return 'Create your diet first, or ask Coach Kory to enable Burn & Build on your contact.';
+  return 'Complete Stripe checkout to unlock your program. If you have a coupon, enter it at checkout.';
 }
 
 export async function ensureBurnAndBuildContact(email) {
