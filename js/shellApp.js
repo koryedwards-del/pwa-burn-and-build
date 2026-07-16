@@ -855,7 +855,12 @@ function openBurnAndBuildWebsite() {
 
 function openBurnAndBuildCreator() {
   try { sessionStorage.setItem('bnb_browse_mode', '1'); } catch (e) {}
-  window.open(BNB_CREATOR_URL, '_blank', 'noopener,noreferrer');
+  const url = BNB_CREATOR_URL;
+  if (isStandaloneDisplay()) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  window.location.href = url;
 }
 
 function renderHomeLogo() {

@@ -3,26 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="no" />
+  <meta name="mobile-web-app-capable" content="no" />
   <script>
     (function () {
       try {
-        if (new URLSearchParams(location.search).has('browse')) {
-          sessionStorage.setItem('bnb_browse_mode', '1');
-        }
+        sessionStorage.setItem('bnb_browse_mode', '1');
       } catch (e) {}
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('a[href*="/createyourfoodplan/"]').forEach((link) => {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
           link.addEventListener('click', () => {
             try { sessionStorage.setItem('bnb_browse_mode', '1'); } catch (e) {}
           });
         });
       });
-      var standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-      var browse = new URLSearchParams(location.search).has('browse')
-        || sessionStorage.getItem('bnb_browse_mode') === '1';
-      if (standalone && !browse) {
-        location.replace('/myplan/');
-      }
     })();
   </script>
   <meta name="theme-color" content="#0A0A0A" />
@@ -233,7 +229,7 @@
       <li><a href="#calculator">What's Possible</a></li>
       <li><a href="#how">What You Get</a></li>
       <li><a href="#who">Who It's For</a></li>
-      <li><a href="/createyourfoodplan/?browse=1" class="nav-cta">Create Your Diet</a></li>
+      <li><a href="/createyourfoodplan/?browse=1" class="nav-cta" target="_blank" rel="noopener noreferrer">Create Your Diet</a></li>
     </ul>
     <button class="hamburger" id="hamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -243,7 +239,7 @@
     <a href="#calculator">What's Possible</a>
     <a href="#how">What You Get</a>
     <a href="#who">Who It's For</a>
-    <a href="/createyourfoodplan/?browse=1">Create Your Diet</a>
+    <a href="/createyourfoodplan/?browse=1" target="_blank" rel="noopener noreferrer">Create Your Diet</a>
     <a href="#pricing">Pricing</a>
     <a href="/privacypolicy">Privacy Policy</a>
     <a href="/support">Support</a>
@@ -253,7 +249,7 @@
     <p class="hero-eyebrow">Contest Prep Diet Program</p>
     <img class="hero-logo" src="/img/brand/bblogo.png" alt="Burn &amp; Build" />
     <h1 class="hero-headline"><span class="hero-line-accent">Lose the Fat.</span><br />Keep the Muscle.</h1>
-    <a class="btn-cta hero-cta" href="/createyourfoodplan/?browse=1">Create Your Diet &rarr;</a>
+    <a class="btn-cta hero-cta" href="/createyourfoodplan/?browse=1" target="_blank" rel="noopener noreferrer">Create Your Diet &rarr;</a>
   </section>
 
   <section class="guide" id="guide">
@@ -273,7 +269,7 @@
           <div class="guide-cta-price">$149</div>
           <p class="guide-cta-period">One-Time Purchase</p>
           <p class="guide-cta-body">A precision diet built for your body — lose fat, keep muscle, no guesswork.</p>
-          <a class="btn-cta" href="/createyourfoodplan/?browse=1">Create Your Diet &rarr;</a>
+          <a class="btn-cta" href="/createyourfoodplan/?browse=1" target="_blank" rel="noopener noreferrer">Create Your Diet &rarr;</a>
         </div>
         <div class="testi">
           <div class="guide-photo-label">
@@ -447,7 +443,7 @@
           <li>Lean Body Analysis</li>
           <li>Weekly Newsletter (optional)</li>
         </ul>
-        <a class="btn-cta" href="/createyourfoodplan/?browse=1">Create Your Diet &rarr;</a>
+        <a class="btn-cta" href="/createyourfoodplan/?browse=1" target="_blank" rel="noopener noreferrer">Create Your Diet &rarr;</a>
       </div>
     </div>
   </section>
