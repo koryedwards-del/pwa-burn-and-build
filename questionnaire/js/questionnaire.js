@@ -16,7 +16,7 @@ const STEPS = [
   { id: 'personal', label: 'Personal info' },
   { id: 'work', label: 'Workday' },
   { id: 'exercise', label: 'Exercise' },
-  { id: 'body', label: 'Body fat' },
+  { id: 'body', label: 'Body composition' },
   { id: 'waiver', label: 'Agreement' },
   { id: 'review', label: 'Review' },
 ];
@@ -182,7 +182,7 @@ function renderReview() {
     ['Gender', values.sex || '—'],
     ['Age', values.age != null ? String(values.age) : '—'],
     ['Weight', values.weight ? `${values.weight} lbs` : '—'],
-    ['Body fat', values.fatPercent ? `${values.fatPercent}% (${fatSourceLabel(values.fatSource)})` : '—'],
+    ['Body composition', values.fatPercent ? `${values.fatPercent}% (${fatSourceLabel(values.fatSource)})` : '—'],
     ['Work exertion', workPhysicalLabel(values.workPhysical)],
     ['Day stress', workStressLabel(values.workStress)],
     ['SAG hours / week', values.weightTrainingHours || '—'],
