@@ -30,7 +30,7 @@
   --surface-drop: #2a2a2a;
   --yellow: var(--gold);
   --yellow-dim: var(--gold-dim);
-  --planner-width: 1225px;
+  --planner-width: var(--app-width);
 }
 
 html, body {

@@ -1,5 +1,9 @@
 /* Shared nav + page chrome — program report and meal planner */
 
+:root {
+  --app-width: 1200px;
+}
+
 .pb-layout {
   display: grid;
   grid-template-columns: 220px 1fr;
