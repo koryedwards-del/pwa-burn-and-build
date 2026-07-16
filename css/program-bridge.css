@@ -96,6 +96,7 @@ a.pb-nav__btn {
   font-size: 0.78rem;
   color: var(--muted);
   line-height: 1.5;
+  white-space: nowrap;
 }
 
 .pb-doc__meta strong {

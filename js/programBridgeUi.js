@@ -36,8 +36,7 @@ export function programMetaHtml(pkg) {
   return `
     <header class="pb-doc__head">
       <p class="pb-doc__meta">
-        Prepared exclusively for: <strong>${name}</strong><br />
-        On: <strong>${date}</strong>
+        Prepared exclusively for: <strong>${name}</strong> · On: <strong>${date}</strong>
       </p>
     </header>`;
 }
