@@ -494,6 +494,11 @@ body {
   gap: 8px;
 }
 
+.save-dialog__actions--stack {
+  flex-direction: column;
+  align-items: stretch;
+}
+
 .save-dialog__btn {
   padding: 8px 14px;
   border-radius: 6px;

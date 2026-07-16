@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../css/program-bridge.css?v=23" />
   <link rel="stylesheet" href="css/report.css?v=16" />
-  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=35" />
+  <link rel="stylesheet" href="../menuplanner/css/planner.css?v=36" />
 </head>
 <body>
   <section id="access-gate" class="mp-access" hidden>
@@ -155,6 +155,17 @@
       </div>
     </div>
   </div>
+
+  <dialog id="print-choice-dialog" class="save-dialog">
+    <div class="save-dialog__form">
+      <p class="save-dialog__title">Print</p>
+      <div class="save-dialog__actions save-dialog__actions--stack">
+        <button type="button" class="save-dialog__btn save-dialog__btn--primary" data-print-view="week">Week plan</button>
+        <button type="button" class="save-dialog__btn save-dialog__btn--primary" data-print-view="shopping">Shopping list</button>
+        <button type="button" class="save-dialog__btn save-dialog__btn--ghost" id="print-choice-cancel">Cancel</button>
+      </div>
+    </div>
+  </dialog>
 
   <dialog id="save-meal-dialog" class="save-dialog">
     <form method="dialog" class="save-dialog__form" id="save-meal-form">

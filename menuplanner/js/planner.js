@@ -1587,7 +1587,7 @@ function buildAssistantHeaderHtml(title) {
   `;
 }
 
-function buildAssistantDocumentHtml() {
+function buildPrintDocumentHtml(view = 'week') {
   const shoppingHtml = buildShoppingListContent();
   const weekHtml = buildWeekAgendaContent();
   const weekHeaderHtml = buildWeekPlanReportHeaderHtml();
@@ -1598,6 +1598,21 @@ function buildAssistantDocumentHtml() {
       <span>Week Plan · ${escapeHtml(programClientName(programPackage))}</span>
     </footer>
   `;
+  const bodyClass = view === 'shopping' ? 'view-shopping' : 'view-week';
+  const documentContent = view === 'shopping'
+    ? `
+      <section class="assistant-panel">
+        ${shoppingHeaderHtml}
+        ${shoppingHtml}
+      </section>
+    `
+    : `
+      <section class="assistant-panel">
+        ${weekHeaderHtml}
+        ${weekHtml}
+        ${weekFooterHtml}
+      </section>
+    `;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -1621,43 +1636,6 @@ function buildAssistantDocumentHtml() {
     }
     body.view-week {
       page: landscape-page;
-    }
-    .assistant-screen {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: #ececec;
-      border-bottom: 1px solid #d4d4d4;
-      padding: 14px 20px 16px;
-    }
-    .assistant-toolbar {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-      max-width: 720px;
-      margin: 0 auto;
-    }
-    .assistant-toolbar button {
-      padding: 8px 14px;
-      border: 1px solid #333;
-      border-radius: 6px;
-      background: #fff;
-      font-size: 0.75rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-    .assistant-toolbar button.active {
-      border-color: #c9a000;
-      background: #fdc500;
-      color: #111;
-    }
-    .assistant-toolbar button.primary {
-      border-color: #c9a000;
-      background: #111;
-      color: #fdc500;
     }
     .assistant-document {
       background: #ffffff;
@@ -1924,7 +1902,6 @@ function buildAssistantDocumentHtml() {
     }
     @media print {
       body { background: #fff; }
-      .assistant-screen { display: none !important; }
       .assistant-document {
         padding: 0;
         margin: 0;
@@ -1945,54 +1922,48 @@ function buildAssistantDocumentHtml() {
         padding-top: 22px;
         padding-bottom: 22px;
       }
-      .assistant-panel[hidden] { display: none !important; }
     }
   </style>
 </head>
-<body class="view-week" data-print-view="week">
-  <div class="assistant-screen">
-    <div class="assistant-toolbar">
-      <button type="button" data-print-view="week" class="active">Week plan</button>
-      <button type="button" data-print-view="shopping">Shopping list</button>
-      <button type="button" class="primary" id="print-btn">Print</button>
-    </div>
-  </div>
+<body class="${bodyClass}">
   <article class="assistant-document">
-    <section class="assistant-panel" id="panel-week">
-      ${weekHeaderHtml}
-      ${weekHtml}
-      ${weekFooterHtml}
-    </section>
-    <section class="assistant-panel" id="panel-shopping" hidden>
-      ${shoppingHeaderHtml}
-      ${shoppingHtml}
-    </section>
+    ${documentContent}
   </article>
-  <script>
-    (function () {
-      const body = document.body;
-      const shoppingPanel = document.getElementById('panel-shopping');
-      const weekPanel = document.getElementById('panel-week');
-      const viewButtons = document.querySelectorAll('[data-print-view]');
-
-      function setView(view) {
-        body.dataset.printView = view;
-        body.className = 'view-' + view;
-        shoppingPanel.hidden = view !== 'shopping';
-        weekPanel.hidden = view !== 'week';
-        viewButtons.forEach((button) => {
-          button.classList.toggle('active', button.dataset.printView === view);
-        });
-      }
-
-      viewButtons.forEach((button) => {
-        button.addEventListener('click', () => setView(button.dataset.printView));
-      });
-      document.getElementById('print-btn').addEventListener('click', () => window.print());
-    })();
-  </script>
 </body>
 </html>`;
+}
+
+let printFrame = null;
+
+function printPlannerDocument(view) {
+  if (!printFrame) {
+    printFrame = document.createElement('iframe');
+    printFrame.setAttribute('aria-hidden', 'true');
+    printFrame.title = 'Print';
+    Object.assign(printFrame.style, {
+      position: 'fixed',
+      width: '0',
+      height: '0',
+      border: '0',
+      visibility: 'hidden',
+    });
+    document.body.appendChild(printFrame);
+  }
+
+  const frameWin = printFrame.contentWindow;
+  const frameDoc = frameWin.document;
+  frameDoc.open();
+  frameDoc.write(buildPrintDocumentHtml(view));
+  frameDoc.close();
+
+  const triggerPrint = () => {
+    frameWin.focus();
+    frameWin.print();
+  };
+
+  frameWin.requestAnimationFrame(() => {
+    window.setTimeout(triggerPrint, 250);
+  });
 }
 
 function showPlannerToast(message, { variant = 'info', durationMs = 6000 } = {}) {
@@ -2013,21 +1984,29 @@ function showPlannerToast(message, { variant = 'info', durationMs = 6000 } = {})
   }, durationMs);
 }
 
-function openPrintAssistant() {
-  const doc = window.open('', '_blank');
-  if (!doc) {
-    showPlannerToast('Pop-up blocked — allow new tabs for this site, then try Print Assistant again.', {
-      variant: 'error',
-      durationMs: 8000,
+function initPrintChoiceDialog() {
+  const dialog = document.getElementById('print-choice-dialog');
+  if (!dialog) return;
+
+  dialog.querySelector('#print-choice-cancel')?.addEventListener('click', () => {
+    dialog.close();
+  });
+
+  dialog.querySelectorAll('[data-print-view]').forEach((button) => {
+    button.addEventListener('click', () => {
+      printPlannerDocument(button.dataset.printView);
+      dialog.close();
     });
+  });
+}
+
+function openPrintAssistant() {
+  const dialog = document.getElementById('print-choice-dialog');
+  if (dialog) {
+    dialog.showModal();
     return;
   }
-  doc.document.write(buildAssistantDocumentHtml());
-  doc.document.close();
-  doc.focus();
-  showPlannerToast('Print Assistant opened — switch between Week plan and Shopping list, then Print.', {
-    variant: 'success',
-  });
+  printPlannerDocument('week');
 }
 
 function initFoodSearch() {
@@ -2041,6 +2020,7 @@ function initFoodSearch() {
 
 function initPrintAssistant() {
   document.getElementById('print-assistant').addEventListener('click', openPrintAssistant);
+  initPrintChoiceDialog();
 }
 
 let plannerShellReady = false;
