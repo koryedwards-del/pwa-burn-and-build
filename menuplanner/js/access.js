@@ -47,7 +47,7 @@ function showAccessScreen(screen, { email = '' } = {}) {
     }
     if (submit) {
       submit.disabled = false;
-      submit.textContent = 'Continue';
+      submit.textContent = 'Go to your diet';
     }
     input?.focus();
   }
@@ -75,7 +75,7 @@ function setAccessBusy(busy) {
   const submit = gateEl()?.querySelector('#access-submit');
   if (!submit) return;
   submit.disabled = busy;
-  submit.textContent = busy ? 'Checking…' : 'Continue';
+  submit.textContent = busy ? 'Checking…' : 'Go to your diet';
 }
 
 function showEmailValidationError(message) {
