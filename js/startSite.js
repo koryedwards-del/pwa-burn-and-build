@@ -346,13 +346,29 @@ function renderPlanReadyAppHandoff(unlocked) {
           <p class="unlock-tagline">Projections, plan/servings, and menu planner.</p>`;
 }
 
+function syncFunnelCheckoutFlag() {
+  try {
+    if (new URLSearchParams(location.search).get('funnel') === '1') {
+      sessionStorage.setItem('bnb_funnel_checkout', '1');
+    }
+  } catch (e) {}
+}
+
+function funnelCheckoutRequired() {
+  syncFunnelCheckoutFlag();
+  return sessionStorage.getItem('bnb_funnel_checkout') === '1';
+}
+
 function renderPlanReady() {
   restoreBuiltPackage();
   const paidThisSession = store.checkoutVerified;
-  const hasAccess = store.accessGranted || paidThisSession;
+  const canOpenProgram = store.accessGranted || paidThisSession;
+  const showPaywall = !paidThisSession && (funnelCheckoutRequired() || !store.accessGranted);
   let lead;
   if (paidThisSession) {
     lead = 'Payment complete. Your program is ready — open your food plan, servings, and menu planner.';
+  } else if (store.accessGranted && funnelCheckoutRequired()) {
+    lead = 'Your personalized diet is saved. Complete checkout to continue — or open your program if you already own Burn & Build.';
   } else if (store.accessGranted) {
     lead = 'Your account already has access. Your program is ready — open your food plan, servings, and menu planner.';
   } else if (store.saveError) {
@@ -361,7 +377,7 @@ function renderPlanReady() {
     lead = 'Your personalized diet is saved. Complete checkout to unlock your program.';
   }
 
-  const checkoutBlock = !hasAccess
+  const checkoutBlock = showPaywall
     ? !store.apiReachable ? `
           <p class="unlock-hint">Could not reach the Burn &amp; Build server. Check your connection and try again.</p>
           ${store.saveError ? `<button type="button" class="btn-secondary unlock-cta-secondary" data-retry-save ${store.saveBusy ? 'disabled' : ''}>${store.saveBusy ? 'SAVING…' : 'Retry save'}</button>` : ''}`
@@ -376,7 +392,7 @@ function renderPlanReady() {
           ${store.checkoutTestBypass ? '<button type="button" class="btn-secondary unlock-cta-secondary" data-test-checkout>Skip payment (test)</button>' : ''}`
     : '';
 
-  const saveActions = !hasAccess && store.saveError && store.apiReachable
+  const saveActions = showPaywall && store.saveError && store.apiReachable
     ? `<button type="button" class="btn-secondary unlock-cta-secondary" data-retry-save ${store.saveBusy ? 'disabled' : ''}>${store.saveBusy ? 'SAVING…' : 'Retry save'}</button>`
     : '';
 
@@ -393,7 +409,7 @@ function renderPlanReady() {
           ${store.checkoutMessage ? `<div class="ob-info"><span class="ob-info-icon">ℹ️</span><p>${store.checkoutMessage}</p></div>` : ''}
           ${checkoutBlock}
           ${saveActions}
-          ${renderPlanReadyAppHandoff(hasAccess)}
+          ${renderPlanReadyAppHandoff(canOpenProgram)}
           ${store.checkoutError ? `<div class="unlock-error">${store.checkoutError}</div>` : ''}
           ${store.saveError ? `<div class="unlock-error">${store.saveError}</div>` : ''}
         </div>
@@ -449,6 +465,7 @@ async function runPlanCreation() {
   const ok = await savePlanToServer();
   store.phase = 'plan-ready';
   sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
+  sessionStorage.setItem('bnb_funnel_checkout', '1');
   await renderPlanReadyPhase();
   if (!ok) render();
 }
@@ -742,6 +759,7 @@ async function handleCheckoutReturn() {
 
   store.checkoutMessage = 'Payment complete. Your program is unlocked.';
   store.checkoutVerified = true;
+  sessionStorage.removeItem('bnb_funnel_checkout');
   await refreshAccessState();
 }
 
@@ -787,6 +805,7 @@ async function completeTestCheckout() {
   }
   store.checkoutMessage = 'Test access granted. Your program is unlocked.';
   store.checkoutVerified = true;
+  sessionStorage.removeItem('bnb_funnel_checkout');
   await refreshAccessState();
   render();
 }
@@ -959,6 +978,7 @@ async function copyImportLink() {
 }
 
 function initStartSite() {
+  syncFunnelCheckoutFlag();
   restoreFlowState();
   syncAccordionSection(store);
   if (!store.onboardingForm) {
