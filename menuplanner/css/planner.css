@@ -197,12 +197,12 @@ body {
 }
 
 .planner-toast--success {
-  --toast-bg: rgba(253, 197, 0, 0.14);
-  --toast-border: rgba(253, 197, 0, 0.5);
+  --toast-bg: var(--surface);
+  --toast-border: rgba(253, 197, 0, 0.55);
 }
 
 .planner-toast--error {
-  --toast-bg: rgba(255, 122, 0, 0.14);
+  --toast-bg: var(--surface);
   --toast-border: rgba(255, 122, 0, 0.55);
   color: #ffb347;
 }
