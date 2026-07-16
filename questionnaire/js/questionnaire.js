@@ -284,7 +284,7 @@ continueBtn.addEventListener('click', (event) => {
   try {
     const program = buildProgramFromValues(values);
     sessionStorage.setItem(MEALPLANNER_PROGRAM_KEY, JSON.stringify(program));
-    window.location.href = '../mealplanner/';
+    window.location.href = '../program-report/';
   } catch (error) {
     console.error(error);
     window.alert('Could not build your program. Check your answers and try again.');

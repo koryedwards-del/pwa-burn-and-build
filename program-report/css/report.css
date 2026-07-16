@@ -1,0 +1,360 @@
+/* Burn & Build — Program report bridge (seminar printout, on screen) */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #1c1c1c;
+  --surface-2: #262626;
+  --border: #333333;
+  --text: #f2f2f2;
+  --muted: #9c9c9c;
+  --gold: #fdc500;
+  --gold-dim: rgba(253, 197, 0, 0.12);
+  --on-gold: #0a0a0a;
+  --text-hint: #656565;
+  --layout-width: 1100px;
+  --doc-paper: #f7f5f0;
+  --doc-ink: #1a1a1a;
+  --doc-muted: #5c5c5c;
+  --doc-rule: #d4d0c8;
+}
+
+html, body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Open Sans", system-ui, sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px 48px;
+}
+
+.r-app {
+  width: var(--layout-width);
+  min-height: calc(100vh - 72px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.r-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.r-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.r-logo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.r-title {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.r-tag {
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.r-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 24px;
+  flex: 1;
+}
+
+.r-nav__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.r-nav__item {
+  width: 100%;
+}
+
+.r-nav__btn {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.r-nav__btn:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.r-nav__btn.is-active {
+  background: var(--gold-dim);
+  border-color: rgba(253, 197, 0, 0.35);
+  color: var(--gold);
+}
+
+.r-nav__btn.is-future {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.r-nav__btn:disabled {
+  cursor: default;
+}
+
+.r-main {
+  min-width: 0;
+}
+
+.r-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.r-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.r-panel__title {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.r-panel__lead {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.r-doc {
+  background: var(--doc-paper);
+  color: var(--doc-ink);
+  border-radius: 10px;
+  padding: 28px 32px 32px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.r-doc__head {
+  border-bottom: 2px solid var(--doc-ink);
+  padding-bottom: 14px;
+  margin-bottom: 20px;
+}
+
+.r-doc__meta {
+  font-size: 0.78rem;
+  color: var(--doc-muted);
+  line-height: 1.5;
+}
+
+.r-doc__meta strong {
+  color: var(--doc-ink);
+}
+
+.r-doc h3 {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 22px 0 10px;
+}
+
+.r-doc p {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+
+.r-doc__section-title {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: var(--doc-ink);
+}
+
+.r-doc__list {
+  margin: 0 0 12px 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.r-doc__list li {
+  margin-bottom: 6px;
+}
+
+.r-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  font-size: 0.82rem;
+  color: var(--doc-muted);
+  margin-bottom: 16px;
+}
+
+.r-stats span strong {
+  color: var(--doc-ink);
+}
+
+.r-composition {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 16px 0 20px;
+}
+
+.r-composition th,
+.r-composition td {
+  border: 1px solid var(--doc-rule);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.r-composition thead th {
+  background: #ebe8e2;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.r-composition .r-composition__row-label {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: #f0ede6;
+  width: 88px;
+}
+
+.r-composition .r-composition__metric {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+.r-composition .r-composition__sub {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--doc-muted);
+  font-family: "Open Sans", system-ui, sans-serif;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.r-callout {
+  background: rgba(253, 197, 0, 0.15);
+  border-left: 4px solid #c9a000;
+  padding: 14px 16px;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.r-callout--good {
+  background: rgba(80, 160, 90, 0.12);
+  border-left-color: #3d8f4a;
+}
+
+.r-note {
+  font-size: 0.82rem;
+  color: var(--text-hint);
+  line-height: 1.5;
+}
+
+.r-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.r-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.r-btn:hover {
+  border-color: var(--muted);
+}
+
+.r-btn--primary {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--on-gold);
+}
+
+.r-btn--primary:hover {
+  filter: brightness(1.05);
+}
+
+.r-btn--ghost {
+  background: transparent;
+}
+
+.r-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.r-empty p {
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
