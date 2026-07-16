@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=1200" />
   <title>Burn &amp; Build — Meal Planner</title>
   <link rel="stylesheet" href="../css/program-bridge.css?v=5" />
-  <link rel="stylesheet" href="css/planner.css?v=16" />
+  <link rel="stylesheet" href="css/planner.css?v=17" />
 </head>
 <body>
   <div class="planner-app">
@@ -34,7 +34,10 @@
             <div class="week-panel__header">
               <p class="col-heading col-heading--week">Week</p>
               <div class="week-panel__actions">
-                <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>
+                <div class="print-assistant-anchor">
+                  <button type="button" class="slot__save" id="print-assistant">Print Assistant</button>
+                  <div class="planner-toast-host" id="planner-toast-host" aria-live="polite" role="status"></div>
+                </div>
                 <button type="button" class="day-col__clear" id="clear-week-menu">Clear Week</button>
               </div>
             </div>
@@ -99,6 +102,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/planner.js?v=25"></script>
+  <script type="module" src="js/planner.js?v=26"></script>
 </body>
 </html>

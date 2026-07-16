@@ -1345,15 +1345,10 @@ function buildAssistantDocumentHtml() {
 }
 
 function showPlannerToast(message, { variant = 'info', durationMs = 6000 } = {}) {
-  let host = document.getElementById('planner-toast-host');
-  if (!host) {
-    host = document.createElement('div');
-    host.id = 'planner-toast-host';
-    host.className = 'planner-toast-host';
-    host.setAttribute('aria-live', 'polite');
-    host.setAttribute('role', 'status');
-    document.body.appendChild(host);
-  }
+  const host = document.getElementById('planner-toast-host');
+  if (!host) return;
+
+  host.innerHTML = '';
 
   const toast = document.createElement('p');
   toast.className = `planner-toast planner-toast--${variant}`;
