@@ -402,15 +402,18 @@ function saveMealFromDay(mealSlotId, name) {
   const trimmed = name.trim();
   if (!trimmed) return;
 
+  const fitted = fitWeekGridLabel(trimmed);
+  if (!fitted) return;
+
   const meal = {
-    id: mealIdFromName(trimmed),
-    name: trimmed,
+    id: mealIdFromName(fitted),
+    name: fitted,
     pickCount: 1,
     items: daySlotToMealItems(mealSlotId),
   };
 
   savedMeals.push(meal);
-  mealSlotMeta(mealSlotId).mealName = trimmed;
+  mealSlotMeta(mealSlotId).mealName = fitted;
   mealSlotMeta(mealSlotId).savedMealId = meal.id;
   renderWeekGrid();
   renderDayColumn();
@@ -422,7 +425,7 @@ function openSaveMealDialog(mealSlotId) {
   const dialog = document.getElementById('save-meal-dialog');
   const input = document.getElementById('save-meal-name');
   pendingSaveDaySlotId = mealSlotId;
-  input.value = mealSlotMeta(mealSlotId).mealName || '';
+  input.value = fitWeekGridLabel(mealSlotMeta(mealSlotId).mealName || '');
   dialog.showModal();
   input.focus();
   input.select();
@@ -614,6 +617,94 @@ function initClearDayMenu() {
 
 function initClearWeekMenu() {
   document.getElementById('clear-week-menu').addEventListener('click', clearWeekMenu);
+}
+
+let weekGridLabelProbe = null;
+
+function weekGridLabelReferenceCell() {
+  return document.querySelector('#week-grid .week-matrix__cell.mini-card[data-meal-slot="breakfast"]')
+    || document.querySelector('#week-grid .week-matrix__cell.mini-card[data-meal-slot]');
+}
+
+function ensureWeekGridLabelProbe() {
+  if (!weekGridLabelProbe) {
+    weekGridLabelProbe = document.createElement('span');
+    weekGridLabelProbe.className = 'mini-card week-matrix__cell';
+    weekGridLabelProbe.setAttribute('aria-hidden', 'true');
+    Object.assign(weekGridLabelProbe.style, {
+      position: 'absolute',
+      left: '-9999px',
+      top: '0',
+      visibility: 'hidden',
+      pointerEvents: 'none',
+      whiteSpace: 'nowrap',
+      width: 'auto',
+      maxWidth: 'none',
+    });
+    document.body.appendChild(weekGridLabelProbe);
+  }
+  return weekGridLabelProbe;
+}
+
+function syncWeekGridLabelProbeStyles() {
+  const probe = ensureWeekGridLabelProbe();
+  const refCell = weekGridLabelReferenceCell();
+  if (!refCell) return;
+  const style = getComputedStyle(refCell);
+  probe.style.font = style.font;
+  probe.style.letterSpacing = style.letterSpacing;
+  probe.style.textTransform = style.textTransform;
+}
+
+function measureWeekGridLabelWidth(text) {
+  syncWeekGridLabelProbeStyles();
+  const probe = ensureWeekGridLabelProbe();
+  probe.textContent = text;
+  return probe.getBoundingClientRect().width;
+}
+
+function weekGridLabelMaxWidth() {
+  const cell = weekGridLabelReferenceCell();
+  if (!cell) return null;
+  const style = getComputedStyle(cell);
+  const paddingX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+  const borderX = parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+  return Math.max(0, cell.clientWidth - paddingX - borderX);
+}
+
+function fitWeekGridLabel(text) {
+  const raw = String(text ?? '').trim();
+  if (!raw) return '';
+
+  const maxWidth = weekGridLabelMaxWidth();
+  if (maxWidth == null || maxWidth <= 0) return raw;
+  if (measureWeekGridLabelWidth(raw) <= maxWidth) return raw;
+
+  let lo = 0;
+  let hi = raw.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (measureWeekGridLabelWidth(raw.slice(0, mid)) <= maxWidth) {
+      lo = mid;
+    } else {
+      hi = mid - 1;
+    }
+  }
+
+  const fitted = raw.slice(0, lo).trimEnd();
+  if (fitted) return fitted;
+  return raw.charAt(0);
+}
+
+function syncSaveMealNameInput(input) {
+  if (!input) return;
+  const raw = input.value;
+  const fitted = fitWeekGridLabel(raw);
+  if (fitted === raw) return;
+  const selStart = input.selectionStart ?? fitted.length;
+  input.value = fitted;
+  const pos = Math.min(selStart, fitted.length);
+  input.setSelectionRange(pos, pos);
 }
 
 function weekMealLabel(weekDay, mealSlotId) {
@@ -848,16 +939,23 @@ function mealDragHtml(meal) {
   return `<p class="card__title">${escapeHtml(meal.name)}</p>`;
 }
 
+function resolveSavedMealTargetSlot() {
+  const mealSlots = ['breakfast', 'lunch', 'dinner'];
+  if (activeSlot?.daySlotId && acceptsSavedMealDrop(activeSlot.daySlotId)) {
+    return activeSlot.daySlotId;
+  }
+  const emptySlot = mealSlots.find((slotId) => {
+    const meta = mealSlotMeta(slotId, activeWeekDay);
+    return !meta.savedMealId && !meta.mealName;
+  });
+  if (emptySlot) return emptySlot;
+  return mealSlots[0];
+}
+
 function applySavedMealFromTap(mealId) {
   const meal = savedMeals.find((item) => item.id === mealId);
   if (!meal) return;
-  const daySlotId = activeSlot?.daySlotId;
-  if (!daySlotId || !acceptsSavedMealDrop(daySlotId)) {
-    showPlannerToast('Select breakfast, lunch, or dinner first, then tap a saved meal.', {
-      variant: 'info',
-    });
-    return;
-  }
+  const daySlotId = resolveSavedMealTargetSlot();
   applySavedMealToDay(daySlotId, meal);
 }
 
@@ -912,7 +1010,7 @@ function renderSavedMeals() {
   const meals = savedMealsByPopularity();
   container.innerHTML = meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
-    : '<p class="saved-meals__hint">It won\'t take long before you have a few go-to meals. Eggs and oatmeal. Chicken and rice. Save your go-to meals to speed up menu planning. Tap a saved meal to add it to the meal you\'re working on.</p>';
+    : '<p class="saved-meals__hint">It won\'t take long before you have a few go-to meals. Eggs and oatmeal. Chicken and rice. Save your go-to meals to speed up menu planning. Tap a saved meal to add it to the active day.</p>';
 
   document.querySelectorAll('[data-meal-apply]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -1124,7 +1222,7 @@ function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true 
     }
   });
   setFatSelections(mealSlotId, fatItems, weekDay);
-  mealSlotMeta(mealSlotId, weekDay).mealName = meal.name;
+  mealSlotMeta(mealSlotId, weekDay).mealName = fitWeekGridLabel(meal.name);
   mealSlotMeta(mealSlotId, weekDay).savedMealId = meal.id;
   if (trackPick) meal.pickCount += 1;
   renderWeekGrid();
@@ -1220,6 +1318,15 @@ function initSaveMealDialog() {
   const form = document.getElementById('save-meal-form');
   const input = document.getElementById('save-meal-name');
   const cancel = document.getElementById('save-meal-cancel');
+
+  input.addEventListener('input', () => {
+    syncSaveMealNameInput(input);
+  });
+
+  window.addEventListener('resize', () => {
+    if (!dialog.open) return;
+    syncSaveMealNameInput(input);
+  });
 
   cancel.addEventListener('click', () => {
     pendingSaveDaySlotId = null;
