@@ -267,29 +267,35 @@ function renderFoodPlan(pkg) {
           <thead>
             <tr>
               <th scope="col"></th>
-              <th scope="col">TODAY</th>
+              <th scope="colgroup" colspan="2">TODAY</th>
               <th scope="col"></th>
-              <th scope="col">EIGHT WEEK GOAL</th>
+              <th scope="colgroup" colspan="2">EIGHT WEEK GOAL</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th scope="row" class="r-goal-row-label">LEAN</th>
-              <td>${today.leanPct} % ${today.leanLbs} lbs.</td>
+              <td class="r-goal-num">${today.leanPct}%</td>
+              <td class="r-goal-num">${today.leanLbs} lbs.</td>
               <td></td>
-              <td>${goalLeanPct} ${goalLeanLbs}</td>
+              <td class="r-goal-num">${goalLeanPct}</td>
+              <td class="r-goal-num">${goalLeanLbs}</td>
             </tr>
             <tr>
               <th scope="row" class="r-goal-row-label">FAT</th>
-              <td>${today.fatPct} % ${today.fatLbs} lbs.</td>
+              <td class="r-goal-num">${today.fatPct}%</td>
+              <td class="r-goal-num">${today.fatLbs} lbs.</td>
               <td class="r-goal-fat-loss">−${fatLost} lbs. of fat</td>
-              <td>${goalFatPct} ${goalFatLbs}</td>
+              <td class="r-goal-num">${goalFatPct}</td>
+              <td class="r-goal-num">${goalFatLbs}</td>
             </tr>
             <tr>
               <th scope="row" class="r-goal-row-label">TOTAL</th>
-              <td>${today.totalPct} % ${today.totalLbs} lbs.</td>
+              <td class="r-goal-num">${today.totalPct}%</td>
+              <td class="r-goal-num">${today.totalLbs} lbs.</td>
               <td></td>
-              <td>${goalTotalPct} ${goalTotalLbs}</td>
+              <td class="r-goal-num">${goalTotalPct}</td>
+              <td class="r-goal-num">${goalTotalLbs}</td>
             </tr>
           </tbody>
         </table>

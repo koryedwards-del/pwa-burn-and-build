@@ -342,6 +342,18 @@ body {
   background: var(--surface-2);
   text-align: left;
   color: var(--text);
+  width: 72px;
+}
+
+.r-goal-table .r-goal-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  min-width: 5.5rem;
+}
+
+.r-goal-table td:empty {
+  background: var(--surface);
 }
 
 .r-goal-fat-loss {
