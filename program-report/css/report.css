@@ -534,9 +534,71 @@ a.r-nav__btn {
 }
 
 .r-empty {
-  padding: 32px;
-  text-align: center;
+  padding: 36px 40px 40px;
+  text-align: left;
   color: var(--muted);
+  max-width: 52rem;
+}
+
+.r-empty__eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.r-empty__title {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.r-empty__lead {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 20px;
+  max-width: 48ch;
+}
+
+.r-empty__steps {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2, #262626);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.r-empty__steps li {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.r-empty__steps strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.r-empty__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.r-empty__hint {
+  margin: 0;
 }
 
 .r-empty p {

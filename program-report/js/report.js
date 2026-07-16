@@ -428,12 +428,22 @@ function renderServings(pkg) {
 function renderMissingProgram() {
   return `
     <div class="r-empty">
-      <p>No program in this browser session yet.</p>
-      <p class="r-note" style="margin-bottom:20px;">Preview the report with sample data, or complete intake to build yours.</p>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <button type="button" class="r-btn r-btn--primary" data-report-preview>Preview sample report →</button>
-        <a class="r-btn r-btn--ghost" href="${INTAKE_ENTRY_URL}">Create your diet</a>
+      <p class="r-empty__eyebrow">Get started</p>
+      <h2 class="r-empty__title">Create your personalized program</h2>
+      <p class="r-empty__lead">
+        Answer a short intake questionnaire — your body composition, workday, and exercise plan for the next 8 weeks.
+        Burn &amp; Build calculates your servings and builds your program report.
+      </p>
+      <ol class="r-empty__steps">
+        <li><strong>Intake</strong> — personal info, body fat, work &amp; exercise</li>
+        <li><strong>Your program</strong> — welcome, food plan, and daily servings</li>
+        <li><strong>Menu planner</strong> — build your week and grocery list</li>
+      </ol>
+      <div class="r-empty__actions">
+        <a class="r-btn r-btn--primary" href="${INTAKE_ENTRY_URL}">Create your diet →</a>
+        <button type="button" class="r-btn r-btn--ghost" data-report-preview>Preview sample report</button>
       </div>
+      <p class="r-note r-empty__hint">Preview uses Kristi Warner&rsquo;s seminar sample before you build yours.</p>
     </div>
   `;
 }
