@@ -9,7 +9,9 @@ import { buildProgramPackage } from '../../js/programPackage.js';
 import { persistAppEmail, saveProgramToServer, isValidEmail } from '../../js/programApi.js';
 import { persistProgramBridge } from '../../js/programBridgeHandoff.js';
 
-const CREATOR_CHECKOUT_URL = '../createyourfoodplan/?browse=1';
+import { CREATOR_ENTRY_URL } from '../../js/siteUrls.js';
+
+const CREATOR_CHECKOUT_URL = CREATOR_ENTRY_URL;
 
 const STEPS = [
   { id: 'welcome', label: 'Welcome' },

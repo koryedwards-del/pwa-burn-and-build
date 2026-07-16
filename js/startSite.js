@@ -23,7 +23,9 @@ import {
 import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js?v=102';
 import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
-const LANDING_URL = 'https://burnandbuilddiet.com';
+import { CREATOR_ENTRY_URL, MARKETING_ORIGIN } from './siteUrls.js';
+
+const LANDING_URL = MARKETING_ORIGIN;
 
 const OWNERSHIP_INCLUDES = [
   'Your personalized 8-week program',

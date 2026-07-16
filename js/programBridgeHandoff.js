@@ -1,5 +1,7 @@
 /** Session handoff — creator / questionnaire → program-report → mealplanner */
 
+import { CREATOR_HOST_ORIGIN } from './siteUrls.js';
+
 export const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 export const BUILT_PROGRAM_KEY = 'bnb_built_package';
 
@@ -28,17 +30,18 @@ export function loadProgramBridge() {
 }
 
 export function programReportHref({ preview = false, page } = {}) {
-  const url = new URL('/program-report/', window.location.origin);
+  const url = new URL('/program-report/', CREATOR_HOST_ORIGIN);
   if (preview) url.searchParams.set('preview', '1');
   if (page) url.searchParams.set('page', page);
   return `${url.pathname}${url.search}`;
 }
 
 export function myplanAppHref(email = '') {
-  const url = new URL('/myplan/', window.location.origin);
+  const url = new URL('/myplan/', CREATOR_HOST_ORIGIN);
   const normalized = String(email || '').trim().toLowerCase();
   if (normalized) url.searchParams.set('email', normalized);
   return `${url.pathname}${url.search}`;
 }
 
 export const CREATOR_ENTRY_PATH = '/createyourfoodplan/?browse=1';
+export { CREATOR_ENTRY_URL } from './siteUrls.js';
