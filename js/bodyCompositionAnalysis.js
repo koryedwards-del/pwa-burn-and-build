@@ -57,6 +57,11 @@ export function computeDietEightWeekProjection({
   });
 }
 
+function formatTimelineWeeks(weeks) {
+  const rounded = Math.round(Number(weeks) * 10) / 10;
+  return Number.isInteger(rounded) ? `${rounded} weeks` : `${rounded.toFixed(1)} weeks`;
+}
+
 /** Full timeline from PHP projection cycles (60-day fat loss, constant LBM). */
 export function computeDietProjectionTimeline({
   gender,
@@ -112,11 +117,7 @@ export function computeDietProjectionTimeline({
       curFatLbs = goalFatLbs;
       curWeight = lbm + curFatLbs;
 
-      const timelineLabel = `${Math.round(cycleWeeks)} weeks`;
-      const last = rows[rows.length - 1];
-      if (last && !last.isCurrent && last.timeline === timelineLabel) {
-        rows.pop();
-      }
+      const timelineLabel = formatTimelineWeeks(cycleWeeks);
 
       if (!shownBadges.Showtime) {
         shownBadges.Showtime = true;
