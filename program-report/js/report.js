@@ -193,9 +193,9 @@ function projectionTimelineRows(timeline) {
   if (!timeline?.valid || !timeline.rows?.length) return '';
   return timeline.rows.map((row) => `
     <tr class="${row.isCurrent ? 'r-projection-current' : ''}">
-      <td>${escapeHtml(row.timeline)}</td>
-      <td>${escapeHtml(row.bodyFatDisplay)}${row.badge ? ` <span class="r-projection-badge">${escapeHtml(row.badge)}</span>` : ''}</td>
-      <td>${escapeHtml(row.weightDisplay)}</td>
+      <td class="r-table-label">${escapeHtml(row.timeline)}</td>
+      <td class="r-table-num">${escapeHtml(row.bodyFatDisplay)}${row.badge ? ` <span class="r-projection-badge">${escapeHtml(row.badge)}</span>` : ''}</td>
+      <td class="r-table-num">${escapeHtml(row.weightDisplay)}</td>
     </tr>
   `).join('');
 }
@@ -228,14 +228,14 @@ function renderFoodPlan(pkg) {
     }
     return `
       <tr>
-        <th scope="row" class="r-macro-label">${escapeHtml(row.label)}</th>
-        <td>${row.proteinG}</td>
-        <td>${formatCalories(row.proteinCal)}</td>
-        <td>${row.carbsG}</td>
-        <td>${formatCalories(row.carbsCal)}</td>
-        <td>${row.fatsG}</td>
-        <td>${formatCalories(row.fatsCal)}</td>
-        <td>${formatCalories(row.totalCal)}</td>
+        <th scope="row" class="r-macro-label r-table-label">${escapeHtml(row.label)}</th>
+        <td class="r-table-num">${row.proteinG}</td>
+        <td class="r-table-num">${formatCalories(row.proteinCal)}</td>
+        <td class="r-table-num">${row.carbsG}</td>
+        <td class="r-table-num">${formatCalories(row.carbsCal)}</td>
+        <td class="r-table-num">${row.fatsG}</td>
+        <td class="r-table-num">${formatCalories(row.fatsCal)}</td>
+        <td class="r-table-num">${formatCalories(row.totalCal)}</td>
       </tr>`;
   }).join('');
 
@@ -306,7 +306,12 @@ function renderFoodPlan(pkg) {
         </p>
 
         ${timelineBody ? `
-        <table class="r-projection-table" aria-label="Body fat and weight projection timeline">
+        <table class="r-projection-table r-report-table" aria-label="Body fat and weight projection timeline">
+          <colgroup>
+            <col class="r-col-label" />
+            <col class="r-col-num" />
+            <col class="r-col-num" />
+          </colgroup>
           <thead>
             <tr>
               <th scope="col">Timeline</th>
@@ -328,14 +333,18 @@ function renderFoodPlan(pkg) {
           requires at rest (your resting metabolic rate), for your workday and for one hour of each type of exercise.
         </p>
 
-        <table class="r-macro-table" aria-label="Daily macro and calorie requirements">
+        <table class="r-macro-table r-report-table" aria-label="Daily macro and calorie requirements">
+          <colgroup>
+            <col class="r-col-label" />
+            <col class="r-col-num" span="7" />
+          </colgroup>
           <thead>
             <tr>
               <th scope="col" rowspan="2"></th>
               <th scope="colgroup" colspan="2">PROTEIN</th>
               <th scope="colgroup" colspan="2">CARBS</th>
               <th scope="colgroup" colspan="2">FATS</th>
-              <th scope="colgroup" rowspan="2">TOTAL</th>
+              <th scope="colgroup" rowspan="2" class="r-macro-total-head">TOTAL<br /><span class="r-macro-th-sub">calories</span></th>
             </tr>
             <tr>
               <th scope="col">grams</th>
@@ -343,7 +352,6 @@ function renderFoodPlan(pkg) {
               <th scope="col">grams</th>
               <th scope="col">calories</th>
               <th scope="col">grams</th>
-              <th scope="col">calories</th>
               <th scope="col">calories</th>
             </tr>
           </thead>

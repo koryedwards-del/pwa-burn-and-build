@@ -62,6 +62,37 @@ function formatTimelineWeeks(weeks) {
   return Number.isInteger(rounded) ? `${rounded} weeks` : `${rounded.toFixed(1)} weeks`;
 }
 
+/** One 60-day cycle with showtime guardrail — matches computeEightWeekFatProjection. */
+function projectCycleEnd({ curFatLbs, lbm, cycleFatLossLbs, targetBf }) {
+  const startFatLbs = curFatLbs;
+  let endFatLbs = curFatLbs - cycleFatLossLbs;
+  let endWeight = lbm + endFatLbs;
+  let endBf = endFatLbs > 0 && endWeight > 0 ? (endFatLbs / endWeight) * 100 : 0;
+  let fatLostLbs = cycleFatLossLbs;
+  let weeks = PROJECTION_CYCLE_WEEKS;
+  let capped = false;
+
+  if (endBf <= targetBf) {
+    capped = true;
+    endBf = targetBf;
+    endFatLbs = (lbm * endBf) / 100;
+    endWeight = lbm + endFatLbs;
+    fatLostLbs = startFatLbs - endFatLbs;
+    weeks = fatLostLbs > 0 && cycleFatLossLbs > 0
+      ? (fatLostLbs / cycleFatLossLbs) * PROJECTION_CYCLE_WEEKS
+      : 0;
+  }
+
+  return {
+    capped,
+    endFatLbs: round1(endFatLbs),
+    endWeight: round1(endWeight),
+    endBf: round2(endBf),
+    fatLostLbs: round1(fatLostLbs),
+    weeks,
+  };
+}
+
 /** Full timeline from PHP projection cycles (60-day fat loss, constant LBM). */
 export function computeDietProjectionTimeline({
   gender,
@@ -106,41 +137,22 @@ export function computeDietProjectionTimeline({
     badge: null,
   });
 
-  while (curFatLbs > goalFatLbs + 0.05) {
-    const remaining = curFatLbs - goalFatLbs;
+  while (true) {
+    const curBf = curFatLbs > 0 && curWeight > 0 ? (curFatLbs / curWeight) * 100 : 0;
+    if (curBf <= targetBf + 0.01) break;
 
-    if (remaining <= cycleFatLossLbs) {
-      const weeksThisCycle = remaining > 0
-        ? (remaining / cycleFatLossLbs) * PROJECTION_CYCLE_WEEKS
-        : 0;
-      cycleWeeks += weeksThisCycle;
-      curFatLbs = goalFatLbs;
-      curWeight = lbm + curFatLbs;
+    const cycle = projectCycleEnd({
+      curFatLbs,
+      lbm,
+      cycleFatLossLbs,
+      targetBf,
+    });
 
-      const timelineLabel = formatTimelineWeeks(cycleWeeks);
+    cycleWeeks += cycle.weeks;
+    curFatLbs = cycle.endFatLbs;
+    curWeight = cycle.endWeight;
 
-      if (!shownBadges.Showtime) {
-        shownBadges.Showtime = true;
-        rows.push({
-          timeline: timelineLabel,
-          bodyFat: targetBf,
-          bodyFatDisplay: `${targetBf.toFixed(2)}%`,
-          weight: curWeight,
-          weightDisplay: `${curWeight.toFixed(1)} lbs`,
-          isCurrent: false,
-          badge: 'Showtime',
-          isShowtime: true,
-        });
-      }
-      break;
-    }
-
-    curFatLbs -= cycleFatLossLbs;
-    curWeight = lbm + curFatLbs;
-    const newBf = (curFatLbs / curWeight) * 100;
-    cycleWeeks += PROJECTION_CYCLE_WEEKS;
-
-    const badge = aceBadge(newBf, g, false);
+    const badge = aceBadge(cycle.endBf, g, cycle.capped);
     let badgeLabel = null;
     if (badge && !shownBadges[badge.label]) {
       shownBadges[badge.label] = true;
@@ -148,14 +160,17 @@ export function computeDietProjectionTimeline({
     }
 
     rows.push({
-      timeline: `${cycleWeeks} weeks`,
-      bodyFat: newBf,
-      bodyFatDisplay: `${newBf.toFixed(2)}%`,
+      timeline: cycle.capped ? formatTimelineWeeks(cycleWeeks) : `${cycleWeeks} weeks`,
+      bodyFat: cycle.endBf,
+      bodyFatDisplay: `${cycle.endBf.toFixed(2)}%`,
       weight: curWeight,
       weightDisplay: `${curWeight.toFixed(1)} lbs`,
       isCurrent: false,
       badge: badgeLabel,
+      isShowtime: cycle.capped,
     });
+
+    if (cycle.capped) break;
   }
 
   const wholeWeeks = Math.round(cycleWeeks);

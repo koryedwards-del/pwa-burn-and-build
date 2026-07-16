@@ -260,12 +260,24 @@ body {
   margin: 16px 0;
 }
 
+.r-report-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.r-report-table .r-col-label {
+  width: 34%;
+}
+
+.r-report-table .r-col-num {
+  width: auto;
+}
+
 .r-projection-table th,
 .r-projection-table td {
   border: 1px solid var(--border);
   padding: 10px 12px;
   vertical-align: middle;
-  text-align: left;
 }
 
 .r-projection-table thead th {
@@ -275,6 +287,36 @@ body {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--gold);
+}
+
+.r-projection-table thead th:nth-child(2),
+.r-projection-table thead th:nth-child(3) {
+  text-align: right;
+}
+
+.r-table-label {
+  text-align: left;
+  font-weight: 600;
+}
+
+.r-table-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.r-macro-total-head {
+  line-height: 1.25;
+  vertical-align: middle;
+}
+
+.r-macro-th-sub {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 2px;
 }
 
 .r-projection-table tr.r-projection-current td {
@@ -342,7 +384,6 @@ body {
   background: var(--surface-2);
   text-align: left;
   color: var(--text);
-  width: 72px;
 }
 
 .r-goal-table .r-goal-num {
@@ -365,6 +406,15 @@ body {
 
 .r-macro-table td,
 .r-servings-table td {
+  text-align: center;
+}
+
+.r-macro-table .r-table-num,
+.r-macro-table thead th:not(:first-child):not(.r-macro-total-head) {
+  text-align: right;
+}
+
+.r-macro-table thead th.r-macro-total-head {
   text-align: center;
 }
 
