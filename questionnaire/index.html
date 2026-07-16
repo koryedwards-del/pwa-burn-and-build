@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=1200" />
   <title>Burn &amp; Build — Program Questionnaire</title>
-  <link rel="stylesheet" href="css/questionnaire.css?v=1" />
+  <link rel="stylesheet" href="css/questionnaire.css?v=2" />
 </head>
 <body>
   <div class="q-app">
@@ -232,7 +232,10 @@
               <p class="q-panel__lead">Confirm the intake, then open the meal planner with your calculated servings.</p>
             </div>
             <dl class="q-review" id="q-review"></dl>
-            <p class="q-note">Wireframe only — servings calculation and persistence hook up to <code>onboardingEngine.js</code> next.</p>
+            <section class="q-servings" id="q-servings" hidden>
+              <h3 class="q-servings__title">Your daily servings</h3>
+              <dl class="q-review q-review--servings" id="q-servings-list"></dl>
+            </section>
             <a class="q-btn q-btn--primary" href="../mealplanner/" id="q-continue">Continue to Meal Planner</a>
           </section>
         </form>
@@ -245,6 +248,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/questionnaire.js?v=1"></script>
+  <script type="module" src="js/questionnaire.js?v=2"></script>
 </body>
 </html>

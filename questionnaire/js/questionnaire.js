@@ -1,9 +1,13 @@
 import {
   ageFromBirthDate,
+  formatBirthDateText,
   heartRates,
   WORK_PHYSICAL,
   WORK_STRESS,
 } from '../../js/onboardingEngine.js';
+import { buildProgramPackage } from '../../js/programPackage.js';
+
+const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
 
 const STEPS = [
   { id: 'welcome', label: 'Welcome' },
@@ -18,6 +22,9 @@ const STEPS = [
 const form = document.getElementById('q-form');
 const navList = document.getElementById('q-nav-list');
 const reviewEl = document.getElementById('q-review');
+const servingsSection = document.getElementById('q-servings');
+const servingsList = document.getElementById('q-servings-list');
+const continueBtn = document.getElementById('q-continue');
 const backBtn = document.querySelector('[data-q-back]');
 const nextBtn = document.querySelector('#q-actions [data-q-next]');
 const panels = [...document.querySelectorAll('.q-panel')];
@@ -68,6 +75,39 @@ function readForm() {
   };
 }
 
+function toOnboardingForm(values) {
+  return {
+    preferredName: values.preferredName,
+    email: values.email,
+    sex: values.sex,
+    heightFeet: String(values.heightFeet || ''),
+    heightInchesPart: String(values.heightInchesPart || ''),
+    heightInches: '',
+    age: values.age,
+    birthDate: values.birthDate,
+    birthDateText: values.birthDate ? formatBirthDateText(values.birthDate) : '',
+    weightText: String(values.weight || ''),
+    fatPercentText: String(values.fatPercent || ''),
+    fatSource: values.fatSource,
+    workPhysical: values.workPhysical,
+    workStress: values.workStress,
+    weightTrainingHours: values.weightTrainingHours,
+    cardioHours: values.cardioHours,
+    fatBurningHours: values.fatBurningHours,
+    wakeTime: '06:00',
+    remindersEnabled: false,
+    newsletterOptIn: values.newsletterOptIn,
+    lowActivities: [],
+  };
+}
+
+function buildProgramFromValues(values) {
+  return buildProgramPackage(toOnboardingForm(values), {
+    label: '8-Week Burn & Build Program',
+    meta: { source: 'desktop-questionnaire' },
+  });
+}
+
 function syncAgeField() {
   const birthInput = form.elements.birthDate;
   const ageInput = form.elements.age;
@@ -93,13 +133,20 @@ function heightLabel(values) {
   return `${feet || 0}'${inches || 0}"`;
 }
 
+function fmtServings(n) {
+  const value = Number(n);
+  if (!Number.isFinite(value)) return '0';
+  if (Math.abs(value - Math.round(value)) < 0.05) return String(Math.round(value));
+  return value.toFixed(1);
+}
+
 function canProceed(stepIndex) {
   const values = readForm();
   switch (stepIndex) {
     case 0:
       return true;
     case 1:
-      return values.preferredName && values.email && values.weight;
+      return values.preferredName && values.email && values.weight && values.sex && values.birthDate;
     case 2:
       return values.fatSource && Number(values.fatPercent) > 0;
     case 3:
@@ -127,6 +174,13 @@ function renderNav() {
 
 function renderReview() {
   const values = readForm();
+  let program = null;
+  try {
+    program = buildProgramFromValues(values);
+  } catch (error) {
+    console.error(error);
+  }
+
   const rows = [
     ['Name', values.preferredName || '—'],
     ['Email', values.email || '—'],
@@ -142,9 +196,33 @@ function renderReview() {
     ['Moderate hours / week', values.fatBurningHours || '—'],
     ['Waiver signed', values.signature || '—'],
   ];
+
+  if (program?.intake) {
+    rows.push(['Lean body mass', `${program.intake.leanBodyMass.toFixed(1)} lbs`]);
+  }
+
   reviewEl.innerHTML = rows.map(([label, value]) => `
     <div><dt>${label}</dt><dd>${value}</dd></div>
   `).join('');
+
+  if (program?.plan?.servings) {
+    const servings = program.plan.servings;
+    const summary = program.plan.summary;
+    servingsSection.hidden = false;
+    servingsList.innerHTML = [
+      ['Protein', `${fmtServings(servings.protein)} / day`],
+      ['Grains & starches', `${fmtServings(servings.grainsStarches)} / day`],
+      ['Fruit', `${fmtServings(servings.fruits)} / day`],
+      ['Vegetables', `${fmtServings(servings.vegetables)} / day`],
+      ['Fat points', `${fmtServings(servings.fatMaintain)} / day`],
+      ['Reduce calories', summary?.reduceTotalCals ? `${Math.round(summary.reduceTotalCals)} / day` : '—'],
+    ].map(([label, value]) => `
+      <div><dt>${label}</dt><dd>${value}</dd></div>
+    `).join('');
+  } else {
+    servingsSection.hidden = true;
+    servingsList.innerHTML = '';
+  }
 }
 
 function showStep(index) {
@@ -198,6 +276,20 @@ document.querySelectorAll('[data-q-next]').forEach((btn) => {
 });
 
 backBtn.addEventListener('click', () => showStep(step - 1));
+
+continueBtn.addEventListener('click', (event) => {
+  event.preventDefault();
+  const values = readForm();
+  if (!canProceed(5)) return;
+  try {
+    const program = buildProgramFromValues(values);
+    sessionStorage.setItem(MEALPLANNER_PROGRAM_KEY, JSON.stringify(program));
+    window.location.href = '../mealplanner/';
+  } catch (error) {
+    console.error(error);
+    window.alert('Could not build your program. Check your answers and try again.');
+  }
+});
 
 initDefaults();
 syncAgeField();

@@ -453,6 +453,27 @@ body {
   margin: 0;
 }
 
+.q-servings {
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid rgba(253, 197, 0, 0.25);
+  border-radius: 8px;
+  background: var(--gold-dim);
+}
+
+.q-servings__title {
+  font-family: Oswald, system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.q-review--servings div {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
 .q-note {
   font-size: 0.82rem;
   color: var(--text-hint);

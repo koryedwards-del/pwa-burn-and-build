@@ -86,6 +86,13 @@ body {
   color: var(--text);
 }
 
+.planner-program {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
 .planner-frame {
   flex: 1;
   min-height: 0;

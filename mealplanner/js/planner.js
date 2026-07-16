@@ -1,5 +1,16 @@
 import { formatGroceryQuantity } from '../../js/groceryEngine.js';
 
+const MEALPLANNER_PROGRAM_KEY = 'bnb_mealplanner_program';
+
+const SLOT_LABEL_TO_ID = {
+  Breakfast: 'breakfast',
+  'Morning Snack': 'morning-snack',
+  Lunch: 'lunch',
+  'Afternoon Snack': 'afternoon-snack',
+  Dinner: 'dinner',
+  'Evening Snack': 'evening-snack',
+};
+
 const FOOD_CATEGORIES = [
   { id: 'protein', label: 'Protein' },
   { id: 'dairy', label: 'Dairy' },
@@ -121,6 +132,8 @@ const WEEK_MEAL_EMPTY_LABEL = {
 };
 
 let foods = [];
+let programPackage = null;
+const mealSlotsById = {};
 let activeWeekDay = 'wed';
 let activeSlot = null;
 let activeFoodCategory = null;
@@ -157,11 +170,75 @@ function templateSlots(template) {
   return TEMPLATE_SLOTS[template];
 }
 
+function loadProgramPackage() {
+  try {
+    const raw = sessionStorage.getItem(MEALPLANNER_PROGRAM_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function initMealSlotsFromProgram(pkg) {
+  if (!pkg?.plan?.mealSlots) return;
+  pkg.plan.mealSlots.forEach((slot) => {
+    const id = SLOT_LABEL_TO_ID[slot.label];
+    if (id) mealSlotsById[id] = slot;
+  });
+}
+
+function fmtServings(n) {
+  const value = Number(n);
+  if (!Number.isFinite(value)) return '0';
+  if (Math.abs(value - Math.round(value)) < 0.05) return String(Math.round(value));
+  return value.toFixed(1);
+}
+
+function requiredServings(daySlotId, categorySlot) {
+  const slot = mealSlotsById[daySlotId];
+  if (!slot) return 1;
+  switch (categorySlot) {
+    case 'protein':
+      return slot.proteinServings || 1;
+    case 'gs':
+      return slot.grainStarchServings || 1;
+    case 'vegetable':
+      return slot.vegetableServings || 1;
+    case 'fruit':
+      return slot.fruitServings || 1;
+    default:
+      return 1;
+  }
+}
+
+function servingHint(daySlotId, categorySlot) {
+  const required = requiredServings(daySlotId, categorySlot);
+  if (!programPackage) return 'Tap or drag food';
+  if (required <= 0 && SLOT_META[categorySlot]?.optional) return 'Optional';
+  return `${fmtServings(required)} serving${Math.abs(required - 1) < 0.05 ? '' : 's'}`;
+}
+
+function renderProgramHeader() {
+  const el = document.getElementById('planner-program');
+  if (!el) return;
+  if (!programPackage?.plan?.servings) {
+    el.hidden = true;
+    return;
+  }
+  const name = programPackage.intake?.preferredName || 'Your program';
+  const servings = programPackage.plan.servings;
+  el.hidden = false;
+  el.textContent = `${name} — Protein ${fmtServings(servings.protein)}, G/S ${fmtServings(servings.grainsStarches)}, Fruit ${fmtServings(servings.fruits)}, Veg ${fmtServings(servings.vegetables)}, Fat pts ${fmtServings(servings.fatMaintain)}`;
+}
+
 function savedMealById(id) {
   return SAVED_MEALS.find((meal) => meal.id === id);
 }
 
 function seedWeekPlan() {
+  if (programPackage) return;
+
   const presets = {
     sun: ['oatmeal-bowl', 'chicken-bowl', 'tilapia-plate'],
     mon: ['oatmeal-bowl', 'chicken-bowl', 'stir-fry'],
@@ -444,7 +521,7 @@ function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
   const meta = SLOT_META[categorySlot];
   const active = isCategorySlotActive(daySlotId, categorySlot);
   const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
-  const emptyHint = 'Tap or drag food';
+  const emptyHint = servingHint(daySlotId, categorySlot);
 
   if (selected) {
     const food = foods.find((item) => item.name === selected.foodName);
@@ -930,6 +1007,7 @@ function initFoodStackInteractions() {
 }
 
 function fillDaySlot(daySlotId, categorySlot, foodName) {
+  const servings = requiredServings(daySlotId, categorySlot);
   clearDaySlotMeta(daySlotId);
   if (isFatSlot(categorySlot)) {
     setFatSelections(daySlotId, [
@@ -939,7 +1017,7 @@ function fillDaySlot(daySlotId, categorySlot, foodName) {
   } else {
     categorySelections(daySlotId)[categorySlot] = {
       foodName,
-      servings: 1,
+      servings,
     };
   }
   renderWeekGrid();
@@ -1300,6 +1378,10 @@ function initPrintAssistant() {
 }
 
 async function init() {
+  programPackage = loadProgramPackage();
+  initMealSlotsFromProgram(programPackage);
+  renderProgramHeader();
+
   const response = await fetch(`../data/foods.json?v=${FOODS_DATA_VERSION}`, { cache: 'no-store' });
   foods = await response.json();
   seedWeekPlan();
