@@ -192,24 +192,10 @@ function projectionTimelineRows(timeline) {
   `).join('');
 }
 
-function renderFoodPlan(pkg) {
-  const intake = pkg.intake;
-  const today = computeTodayBodyComposition(intake);
-  const projection = eightWeekProjectionFromPackage(pkg);
-  const timeline = projectionTimelineFromPackage(pkg);
-  const hours = exerciseHoursSummary(intake);
-  const macroRows = macroTableRows(pkg.plan?.formula, intake.workIntensity);
-
-  const fatLost = projection ? projection.fatLostLbs.toFixed(1) : '—';
-  const weekly = projection ? projection.weeklyFatLossLbs.toFixed(1) : '—';
-  const goalLeanPct = projection ? `${projection.endLeanPct.toFixed(2)}%` : '—';
-  const goalLeanLbs = projection ? `${projection.leanLbs.toFixed(1)} lbs.` : '—';
-  const goalFatPct = projection ? `${projection.endBf.toFixed(2)}%` : '—';
-  const goalFatLbs = projection ? `${projection.endFatLbs.toFixed(1)} lbs.` : '—';
-  const goalTotalPct = '100.00%';
-  const goalTotalLbs = projection ? `${projection.endWeight.toFixed(1)} lbs.` : '—';
-
-  const timelineBody = projectionTimelineRows(timeline);
+function macroTableSectionHtml(pkg) {
+  const intake = pkg?.intake;
+  const macroRows = macroTableRows(pkg?.plan?.formula, intake?.workIntensity);
+  if (!macroRows.length) return '';
 
   const macroBody = macroRows.map((row) => {
     if (row.spacer) {
@@ -227,6 +213,61 @@ function renderFoodPlan(pkg) {
         <td class="r-table-num">${formatCalories(row.totalCal)}</td>
       </tr>`;
   }).join('');
+
+  return `
+        <p>
+          How much food you need each day depends on how much LBM you have. Also, it depends on your
+          activity level and the type and amount of exercise you participate in. Based on the information you
+          provided, the following table gives you the number of calories and the amount of protein, carbohydrates
+          and fat you need per day to maintain your fat or to reduce body fat. Also listed is what your body
+          requires at rest (your resting metabolic rate), for your workday and for one hour of each type of exercise.
+        </p>
+
+        <table class="r-macro-table r-report-table" aria-label="Daily macro and calorie requirements">
+          <colgroup>
+            <col class="r-col-label" />
+            <col class="r-col-num" span="7" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" rowspan="2"></th>
+              <th scope="colgroup" colspan="2">PROTEIN</th>
+              <th scope="colgroup" colspan="2">CARBS</th>
+              <th scope="colgroup" colspan="2">FATS</th>
+              <th scope="colgroup" rowspan="2" class="r-macro-total-head">TOTAL<br /><span class="r-macro-th-sub">calories</span></th>
+            </tr>
+            <tr>
+              <th scope="col">grams</th>
+              <th scope="col">calories</th>
+              <th scope="col">grams</th>
+              <th scope="col">calories</th>
+              <th scope="col">grams</th>
+              <th scope="col">calories</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${macroBody}
+          </tbody>
+        </table>`;
+}
+
+function renderFoodPlan(pkg) {
+  const intake = pkg.intake;
+  const today = computeTodayBodyComposition(intake);
+  const projection = eightWeekProjectionFromPackage(pkg);
+  const timeline = projectionTimelineFromPackage(pkg);
+  const hours = exerciseHoursSummary(intake);
+
+  const fatLost = projection ? projection.fatLostLbs.toFixed(1) : '—';
+  const weekly = projection ? projection.weeklyFatLossLbs.toFixed(1) : '—';
+  const goalLeanPct = projection ? `${projection.endLeanPct.toFixed(2)}%` : '—';
+  const goalLeanLbs = projection ? `${projection.leanLbs.toFixed(1)} lbs.` : '—';
+  const goalFatPct = projection ? `${projection.endBf.toFixed(2)}%` : '—';
+  const goalFatLbs = projection ? `${projection.endFatLbs.toFixed(1)} lbs.` : '—';
+  const goalTotalPct = '100.00%';
+  const goalTotalLbs = projection ? `${projection.endWeight.toFixed(1)} lbs.` : '—';
+
+  const timelineBody = projectionTimelineRows(timeline);
 
   return `
     <section class="r-panel">
@@ -309,41 +350,6 @@ function renderFoodPlan(pkg) {
           </tbody>
         </table>
         ` : ''}
-
-        <p>
-          How much food you need each day depends on how much LBM you have. Also, it depends on your
-          activity level and the type and amount of exercise you participate in. Based on the information you
-          provided, the following table gives you the number of calories and the amount of protein, carbohydrates
-          and fat you need per day to maintain your fat or to reduce body fat. Also listed is what your body
-          requires at rest (your resting metabolic rate), for your workday and for one hour of each type of exercise.
-        </p>
-
-        <table class="r-macro-table r-report-table" aria-label="Daily macro and calorie requirements">
-          <colgroup>
-            <col class="r-col-label" />
-            <col class="r-col-num" span="7" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th scope="col" rowspan="2"></th>
-              <th scope="colgroup" colspan="2">PROTEIN</th>
-              <th scope="colgroup" colspan="2">CARBS</th>
-              <th scope="colgroup" colspan="2">FATS</th>
-              <th scope="colgroup" rowspan="2" class="r-macro-total-head">TOTAL<br /><span class="r-macro-th-sub">calories</span></th>
-            </tr>
-            <tr>
-              <th scope="col">grams</th>
-              <th scope="col">calories</th>
-              <th scope="col">grams</th>
-              <th scope="col">calories</th>
-              <th scope="col">grams</th>
-              <th scope="col">calories</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${macroBody}
-          </tbody>
-        </table>
       </article>
 
       <footer class="r-actions">
@@ -388,6 +394,8 @@ function renderServings(pkg) {
 
       <article class="r-doc">
         ${programMetaHtml(pkg)}
+
+        ${macroTableSectionHtml(pkg)}
 
         <h3>Servings</h3>
         <p class="r-doc__note">
