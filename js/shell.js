@@ -22,9 +22,6 @@ import {
   planFromPackage,
 } from './programPackage.js';
 import {
-  ensureBurnAndBuildContact,
-} from './contactsApi.js';
-import {
   fetchProgramFromServer,
   getAppEmail,
   persistAppEmail,
@@ -507,14 +504,6 @@ async function submitShellEmail() {
   store.loadError = null;
   store.screen = 'loading';
   render();
-
-  const access = await ensureBurnAndBuildContact(email);
-  if (!access.ok) {
-    store.loadError = access.message;
-    store.screen = 'login';
-    render();
-    return;
-  }
 
   const ok = await loadProgramFromServer(email);
   store.screen = ok ? 'plan' : 'login';

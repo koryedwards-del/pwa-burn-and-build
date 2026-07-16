@@ -71,6 +71,18 @@ export async function fetchProgramSavedStatus(email) {
   }
 }
 
+export async function fetchProgramPaymentStatus(email, programId) {
+  try {
+    const { res, data } = await fetchJson(
+      apiUrl(`/api/programs/payment-status?email=${encodeURIComponent(normalizeEmail(email))}&programId=${encodeURIComponent(programId)}`)
+    );
+    if (!res.ok) return { ok: false, paid: false, message: data.message || 'Could not check payment status.' };
+    return data;
+  } catch {
+    return { ok: false, paid: false, message: 'Network error checking payment status.' };
+  }
+}
+
 export async function fetchProgramFromServer(email) {
   try {
     const { res, data } = await fetchJson(

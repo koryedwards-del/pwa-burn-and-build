@@ -11,9 +11,8 @@ import {
   localDateKey,
   packageToImportUrl,
 } from './programPackage.js';
-import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail, fetchProgramFromServer } from './programApi.js';
+import { getAppEmail, persistAppEmail, saveProgramToServer, isValidEmail, fetchProgramFromServer, fetchProgramPaymentStatus } from './programApi.js';
 import { persistProgramBridge, programReportHref } from './programBridgeHandoff.js';
-import { lookupContact } from './contactsApi.js';
 import {
   completeCheckoutForTest,
   createCheckoutSession,
@@ -101,7 +100,7 @@ const store = {
   reviewViewed: false,
   accordionEditReturn: null,
   accordionPendingFocus: null,
-  accessGranted: false,
+  programPaid: false,
   apiReachable: true,
   stripeConfigured: false,
   checkoutTestBypass: false,
@@ -372,16 +371,32 @@ function ensurePlanReadyEmail() {
   return '';
 }
 
+function currentProgramId() {
+  restoreBuiltPackage();
+  return String(store.builtPackage?.program?.id || '').trim();
+}
+
+async function refreshProgramPaymentStatus() {
+  const email = ensurePlanReadyEmail();
+  const programId = currentProgramId();
+  if (!isValidEmail(email) || !programId) {
+    store.programPaid = false;
+    return;
+  }
+  const result = await fetchProgramPaymentStatus(email, programId);
+  store.programPaid = !!(result.ok && result.paid);
+}
+
 function renderPlanReady() {
   restoreBuiltPackage();
   ensurePlanReadyEmail();
   const paidThisSession = store.checkoutVerified;
-  const hasPaidAccess = paidThisSession || store.accessGranted;
+  const hasPaidAccess = paidThisSession || store.programPaid;
   const showPaywall = !hasPaidAccess;
   let lead;
   if (paidThisSession) {
     lead = 'Payment complete. Your program is ready — open your food plan, servings, and menu planner.';
-  } else if (store.accessGranted) {
+  } else if (store.programPaid) {
     lead = 'Your program is unlocked. Open your food plan, servings, and menu planner.';
   } else if (store.saveError) {
     lead = 'Your diet is ready on this device. Save it to your account, then complete checkout.';
@@ -714,16 +729,6 @@ async function savePlanToServer() {
   return true;
 }
 
-async function refreshAccessState() {
-  const email = ensurePlanReadyEmail();
-  if (!isValidEmail(email)) {
-    store.accessGranted = false;
-    return;
-  }
-  const result = await lookupContact(email);
-  store.accessGranted = !!(result.ok && result.contact?.burnAndBuild);
-}
-
 function cleanCheckoutQuery() {
   const url = new URL(location.href);
   url.searchParams.delete('checkout');
@@ -771,7 +776,7 @@ async function handleCheckoutReturn() {
 
   store.checkoutMessage = 'Payment complete. Your program is unlocked.';
   store.checkoutVerified = true;
-  await refreshAccessState();
+  store.programPaid = true;
 }
 
 async function retrySavePlan() {
@@ -793,7 +798,12 @@ async function startCheckout() {
   store.checkoutBusy = true;
   render();
 
-  const programId = store.builtPackage?.program?.id;
+  const programId = currentProgramId();
+  if (!programId) {
+    store.checkoutError = 'Your program must be saved before checkout. Try again from the questionnaire.';
+    render();
+    return;
+  }
   const result = await createCheckoutSession(email, programId);
   store.checkoutBusy = false;
 
@@ -809,7 +819,7 @@ async function startCheckout() {
 async function completeTestCheckout() {
   store.checkoutError = '';
   store.checkoutMessage = '';
-  const result = await completeCheckoutForTest(store.email);
+  const result = await completeCheckoutForTest(email, currentProgramId());
   if (!result.ok) {
     store.checkoutError = result.message || 'Test checkout failed.';
     render();
@@ -817,7 +827,7 @@ async function completeTestCheckout() {
   }
   store.checkoutMessage = 'Test access granted. Your program is unlocked.';
   store.checkoutVerified = true;
-  await refreshAccessState();
+  store.programPaid = true;
   render();
 }
 
@@ -825,7 +835,7 @@ async function preparePlanReadyState() {
   ensurePlanReadyEmail();
   await refreshCheckoutConfig();
   await handleCheckoutReturn();
-  await refreshAccessState();
+  await refreshProgramPaymentStatus();
 }
 
 function render() {

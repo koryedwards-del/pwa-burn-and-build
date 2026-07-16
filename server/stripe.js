@@ -1,6 +1,5 @@
 import Stripe from 'stripe';
-import { normalizeEmail } from './db.js';
-import { setBurnAndBuild } from './contacts.js';
+import { markProgramPaid, normalizeEmail } from './db.js';
 
 const secretKey = process.env.STRIPE_SECRET_KEY;
 const priceId = process.env.STRIPE_PRICE_ID;
@@ -41,9 +40,15 @@ export function grantAccessFromCheckoutSession(session) {
   if (!paid) {
     return { ok: false, message: 'Payment not completed.' };
   }
-  // Only Stripe checkout (full price or coupon) grants access.
-  const contact = setBurnAndBuild(email, true);
-  return { ok: true, email, contact, programId: session.metadata?.programId || null };
+  const programId = session.metadata?.programId || null;
+  if (!programId) {
+    return { ok: false, message: 'Checkout session is missing program id.' };
+  }
+  const marked = markProgramPaid(email, programId);
+  if (!marked) {
+    return { ok: false, message: 'Could not unlock this program after payment.' };
+  }
+  return { ok: true, email, programId, paid: true };
 }
 
 export async function createCheckoutSession({ email, programId, baseUrl }) {

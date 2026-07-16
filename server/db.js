@@ -57,7 +57,15 @@ function migrateLegacyTable() {
   db.exec('DROP TABLE programs_legacy');
 }
 
+function migratePaidAtColumn() {
+  const cols = db.prepare('PRAGMA table_info(programs)').all();
+  if (!cols.some((c) => c.name === 'paid_at')) {
+    db.exec('ALTER TABLE programs ADD COLUMN paid_at TEXT');
+  }
+}
+
 migrateLegacyTable();
+migratePaidAtColumn();
 
 export function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -173,6 +181,29 @@ export function deleteProgram(email, programId) {
     DELETE FROM programs
     WHERE email = ? AND id = ?
   `).run(normalizeEmail(email), programId);
+  return result.changes > 0;
+}
+
+export function isProgramPaid(email, programId) {
+  const key = normalizeEmail(email);
+  let id = programId;
+  if (!id) {
+    const meta = getLatestProgramMeta(key);
+    id = meta?.id;
+  }
+  if (!id) return false;
+  const row = db.prepare('SELECT paid_at FROM programs WHERE id = ? AND email = ?').get(id, key);
+  return !!(row?.paid_at);
+}
+
+export function markProgramPaid(email, programId) {
+  const key = normalizeEmail(email);
+  const id = String(programId || '').trim();
+  if (!id) return false;
+  const now = new Date().toISOString();
+  const result = db.prepare(`
+    UPDATE programs SET paid_at = ? WHERE id = ? AND email = ?
+  `).run(now, id, key);
   return result.changes > 0;
 }
 

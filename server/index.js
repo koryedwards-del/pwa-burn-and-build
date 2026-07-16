@@ -4,7 +4,6 @@ import { fileURLToPath } from 'url';
 import 'dotenv/config';
 import {
   deleteContact,
-  ensureBurnAndBuildAccess,
   enrollContactFromProgramCreation,
   getContact,
   listContacts,
@@ -13,7 +12,7 @@ import {
   setBurnAndBuild,
   upsertContact,
 } from './contacts.js';
-import { countPrograms, dbPathForHealth, deleteProgram, getLatestProgram, getProgramById, listPrograms, normalizeEmail, saveProgram } from './db.js';
+import { countPrograms, dbPathForHealth, deleteProgram, getLatestProgram, getLatestProgramMeta, getProgramById, isProgramPaid, listPrograms, markProgramPaid, normalizeEmail, saveProgram } from './db.js';
 import { validateProgramPackage } from '../js/programPackage.js';
 import {
   constructStripeWebhookEvent,
@@ -208,12 +207,21 @@ app.post('/api/checkout/test-complete', (req, res) => {
     return;
   }
   const email = normalizeEmail(req.body?.email);
+  const programId = String(req.body?.programId || '').trim();
   if (!isValidEmail(email)) {
     res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
     return;
   }
-  const contact = setBurnAndBuild(email, true);
-  res.json({ ok: true, email, contact, test: true });
+  if (!programId) {
+    res.status(400).json({ ok: false, message: 'Missing program id.' });
+    return;
+  }
+  const paid = markProgramPaid(email, programId);
+  if (!paid) {
+    res.status(404).json({ ok: false, message: 'Program not found for this email.' });
+    return;
+  }
+  res.json({ ok: true, email, programId, paid: true, test: true });
 });
 
 app.get('/api/contacts/lookup', (req, res) => {
@@ -336,14 +344,32 @@ app.get('/api/programs/saved', (req, res) => {
   }
 
   const saved = programSavedForEmail(email);
-  const contact = getContact(email);
   res.json({
     ok: true,
     email,
     saved: saved.saved,
     programId: saved.programId || null,
     programCount: saved.programCount,
-    accessGranted: !!contact?.burnAndBuild,
+    programPaid: !!saved.programPaid,
+  });
+});
+
+app.get('/api/programs/payment-status', (req, res) => {
+  const email = normalizeEmail(req.query.email);
+  const programId = String(req.query.programId || '').trim();
+  if (!isValidEmail(email)) {
+    res.status(400).json({ ok: false, message: 'Enter a valid email address.' });
+    return;
+  }
+  if (!programId) {
+    res.status(400).json({ ok: false, message: 'Missing program id.' });
+    return;
+  }
+  res.json({
+    ok: true,
+    email,
+    programId,
+    paid: isProgramPaid(email, programId),
   });
 });
 
@@ -410,11 +436,21 @@ app.get('/api/programs/:id', (req, res) => {
   }
 
   const accessResult = resolveProgramLoad(email, { getLatestProgram, countPrograms });
-  if (!accessResult.ok) {
+  if (!accessResult.ok && accessResult.status !== 403) {
     res.status(accessResult.status).json({
       ok: false,
       message: accessResult.message,
       ...(accessResult.saved ? { saved: true, programCount: accessResult.programCount } : {}),
+    });
+    return;
+  }
+
+  if (!isProgramPaid(email, id)) {
+    res.status(403).json({
+      ok: false,
+      message: 'Complete Stripe checkout to unlock this program.',
+      saved: true,
+      programId: id,
     });
     return;
   }

@@ -42,12 +42,12 @@ export async function verifyCheckoutSession(sessionId) {
   }
 }
 
-export async function completeCheckoutForTest(email) {
+export async function completeCheckoutForTest(email, programId) {
   try {
     const { res, data } = await fetchJson(apiUrl('/api/checkout/test-complete'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: normalizeEmail(email) }),
+      body: JSON.stringify({ email: normalizeEmail(email), programId: programId || undefined }),
     });
     if (!res.ok) return { ok: false, message: data.message || 'Test checkout failed.' };
     return data;

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import Database from 'better-sqlite3';
-import { countPrograms, getLatestProgram, normalizeEmail } from './db.js';
+import { countPrograms, getLatestProgram, getLatestProgramMeta, isProgramPaid, normalizeEmail } from './db.js';
 import { prepareDatabasePath, resolveDatabasePath } from './dbPath.js';
 
 const dbPath = resolveDatabasePath();
@@ -136,38 +136,42 @@ export function enrollContactFromProgramCreation(email, displayName) {
 }
 
 export function programSavedForEmail(email) {
-  const pkg = getLatestProgram(email);
-  if (!pkg) {
-    return { saved: false, programCount: 0 };
+  const meta = getLatestProgramMeta(email);
+  if (!meta) {
+    return { saved: false, programCount: 0, programPaid: false };
   }
   return {
     saved: true,
-    programId: pkg.program?.id || null,
+    programId: meta.id,
     programCount: countPrograms(email),
+    programPaid: isProgramPaid(email, meta.id),
   };
 }
 
 export function resolveProgramLoad(email, { getLatestProgram: getLatest, countPrograms: count }) {
-  const pkg = getLatest(email);
-  if (!pkg) {
+  const key = normalizeEmail(email);
+  const meta = getLatestProgramMeta(key);
+  if (!meta) {
     return { ok: false, status: 404, message: 'No diet saved for this email yet.' };
   }
 
-  const access = ensureBurnAndBuildAccess(email);
-  if (!access.ok) {
-    const message = access.message.includes('Stripe checkout')
-      ? 'Your plan is saved. Complete Stripe checkout to open it in the app.'
-      : access.message;
+  if (!isProgramPaid(key, meta.id)) {
     return {
       ok: false,
       status: 403,
       saved: true,
-      message,
-      programCount: count(email),
+      message: 'Complete Stripe checkout to unlock this program.',
+      programCount: count(key),
+      programId: meta.id,
     };
   }
 
-  return { ok: true, package: pkg, programCount: count(email) };
+  const pkg = getLatest(key);
+  if (!pkg) {
+    return { ok: false, status: 404, message: 'No diet saved for this email yet.' };
+  }
+
+  return { ok: true, package: pkg, programCount: count(key), programId: meta.id };
 }
 
 export function deleteContact(email) {
