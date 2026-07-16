@@ -279,6 +279,12 @@ function scaledLabel(food, servings) {
   return `${Math.round(food.gramWeight * servings)} g`;
 }
 
+function servingAmountLabel(food, servings) {
+  const count = Number(servings);
+  if (!food || !Number.isFinite(count)) return '';
+  return `${fmtServings(count)} × ${scaledLabel(food, 1)} = ${scaledLabel(food, count)}`;
+}
+
 function escapeHtml(text) {
   return text
     .replace(/&/g, '&amp;')
@@ -447,7 +453,7 @@ function renderFatItemCard({ item, daySlotId, index }) {
   const food = foods.find((entry) => entry.name === item.foodName);
   const categoryLabel = FAT_LANE_SLOT_LABELS[food?.category];
   const detail = food
-    ? `${item.servings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, item.servings)}`
+    ? servingAmountLabel(food, item.servings)
     : '';
   const typeTag = categoryLabel
     ? `<span class="fat-points__type">${categoryLabel}</span>`
@@ -526,7 +532,7 @@ function renderCategorySlotButton({ categorySlot, daySlotId, selected }) {
   if (selected) {
     const food = foods.find((item) => item.name === selected.foodName);
     const detail = food
-      ? `${selected.servings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, selected.servings)}`
+      ? servingAmountLabel(food, selected.servings)
       : '';
     return `
       <button
@@ -787,7 +793,7 @@ function foodsForActiveSlot() {
 function mealItemDetail(item) {
   const food = foods.find((entry) => entry.name === item.foodName);
   if (!food) return escapeHtml(item.foodName);
-  return `${item.servings} × ${scaledLabel(food, 1)} = ${scaledLabel(food, item.servings)}`;
+  return servingAmountLabel(food, item.servings);
 }
 
 function mealSummary(meal) {
@@ -953,7 +959,7 @@ function foodCardDetail(food) {
   if (!programPackage || Math.abs(servings - 1) < 0.05) {
     return scaledLabel(food, 1);
   }
-  return `${fmtServings(servings)} × ${scaledLabel(food, 1)} = ${scaledLabel(food, servings)}`;
+  return servingAmountLabel(food, servings);
 }
 
 function renderFoodStack() {
