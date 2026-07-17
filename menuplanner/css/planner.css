@@ -136,34 +136,57 @@ body {
   min-width: 0;
 }
 
-.week-panel__toggle {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.85rem;
-  line-height: 1;
-  cursor: pointer;
+.week-panel__title {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
-.week-panel__toggle:hover {
-  border-color: var(--gold-muted);
+.week-panel__title:hover .col-heading--week,
+.week-panel__title:focus-visible .col-heading--week {
   color: var(--text);
 }
 
+.week-panel__title-icon {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.week-panel__title:hover .week-panel__title-icon,
+.week-panel__title:focus-visible .week-panel__title-icon {
+  color: var(--text);
+}
+
+.week-panel__title:focus-visible {
+  outline: 2px solid var(--gold-muted);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .week-panel.is-collapsed {
-  gap: 0;
+  gap: 8px;
 }
 
 .week-panel.is-collapsed .week-grid {
+  cursor: pointer;
+}
+
+.week-panel.is-collapsed .week-grid .week-matrix {
   display: none;
+}
+
+.week-panel.is-collapsed .week-grid:hover {
+  border-color: var(--gold-muted);
 }
 
 .col-heading--week {
@@ -903,11 +926,27 @@ button.mini-card.week-matrix__cell {
   -webkit-overflow-scrolling: touch;
 }
 
-.saved-meals__hint {
+.saved-meals__hint,
+.saved-meals__browse-hint {
   font-size: 0.8rem;
   color: var(--muted);
   line-height: 1.5;
+  margin-bottom: 8px;
   padding: 8px 2px;
+}
+
+.saved-meals__browse-hint {
+  color: rgba(253, 197, 0, 0.82);
+}
+
+.saved-meal__apply--ready {
+  border-color: var(--gold-muted);
+  background: var(--gold-select-bg);
+}
+
+.saved-meal__apply--ready:hover {
+  border-color: var(--gold);
+  background: var(--gold-dim);
 }
 
 .saved-meal {

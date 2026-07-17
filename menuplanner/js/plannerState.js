@@ -212,6 +212,8 @@ function applyPlannerState(saved) {
   }
   if (saved.foodBrowseMode === 'fruit') {
     state.foodBrowseMode = 'fruit';
+  } else if (saved.foodBrowseMode === 'meal') {
+    state.foodBrowseMode = 'meal';
   }
 }
 
