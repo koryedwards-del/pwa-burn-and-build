@@ -1105,10 +1105,58 @@ body {
   border-radius: 3px;
 }
 
+/* Phase B3 — narrow viewports: stack day / saved meals / foods */
+@media (max-width: 900px) {
+  .planner-frame {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .workspace {
+    flex: none;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    grid-auto-rows: auto;
+    align-content: start;
+    overflow: visible;
+    min-height: 0;
+  }
+
+  .workspace__col {
+    height: auto;
+    align-self: stretch;
+    min-height: 240px;
+  }
+
+  .workspace__col--day {
+    min-height: 300px;
+  }
+
+  .day-slots,
+  .saved-meals,
+  .food-stack {
+    min-height: 180px;
+    max-height: min(46vh, 400px);
+  }
+
+  .food-filters {
+    flex-wrap: wrap;
+  }
+}
+
 /* iPad / iOS Safari: nested flex scroll areas need a definite workspace height */
 @supports (-webkit-touch-callout: none) {
   .workspace {
     min-height: clamp(280px, 42vh, 640px);
+  }
+}
+
+@media (max-width: 900px) {
+  @supports (-webkit-touch-callout: none) {
+    .workspace {
+      min-height: 0;
+    }
   }
 }
 
