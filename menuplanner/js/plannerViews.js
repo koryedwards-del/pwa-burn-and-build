@@ -713,7 +713,7 @@ function renderSavedMealCard(meal) {
 }
 
 function savedMealsByPopularity() {
-  return [...savedMeals].sort((a, b) => b.pickCount - a.pickCount);
+  return [...state.savedMeals].sort((a, b) => b.pickCount - a.pickCount);
 }
 
 function deleteSavedMeal(mealId) {
@@ -839,8 +839,8 @@ function renderFoodStack() {
 
   if (!list.length) {
     const hint = state.foodSearchQuery.trim()
-      ? 'No state.foods match your search.'
-      : 'No state.foods in this category.';
+      ? 'No foods match your search.'
+      : 'No foods in this category.';
     container.innerHTML = `<p class="food-stack__hint">${hint}</p>`;
     return;
   }
