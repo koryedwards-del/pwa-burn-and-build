@@ -124,7 +124,8 @@ function buildWeekAgendaContent() {
   `;
 }
 
-const PRINT_LOGO_PATH = '../img/brand/bblogo-solid.png';
+/** Trimmed medallion asset — transparent outer corners for light/print backgrounds. */
+const PRINT_LOGO_PATH = '../img/brand/bblogo.png';
 
 function printLogoUrl() {
   return escapeHtml(new URL(PRINT_LOGO_PATH, window.location.href).href);
@@ -294,6 +295,7 @@ function buildPrintDocumentHtml(view = 'week') {
       width: 120px;
       height: auto;
       flex-shrink: 0;
+      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.12));
     }
     .assistant-doc-titles {
       text-align: left;
