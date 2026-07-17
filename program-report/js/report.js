@@ -19,12 +19,30 @@ import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeH
 import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js';
 import { bootProgramBridgeAside } from '../../js/programLibrary.js';
 import { bindProgramAccess, bootProgramAccess, openAccessGate } from '../../js/programAccess.js';
-import {
-  applyMenuPlannerProgram,
-  bootMenuPlannerPage,
-  persistMenuPlannerState,
-} from '../../menuplanner/js/planner.js';
 import { QUESTIONNAIRE_WELCOME_URL } from '../../js/siteUrls.js';
+
+const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || '1';
+
+let plannerModulePromise = null;
+
+function loadPlannerModule() {
+  if (!plannerModulePromise) {
+    plannerModulePromise = import(`../../menuplanner/js/planner.js?v=${ASSET_VERSION}`);
+  }
+  return plannerModulePromise;
+}
+
+async function bootMenuPlannerPage() {
+  return (await loadPlannerModule()).bootMenuPlannerPage();
+}
+
+async function applyMenuPlannerProgram(pkg) {
+  return (await loadPlannerModule()).applyMenuPlannerProgram(pkg);
+}
+
+async function persistMenuPlannerState() {
+  return (await loadPlannerModule()).persistMenuPlannerState();
+}
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */
 const PREVIEW_FORM = {
@@ -595,14 +613,14 @@ function launchApp() {
     getProgramPackage: () => programPackage,
     openAccessGate,
     beforeSwitch: async () => {
-      if (activePage === 3) persistMenuPlannerState();
+      if (activePage === 3) await persistMenuPlannerState();
     },
     onSwitch: async (pkg) => {
       programPackage = pkg;
       persistProgram(programPackage);
       renderNav();
       if (activePage === 3) {
-        applyMenuPlannerProgram(programPackage);
+        await applyMenuPlannerProgram(programPackage);
         syncPrintShopNavVisibility();
       } else {
         renderPage();

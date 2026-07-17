@@ -1,4 +1,4 @@
-import { ASSET_VERSION } from '../../js/assetVersion.js';
+import { ASSET_VERSION as FALLBACK_ASSET_VERSION } from '../../js/assetVersion.js';
 import { plannerStateFromPackage } from '../../js/menuPlannerState.js';
 import { setActiveProgramId } from '../../js/programActive.js';
 import {
@@ -18,6 +18,8 @@ import {
   initFoodSearch,
   initFoodDropTargets,
 } from './plannerViews.js';
+
+const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
 
 let plannerShellReady = false;
 let plannerBootPromise = null;
