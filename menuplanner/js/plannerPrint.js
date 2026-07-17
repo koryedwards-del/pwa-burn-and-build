@@ -66,7 +66,7 @@ function renderAgendaCell(foodLines) {
     return '<span class="agenda-cell-empty" aria-hidden="true">—</span>';
   }
   return `
-    <ul class="agenda-state.foods">
+    <ul class="agenda-foods">
       ${foodLines.map((line) => `
         <li>
           <span class="agenda-food">${escapeHtml(line.foodName)}</span>
@@ -511,17 +511,17 @@ function buildPrintDocumentHtml(view = 'week', logoDataUrl = '') {
       text-align: center;
       line-height: 1;
     }
-    .agenda-state.foods {
+    .agenda-foods {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
-    .agenda-state.foods li {
+    .agenda-foods li {
       display: flex;
-      flex-direction: column;
-      gap: 1px;
-      font-size: 0.72rem;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 0.62rem;
       line-height: 1.35;
     }
     .agenda-food {
@@ -530,8 +530,10 @@ function buildPrintDocumentHtml(view = 'week', logoDataUrl = '') {
     }
     .agenda-amount {
       font-weight: 700;
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       color: #111;
+      text-align: right;
+      flex-shrink: 0;
     }
     @media print {
       body { background: #fff; }

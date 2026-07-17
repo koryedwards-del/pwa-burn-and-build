@@ -496,12 +496,6 @@ function applyFruitToSnackCell(weekDay, mealSlotId, foodName) {
   persistPlannerToProgram();
 }
 
-function gridDropHint(mealSlotId) {
-  return isSnackMealSlot(mealSlotId)
-    ? 'Drag a saved snack or fruit onto this slot.'
-    : 'Drag a saved meal from Saved Meals onto this slot.';
-}
-
 function weekGridColumnLabel(mealSlotId) {
   const slot = DAY_SLOTS.find((item) => item.id === mealSlotId);
   if (!slot) return mealSlotId;
@@ -582,11 +576,10 @@ function initWeekGrid() {
     if (mealCell?.dataset.mealSlot) {
       const weekDay = mealCell.dataset.weekDay;
       const mealSlotId = mealCell.dataset.mealSlot;
-      if (gridCellHasAssignment(mealSlotId, weekDay)) {
+      if (gridCellHasAssignment(mealSlotId, weekDay) || isSnackMealSlot(mealSlotId)) {
         navigateToDayMealSlot(weekDay, mealSlotId);
       } else {
         setActiveWeekDay(weekDay);
-        showPlannerToast(gridDropHint(mealSlotId));
       }
       return;
     }
