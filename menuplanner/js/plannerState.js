@@ -156,6 +156,7 @@ function resetPlannerState() {
   state.activeWeekDay = todayWeekDayId();
   state.mealMakerDraft = createEmptyMealMakerDraft();
   state.activeMakerSlot = null;
+  state.activeMealSlot = null;
   state.foodBrowseMode = null;
   state.activeFoodCategory = null;
   state.weekGridCollapsed = false;
@@ -170,6 +171,7 @@ function collectPlannerState() {
     weekGridCollapsed: state.weekGridCollapsed,
     mealMakerDraft: state.mealMakerDraft,
     activeMakerSlot: state.activeMakerSlot,
+    activeMealSlot: state.activeMealSlot,
     foodBrowseMode: state.foodBrowseMode,
   };
 }
@@ -204,6 +206,9 @@ function applyPlannerState(saved) {
   }
   if (saved.activeMakerSlot && MEAL_MAKER_SLOTS.includes(saved.activeMakerSlot)) {
     state.activeMakerSlot = saved.activeMakerSlot;
+  }
+  if (saved.activeMealSlot && DAY_SLOTS.some((slot) => slot.id === saved.activeMealSlot)) {
+    state.activeMealSlot = saved.activeMealSlot;
   }
   if (saved.foodBrowseMode === 'fruit') {
     state.foodBrowseMode = 'fruit';
@@ -667,6 +672,7 @@ export const state = {
   mealSlotsById: {},
   mealMakerDraft: createEmptyMealMakerDraft(),
   activeMakerSlot: null,
+  activeMealSlot: null,
   foodBrowseMode: null,
   activeFoodCategory: null,
   foodSearchQuery: '',
