@@ -158,7 +158,6 @@ async function resumeDesktopCheckout(email) {
   persistProgramBridge(result.package);
   try {
     sessionStorage.setItem('bnb_creator_phase', 'plan-ready');
-    sessionStorage.setItem('bnb_browse_mode', '1');
   } catch (err) {
     console.error(err);
   }

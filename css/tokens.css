@@ -23,7 +23,7 @@
   --gray-muted: #888888;
   --gray-light: #D4D4D4;
 
-  /* App semantics (creator + myplan) */
+  /* App semantics (desktop web) */
   --bg: var(--black);
   --card: var(--gray);
   --border: var(--gray-mid);

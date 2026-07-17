@@ -3,25 +3,23 @@ description: Project map and hosting context
 alwaysApply: true
 ---
 
-# Burn & Build — one repo, separate products
+# Burn & Build — desktop web product
 
 Repo: **`pwa-burn-and-build`** (this workspace)
 
-**Keep top products separate.** Do not merge flows, copy, CTAs, or implementation between them unless the user explicitly asks.
-
 **Product name:** **Menu planner** (folder/URL alias: `menuplanner/` → redirects). Never use “meal planner” in user-facing copy or docs.
+
+**Site:** burnandbuilddiet.com — desktop browser only. No phone app in this funnel.
 
 ---
 
-## Product A — Desktop web app (active build)
-
-**Site:** burnandbuilddiet.com
+## Paths
 
 | Path | Role |
 |------|------|
 | `landing/` | Marketing → questionnaire |
-| `questionnaire/` | **Primary intake** → save plan → checkout handoff |
-| `createyourfoodplan/` | **Checkout paywall** (+ optional `?browse=1` accordion intake); Stripe return URL |
+| `questionnaire/` | **Intake** → save plan → checkout handoff |
+| `createyourfoodplan/` | **Checkout paywall** + Stripe return (no intake) |
 | `program-report/` | **Unified program shell** — Welcome, Projections, Plan/Servings, Menu planner |
 | `menuplanner/` | Redirect → `program-report/?page=menuplanner` |
 | `menuplanner/js/planner.js` | Menu planner facade (`plannerState`, `plannerViews`, `plannerPrint`) |
@@ -37,21 +35,9 @@ Landing → questionnaire → createyourfoodplan (paywall) → program-report (p
 **Return access:** `burnandbuilddiet.com/menuplanner/` or `program-report/?page=menuplanner` + email → unlock program.
 
 - Each new program = its own Stripe checkout (`programId`).
-- **End of desktop product** = Menu planner (page 4 inside program-report).
+- **End of product** = Menu planner (page 4 inside program-report).
 
 **Cache busting:** bump `ASSET_VERSION` in `js/assetVersion.js`; `scripts/build-pages.sh` stamps HTML `?v=` at deploy.
-
----
-
-## Product B — Phone PWA (separate; do not conflate)
-
-| Path | Role |
-|------|------|
-| `myplan/` | Phone daily app (PWA + `myplan/sw.js`) |
-| `js/shellApp.js` | Phone shell entry module |
-| Phone CSS | `css/home.css`, `plan.css`, `grocery.css`, `projections.css`, `previousPlans.css` |
-
-Not part of the desktop funnel or menu planner. Legacy `js/app.js`, `js/shell.js`, and root `sw.js` removed.
 
 ---
 
@@ -59,3 +45,4 @@ Not part of the desktop funnel or menu planner. Legacy `js/app.js`, `js/shell.js
 
 - **Signal+** — separate product.
 - **Deploy:** push `main` → `.github/workflows/deploy-landing.yml` → GitHub Pages (`scripts/build-pages.sh`).
+- Phone PWA (`myplan/`, `shellApp.js`) removed — desktop-only repo for this product.
