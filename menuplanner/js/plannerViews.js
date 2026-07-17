@@ -109,14 +109,11 @@ function saveMealFromMaker(name) {
   clearMealMakerDraft();
   state.activeMakerSlot = null;
   state.foodBrowseMode = null;
-  mealMakerWasSaveable = false;
   renderMealMaker();
   renderSavedMeals();
   refreshFoodsPanel();
   persistPlannerToProgram();
 }
-
-let mealMakerWasSaveable = false;
 
 function openSaveMealDialog() {
   const dialog = document.getElementById('save-meal-dialog');
@@ -338,12 +335,7 @@ function renderMealMaker() {
     });
   });
 
-  const saveable = isMealMakerSaveable();
   updateSaveMealTrigger();
-  if (saveable && !mealMakerWasSaveable) {
-    openSaveMealDialog();
-  }
-  mealMakerWasSaveable = saveable;
 }
 
 function clearMealMaker() {
@@ -351,7 +343,6 @@ function clearMealMaker() {
   state.activeMakerSlot = null;
   state.foodBrowseMode = null;
   state.activeFoodCategory = null;
-  mealMakerWasSaveable = false;
   renderMealMaker();
   refreshFoodsPanel();
 }
@@ -1061,8 +1052,8 @@ function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true 
 
   const gsItems = [];
   const vegetableItems = [];
+  const proteinItems = [];
   const fatItems = [];
-  let proteinSelection = null;
 
   meal.items.forEach((item) => {
     const slotKey = labelToSlot[item.slot];
@@ -1077,11 +1068,11 @@ function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true 
     } else if (slotKey === 'vegetable') {
       vegetableItems.push(entry);
     } else if (slotKey === 'protein') {
-      proteinSelection = entry;
+      proteinItems.push(entry);
     }
   });
 
-  categorySelections(mealSlotId, weekDay).protein = proteinSelection;
+  setSplitGridSelections(mealSlotId, 'protein', proteinItems, weekDay);
   setSplitGridSelections(mealSlotId, 'gs', gsItems, weekDay);
   setSplitGridSelections(mealSlotId, 'vegetable', vegetableItems, weekDay);
   setFatSelections(mealSlotId, fatItems, weekDay);

@@ -85,7 +85,7 @@ const WEEK_MEAL_EMPTY_LABEL = {
 
 function createEmptyMealMakerDraft() {
   return {
-    protein: null,
+    protein: [],
     gs: [],
     vegetable: [],
     fat: [],
@@ -100,7 +100,7 @@ function normalizeSelectionList(value) {
 }
 
 function isSplitServingsMakerSlot(categorySlot) {
-  return categorySlot === 'gs' || categorySlot === 'vegetable';
+  return categorySlot === 'protein' || categorySlot === 'gs' || categorySlot === 'vegetable';
 }
 
 function createEmptyDayState() {
@@ -204,7 +204,7 @@ function applyPlannerState(saved) {
     state.mealMakerDraft = {
       ...createEmptyMealMakerDraft(),
       ...saved.mealMakerDraft,
-      protein: saved.mealMakerDraft.protein?.foodName ? saved.mealMakerDraft.protein : null,
+      protein: normalizeSelectionList(saved.mealMakerDraft.protein),
       gs: normalizeSelectionList(saved.mealMakerDraft.gs),
       vegetable: normalizeSelectionList(saved.mealMakerDraft.vegetable),
       fat: Array.isArray(saved.mealMakerDraft.fat) ? saved.mealMakerDraft.fat : [],
@@ -362,19 +362,24 @@ function setMakerFatSelections(items) {
 
 function normalizeMealMakerDraft(draft = state.mealMakerDraft) {
   if (!draft || typeof draft !== 'object') return;
+  draft.protein = normalizeSelectionList(draft.protein);
   draft.gs = normalizeSelectionList(draft.gs);
   draft.vegetable = normalizeSelectionList(draft.vegetable);
   if (!Array.isArray(draft.fat)) draft.fat = [];
-  if (draft.protein && !draft.protein.foodName) draft.protein = null;
 }
 
 function getMakerSplitSelections(categorySlot) {
+  if (categorySlot === 'protein') return normalizeSelectionList(state.mealMakerDraft.protein);
   if (categorySlot === 'gs') return normalizeSelectionList(state.mealMakerDraft.gs);
   if (categorySlot === 'vegetable') return normalizeSelectionList(state.mealMakerDraft.vegetable);
   return [];
 }
 
 function setMakerSplitSelections(categorySlot, items) {
+  if (categorySlot === 'protein') {
+    state.mealMakerDraft.protein = items;
+    return;
+  }
   if (categorySlot === 'gs') {
     state.mealMakerDraft.gs = items;
     return;
