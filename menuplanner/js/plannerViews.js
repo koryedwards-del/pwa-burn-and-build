@@ -33,6 +33,8 @@ import {
   acceptsSavedMealDrop,
   isDaySlotSaveable,
   isAssignedMeal,
+  isSnackMealSlot,
+  gridCellHasAssignment,
   savedMealFitsMealSlot,
   showSaveMealButton,
   clearDaySlotMeta,
@@ -466,7 +468,38 @@ function weekMealLabel(weekDay, mealSlotId) {
     return { text, fullText, empty: false };
   }
 
+  if (isFruitOnlySnack(mealSlotId, weekDay)) {
+    const fruitName = categorySelections(mealSlotId, weekDay).fruit.foodName;
+    const text = fitWeekGridLabel(fruitName);
+    return { text, fullText: fruitName, empty: false };
+  }
+
   return { text: WEEK_MEAL_EMPTY_LABEL[mealSlotId], empty: true };
+}
+
+function applyFruitToSnackCell(weekDay, mealSlotId, foodName) {
+  if (!isSnackMealSlot(mealSlotId)) return;
+  const food = state.foods.find((item) => item.name === foodName);
+  if (!food || food.category !== 'fruit') return;
+
+  templateSlots('snack').forEach((slotKey) => {
+    categorySelections(mealSlotId, weekDay)[slotKey] = null;
+  });
+  setFatSelections(mealSlotId, [], weekDay);
+  clearDaySlotMeta(mealSlotId, weekDay);
+  categorySelections(mealSlotId, weekDay).fruit = {
+    foodName,
+    servings: requiredServings(mealSlotId, 'fruit'),
+  };
+  renderWeekGrid();
+  if (weekDay === state.activeWeekDay) renderDayColumn();
+  persistPlannerToProgram();
+}
+
+function gridDropHint(mealSlotId) {
+  return isSnackMealSlot(mealSlotId)
+    ? 'Drag a saved snack or fruit onto this slot.'
+    : 'Drag a saved meal from Saved Meals onto this slot.';
 }
 
 function weekGridColumnLabel(mealSlotId) {
@@ -549,11 +582,11 @@ function initWeekGrid() {
     if (mealCell?.dataset.mealSlot) {
       const weekDay = mealCell.dataset.weekDay;
       const mealSlotId = mealCell.dataset.mealSlot;
-      if (isAssignedMeal(mealSlotId, weekDay)) {
+      if (gridCellHasAssignment(mealSlotId, weekDay)) {
         navigateToDayMealSlot(weekDay, mealSlotId);
       } else {
         setActiveWeekDay(weekDay);
-        showPlannerToast('Drag a saved meal from Saved Meals onto this slot.');
+        showPlannerToast(gridDropHint(mealSlotId));
       }
       return;
     }
@@ -581,6 +614,22 @@ function initWeekGrid() {
     if (!cell) return;
     event.preventDefault();
     cell.classList.remove('drop-zone--over');
+
+    const foodName = event.dataTransfer.getData('application/x-food-name');
+    if (foodName) {
+      if (!isSnackMealSlot(cell.dataset.mealSlot)) {
+        showPlannerToast('Drag fruit onto snack slots only.', { variant: 'error' });
+        return;
+      }
+      const food = state.foods.find((item) => item.name === foodName);
+      if (!food || food.category !== 'fruit') {
+        showPlannerToast('Only fruit can be dropped on snack slots.', { variant: 'error' });
+        return;
+      }
+      applyFruitToSnackCell(cell.dataset.weekDay, cell.dataset.mealSlot, foodName);
+      navigateToDayMealSlot(cell.dataset.weekDay, cell.dataset.mealSlot);
+      return;
+    }
 
     const mealId = event.dataTransfer.getData('application/x-meal-id');
     if (!mealId) return;
@@ -760,7 +809,7 @@ function renderSavedMeals() {
   const meals = savedMealsByPopularity();
   container.innerHTML = meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
-    : '<p class="saved-meals__hint">Build a complete meal in the day column, save it here, then drag it onto the week grid. Tap to add to the active day.</p>';
+    : '<p class="saved-meals__hint">Build a complete meal in the day column and save it here, then drag onto breakfast, lunch, or dinner. Drag saved snacks or fruit onto snack slots.</p>';
 
   document.querySelectorAll('[data-meal-apply]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -890,10 +939,6 @@ function initFoodStackInteractions() {
     let dragged = false;
 
     card.addEventListener('dragstart', (event) => {
-      if (!state.activeSlot) {
-        event.preventDefault();
-        return;
-      }
       dragged = true;
       event.dataTransfer.effectAllowed = 'copy';
       event.dataTransfer.setData('application/x-food-name', card.dataset.foodName);

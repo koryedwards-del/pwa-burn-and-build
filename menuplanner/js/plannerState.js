@@ -312,6 +312,17 @@ function isAssignedMeal(mealSlotId, weekDay = state.activeWeekDay) {
   return !!(meta.savedMealId && meta.mealName);
 }
 
+function isSnackMealSlot(mealSlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
+  return daySlot?.template === 'snack';
+}
+
+/** Grid shows saved meal name or quick-assigned snack fruit. */
+function gridCellHasAssignment(mealSlotId, weekDay = state.activeWeekDay) {
+  if (isAssignedMeal(mealSlotId, weekDay)) return true;
+  return isFruitOnlySnack(mealSlotId, weekDay);
+}
+
 const SAVED_MEAL_SLOT_LABELS = {
   Protein: 'protein',
   'Grains/Starches': 'gs',
@@ -555,6 +566,8 @@ export {
   isFruitOnlySnack,
   acceptsSavedMealDrop,
   isAssignedMeal,
+  isSnackMealSlot,
+  gridCellHasAssignment,
   savedMealFitsMealSlot,
   isDaySlotSaveable,
   showSaveMealButton,
