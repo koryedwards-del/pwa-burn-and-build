@@ -28,7 +28,7 @@ const FOOD_CATEGORIES = [
 ];
 
 const SLOT_META = {
-  protein: { label: 'Protein', categories: ['protein'] },
+  protein: { label: 'Protein', categories: ['protein', 'dairy'] },
   gs: { label: 'Grains/Starches', categories: ['grain', 'starch'] },
   vegetable: { label: 'Veggie', categories: ['vegetable'], optional: true },
   fat: { label: 'Fat Points', categories: ['fat', 'sugar', 'alcohol'], optional: true },
