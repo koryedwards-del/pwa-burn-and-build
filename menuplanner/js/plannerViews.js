@@ -382,44 +382,33 @@ function setWeekGridCollapsed(collapsed, { persist = true } = {}) {
   if (title) {
     title.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
     title.setAttribute('aria-label', collapsed ? 'Show week grid' : 'Hide week grid');
-    const icon = title.querySelector('[data-week-toggle-icon]');
-    if (icon) icon.textContent = collapsed ? '▸' : '▾';
   }
   if (persist) persistPlannerToProgram();
 }
 
-function toggleWeekGridCollapsed() {
-  setWeekGridCollapsed(!state.weekGridCollapsed);
-}
-
-function isWeekGridCollapseTap(event) {
-  const grid = document.getElementById('week-grid');
-  if (!grid || !grid.contains(event.target)) return false;
-  if (event.target.closest('[data-meal-slot], .week-matrix__day[data-week-day-select], #clear-week-menu')) {
-    return false;
-  }
-  return true;
-}
-
 function initWeekGridCollapse() {
   const panel = document.getElementById('week-panel');
-  const title = document.getElementById('week-grid-toggle');
   const grid = document.getElementById('week-grid');
-  if (!panel || !title || !grid || panel.dataset.weekCollapseInit) return;
+  if (!panel || !grid || panel.dataset.weekCollapseInit) return;
   panel.dataset.weekCollapseInit = '1';
   setWeekGridCollapsed(state.weekGridCollapsed, { persist: false });
-  title.addEventListener('click', toggleWeekGridCollapsed);
   grid.addEventListener('click', (event) => {
-    if (!isWeekGridCollapseTap(event)) return;
-    toggleWeekGridCollapsed();
+    if (state.weekGridCollapsed) {
+      setWeekGridCollapsed(false);
+      return;
+    }
+    if (event.target.closest('[data-meal-slot], .week-matrix__day[data-week-day-select], #clear-week-menu, .week-panel__actions')) {
+      return;
+    }
+    setWeekGridCollapsed(true);
   });
 }
 
 let weekGridLabelProbe = null;
 
 function weekGridLabelReferenceCell() {
-  return document.querySelector('#week-grid .week-matrix__cell.mini-card[data-meal-slot="breakfast"]')
-    || document.querySelector('#week-grid .week-matrix__cell.mini-card[data-meal-slot]');
+  return document.querySelector('#week-grid-matrix .week-matrix__cell.mini-card[data-meal-slot="breakfast"]')
+    || document.querySelector('#week-grid-matrix .week-matrix__cell.mini-card[data-meal-slot]');
 }
 
 function ensureWeekGridLabelProbe() {
@@ -552,7 +541,7 @@ function weekGridColumnLabel(mealSlotId) {
 }
 
 function renderWeekGrid() {
-  const container = document.getElementById('week-grid');
+  const container = document.getElementById('week-grid-matrix');
   if (!container) return;
   const headCells = WEEK_GRID_MEALS.map((mealSlotId) => `
     <div class="week-matrix__col-head">${escapeHtml(weekGridColumnLabel(mealSlotId))}</div>
@@ -601,7 +590,7 @@ function renderWeekGrid() {
 }
 
 function syncWeekGridSelectionClasses() {
-  const root = document.getElementById('week-grid');
+  const root = document.getElementById('week-grid-matrix');
   if (!root) return;
   root.querySelectorAll('button[data-meal-slot]').forEach((cell) => {
     const selected = !!state.activeMealSlot
@@ -613,7 +602,7 @@ function syncWeekGridSelectionClasses() {
 }
 
 function bindWeekGridCellInteractions() {
-  const root = document.getElementById('week-grid');
+  const root = document.getElementById('week-grid-matrix');
   if (!root) return;
   root.querySelectorAll('button[data-meal-slot]').forEach((cell) => {
     if (cell.dataset.gridCellBound) return;
@@ -665,7 +654,7 @@ function initWeekGrid() {
   panel.dataset.weekInit = '1';
 
   panel.addEventListener('click', (event) => {
-    if (event.target.closest('#clear-week-menu, #week-grid-toggle')) return;
+    if (event.target.closest('#clear-week-menu')) return;
     const dayCell = event.target.closest('.week-matrix__day[data-week-day-select]');
     if (dayCell) {
       setActiveWeekDay(dayCell.dataset.weekDay);

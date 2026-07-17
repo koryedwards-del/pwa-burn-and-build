@@ -112,24 +112,24 @@
 
           <main class="planner-frame">
             <div class="week-panel" id="week-panel">
-              <div class="week-panel__header">
-                <div class="week-panel__title-row">
+              <section class="week-grid" id="week-grid" aria-label="Week plan">
+                <div class="week-grid__bar">
                   <button
                     type="button"
-                    class="week-panel__title"
+                    class="week-grid__toggle"
                     id="week-grid-toggle"
                     aria-expanded="true"
-                    aria-controls="week-grid"
+                    aria-controls="week-grid-matrix"
                   >
-                    <span class="week-panel__title-icon" data-week-toggle-icon aria-hidden="true">▾</span>
                     <span class="col-heading col-heading--week">Plan your week</span>
+                    <span class="week-grid__hint">Tap to open</span>
                   </button>
+                  <div class="week-panel__actions">
+                    <div class="planner-toast-host" id="planner-toast-host" aria-live="polite" role="status"></div>
+                  </div>
                 </div>
-                <div class="week-panel__actions">
-                  <div class="planner-toast-host" id="planner-toast-host" aria-live="polite" role="status"></div>
-                </div>
-              </div>
-              <section class="week-grid" id="week-grid" aria-label="Week"></section>
+                <div class="week-grid__matrix" id="week-grid-matrix"></div>
+              </section>
             </div>
 
             <section class="workspace" aria-label="Planner workspace">
