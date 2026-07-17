@@ -44,7 +44,6 @@ const PREVIEW_FORM = {
   fatBurningHours: 3,
   wakeTime: '06:00',
   newsletterOptIn: false,
-  lowActivities: [],
 };
 
 const PAGES = PROGRAM_BRIDGE_PAGES;

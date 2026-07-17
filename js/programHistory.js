@@ -6,7 +6,6 @@ import {
   activityHoursReviewLabel,
   WORK_PHYSICAL,
   WORK_STRESS,
-  LOW_ACTIVITIES,
 } from './onboardingEngine.js';
 import { localDateKey } from './programPackage.js';
 
@@ -71,9 +70,6 @@ export function programHistoryFieldRows(pkg) {
   const fatLbs = weight > 0 && lbm >= 0 ? weight - lbm : 0;
   const phys = WORK_PHYSICAL.find((w) => w.id === intake.workPhysical);
   const stress = WORK_STRESS.find((w) => w.id === intake.workStress);
-  const lowLabels = (intake.lowActivities || [])
-    .map((id) => LOW_ACTIVITIES.find((a) => a.id === id)?.label)
-    .filter(Boolean);
   const wakeTime = intake.wakeTime || intake.defaultWakeTime;
 
   const rows = [
@@ -99,10 +95,6 @@ export function programHistoryFieldRows(pkg) {
       historyField('Fat burning', activityHoursReviewLabel(intake.fatBurningHours, 20)),
     ],
   ];
-
-  if (lowLabels.length) {
-    rows.push([historyField('Other activities', lowLabels.join(', '))]);
-  }
 
   return rows;
 }

@@ -11,15 +11,6 @@ export const WORK_STRESS = [
   { id: 'stressful', label: 'Stressful', sub: 'High pressure. You come home drained.' },
 ];
 
-export const LOW_ACTIVITIES = [
-  { id: 'dog', icon: '🐕', label: 'Walking the dog' },
-  { id: 'house', icon: '🏠', label: 'Housework & chores' },
-  { id: 'garden', icon: '🌱', label: 'Gardening & yard work' },
-  { id: 'kids', icon: '👶', label: 'Chasing kids around' },
-  { id: 'walk', icon: '🚶', label: 'Walking for exercise' },
-  { id: 'yoga', icon: '🧘', label: 'Yoga or stretching' },
-];
-
 function computeWorkIntensity(physical, stress) {
   if (!physical || !stress) return 2.0;
   const map = {
@@ -158,6 +149,5 @@ export function profileFromForm(form) {
     fatBurningHours: parseActivityHours(form.fatBurningHours, 20) ?? 0,
     wakeTime: form.wakeTime,
     newsletterOptIn: !!form.newsletterOptIn,
-    lowActivities: form.lowActivities || [],
   };
 }

@@ -40,7 +40,6 @@ const KRISTI_FORM = {
   fatBurningHours: 3,
   wakeTime: '06:00',
   newsletterOptIn: false,
-  lowActivities: [],
 };
 
 const KRISTI_PDF = {
