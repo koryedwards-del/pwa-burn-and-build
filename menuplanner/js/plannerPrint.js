@@ -1,4 +1,3 @@
-import { ASSET_VERSION as FALLBACK_ASSET_VERSION } from '../../js/assetVersion.js';
 import {
   formatPrintDateTime,
   programClientName,
@@ -125,21 +124,21 @@ function buildWeekAgendaContent() {
   `;
 }
 
-const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
-
-function printLogoUrl() {
-  const url = new URL('../../img/brand/bblogo.png', import.meta.url);
-  url.searchParams.set('v', ASSET_VERSION);
-  return escapeHtml(url.href);
+function printBrandSealHtml() {
+  return `
+    <div class="assistant-brand-seal" aria-hidden="true">
+      <span class="assistant-brand-seal__burn">Burn</span>
+      <span class="assistant-brand-seal__build">&amp; Build</span>
+    </div>
+  `;
 }
 
 function buildWeekPlanReportHeaderHtml() {
   const name = escapeHtml(programClientName(state.programPackage));
   const date = escapeHtml(formatPrintDateTime(new Date()));
-  const logoUrl = printLogoUrl();
   return `
     <header class="assistant-doc-header assistant-doc-header--report">
-      <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="72" height="72" />
+      ${printBrandSealHtml()}
       <div class="assistant-doc-titles">
         <p class="assistant-doc-eyebrow">Personalized nutrition plan for</p>
         <h1 class="assistant-doc-name">${name}</h1>
@@ -202,10 +201,9 @@ function buildShoppingListContent() {
 function buildAssistantHeaderHtml(title) {
   const name = escapeHtml(programClientName(state.programPackage));
   const date = escapeHtml(formatPrintDateTime(new Date()));
-  const logoUrl = printLogoUrl();
   return `
     <header class="assistant-doc-header">
-      <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="72" height="72" />
+      ${printBrandSealHtml()}
       <div class="assistant-doc-titles">
         <p class="assistant-doc-brand">Burn &amp; Build Diet</p>
         <h1 class="assistant-doc-title">${escapeHtml(title)}</h1>
@@ -289,11 +287,28 @@ function buildPrintDocumentHtml(view = 'week') {
       align-items: flex-start;
       margin-bottom: 24px;
     }
-    .assistant-logo {
-      display: block;
-      width: 72px;
-      height: auto;
+    .assistant-brand-seal {
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 64px;
+      padding: 8px 12px 8px 10px;
+      border-left: 3px solid #fdc500;
+      font-family: Oswald, system-ui, sans-serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1.05;
+    }
+    .assistant-brand-seal__burn {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #c9a000;
+    }
+    .assistant-brand-seal__build {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #666;
     }
     .assistant-doc-titles {
       text-align: left;
@@ -537,9 +552,6 @@ function buildPrintDocumentHtml(view = 'week') {
       .assistant-doc-header {
         margin-bottom: 20px;
         padding-bottom: 16px;
-      }
-      .assistant-logo {
-        width: 64px;
       }
       .assistant-doc-name {
         font-size: 1.85rem;
