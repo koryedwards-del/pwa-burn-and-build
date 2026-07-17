@@ -183,7 +183,27 @@ function collectPlannerState() {
   };
 }
 
-function applyPlannerState(saved) {
+function restoreSessionGridUi(sessionUi) {
+  if (!sessionUi) return;
+  if (sessionUi.activeWeekDay && WEEK_DAYS.some((day) => day.id === sessionUi.activeWeekDay)) {
+    state.activeWeekDay = sessionUi.activeWeekDay;
+  }
+  if (sessionUi.activeMealSlot && DAY_SLOTS.some((slot) => slot.id === sessionUi.activeMealSlot)) {
+    state.activeMealSlot = sessionUi.activeMealSlot;
+  }
+  if (sessionUi.foodBrowseMode === 'fruit' || sessionUi.foodBrowseMode === 'meal') {
+    state.foodBrowseMode = sessionUi.foodBrowseMode;
+  }
+}
+
+function applyPlannerState(saved, { preserveSessionUi = false } = {}) {
+  const sessionUi = preserveSessionUi
+    ? {
+      activeWeekDay: state.activeWeekDay,
+      activeMealSlot: state.activeMealSlot,
+      foodBrowseMode: state.foodBrowseMode,
+    }
+    : null;
   resetPlannerState();
   if (!saved || typeof saved !== 'object') return;
   if (saved.weekPlan && typeof saved.weekPlan === 'object') {
@@ -214,7 +234,8 @@ function applyPlannerState(saved) {
   if (saved.activeMakerSlot && MEAL_MAKER_SLOTS.includes(saved.activeMakerSlot)) {
     state.activeMakerSlot = saved.activeMakerSlot;
   }
-  // activeMealSlot and foodBrowseMode are session-only — dashed selection shows after tap.
+  restoreSessionGridUi(sessionUi);
+  // On cold load, sessionUi is null — dashed selection appears only after a grid tap.
 }
 
 function persistPlannerToProgram({ immediate = false } = {}) {

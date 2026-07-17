@@ -27,7 +27,9 @@ function applyProgramPackage(pkg) {
   if (state.programPackage?.program?.id) {
     setActiveProgramId(state.programPackage.program.id);
   }
-  applyPlannerState(plannerStateFromPackage(state.programPackage));
+  applyPlannerState(plannerStateFromPackage(state.programPackage), {
+    preserveSessionUi: plannerShellReady,
+  });
   normalizeMealMakerDraft();
   initMealSlotsFromProgram(state.programPackage);
   if (!views) return;
