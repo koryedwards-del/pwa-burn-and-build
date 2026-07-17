@@ -14,24 +14,19 @@ export function renderHistoryCardRows(fieldRows = []) {
     </div>`;
 }
 
-export function renderSidebarProgramCard(row, { isActive = false, isOpening = false, isCollapsed = true } = {}) {
+export function renderSidebarProgramCard(row, { isActive = false, isOpening = false } = {}) {
+  const aria = isActive ? ' aria-current="true"' : '';
   return `
-    <div
-      class="pb-program-card${isActive ? ' is-active' : ''}${isOpening ? ' is-opening' : ''}${isCollapsed ? ' is-collapsed' : ''}"
-      data-program-card="${row.id}"
-    >
+    <li class="pb-nav__item">
       <button
         type="button"
-        class="pb-nav__btn pb-program-card__top${isActive ? ' is-active' : ''}${isOpening ? ' is-opening' : ''}"
-        data-toggle-program-card="${row.id}"
-        aria-expanded="${isCollapsed ? 'false' : 'true'}"
-        aria-label="${isCollapsed ? 'Show diet details' : 'Hide diet details'}"
+        class="pb-nav__btn pb-nav__btn--aux${isOpening ? ' is-opening' : ''}"
+        data-switch-program="${row.id}"
+        aria-label="Switch to diet from ${row.testDateDisplay}${isActive ? ' (active)' : ''}"${aria}
+        ${isActive ? ' disabled' : ''}
       >
-        <span class="pb-program-card__date">${row.testDateDisplay}</span>
-        ${isActive ? '<span class="pb-program-card__tag">Active</span>' : ''}
+        <span class="pb-nav__btn-line">${row.testDateDisplay}</span>
+        ${isActive ? '<span class="pb-nav__btn-sub">Active</span>' : ''}
       </button>
-      <div class="pb-program-card__body" data-switch-program="${row.id}">
-        ${renderHistoryCardRows(row.fieldRows)}
-      </div>
-    </div>`;
+    </li>`;
 }

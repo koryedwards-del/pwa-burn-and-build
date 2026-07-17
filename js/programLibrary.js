@@ -45,7 +45,6 @@ let openingProgramId = null;
 let switchHandler = null;
 let beforeSwitchHandler = null;
 let getProgramPackageHandler = null;
-const expandedProgramCards = new Set();
 const LIBRARY_CACHE_KEY = 'bnb_sidebar_library';
 let lastRenderedSignature = '';
 
@@ -75,51 +74,25 @@ function rowsSignature(rows, activeId) {
   return `${activeId || ''}:${openingProgramId || ''}:${rows.map((row) => row.id).join(',')}`;
 }
 
-function isProgramCardCollapsed(programId) {
-  return !expandedProgramCards.has(programId);
-}
-
-function setProgramCardCollapsed(programId, collapsed) {
-  if (!programId) return;
-  if (collapsed) expandedProgramCards.delete(programId);
-  else expandedProgramCards.add(programId);
-}
-
-function toggleProgramCard(card) {
-  const programId = card?.getAttribute('data-program-card');
-  if (!programId || !card) return;
-  const collapsed = card.classList.toggle('is-collapsed');
-  setProgramCardCollapsed(programId, !collapsed);
-  const top = card.querySelector('[data-toggle-program-card]');
-  if (top) {
-    top.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-    top.setAttribute('aria-label', collapsed ? 'Show diet details' : 'Hide diet details');
-  }
-}
-
 function bindLibraryEvents() {
   const library = libraryEl();
   if (!library || library.dataset.bound === '1') return;
   library.dataset.bound = '1';
 
   library.addEventListener('click', (event) => {
-    const top = event.target.closest('[data-toggle-program-card]');
-    if (top) {
-      event.preventDefault();
-      const card = top.closest('[data-program-card]');
-      if (!card) return;
-      toggleProgramCard(card);
-      return;
-    }
-
-    const body = event.target.closest('.pb-program-card__body[data-switch-program]');
-    if (!body) return;
-    const card = body.closest('[data-program-card]');
-    if (!card || card.classList.contains('is-active') || card.classList.contains('is-collapsed')) return;
-    const programId = body.getAttribute('data-switch-program');
+    const switchBtn = event.target.closest('[data-switch-program]');
+    if (!switchBtn || switchBtn.disabled) return;
+    const programId = switchBtn.getAttribute('data-switch-program');
     if (!programId) return;
     switchProgram(programId).catch((err) => console.error(err));
   });
+}
+
+function libraryHeadHtml() {
+  return `
+    <li class="pb-nav__item">
+      <span class="pb-nav__btn pb-nav__btn--static">Your diet plans</span>
+    </li>`;
 }
 
 function renderLibraryRows(rows, activeId) {
@@ -136,21 +109,22 @@ function renderLibraryRows(rows, activeId) {
   if (!rows.length) {
     library.hidden = false;
     library.innerHTML = `
-      <p class="pb-nav__section-label">Your diet plans</p>
+      <ol class="pb-nav__list pb-program-list">
+        ${libraryHeadHtml()}
+      </ol>
       <p class="pb-nav__section-empty">No purchased plans yet.</p>`;
     return;
   }
 
   library.hidden = false;
   library.innerHTML = `
-    <p class="pb-nav__section-label">Your diet plans</p>
-    <div class="pb-program-list">
+    <ol class="pb-nav__list pb-program-list">
+      ${libraryHeadHtml()}
       ${rows.map((row) => renderSidebarProgramCard(row, {
         isActive: row.id === activeId,
         isOpening: row.id === openingProgramId,
-        isCollapsed: isProgramCardCollapsed(row.id),
       })).join('')}
-    </div>`;
+    </ol>`;
 }
 
 export async function refreshProgramLibrary({
@@ -176,10 +150,12 @@ export async function refreshProgramLibrary({
   if (!result.ok) {
     const library = libraryEl();
     if (library) {
-      if (!library.querySelector('.pb-program-list, .pb-program-card')) {
+      if (!library.querySelector('.pb-program-list')) {
         library.hidden = false;
         library.innerHTML = `
-          <p class="pb-nav__section-label">Your diet plans</p>
+          <ol class="pb-nav__list pb-program-list">
+            ${libraryHeadHtml()}
+          </ol>
           <p class="pb-nav__section-error">${result.message || 'Could not load your plans.'}</p>`;
       }
     }
