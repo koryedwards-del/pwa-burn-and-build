@@ -40,6 +40,14 @@ async function applyMenuPlannerProgram(pkg) {
   return (await loadPlannerModule()).applyMenuPlannerProgram(pkg);
 }
 
+async function refreshMenuPlannerDisplay() {
+  return (await loadPlannerModule()).refreshMenuPlannerDisplay();
+}
+
+async function isMenuPlannerHydrated() {
+  return (await loadPlannerModule()).isMenuPlannerHydrated();
+}
+
 async function persistMenuPlannerState() {
   return (await loadPlannerModule()).persistMenuPlannerState();
 }
@@ -544,7 +552,13 @@ function renderPage() {
     main.innerHTML = '';
     plannerPage.hidden = false;
     bootMenuPlannerPage()
-      .then(() => applyMenuPlannerProgram(programPackage))
+      .then(async () => {
+        if (await isMenuPlannerHydrated()) {
+          await refreshMenuPlannerDisplay();
+          return;
+        }
+        await applyMenuPlannerProgram(programPackage);
+      })
       .catch((err) => {
         console.error('Menu planner failed to load:', err);
         applyMenuPlannerProgram(programPackage).catch((applyErr) => {

@@ -329,16 +329,6 @@ body {
   min-width: 0;
 }
 
-.week-matrix__cell--selected {
-  border-style: dashed;
-  border-color: var(--gold-muted);
-  background: var(--gold-select-bg);
-}
-
-.mini-card.week-matrix__cell--selected.mini-card--empty {
-  color: var(--muted);
-}
-
 button.mini-card.week-matrix__cell {
   display: block;
   width: 100%;
@@ -359,7 +349,7 @@ button.mini-card.week-matrix__cell {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
-  transition: background 0.15s ease, border-color 0.2s ease;
+  transition: background 0.15s ease, border-color 0.2s ease, outline-color 0.2s ease;
   cursor: pointer;
 }
 
@@ -371,6 +361,20 @@ button.mini-card.week-matrix__cell {
 .mini-card--empty {
   color: var(--muted);
   border-style: dashed;
+}
+
+button.mini-card.week-matrix__cell.week-matrix__cell--selected {
+  position: relative;
+  z-index: 1;
+  border-style: dashed;
+  border-color: var(--gold);
+  background: rgba(253, 197, 0, 0.1);
+  outline: 2px dashed rgba(253, 197, 0, 0.55);
+  outline-offset: -2px;
+}
+
+button.mini-card.week-matrix__cell.mini-card--empty.week-matrix__cell--selected {
+  color: var(--muted);
 }
 
 /* Workspace */

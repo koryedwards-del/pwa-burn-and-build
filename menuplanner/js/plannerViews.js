@@ -596,11 +596,36 @@ function renderWeekGrid() {
       ${bodyRows}
     </div>
   `;
+  bindWeekGridCellInteractions();
+  syncWeekGridSelectionClasses();
+}
+
+function syncWeekGridSelectionClasses() {
+  const root = document.getElementById('week-grid');
+  if (!root) return;
+  root.querySelectorAll('button[data-meal-slot]').forEach((cell) => {
+    const selected = !!state.activeMealSlot
+      && cell.dataset.weekDay === state.activeWeekDay
+      && cell.dataset.mealSlot === state.activeMealSlot;
+    cell.classList.toggle('week-matrix__cell--selected', selected);
+    cell.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
+}
+
+function bindWeekGridCellInteractions() {
+  const root = document.getElementById('week-grid');
+  if (!root) return;
+  root.querySelectorAll('button[data-meal-slot]').forEach((cell) => {
+    if (cell.dataset.gridCellBound) return;
+    cell.dataset.gridCellBound = '1';
+    cell.addEventListener('click', () => {
+      selectGridCell(cell.dataset.weekDay, cell.dataset.mealSlot);
+    });
+  });
 }
 
 function selectGridCell(weekDay, mealSlotId) {
   const dayChanged = weekDay !== state.activeWeekDay;
-  const slotChanged = mealSlotId !== state.activeMealSlot;
   state.activeWeekDay = weekDay;
   state.activeMealSlot = mealSlotId;
 
@@ -621,7 +646,7 @@ function selectGridCell(weekDay, mealSlotId) {
   renderWeekGrid();
   renderSavedMeals();
   refreshFoodsPanel();
-  if (dayChanged || slotChanged) persistPlannerToProgram();
+  if (dayChanged) persistPlannerToProgram();
 }
 
 function setActiveWeekDay(weekDay) {
@@ -641,11 +666,6 @@ function initWeekGrid() {
 
   panel.addEventListener('click', (event) => {
     if (event.target.closest('#clear-week-menu, #week-grid-toggle')) return;
-    const mealCell = event.target.closest('[data-meal-slot]');
-    if (mealCell?.dataset.mealSlot) {
-      selectGridCell(mealCell.dataset.weekDay, mealCell.dataset.mealSlot);
-      return;
-    }
     const dayCell = event.target.closest('.week-matrix__day[data-week-day-select]');
     if (dayCell) {
       setActiveWeekDay(dayCell.dataset.weekDay);

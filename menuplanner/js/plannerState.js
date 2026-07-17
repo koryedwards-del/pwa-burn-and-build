@@ -178,8 +178,6 @@ function collectPlannerState() {
     weekGridCollapsed: state.weekGridCollapsed,
     mealMakerDraft: state.mealMakerDraft,
     activeMakerSlot: state.activeMakerSlot,
-    activeMealSlot: state.activeMealSlot,
-    foodBrowseMode: state.foodBrowseMode,
   };
 }
 

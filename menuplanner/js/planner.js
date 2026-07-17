@@ -43,6 +43,16 @@ export function applyMenuPlannerProgram(pkg) {
   applyProgramPackage(pkg);
 }
 
+export function refreshMenuPlannerDisplay() {
+  if (!views || !plannerShellReady) return;
+  views.renderPlannerMeta();
+  views.renderPlannerWorkspace();
+}
+
+export function isMenuPlannerHydrated() {
+  return plannerShellReady && Boolean(state.programPackage?.program?.id);
+}
+
 export function persistMenuPlannerState() {
   persistPlannerToProgram({ immediate: true });
 }
