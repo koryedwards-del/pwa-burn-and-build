@@ -55,7 +55,7 @@ const TEMPLATE_SLOTS = {
   snack: ['fruit'],
 };
 
-const MEAL_MAKER_SLOTS = TEMPLATE_SLOTS.meal;
+const MEAL_MAKER_SLOTS = ['protein', 'gs', 'vegetable'];
 const MEAL_REFERENCE_SLOT = 'breakfast';
 
 
