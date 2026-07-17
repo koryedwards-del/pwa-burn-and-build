@@ -151,6 +151,7 @@ function applyPlannerState(saved) {
   }
   if (Array.isArray(saved.savedMeals)) {
     state.savedMeals = saved.savedMeals;
+    dedupeSavedMeals();
   }
   if (saved.activeWeekDay && WEEK_DAYS.some((day) => day.id === saved.activeWeekDay)) {
     state.activeWeekDay = saved.activeWeekDay;
@@ -353,7 +354,7 @@ function isDaySlotSaveable(mealSlotId, weekDay = state.activeWeekDay) {
 }
 
 function showSaveMealButton(mealSlotId) {
-  return isDaySlotSaveable(mealSlotId) && !mealSlotMeta(mealSlotId).savedMealId;
+  return isDaySlotSaveable(mealSlotId);
 }
 
 function clearDaySlotMeta(mealSlotId, weekDay = state.activeWeekDay) {
@@ -396,6 +397,51 @@ function mealIdFromName(name) {
     suffix += 1;
   }
   return id;
+}
+
+function normalizedMealName(name) {
+  return String(name || '').trim().toLowerCase();
+}
+
+function findSavedMealByName(name) {
+  const key = normalizedMealName(name);
+  if (!key) return null;
+  return state.savedMeals.find((meal) => normalizedMealName(meal.name) === key) || null;
+}
+
+/** One library entry per meal name; remap grid slots from removed duplicates. */
+function dedupeSavedMeals() {
+  if (!Array.isArray(state.savedMeals) || state.savedMeals.length < 2) return;
+
+  const keptByName = new Map();
+  const idRemap = new Map();
+
+  state.savedMeals.forEach((meal) => {
+    const key = normalizedMealName(meal.name);
+    if (!key) return;
+    const kept = keptByName.get(key);
+    if (!kept) {
+      keptByName.set(key, meal);
+      return;
+    }
+    idRemap.set(meal.id, kept.id);
+    kept.pickCount = Math.max(kept.pickCount || 0, meal.pickCount || 0);
+    if ((meal.items?.length || 0) > (kept.items?.length || 0)) {
+      kept.items = meal.items;
+    }
+  });
+
+  state.savedMeals = [...keptByName.values()];
+
+  if (!idRemap.size) return;
+
+  WEEK_DAYS.forEach((day) => {
+    DAY_SLOTS.forEach((daySlot) => {
+      const meta = mealSlotMeta(daySlot.id, day.id);
+      const mapped = idRemap.get(meta.savedMealId);
+      if (mapped) meta.savedMealId = mapped;
+    });
+  });
 }
 
 function iterWeekFoodSelections(callback) {
@@ -516,6 +562,8 @@ export {
   itemSlotLabel,
   daySlotToMealItems,
   mealIdFromName,
+  findSavedMealByName,
+  dedupeSavedMeals,
   iterWeekFoodSelections,
   foodAmountLabel,
   buildShoppingTotals,

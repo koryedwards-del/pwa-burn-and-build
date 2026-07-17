@@ -39,6 +39,8 @@ import {
   itemSlotLabel,
   daySlotToMealItems,
   mealIdFromName,
+  findSavedMealByName,
+  dedupeSavedMeals,
   persistPlannerToProgram,
   createEmptyDayState,
 } from './plannerState.js';
@@ -67,25 +69,30 @@ function saveMealFromDay(mealSlotId, name) {
   if (!trimmed) return;
 
   const items = daySlotToMealItems(mealSlotId);
-  const existingId = mealSlotMeta(mealSlotId).savedMealId;
-  const existing = existingId ? state.savedMeals.find((meal) => meal.id === existingId) : null;
+  const slotMeta = mealSlotMeta(mealSlotId);
+  let meal = slotMeta.savedMealId
+    ? state.savedMeals.find((entry) => entry.id === slotMeta.savedMealId)
+    : null;
+  if (!meal) meal = findSavedMealByName(trimmed);
 
-  if (existing) {
-    existing.name = trimmed;
-    existing.items = items;
-    existing.pickCount += 1;
-    mealSlotMeta(mealSlotId).mealName = trimmed;
+  if (meal) {
+    meal.name = trimmed;
+    meal.items = items;
+    meal.pickCount = (meal.pickCount || 0) + 1;
   } else {
-    const meal = {
+    meal = {
       id: mealIdFromName(trimmed),
       name: trimmed,
       pickCount: 1,
       items,
     };
     state.savedMeals.push(meal);
-    mealSlotMeta(mealSlotId).mealName = trimmed;
-    mealSlotMeta(mealSlotId).savedMealId = meal.id;
   }
+
+  dedupeSavedMeals();
+  const canonical = findSavedMealByName(trimmed) || meal;
+  slotMeta.mealName = trimmed;
+  slotMeta.savedMealId = canonical.id;
 
   renderWeekGrid();
   renderDayColumn();
