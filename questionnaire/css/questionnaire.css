@@ -25,17 +25,25 @@ html, body {
   min-height: 100%;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   font-family: "Open Sans", system-ui, sans-serif;
   display: flex;
   justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   padding: 24px 16px 48px;
 }
 
 .q-app {
-  width: var(--layout-width);
+  width: min(100%, var(--layout-width));
+  max-width: 100%;
   min-height: calc(100vh - 72px);
   display: flex;
   flex-direction: column;
@@ -775,4 +783,14 @@ body {
 
 .q-panel .q-btn--primary[data-q-next] {
   margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 16px 12px 32px;
+  }
+
+  .q-input {
+    font-size: 16px;
+  }
 }
