@@ -14,16 +14,16 @@ import {
   escapeHtml,
   programMetaHtml,
   programNavListHtml,
-} from '../../js/programBridgeUi.js?v=23';
-import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js?v=22';
-import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js?v=22';
-import { bootProgramBridgeAside } from '../../js/programLibrary.js?v=22';
-import { bindProgramAccess, bootProgramAccess, openAccessGate } from '../../js/programAccess.js?v=2';
+} from '../../js/programBridgeUi.js';
+import { loadProgramBridge, persistProgramBridge } from '../../js/programBridgeHandoff.js';
+import { getActiveProgramId, setActiveProgramId } from '../../js/programActive.js';
+import { bootProgramBridgeAside } from '../../js/programLibrary.js';
+import { bindProgramAccess, bootProgramAccess, openAccessGate } from '../../js/programAccess.js';
 import {
   applyMenuPlannerProgram,
   bootMenuPlannerPage,
   persistMenuPlannerState,
-} from '../../menuplanner/js/planner.js?v=69';
+} from '../../menuplanner/js/planner.js';
 import { QUESTIONNAIRE_WELCOME_URL } from '../../js/siteUrls.js';
 
 /** Kristi Warner seminar printout — LBM 113.7, work 1.5a, 3 wt / 3 fat-burn. */

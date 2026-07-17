@@ -793,4 +793,35 @@ body {
   .q-input {
     font-size: 16px;
   }
+
+  .q-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .q-nav {
+    position: static;
+    top: auto;
+    align-self: stretch;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .q-nav__list {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 8px;
+    padding-bottom: 2px;
+  }
+
+  .q-nav__item {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+    min-height: 44px;
+    padding: 10px 14px;
+  }
 }

@@ -3,8 +3,8 @@ import {
   initOnboardingForm,
   refreshPersonalDetailFields,
   syncObToStore,
-} from './onboardingUI.js?v=116';
-import { renderAccordion, bindAccordionEvents, syncAccordionSection, applyPendingAccordionFocus } from './onboardingAccordion.js?v=117';
+} from './onboardingUI.js';
+import { renderAccordion, bindAccordionEvents, syncAccordionSection, applyPendingAccordionFocus } from './onboardingAccordion.js';
 import {
   buildProgramPackage,
   downloadProgramPackage,
@@ -19,7 +19,7 @@ import {
   fetchCheckoutStatus,
   verifyCheckoutSession,
 } from './checkoutApi.js';
-import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js?v=102';
+import { totalOnboardingPages, QUESTION_COUNT, WELCOME_COUNT } from './onboardingEngine.js';
 import { initFocusFlow, syncFocusFlow } from './startViewport.js';
 
 import { CREATOR_ENTRY_URL, MARKETING_ORIGIN } from './siteUrls.js';

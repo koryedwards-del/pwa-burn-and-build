@@ -24,7 +24,7 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 | `createyourfoodplan/` | Plan-ready + Stripe paywall ($149 per program) |
 | `program-report/` | **Unified program shell** — Welcome, Projections, Plan/Servings, Menu planner |
 | `menuplanner/` | Redirect → `program-report/?page=menuplanner` |
-| `menuplanner/js/planner.js` | Menu planner workspace module (mounted as page 4) |
+| `menuplanner/js/planner.js` | Menu planner facade (state, views, print modules) |
 | `mealplanner/` | Redirect stub → menu planner deep link |
 | `server/` | API + SQLite — programs, per-program payment |
 
@@ -44,10 +44,10 @@ Landing → questionnaire → Stripe (per program) → program-report (pages 1�
 
 | Path | Role |
 |------|------|
-| `myplan/` | Phone daily app |
-| `js/shell.js`, `js/app.js` | Phone shell / older PWA |
+| `myplan/` | Phone daily app (PWA) |
+| `js/shellApp.js` | Phone shell entry module |
 
-Not part of the desktop funnel or menu planner.
+Not part of the desktop funnel or menu planner. Legacy `js/app.js`, `js/shell.js`, and root `sw.js` removed.
 
 ---
 

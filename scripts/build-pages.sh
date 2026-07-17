@@ -19,10 +19,14 @@ done
 mkdir -p "$OUT/js"
 cp -r "$ROOT/js/." "$OUT/js/"
 
-for file in privacypolicy.html support.html sw.js favicon.ico favicon-16x16.png favicon-32x32.png apple-touch-icon.png; do
-  if [ -f "$ROOT/$file" ]; then
-    cp "$ROOT/$file" "$OUT/$file"
-  fi
+ASSET_VERSION=$(sed -n "s/.*ASSET_VERSION = '\([^']*\)'.*/\1/p" "$ROOT/js/assetVersion.js" | head -1)
+if [ -z "$ASSET_VERSION" ]; then
+  echo "Could not read ASSET_VERSION from js/assetVersion.js" >&2
+  exit 1
+fi
+
+find "$OUT" -name '*.html' -print0 | while IFS= read -r -d '' file; do
+  perl -pi -e "s/\\?v=[0-9]*/?v=${ASSET_VERSION}/g" "$file"
 done
 
-echo "Built GitHub Pages site at $OUT"
+echo "Built GitHub Pages site at $OUT (asset v${ASSET_VERSION})"

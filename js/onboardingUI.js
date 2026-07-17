@@ -37,7 +37,7 @@ import {
   parseActivityHours,
   finalizeActivityHours,
   formatActivityHoursNumber,
-} from './onboardingEngine.js?v=102';
+} from './onboardingEngine.js';
 import { isValidEmail } from './programApi.js';
 import { renderTestimonyBlock } from './testimonyBlock.js';
 
@@ -867,7 +867,7 @@ export function renderPersonalDetails(form, open = true, complete = false) {
 }
 
 function flowRoot() {
-  return '.ob-flow, .accordion-flow, .chat-flow, .artshow-flow';
+  return '.ob-flow, .accordion-flow, .artshow-flow';
 }
 
 function syncNextButton(store, form) {
@@ -893,13 +893,13 @@ function syncAgeFromBirthDate(form, flow) {
 function updateBoundDisplays(name, value) {
   const num = Number(value);
   const sel = `[data-bind="${name}"]`;
-  document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}, .chat-flow ${sel}, .artshow-flow ${sel}`).forEach((el) => {
+  document.querySelectorAll(`.ob-flow ${sel}, .accordion-flow ${sel}, .artshow-flow ${sel}`).forEach((el) => {
     if (el.dataset.format === 'height') el.textContent = heightConfirmLabel(num);
     else if (el.dataset.format === 'inches') el.textContent = Number.isFinite(num) && num > 0 ? String(Math.round(num)) : '';
     else el.textContent = value;
   });
   const subSel = `[data-bind-sub="${name}"]`;
-  document.querySelectorAll(`.ob-flow ${subSel}, .accordion-flow ${subSel}, .chat-flow ${subSel}, .artshow-flow ${subSel}`).forEach((el) => {
+  document.querySelectorAll(`.ob-flow ${subSel}, .accordion-flow ${subSel}, .artshow-flow ${subSel}`).forEach((el) => {
     if (name === 'heightInches') el.textContent = heightConfirmLabel(num);
   });
 }
@@ -1064,7 +1064,7 @@ function ensureObDelegation() {
     const input = e.target;
     if (!input.closest(flowRoot())) return;
     const form = obCtx.store.onboardingForm;
-    const flow = input.closest('.ob-flow, .chat-flow, .artshow-flow');
+    const flow = input.closest('.ob-flow, .artshow-flow');
 
     if (input.name === 'fatSource') {
       form.fatSource = input.value;
