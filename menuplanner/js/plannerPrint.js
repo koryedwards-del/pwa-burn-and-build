@@ -291,7 +291,7 @@ function buildPrintDocumentHtml(view = 'week') {
       padding: 36px 44px 52px;
     }
     body.view-shopping .assistant-document {
-      max-width: 720px;
+      max-width: 540px;
     }
     body.view-week .assistant-document {
       max-width: none;
@@ -416,7 +416,7 @@ function buildPrintDocumentHtml(view = 'week') {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 24px;
       font-size: 0.9rem;
       padding: 4px 0;
       border-bottom: 1px solid #eee;
@@ -441,7 +441,8 @@ function buildPrintDocumentHtml(view = 'week') {
       color: #333;
       font-weight: 600;
       text-align: right;
-      max-width: 45%;
+      flex-shrink: 0;
+      max-width: 38%;
     }
     .assistant-empty { color: #666; font-size: 0.9rem; }
     .agenda-section-title {
