@@ -1,4 +1,3 @@
-import { ASSET_VERSION as FALLBACK_ASSET_VERSION } from '../../js/assetVersion.js';
 import {
   formatPrintDateTime,
   programClientName,
@@ -125,25 +124,11 @@ function buildWeekAgendaContent() {
   `;
 }
 
-const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
-
-let printLogoDataUrlPromise = null;
-
-function getPrintLogoDataUrl() {
-  if (!printLogoDataUrlPromise) {
-    printLogoDataUrlPromise = import(`./printLogoAsset.js?v=${ASSET_VERSION}`)
-      .then((mod) => mod.PRINT_LOGO_DATA_URL);
-  }
-  return printLogoDataUrlPromise;
-}
-
-function buildWeekPlanReportHeaderHtml(logoDataUrl) {
+function buildWeekPlanReportHeaderHtml() {
   const name = escapeHtml(programClientName(state.programPackage));
   const date = escapeHtml(formatPrintDateTime(new Date()));
-  const logoUrl = escapeHtml(logoDataUrl);
   return `
     <header class="assistant-doc-header assistant-doc-header--report">
-      <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="120" height="120" />
       <div class="assistant-doc-titles">
         <p class="assistant-doc-eyebrow">Personalized nutrition plan for</p>
         <h1 class="assistant-doc-name">${name}</h1>
@@ -203,13 +188,11 @@ function buildShoppingListContent() {
   `).join('');
 }
 
-function buildAssistantHeaderHtml(title, logoDataUrl) {
+function buildAssistantHeaderHtml(title) {
   const name = escapeHtml(programClientName(state.programPackage));
   const date = escapeHtml(formatPrintDateTime(new Date()));
-  const logoUrl = escapeHtml(logoDataUrl);
   return `
     <header class="assistant-doc-header">
-      <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="160" height="160" />
       <div class="assistant-doc-titles">
         <p class="assistant-doc-brand">Burn &amp; Build Diet</p>
         <h1 class="assistant-doc-title">${escapeHtml(title)}</h1>
@@ -219,11 +202,11 @@ function buildAssistantHeaderHtml(title, logoDataUrl) {
   `;
 }
 
-function buildPrintDocumentHtml(view = 'week', logoDataUrl = '') {
+function buildPrintDocumentHtml(view = 'week') {
   const shoppingHtml = buildShoppingListContent();
   const weekHtml = buildWeekAgendaContent();
-  const weekHeaderHtml = buildWeekPlanReportHeaderHtml(logoDataUrl);
-  const shoppingHeaderHtml = buildAssistantHeaderHtml('Shopping List', logoDataUrl);
+  const weekHeaderHtml = buildWeekPlanReportHeaderHtml();
+  const shoppingHeaderHtml = buildAssistantHeaderHtml('Shopping List');
   const weekFooterHtml = `
     <footer class="assistant-doc-footer">
       <span>Burn &amp; Build Diet</span>
@@ -282,26 +265,12 @@ function buildPrintDocumentHtml(view = 'week', logoDataUrl = '') {
       max-width: none;
     }
     .assistant-doc-header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 28px;
       margin-bottom: 28px;
       padding-bottom: 22px;
       border-bottom: 1px solid #e8e8e8;
     }
     .assistant-doc-header--report {
-      align-items: flex-start;
-      justify-content: flex-start;
-      gap: 24px;
       margin-bottom: 24px;
-    }
-    .assistant-logo {
-      display: block;
-      width: 120px;
-      height: auto;
-      flex-shrink: 0;
-      filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.12));
     }
     .assistant-doc-titles {
       text-align: left;
@@ -546,9 +515,6 @@ function buildPrintDocumentHtml(view = 'week', logoDataUrl = '') {
         margin-bottom: 20px;
         padding-bottom: 16px;
       }
-      .assistant-logo {
-        width: 100px;
-      }
       .assistant-doc-name {
         font-size: 1.85rem;
       }
@@ -570,7 +536,7 @@ function buildPrintDocumentHtml(view = 'week', logoDataUrl = '') {
 
 let printFrame = null;
 
-async function printPlannerDocument(view) {
+function printPlannerDocument(view) {
   if (!printFrame) {
     printFrame = document.createElement('iframe');
     printFrame.setAttribute('aria-hidden', 'true');
@@ -585,17 +551,10 @@ async function printPlannerDocument(view) {
     document.body.appendChild(printFrame);
   }
 
-  let logoDataUrl = '';
-  try {
-    logoDataUrl = await getPrintLogoDataUrl();
-  } catch (err) {
-    console.error('Print logo failed to load:', err);
-  }
-
   const frameWin = printFrame.contentWindow;
   const frameDoc = frameWin.document;
   frameDoc.open();
-  frameDoc.write(buildPrintDocumentHtml(view, logoDataUrl));
+  frameDoc.write(buildPrintDocumentHtml(view));
   frameDoc.close();
 
   const triggerPrint = () => {
