@@ -5,7 +5,7 @@
   --yellow: #FFCC00;
   --yellow-rgb: 255, 204, 0;
   --yellow-dim: #C99700;
-  /* Logo colors — match img/brand/bblogo.png (canonical logo asset) */
+  /* Logo colors — match img/brand/bblogo.png (UI) and bblogo-print.png (print) */
   --logo-burn: #FDC500;
   --logo-build: #8A8A8A;
   --flame: var(--yellow);
