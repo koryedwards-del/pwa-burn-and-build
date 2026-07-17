@@ -22,7 +22,7 @@ export function renderSidebarProgramCard(row, { isActive = false, isOpening = fa
     >
       <button
         type="button"
-        class="pb-program-card__top"
+        class="pb-nav__btn pb-program-card__top${isActive ? ' is-active' : ''}${isOpening ? ' is-opening' : ''}"
         data-toggle-program-card="${row.id}"
         aria-expanded="${isCollapsed ? 'false' : 'true'}"
         aria-label="${isCollapsed ? 'Show diet details' : 'Hide diet details'}"

@@ -127,7 +127,7 @@ function renderLibraryRows(rows, activeId) {
   if (!library) return;
 
   const signature = rowsSignature(rows, activeId);
-  if (signature === lastRenderedSignature && library.querySelector('.pb-program-list, .pb-side-card__empty')) {
+  if (signature === lastRenderedSignature && library.querySelector('.pb-program-list, .pb-nav__section-empty')) {
     library.hidden = false;
     return;
   }
@@ -136,14 +136,14 @@ function renderLibraryRows(rows, activeId) {
   if (!rows.length) {
     library.hidden = false;
     library.innerHTML = `
-      <h2 class="pb-side-card__title">Your diet plans</h2>
-      <p class="pb-side-card__empty">No purchased plans yet.</p>`;
+      <p class="pb-nav__section-label">Your diet plans</p>
+      <p class="pb-nav__section-empty">No purchased plans yet.</p>`;
     return;
   }
 
   library.hidden = false;
   library.innerHTML = `
-    <h2 class="pb-side-card__title">Your diet plans</h2>
+    <p class="pb-nav__section-label">Your diet plans</p>
     <div class="pb-program-list">
       ${rows.map((row) => renderSidebarProgramCard(row, {
         isActive: row.id === activeId,
@@ -179,8 +179,8 @@ export async function refreshProgramLibrary({
       if (!library.querySelector('.pb-program-list, .pb-program-card')) {
         library.hidden = false;
         library.innerHTML = `
-          <h2 class="pb-side-card__title">Your diet plans</h2>
-          <p class="pb-side-card__error">${result.message || 'Could not load your plans.'}</p>`;
+          <p class="pb-nav__section-label">Your diet plans</p>
+          <p class="pb-nav__section-error">${result.message || 'Could not load your plans.'}</p>`;
       }
     }
     return [];
