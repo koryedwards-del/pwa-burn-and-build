@@ -32,6 +32,8 @@ import {
   isFruitOnlySnack,
   acceptsSavedMealDrop,
   isDaySlotSaveable,
+  isAssignedMeal,
+  savedMealFitsMealSlot,
   showSaveMealButton,
   clearDaySlotMeta,
   itemSlotLabel,
@@ -422,36 +424,28 @@ function fitWeekGridLabel(text) {
   return raw.charAt(0);
 }
 
+function showPlannerToast(message, { variant = 'info', durationMs = 5000 } = {}) {
+  const host = document.getElementById('planner-toast-host');
+  if (!host) return;
+
+  host.innerHTML = '';
+  const toast = document.createElement('p');
+  toast.className = `planner-toast planner-toast--${variant}`;
+  toast.textContent = message;
+  host.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
+  window.setTimeout(() => {
+    toast.classList.remove('is-visible');
+    window.setTimeout(() => toast.remove(), 320);
+  }, durationMs);
+}
+
 function weekMealLabel(weekDay, mealSlotId) {
   const meta = mealSlotMeta(mealSlotId, weekDay);
-  if (meta.mealName) {
+  if (isAssignedMeal(mealSlotId, weekDay)) {
     const fullText = meta.mealName;
     const text = fitWeekGridLabel(fullText);
     return { text, fullText, empty: false };
-  }
-
-  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
-  const hasContent = templateSlots(daySlot.template).some((slotKey) => {
-    if (isFatSlot(slotKey)) return getFatSelections(mealSlotId, weekDay).length > 0;
-    return categorySelections(mealSlotId, weekDay)[slotKey] != null;
-  });
-
-  if (!hasContent) {
-    return { text: WEEK_MEAL_EMPTY_LABEL[mealSlotId], empty: true };
-  }
-
-  if (isFruitOnlySnack(mealSlotId, weekDay)) {
-    return {
-      text: categorySelections(mealSlotId, weekDay).fruit.foodName,
-      empty: false,
-    };
-  }
-
-  for (const slotKey of templateSlots(daySlot.template)) {
-    const selected = categorySelections(mealSlotId, weekDay)[slotKey];
-    if (selected) {
-      return { text: selected.foodName.split(',')[0], empty: false };
-    }
   }
 
   return { text: WEEK_MEAL_EMPTY_LABEL[mealSlotId], empty: true };
@@ -483,7 +477,7 @@ function renderWeekGrid() {
       const { text, fullText, empty } = weekMealLabel(day.id, mealSlotId);
       const tooltip = !empty && fullText && fullText !== text ? fullText : text;
       const titleAttr = empty ? '' : ` title="${escapeHtml(tooltip)}"`;
-      const dropAttrs = acceptsSavedMealDrop(mealSlotId) ? ' data-week-meal-drop' : '';
+      const dropAttrs = ' data-week-meal-drop';
       return `
         <div
           class="mini-card week-matrix__cell${empty ? ' mini-card--empty' : ''}${active ? ' week-matrix__cell--active-row' : ''}"
@@ -535,7 +529,14 @@ function initWeekGrid() {
   grid.addEventListener('click', (event) => {
     const mealCell = event.target.closest('[data-meal-slot]');
     if (mealCell?.dataset.mealSlot) {
-      navigateToDayMealSlot(mealCell.dataset.weekDay, mealCell.dataset.mealSlot);
+      const weekDay = mealCell.dataset.weekDay;
+      const mealSlotId = mealCell.dataset.mealSlot;
+      if (isAssignedMeal(mealSlotId, weekDay)) {
+        navigateToDayMealSlot(weekDay, mealSlotId);
+      } else {
+        setActiveWeekDay(weekDay);
+        showPlannerToast('Drag a saved meal from Saved Meals onto this slot.');
+      }
       return;
     }
     const dayCell = event.target.closest('.week-matrix__day[data-week-day-select]');
@@ -568,6 +569,11 @@ function initWeekGrid() {
 
     const meal = state.savedMeals.find((item) => item.id === mealId);
     if (!meal) return;
+
+    if (!savedMealFitsMealSlot(meal, cell.dataset.mealSlot)) {
+      showPlannerToast('That saved meal is not complete for this slot.', { variant: 'error' });
+      return;
+    }
 
     applySavedMealToMealSlot(cell.dataset.weekDay, cell.dataset.mealSlot, meal);
     navigateToDayMealSlot(cell.dataset.weekDay, cell.dataset.mealSlot);
@@ -736,7 +742,7 @@ function renderSavedMeals() {
   const meals = savedMealsByPopularity();
   container.innerHTML = meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
-    : '<p class="saved-meals__hint">It won\'t take long before you have a few go-to meals. Eggs and oatmeal. Chicken and rice. Save your go-to meals to speed up menu planning. Tap a saved meal to add it to the active day.</p>';
+    : '<p class="saved-meals__hint">Build a complete meal in the day column, save it here, then drag it onto the week grid. Tap to add to the active day.</p>';
 
   document.querySelectorAll('[data-meal-apply]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -918,7 +924,7 @@ function removeFatPoint(daySlotId, index) {
 }
 
 function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true } = {}) {
-  if (!acceptsSavedMealDrop(mealSlotId)) return;
+  if (!acceptsSavedMealDrop(mealSlotId) || !savedMealFitsMealSlot(meal, mealSlotId)) return;
   const labelToSlot = {
     Protein: 'protein',
     'Grains/Starches': 'gs',
@@ -1033,6 +1039,10 @@ function initMealDragDrop() {
 
       const meal = state.savedMeals.find((item) => item.id === mealId);
       if (!meal || !acceptsSavedMealDrop(zone.dataset.daySlotId)) return;
+      if (!savedMealFitsMealSlot(meal, zone.dataset.daySlotId)) {
+        showPlannerToast('That saved meal is not complete for this slot.', { variant: 'error' });
+        return;
+      }
 
       applySavedMealToDay(zone.dataset.daySlotId, meal);
     });

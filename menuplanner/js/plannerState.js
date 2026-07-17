@@ -302,8 +302,44 @@ function isFruitOnlySnack(mealSlotId, weekDay = state.activeWeekDay) {
 }
 
 function acceptsSavedMealDrop(daySlotId) {
-  const daySlot = DAY_SLOTS.find((item) => item.id === daySlotId);
-  return daySlot.template !== 'snack';
+  return DAY_SLOTS.some((item) => item.id === daySlotId);
+}
+
+/** Grid and assigned slots: meal came from Saved Meals (center column). */
+function isAssignedMeal(mealSlotId, weekDay = state.activeWeekDay) {
+  const meta = mealSlotMeta(mealSlotId, weekDay);
+  return !!(meta.savedMealId && meta.mealName);
+}
+
+const SAVED_MEAL_SLOT_LABELS = {
+  Protein: 'protein',
+  'Grains/Starches': 'gs',
+  'G / S': 'gs',
+  Veggie: 'vegetable',
+  'Extra Fat': 'fat',
+  Sugar: 'fat',
+  Alcohol: 'fat',
+  Fruit: 'fruit',
+};
+
+function savedMealSlotKeys(meal) {
+  const keys = new Set();
+  meal.items.forEach((item) => {
+    const slotKey = SAVED_MEAL_SLOT_LABELS[item.slot];
+    if (slotKey) keys.add(slotKey);
+  });
+  return keys;
+}
+
+/** Saved meal must cover every required category for the target meal slot. */
+function savedMealFitsMealSlot(meal, mealSlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
+  if (!daySlot || !meal?.items?.length) return false;
+  const filled = savedMealSlotKeys(meal);
+  return templateSlots(daySlot.template).every((slotKey) => {
+    if (SLOT_META[slotKey]?.optional) return true;
+    return filled.has(slotKey);
+  });
 }
 
 function isDaySlotSaveable(mealSlotId, weekDay = state.activeWeekDay) {
@@ -472,6 +508,8 @@ export {
   setFatSelections,
   isFruitOnlySnack,
   acceptsSavedMealDrop,
+  isAssignedMeal,
+  savedMealFitsMealSlot,
   isDaySlotSaveable,
   showSaveMealButton,
   clearDaySlotMeta,
