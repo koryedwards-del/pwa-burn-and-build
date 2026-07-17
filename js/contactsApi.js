@@ -19,17 +19,6 @@ function adminHeaders() {
   return key ? { 'X-Contacts-Admin-Key': key } : {};
 }
 
-export async function lookupContact(email) {
-  try {
-    const res = await fetch(apiUrl(`/api/contacts/lookup?email=${encodeURIComponent(normalizeEmail(email))}`));
-    const data = await res.json();
-    if (!res.ok) return { ok: false, message: data.message || 'Contact not found.' };
-    return data;
-  } catch {
-    return { ok: false, message: 'Network error checking contact.' };
-  }
-}
-
 export async function fetchContacts() {
   try {
     const res = await fetch(apiUrl('/api/contacts'), { headers: adminHeaders() });
@@ -71,17 +60,6 @@ export async function revokeContactAccess(email) {
   }
 }
 
-/** @deprecated Use revokeContactAccess — access cannot be granted manually. */
-export async function setContactBurnAndBuild(email, burnAndBuild) {
-  if (burnAndBuild) {
-    return {
-      ok: false,
-      message: 'Access is granted through Stripe checkout only. Create a coupon in Stripe for complimentary access.',
-    };
-  }
-  return revokeContactAccess(email);
-}
-
 export async function deleteContact(email) {
   try {
     const res = await fetch(apiUrl('/api/contacts'), {
@@ -97,17 +75,3 @@ export async function deleteContact(email) {
   }
 }
 
-export function burnAndBuildAccessMessage() {
-  return 'Complete Stripe checkout to unlock your program. If you have a coupon, enter it at checkout.';
-}
-
-export async function ensureBurnAndBuildContact(email) {
-  const result = await lookupContact(email);
-  if (!result.ok || !result.contact) {
-    return { ok: false, message: burnAndBuildAccessMessage() };
-  }
-  if (!result.contact.burnAndBuild) {
-    return { ok: false, message: burnAndBuildAccessMessage() };
-  }
-  return { ok: true, contact: result.contact };
-}

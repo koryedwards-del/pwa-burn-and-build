@@ -40,23 +40,3 @@ export function programReportHref({ preview = false, page } = {}) {
   if (page) url.searchParams.set('page', page);
   return `${url.pathname}${url.search}`;
 }
-
-export function myplanAppHref(email = '') {
-  const url = new URL('/myplan/', CREATOR_HOST_ORIGIN);
-  const normalized = String(email || '').trim().toLowerCase();
-  if (normalized) url.searchParams.set('email', normalized);
-  return `${url.pathname}${url.search}`;
-}
-
-export const PROGRAM_ENTRY_PATH = '/program-report/';
-export const QUESTIONNAIRE_WELCOME_PATH = '/questionnaire/#welcome';
-export const QUESTIONNAIRE_ENTRY_PATH = QUESTIONNAIRE_WELCOME_PATH;
-export const CREATOR_CHECKOUT_PATH = '/createyourfoodplan/?browse=1';
-export {
-  QUESTIONNAIRE_WELCOME_URL,
-  QUESTIONNAIRE_ENTRY_URL,
-  INTAKE_ENTRY_URL,
-  PROGRAM_REPORT_URL,
-  CREATOR_CHECKOUT_URL,
-  CREATOR_ENTRY_URL,
-} from './siteUrls.js';

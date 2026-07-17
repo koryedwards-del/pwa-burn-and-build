@@ -224,9 +224,9 @@ function renderWelcome(pkg) {
           on your own.
         </p>
 
-        <h3>Menu Planner</h3>
+        <h3>Menu planner</h3>
         <p>
-          After your servings page, the Menu Planner is where you build your week. Choose meals for breakfast,
+          After your servings page, the menu planner is where you build your week. Choose meals for breakfast,
           lunch, dinner, and snacks that hit your daily serving targets — and get your grocery list.
         </p>
       </article>

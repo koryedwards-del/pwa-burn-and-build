@@ -769,16 +769,6 @@ export function refreshPersonalDetailFields(form) {
 
 export { profileFromForm, onboardingPhase, WELCOME_COUNT, renderQuestionBody, renderConfirmBody };
 
-export function renderLockedPanel(title) {
-  return `
-    <div class="pd-panel is-locked">
-      <div class="pd-trigger pd-trigger-locked" aria-disabled="true">
-        <span class="pd-trigger-title">${title}</span>
-        <span class="pd-chevron" aria-hidden="true">·</span>
-      </div>
-    </div>`;
-}
-
 export function renderCollapsiblePanel(title, innerHtml, open = true, complete = false) {
   return `
     <div class="pd-panel ${open ? 'is-open' : ''} ${complete ? 'is-complete' : ''}">
