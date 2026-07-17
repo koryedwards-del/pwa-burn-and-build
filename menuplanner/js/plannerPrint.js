@@ -139,7 +139,7 @@ function buildWeekAgendaContent() {
 const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
 
 function printLogoUrl() {
-  const url = new URL('/img/brand/bblogo.png', window.location.origin);
+  const url = new URL('/img/brand/bblogo1.png', window.location.origin);
   url.searchParams.set('v', ASSET_VERSION);
   return escapeHtml(url.href);
 }
