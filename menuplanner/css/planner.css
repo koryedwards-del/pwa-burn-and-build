@@ -592,6 +592,11 @@ body {
   color: var(--on-gold);
 }
 
+.save-dialog__btn:focus,
+.save-dialog__btn:focus-visible {
+  outline: none;
+}
+
 /* Cards */
 
 .card {
