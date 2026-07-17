@@ -24,6 +24,19 @@ export function formatProgramDateLong(iso) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+/** Date and time stamp for printouts (local timezone). */
+export function formatPrintDateTime(date = new Date()) {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export function programClientName(pkg) {
   return pkg?.intake?.preferredName || 'You';
 }

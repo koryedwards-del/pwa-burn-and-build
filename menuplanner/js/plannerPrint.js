@@ -1,5 +1,5 @@
 import {
-  formatProgramDateLong,
+  formatPrintDateTime,
   programClientName,
 } from '../../js/programBridgeUi.js';
 import {
@@ -124,12 +124,16 @@ function buildWeekAgendaContent() {
   `;
 }
 
+const PRINT_LOGO_PATH = '../img/brand/bblogo-solid.png';
+
+function printLogoUrl() {
+  return escapeHtml(new URL(PRINT_LOGO_PATH, window.location.href).href);
+}
+
 function buildWeekPlanReportHeaderHtml() {
   const name = escapeHtml(programClientName(state.programPackage));
-  const date = escapeHtml(formatProgramDateLong(
-    state.programPackage?.program?.issuedAt || state.programPackage?.program?.foodPlanCreatedDate,
-  ));
-  const logoUrl = escapeHtml(new URL('../img/brand/bblogo.png', window.location.href).href);
+  const date = escapeHtml(formatPrintDateTime(new Date()));
+  const logoUrl = printLogoUrl();
   return `
     <header class="assistant-doc-header assistant-doc-header--report">
       <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="120" height="120" />
@@ -194,10 +198,8 @@ function buildShoppingListContent() {
 
 function buildAssistantHeaderHtml(title) {
   const name = escapeHtml(programClientName(state.programPackage));
-  const date = escapeHtml(formatProgramDateLong(
-    state.programPackage?.program?.issuedAt || state.programPackage?.program?.foodPlanCreatedDate,
-  ));
-  const logoUrl = escapeHtml(new URL('../img/brand/bblogo.png', window.location.href).href);
+  const date = escapeHtml(formatPrintDateTime(new Date()));
+  const logoUrl = printLogoUrl();
   return `
     <header class="assistant-doc-header">
       <img class="assistant-logo" src="${logoUrl}" alt="Burn &amp; Build" width="160" height="160" />
