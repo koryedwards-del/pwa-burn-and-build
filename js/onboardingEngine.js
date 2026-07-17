@@ -1,6 +1,3 @@
-export const WELCOME_COUNT = 1;
-export const QUESTION_COUNT = 10;
-
 export const WORK_PHYSICAL = [
   { id: 'sitting', label: 'Mostly sitting', sub: 'Desk, computer, driving, reception.' },
   { id: 'feet', label: 'On your feet', sub: 'Retail, teaching, nursing, restaurant.' },
@@ -324,37 +321,6 @@ export function activityHoursReviewLabel(value, max = 20) {
   return parsed !== null ? `${formatActivityHoursNumber(parsed)} hrs/week` : '—';
 }
 
-export function defaultOnboardingForm(profile) {
-  const p = profile || {};
-  const age = p.age ?? 35;
-  const birthDate = p.birthDate || (p.birthDateText ? parseBirthDateText(p.birthDateText) : null) || defaultBirthDateFromAge(age);
-  const work = p.workIntensity != null ? reverseWorkIntensity(p.workIntensity) : null;
-  const heightPartsInit = heightFormParts(p.heightInches);
-  return {
-    preferredName: p.preferredName || '',
-    email: p.email || '',
-    sex: p.sex || '',
-    heightFeet: heightPartsInit.heightFeet,
-    heightInchesPart: heightPartsInit.heightInchesPart,
-    heightInches: p.heightInches ?? '',
-    age,
-    birthDate,
-    birthDateText: p.birthDateText || '',
-    weightText: p.totalWeight > 0 ? String(Math.round(p.totalWeight)) : '',
-    fatPercentText: p.fatPercent > 0 ? String(p.fatPercent) : '',
-    fatSource: p.fatPercent > 0 ? 'recent' : '',
-    workPhysical: p.workPhysical || (work?.physical ?? ''),
-    workStress: p.workStress || (work?.stress ?? ''),
-    weightTrainingHours: p.weightTrainingHours != null && p.weightTrainingHours !== '' ? p.weightTrainingHours : '',
-    cardioHours: p.cardioHours != null && p.cardioHours !== '' ? p.cardioHours : '',
-    fatBurningHours: p.fatBurningHours != null && p.fatBurningHours !== '' ? p.fatBurningHours : 3,
-    wakeTime: p.wakeTime || '06:00',
-    remindersEnabled: p.remindersEnabled !== false,
-    newsletterOptIn: !!p.newsletterOptIn,
-    lowActivities: p.lowActivities || [],
-  };
-}
-
 export function profileFromForm(form) {
   const weight = Number(form.weightText);
   const fatPercent = Number(form.fatPercentText);
@@ -380,63 +346,4 @@ export function profileFromForm(form) {
     newsletterOptIn: !!form.newsletterOptIn,
     lowActivities: form.lowActivities || [],
   };
-}
-
-export function welcomeScreens() {
-  return [
-    {
-      type: 'intro',
-      line1: 'READY?',
-      line2: "LET'S BUILD.",
-      body: "This takes a few minutes. It's worth it. We'll use your answers to create a diet that's yours — not a generic template.",
-      quote: "Nutrition is everything. You got the science figured out years before anyone else. At 62, I still weigh and measure every meal every day — 40 years and counting.",
-      quoteName: 'Paul',
-      quoteMeta: '40 years on the plan',
-    },
-  ];
-}
-
-export function onboardingPhase(page, isEditMode) {
-  const start = isEditMode ? WELCOME_COUNT : 0;
-  if (page < WELCOME_COUNT) return { kind: 'welcome', index: page };
-  const qi = page - WELCOME_COUNT;
-  if (qi < QUESTION_COUNT) return { kind: 'question', index: qi };
-  if (qi === QUESTION_COUNT) return { kind: 'confirm' };
-  return { kind: 'done' };
-}
-
-export function totalOnboardingPages() {
-  return WELCOME_COUNT + QUESTION_COUNT + 2;
-}
-
-export function canProceed(phase, form) {
-  switch (phase.kind) {
-    case 'welcome':
-      return true;
-    case 'question':
-      switch (phase.index) {
-        case 0: return form.preferredName.trim().length > 0;
-        case 1: return isValidHeight(resolvedHeightInches(form.heightFeet, form.heightInchesPart));
-        case 2: return birthDateIsValid(form.birthDateText);
-        case 3: return Number(form.weightText) > 0;
-        case 4: return Number(form.fatPercentText) > 0 && form.fatSource;
-        case 5: return !!form.workPhysical;
-        case 6: return !!form.workStress;
-        case 7:
-          return activityHoursHasValue(form.weightTrainingHours, 15)
-            && activityHoursHasValue(form.cardioHours, 15);
-        case 8: return activityHoursHasValue(form.fatBurningHours, 20);
-        default: return true;
-      }
-    default:
-      return true;
-  }
-}
-
-export function nextLabel(phase, isEditMode) {
-  if (phase.kind === 'welcome' && phase.index === 0) return 'CREATE YOUR DIET';
-  if (phase.kind === 'welcome') return 'NEXT  →';
-  if (phase.kind === 'confirm') return isEditMode ? 'UPDATE MY PLAN  →' : 'Create my diet';
-  if (phase.kind === 'done') return isEditMode ? 'DONE  →' : 'SEE YOUR DIET  →';
-  return 'NEXT  →';
 }

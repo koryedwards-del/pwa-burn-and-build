@@ -9,7 +9,6 @@ on:
       - 'questionnaire/**'
       - 'program-report/**'
       - 'menuplanner/**'
-      - 'mealplanner/**'
       - 'css/**'
       - 'js/**'
       - 'data/**'

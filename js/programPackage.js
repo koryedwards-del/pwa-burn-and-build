@@ -154,52 +154,11 @@ export function mealSlotsFromProgram(pkg, settings) {
   return pkg.plan.mealSlots?.length ? pkg.plan.mealSlots : generateMealSlots(wh, wm, plan.servings);
 }
 
-export function importProgramPackage(pkg) {
-  const result = validateProgramPackage(pkg);
-  if (!result.ok) return result;
-  localStorage.setItem('bnb_program', JSON.stringify(pkg));
-  localStorage.setItem('bnb_onboarding_complete', 'true');
-  const settings = {
-    wakeTime: pkg.intake.defaultWakeTime || '06:00',
-    remindersEnabled: pkg.intake.remindersEnabled !== false,
-  };
-  localStorage.setItem('bnb_settings', JSON.stringify(settings));
-  return { ok: true, program: pkg };
-}
-
 export function parseProgramPackageJson(text) {
   try {
     return { ok: true, pkg: JSON.parse(text) };
   } catch (err) {
     return { ok: false, errors: ['Invalid JSON — could not parse file.'] };
-  }
-}
-
-export function downloadProgramPackage(pkg, filename) {
-  const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename || `burn-and-build-program-${pkg.program.startDate}.bnbprogram.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-export function packageToImportUrl(pkg, appBase = '../') {
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(pkg))));
-  const base = appBase.endsWith('/') ? appBase : `${appBase}/`;
-  return `${base}?import=${encodeURIComponent(encoded)}`;
-}
-
-export function parseImportFromUrl(search) {
-  const params = new URLSearchParams(search);
-  const raw = params.get('import');
-  if (!raw) return null;
-  try {
-    const json = decodeURIComponent(escape(atob(decodeURIComponent(raw))));
-    return JSON.parse(json);
-  } catch {
-    return null;
   }
 }
 

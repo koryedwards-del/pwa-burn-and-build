@@ -23,7 +23,6 @@ Repo: **`pwa-burn-and-build`** (this workspace)
 | `program-report/` | **Unified program shell** — Welcome, Projections, Plan/Servings, Menu planner |
 | `menuplanner/` | Redirect → `program-report/?page=menuplanner` |
 | `menuplanner/js/planner.js` | Menu planner facade (`plannerState`, `plannerViews`, `plannerPrint`) |
-| `mealplanner/` | Legacy URL alias — same redirect as `menuplanner/` |
 | `server/` | API + SQLite on Render — programs, per-program Stripe payment |
 | `contacts/` | Admin contact list (deployed; key auth) |
 
