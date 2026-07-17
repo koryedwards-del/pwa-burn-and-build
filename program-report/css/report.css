@@ -846,6 +846,11 @@ a.r-nav__btn {
   .r-doc {
     padding: 20px 16px 24px;
   }
+
+  .r-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 @media print {
