@@ -17,7 +17,6 @@ on:
       - 'img/**'
       - 'icons/**'
       - 'contacts/**'
-      - 'shell/**'
       - 'privacypolicy.html'
       - 'support.html'
       - 'sw.js'
