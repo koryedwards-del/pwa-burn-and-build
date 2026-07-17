@@ -86,10 +86,21 @@ const WEEK_MEAL_EMPTY_LABEL = {
 function createEmptyMealMakerDraft() {
   return {
     protein: null,
-    gs: null,
-    vegetable: null,
+    gs: [],
+    vegetable: [],
     fat: [],
   };
+}
+
+function normalizeSelectionList(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter((item) => item?.foodName);
+  if (value.foodName) return [value];
+  return [];
+}
+
+function isSplitServingsMakerSlot(categorySlot) {
+  return categorySlot === 'gs' || categorySlot === 'vegetable';
 }
 
 function createEmptyDayState() {
@@ -180,6 +191,9 @@ function applyPlannerState(saved) {
     state.mealMakerDraft = {
       ...createEmptyMealMakerDraft(),
       ...saved.mealMakerDraft,
+      protein: saved.mealMakerDraft.protein?.foodName ? saved.mealMakerDraft.protein : null,
+      gs: normalizeSelectionList(saved.mealMakerDraft.gs),
+      vegetable: normalizeSelectionList(saved.mealMakerDraft.vegetable),
       fat: Array.isArray(saved.mealMakerDraft.fat) ? saved.mealMakerDraft.fat : [],
     };
   }
@@ -331,6 +345,55 @@ function setMakerFatSelections(items) {
   state.mealMakerDraft.fat = items.length ? items : [];
 }
 
+function getMakerSplitSelections(categorySlot) {
+  if (categorySlot === 'gs') return state.mealMakerDraft.gs || [];
+  if (categorySlot === 'vegetable') return state.mealMakerDraft.vegetable || [];
+  return [];
+}
+
+function setMakerSplitSelections(categorySlot, items) {
+  if (categorySlot === 'gs') {
+    state.mealMakerDraft.gs = items;
+    return;
+  }
+  if (categorySlot === 'vegetable') {
+    state.mealMakerDraft.vegetable = items;
+  }
+}
+
+function rebalanceMakerSplitServings(categorySlot, items) {
+  const total = makerRequiredServings(categorySlot);
+  if (!items.length) return [];
+  const each = total / items.length;
+  return items.map((item) => ({
+    foodName: item.foodName,
+    servings: each,
+  }));
+}
+
+function addMakerSplitFood(categorySlot, foodName) {
+  const items = rebalanceMakerSplitServings(categorySlot, [
+    ...getMakerSplitSelections(categorySlot),
+    { foodName, servings: 0 },
+  ]);
+  setMakerSplitSelections(categorySlot, items);
+}
+
+function removeMakerSplitFood(categorySlot, index) {
+  const items = getMakerSplitSelections(categorySlot);
+  items.splice(index, 1);
+  setMakerSplitSelections(categorySlot, rebalanceMakerSplitServings(categorySlot, items));
+}
+
+function getSplitGridSelections(mealSlotId, categorySlot, weekDay = state.activeWeekDay) {
+  const raw = categorySelections(mealSlotId, weekDay)[categorySlot];
+  return normalizeSelectionList(raw);
+}
+
+function setSplitGridSelections(mealSlotId, categorySlot, items, weekDay = state.activeWeekDay) {
+  categorySelections(mealSlotId, weekDay)[categorySlot] = items.length ? items : null;
+}
+
 function clearMealMakerDraft() {
   state.mealMakerDraft = createEmptyMealMakerDraft();
 }
@@ -339,6 +402,9 @@ function isMealMakerSaveable() {
   return MEAL_MAKER_SLOTS.every((slotKey) => {
     if (SLOT_META[slotKey]?.optional) return true;
     if (isFatSlot(slotKey)) return true;
+    if (isSplitServingsMakerSlot(slotKey)) {
+      return getMakerSplitSelections(slotKey).length > 0;
+    }
     return state.mealMakerDraft[slotKey] != null;
   });
 }
@@ -347,6 +413,13 @@ function mealMakerToItems() {
   return MEAL_MAKER_SLOTS.flatMap((slotKey) => {
     if (isFatSlot(slotKey)) {
       return getMakerFatSelections().map((selected) => ({
+        slot: itemSlotLabel(slotKey, selected.foodName),
+        foodName: selected.foodName,
+        servings: selected.servings,
+      }));
+    }
+    if (isSplitServingsMakerSlot(slotKey)) {
+      return getMakerSplitSelections(slotKey).map((selected) => ({
         slot: itemSlotLabel(slotKey, selected.foodName),
         foodName: selected.foodName,
         servings: selected.servings,
@@ -522,6 +595,17 @@ function iterWeekFoodSelections(callback) {
           });
           return;
         }
+        if (isSplitServingsMakerSlot(categorySlot)) {
+          getSplitGridSelections(mealSlot.id, categorySlot, day.id).forEach((item) => {
+            callback({
+              weekDay: day.id,
+              mealSlotId: mealSlot.id,
+              foodName: item.foodName,
+              servings: item.servings,
+            });
+          });
+          return;
+        }
         const selected = categorySelections(mealSlot.id, day.id)[categorySlot];
         if (selected) {
           callback({
@@ -620,6 +704,12 @@ export {
   makerServingHint,
   getMakerFatSelections,
   setMakerFatSelections,
+  isSplitServingsMakerSlot,
+  getMakerSplitSelections,
+  addMakerSplitFood,
+  removeMakerSplitFood,
+  getSplitGridSelections,
+  setSplitGridSelections,
   clearMealMakerDraft,
   isMealMakerSaveable,
   mealMakerToItems,

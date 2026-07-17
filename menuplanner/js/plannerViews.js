@@ -28,6 +28,11 @@ import {
   setFatSelections,
   getMakerFatSelections,
   setMakerFatSelections,
+  isSplitServingsMakerSlot,
+  getMakerSplitSelections,
+  addMakerSplitFood,
+  removeMakerSplitFood,
+  setSplitGridSelections,
   isFruitOnlySnack,
   isAssignedMeal,
   isSnackMealSlot,
@@ -128,6 +133,67 @@ function updateSaveMealTrigger() {
   button.disabled = !isMealMakerSaveable();
 }
 
+function renderMakerSplitItemCard({ item, index, categorySlot }) {
+  const food = state.foods.find((entry) => entry.name === item.foodName);
+  const detail = food ? servingAmountLabel(food, item.servings) : '';
+
+  return `
+    <div class="fat-points__item">
+      <button
+        type="button"
+        class="fat-points__remove"
+        data-maker-split-remove
+        data-split-category="${categorySlot}"
+        data-split-index="${index}"
+        aria-label="Remove ${escapeHtml(item.foodName)}"
+      >×</button>
+      <p class="card__title">${escapeHtml(item.foodName)}</p>
+      ${detail ? `<p class="card__detail">${detail}</p>` : ''}
+    </div>
+  `;
+}
+
+function renderMakerSplitLane(categorySlot) {
+  const meta = SLOT_META[categorySlot];
+  const active = isCategorySlotActive(categorySlot);
+  const items = getMakerSplitSelections(categorySlot);
+  const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
+
+  if (!items.length) {
+    return `
+      <button
+        type="button"
+        class="card card--slot card--empty${meta.optional ? ' card--slot-optional' : ''}${active ? ' card--slot-active' : ''}"
+        data-maker-category
+        data-category-slot="${categorySlot}"
+      >
+        <span class="card__slot-label">${meta.label}${optionalTag}</span>
+        <span class="card__slot-hint">${makerServingHint(categorySlot)}</span>
+      </button>
+    `;
+  }
+
+  const stackHtml = items
+    .map((item, index) => renderMakerSplitItemCard({ item, index, categorySlot }))
+    .join('');
+
+  return `
+    <div
+      class="fat-points-lane card card--slot card--filled${meta.optional ? ' card--slot-optional' : ''}${active ? ' card--slot-active' : ''}"
+      data-maker-category
+      data-category-slot="${categorySlot}"
+    >
+      <span class="card__slot-label">${meta.label}${optionalTag}</span>
+      <div class="fat-points-lane__stack">
+        ${stackHtml}
+        <div class="fat-points__add">
+          <span class="card__slot-hint">Tap or drag to add another</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function renderMakerFatItemCard({ item, index }) {
   const food = state.foods.find((entry) => entry.name === item.foodName);
   const categoryLabel = FAT_LANE_SLOT_LABELS[food?.category];
@@ -198,6 +264,10 @@ function renderMakerCategorySlot(categorySlot) {
     return renderMakerFatPointsLane();
   }
 
+  if (isSplitServingsMakerSlot(categorySlot)) {
+    return renderMakerSplitLane(categorySlot);
+  }
+
   const meta = SLOT_META[categorySlot];
   const active = isCategorySlotActive(categorySlot);
   const optionalTag = meta.optional ? ' <span class="card__slot-optional">(optional)</span>' : '';
@@ -242,7 +312,7 @@ function renderMealMaker() {
 
   container.querySelectorAll('[data-maker-category]').forEach((button) => {
     button.addEventListener('click', (event) => {
-      if (event.target.closest('[data-maker-fat-remove]')) return;
+      if (event.target.closest('[data-maker-fat-remove], [data-maker-split-remove]')) return;
       state.activeMakerSlot = button.dataset.categorySlot;
       state.foodBrowseMode = null;
       state.activeFoodCategory = null;
@@ -256,6 +326,14 @@ function renderMealMaker() {
     button.addEventListener('click', (event) => {
       event.stopPropagation();
       removeMakerFatPoint(Number(button.dataset.fatIndex));
+    });
+  });
+
+  container.querySelectorAll('[data-maker-split-remove]').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      event.stopPropagation();
+      removeMakerSplitFood(button.dataset.splitCategory, Number(button.dataset.splitIndex));
+      renderMealMaker();
     });
   });
 
@@ -772,7 +850,10 @@ function foodCardDetail(food) {
   if (!state.activeMakerSlot || isFatSlot(state.activeMakerSlot)) {
     return scaledLabel(food, 1);
   }
-  const servings = makerRequiredServings(state.activeMakerSlot);
+  let servings = makerRequiredServings(state.activeMakerSlot);
+  if (isSplitServingsMakerSlot(state.activeMakerSlot)) {
+    servings = servings / (getMakerSplitSelections(state.activeMakerSlot).length + 1);
+  }
   if (!state.programPackage || Math.abs(servings - 1) < 0.05) {
     return scaledLabel(food, 1);
   }
@@ -844,14 +925,18 @@ function initFoodStackInteractions() {
 }
 
 function fillMakerSlot(categorySlot, foodName) {
-  const servings = makerRequiredServings(categorySlot);
   if (isFatSlot(categorySlot)) {
     setMakerFatSelections([
       ...getMakerFatSelections(),
       { foodName, servings: 1 },
     ]);
+  } else if (isSplitServingsMakerSlot(categorySlot)) {
+    addMakerSplitFood(categorySlot, foodName);
   } else {
-    state.mealMakerDraft[categorySlot] = { foodName, servings };
+    state.mealMakerDraft[categorySlot] = {
+      foodName,
+      servings: makerRequiredServings(categorySlot),
+    };
   }
   renderMealMaker();
 }
@@ -881,22 +966,31 @@ function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true 
   });
   setFatSelections(mealSlotId, [], weekDay);
 
+  const gsItems = [];
+  const vegetableItems = [];
   const fatItems = [];
+  let proteinSelection = null;
+
   meal.items.forEach((item) => {
     const slotKey = labelToSlot[item.slot];
+    const entry = {
+      foodName: item.foodName,
+      servings: item.servings,
+    };
     if (slotKey === 'fat') {
-      fatItems.push({
-        foodName: item.foodName,
-        servings: item.servings,
-      });
-    } else if (slotKey && categorySelections(mealSlotId, weekDay)[slotKey] !== undefined) {
-      categorySelections(mealSlotId, weekDay)[slotKey] = {
-        foodName: item.foodName,
-        servings: item.servings,
-      };
+      fatItems.push(entry);
+    } else if (slotKey === 'gs') {
+      gsItems.push(entry);
+    } else if (slotKey === 'vegetable') {
+      vegetableItems.push(entry);
+    } else if (slotKey === 'protein') {
+      proteinSelection = entry;
     }
   });
 
+  categorySelections(mealSlotId, weekDay).protein = proteinSelection;
+  setSplitGridSelections(mealSlotId, 'gs', gsItems, weekDay);
+  setSplitGridSelections(mealSlotId, 'vegetable', vegetableItems, weekDay);
   setFatSelections(mealSlotId, fatItems, weekDay);
   mealSlotMeta(mealSlotId, weekDay).mealName = meal.name;
   mealSlotMeta(mealSlotId, weekDay).savedMealId = meal.id;

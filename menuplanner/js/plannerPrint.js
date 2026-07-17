@@ -12,7 +12,9 @@ import {
   categorySelections,
   templateSlots,
   isFatSlot,
+  isSplitServingsMakerSlot,
   getFatSelections,
+  getSplitGridSelections,
   fmtServings,
   scaledLabel,
   escapeHtml,
@@ -43,6 +45,15 @@ function mealFoodLinesForPrint(mealSlotId, weekDay) {
   templateSlots(daySlot.template).forEach((categorySlot) => {
     if (isFatSlot(categorySlot)) {
       getFatSelections(mealSlotId, weekDay).forEach((item) => {
+        lines.push({
+          foodName: item.foodName,
+          amount: printFoodAmount(item.foodName, item.servings),
+        });
+      });
+      return;
+    }
+    if (isSplitServingsMakerSlot(categorySlot)) {
+      getSplitGridSelections(mealSlotId, categorySlot, weekDay).forEach((item) => {
         lines.push({
           foodName: item.foodName,
           amount: printFoodAmount(item.foodName, item.servings),
