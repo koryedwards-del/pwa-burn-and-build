@@ -24,17 +24,25 @@ html, body {
   min-height: 100%;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   font-family: "Open Sans", system-ui, sans-serif;
   display: flex;
   justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   padding: 24px 16px 48px;
 }
 
 .r-app {
-  width: var(--layout-width);
+  width: min(100%, var(--layout-width));
+  max-width: 100%;
   min-height: calc(100vh - 72px);
   display: flex;
   flex-direction: column;
@@ -103,7 +111,7 @@ body.mp-access-mode {
 
 body.mp-access-mode #access-gate {
   width: 100%;
-  max-width: var(--layout-width);
+  max-width: min(100%, var(--layout-width));
   flex: 1;
   display: flex;
   align-items: center;
@@ -186,7 +194,7 @@ body.mp-access-mode #r-app {
   background: var(--bg);
   color: var(--text);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 16px;
 }
 
 #access-gate .mp-access__input:focus {
@@ -376,6 +384,8 @@ a.r-nav__btn {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 24px 28px 28px;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .r-doc__head {
@@ -826,6 +836,16 @@ a.r-nav__btn {
 .r-empty p {
   margin-bottom: 16px;
   line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  body {
+    padding: 16px 12px 32px;
+  }
+
+  .r-doc {
+    padding: 20px 16px 24px;
+  }
 }
 
 @media print {
