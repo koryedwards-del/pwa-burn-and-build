@@ -21,6 +21,9 @@ import {
   iterWeekFoodSelections,
   foodAmountLabel,
   buildShoppingTotals,
+  persistPlannerToProgram,
+  isAssignedMeal,
+  mealSlotMeta,
 } from './plannerState.js';
 
 function printFoodAmount(foodName, servings) {
@@ -38,7 +41,7 @@ function mealSlotPrintParts(mealSlotId) {
   };
 }
 
-function mealFoodLinesForPrint(mealSlotId, weekDay) {
+function categoryFoodLinesForPrint(mealSlotId, weekDay) {
   const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
   if (!daySlot) return [];
   const lines = [];
@@ -72,6 +75,32 @@ function mealFoodLinesForPrint(mealSlotId, weekDay) {
   return lines;
 }
 
+function savedMealFoodLinesForPrint(meal) {
+  if (!meal?.items?.length) return [];
+  return meal.items.map((item) => ({
+    foodName: item.foodName,
+    amount: printFoodAmount(item.foodName, item.servings),
+  }));
+}
+
+function mealFoodLinesForPrint(mealSlotId, weekDay) {
+  if (isAssignedMeal(mealSlotId, weekDay)) {
+    const meta = mealSlotMeta(mealSlotId, weekDay);
+    const meal = state.savedMeals.find((item) => item.id === meta.savedMealId);
+    const lines = [];
+    if (meta.mealName) {
+      lines.push({ foodName: meta.mealName, amount: '', isMealTitle: true });
+    }
+    if (meal) {
+      lines.push(...savedMealFoodLinesForPrint(meal));
+    } else {
+      lines.push(...categoryFoodLinesForPrint(mealSlotId, weekDay));
+    }
+    return lines;
+  }
+  return categoryFoodLinesForPrint(mealSlotId, weekDay);
+}
+
 function renderAgendaCell(foodLines) {
   if (!foodLines.length) {
     return '<span class="agenda-cell-empty" aria-hidden="true">—</span>';
@@ -79,9 +108,9 @@ function renderAgendaCell(foodLines) {
   return `
     <ul class="agenda-foods">
       ${foodLines.map((line) => `
-        <li>
+        <li${line.isMealTitle ? ' class="agenda-meal-title"' : ''}>
           <span class="agenda-food">${escapeHtml(line.foodName)}</span>
-          <span class="agenda-amount">${escapeHtml(line.amount)}</span>
+          ${line.amount ? `<span class="agenda-amount">${escapeHtml(line.amount)}</span>` : ''}
         </li>
       `).join('')}
     </ul>
@@ -540,6 +569,10 @@ function buildPrintDocumentHtml(view = 'week') {
       font-weight: 400;
       color: #222;
     }
+    .agenda-meal-title .agenda-food {
+      font-weight: 700;
+      color: #111;
+    }
     .agenda-amount {
       font-weight: 700;
       font-size: 0.62rem;
@@ -583,6 +616,8 @@ function buildPrintDocumentHtml(view = 'week') {
 let printFrame = null;
 
 function printPlannerDocument(view) {
+  persistPlannerToProgram({ immediate: true });
+
   if (!printFrame) {
     printFrame = document.createElement('iframe');
     printFrame.setAttribute('aria-hidden', 'true');

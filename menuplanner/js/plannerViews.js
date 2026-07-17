@@ -1090,6 +1090,7 @@ function applySavedMealToMealSlot(weekDay, mealSlotId, meal, { trackPick = true 
   if (trackPick) meal.pickCount += 1;
   renderWeekGrid();
   renderSavedMeals();
+  persistPlannerToProgram();
 }
 
 function initFoodDropTargets() {
