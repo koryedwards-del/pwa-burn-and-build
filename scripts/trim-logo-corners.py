@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
-"""Trim outer black matte on the brand logo into UI (transparent) and print (white) PNGs."""
+"""Trim outer black matte on the brand logo.
+
+Source: solid bblogo with square black corners (git f7bd919 export).
+Outputs:
+  bblogo.png        — UI on dark backgrounds (outer matte → transparent)
+  bblogo-print.png  — Print Shop on white paper (outer matte → white, RGB, no alpha)
+"""
 from __future__ import annotations
 
 from collections import deque
+from io import BytesIO
 from pathlib import Path
 
 try:
@@ -15,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BRAND = ROOT / 'img' / 'brand'
 UI_TARGET = BRAND / 'bblogo.png'
 PRINT_TARGET = BRAND / 'bblogo-print.png'
+SOLID_SOURCE_COMMIT = 'f7bd919:img/brand/bblogo.png'
 
 
 def is_matte(r: int, g: int, b: int, alpha: int) -> bool:
@@ -58,42 +66,25 @@ def flood_fill_outer_matte(pixels: np.ndarray, fill: tuple[int, int, int, int]) 
     return out
 
 
-def load_source_with_matte() -> Image.Image:
-    """Use UI logo; if corners are already transparent, restore matte from git original."""
-    im = Image.open(UI_TARGET).convert('RGBA')
-    corners = [
-        im.getpixel((0, 0)),
-        im.getpixel((im.width - 1, 0)),
-        im.getpixel((0, im.height - 1)),
-        im.getpixel((im.width - 1, im.height - 1)),
-    ]
-    if all(p[3] > 200 and p[0] < 45 and p[1] < 45 and p[2] < 45 for p in corners):
-        return im
-
+def load_solid_source() -> Image.Image:
     import subprocess
 
-    raw = subprocess.check_output(
-        ['git', 'show', 'f7bd919:img/brand/bblogo.png'],
-        cwd=ROOT,
-    )
-    from io import BytesIO
-
+    raw = subprocess.check_output(['git', 'show', SOLID_SOURCE_COMMIT], cwd=ROOT)
     return Image.open(BytesIO(raw)).convert('RGBA')
 
 
 def write_logo_variants() -> None:
     BRAND.mkdir(parents=True, exist_ok=True)
-    source = load_source_with_matte()
-    pixels = np.array(source)
+    pixels = np.array(load_solid_source())
 
     ui = flood_fill_outer_matte(pixels, (0, 0, 0, 0))
     Image.fromarray(ui).save(UI_TARGET, optimize=True)
 
-    print_logo = flood_fill_outer_matte(pixels, (255, 255, 255, 255))
-    Image.fromarray(print_logo).save(PRINT_TARGET, optimize=True)
+    print_rgba = flood_fill_outer_matte(pixels, (255, 255, 255, 255))
+    Image.fromarray(print_rgba).convert('RGB').save(PRINT_TARGET, optimize=True)
 
-    print(f'Wrote {UI_TARGET} ({UI_TARGET.stat().st_size} bytes, transparent corners)')
-    print(f'Wrote {PRINT_TARGET} ({PRINT_TARGET.stat().st_size} bytes, white corners)')
+    print(f'Wrote {UI_TARGET} ({UI_TARGET.stat().st_size} bytes, transparent outer matte)')
+    print(f'Wrote {PRINT_TARGET} ({PRINT_TARGET.stat().st_size} bytes, white outer matte, RGB)')
 
 
 if __name__ == '__main__':

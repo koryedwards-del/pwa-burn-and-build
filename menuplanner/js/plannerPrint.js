@@ -128,7 +128,7 @@ function buildWeekAgendaContent() {
 const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
 
 function printLogoUrl() {
-  const url = new URL('../../img/brand/bblogo-print.png', import.meta.url);
+  const url = new URL('/img/brand/bblogo-print.png', window.location.origin);
   url.searchParams.set('v', ASSET_VERSION);
   return escapeHtml(url.href);
 }
