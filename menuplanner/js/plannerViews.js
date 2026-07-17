@@ -544,6 +544,7 @@ function weekGridColumnLabel(mealSlotId) {
 
 function renderWeekGrid() {
   const container = document.getElementById('week-grid');
+  if (!container) return;
   const headCells = WEEK_GRID_MEALS.map((mealSlotId) => `
     <div class="week-matrix__col-head">${escapeHtml(weekGridColumnLabel(mealSlotId))}</div>
   `).join('');
@@ -612,7 +613,7 @@ function setActiveWeekDay(weekDay) {
 
 function initWeekGrid() {
   const grid = document.getElementById('week-grid');
-  if (grid.dataset.weekInit) return;
+  if (!grid || grid.dataset.weekInit) return;
   grid.dataset.weekInit = '1';
 
   grid.addEventListener('click', (event) => {
@@ -762,6 +763,7 @@ function deleteSavedMeal(mealId) {
 
 function renderSavedMeals() {
   const container = document.getElementById('saved-meals');
+  if (!container) return;
   const meals = savedMealsByPopularity();
   container.innerHTML = meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
@@ -862,6 +864,7 @@ function foodCardDetail(food) {
 
 function renderFoodStack() {
   const container = document.getElementById('food-stack');
+  if (!container) return;
   const list = foodsForActiveBrowse();
 
   if (!state.activeMakerSlot && state.foodBrowseMode !== 'fruit') {
@@ -1088,10 +1091,26 @@ function initSaveMealDialog() {
 
 function renderPlannerWorkspace() {
   setWeekGridCollapsed(state.weekGridCollapsed, { persist: false });
-  renderWeekGrid();
-  renderMealMaker();
-  renderSavedMeals();
-  refreshFoodsPanel();
+  try {
+    renderWeekGrid();
+  } catch (err) {
+    console.error('Week grid failed to render:', err);
+  }
+  try {
+    renderMealMaker();
+  } catch (err) {
+    console.error('Meal maker failed to render:', err);
+  }
+  try {
+    renderSavedMeals();
+  } catch (err) {
+    console.error('Saved meals failed to render:', err);
+  }
+  try {
+    refreshFoodsPanel();
+  } catch (err) {
+    console.error('Foods panel failed to render:', err);
+  }
 }
 
 function initFoodSearch() {
@@ -1114,4 +1133,5 @@ export {
   initFoodSearch,
   initFoodDropTargets,
   setWeekGridCollapsed,
+  showPlannerToast,
 };

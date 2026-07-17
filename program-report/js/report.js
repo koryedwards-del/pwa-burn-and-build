@@ -544,10 +544,13 @@ function renderPage() {
     main.innerHTML = '';
     plannerPage.hidden = false;
     bootMenuPlannerPage()
-      .then(() => {
-        applyMenuPlannerProgram(programPackage);
-      })
-      .catch((err) => console.error('Menu planner failed to load:', err));
+      .then(() => applyMenuPlannerProgram(programPackage))
+      .catch((err) => {
+        console.error('Menu planner failed to load:', err);
+        applyMenuPlannerProgram(programPackage).catch((applyErr) => {
+          console.error('Menu planner apply failed:', applyErr);
+        });
+      });
     return;
   }
 

@@ -141,6 +141,10 @@ function ensureWeekPlanShape(plan = state.weekPlan) {
         if (!(slot in plan[day.id].selections[daySlot.id])) {
           plan[day.id].selections[daySlot.id][slot] = null;
         }
+        if (isSplitServingsMakerSlot(slot)) {
+          const normalized = normalizeSelectionList(plan[day.id].selections[daySlot.id][slot]);
+          plan[day.id].selections[daySlot.id][slot] = normalized.length ? normalized : null;
+        }
       });
     });
   });
@@ -196,6 +200,7 @@ function applyPlannerState(saved) {
       vegetable: normalizeSelectionList(saved.mealMakerDraft.vegetable),
       fat: Array.isArray(saved.mealMakerDraft.fat) ? saved.mealMakerDraft.fat : [],
     };
+    normalizeMealMakerDraft();
   }
   if (saved.activeMakerSlot && MEAL_MAKER_SLOTS.includes(saved.activeMakerSlot)) {
     state.activeMakerSlot = saved.activeMakerSlot;
@@ -294,7 +299,7 @@ function servingAmountLabel(food, servings) {
 }
 
 function escapeHtml(text) {
-  return text
+  return String(text ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -345,9 +350,17 @@ function setMakerFatSelections(items) {
   state.mealMakerDraft.fat = items.length ? items : [];
 }
 
+function normalizeMealMakerDraft(draft = state.mealMakerDraft) {
+  if (!draft || typeof draft !== 'object') return;
+  draft.gs = normalizeSelectionList(draft.gs);
+  draft.vegetable = normalizeSelectionList(draft.vegetable);
+  if (!Array.isArray(draft.fat)) draft.fat = [];
+  if (draft.protein && !draft.protein.foodName) draft.protein = null;
+}
+
 function getMakerSplitSelections(categorySlot) {
-  if (categorySlot === 'gs') return state.mealMakerDraft.gs || [];
-  if (categorySlot === 'vegetable') return state.mealMakerDraft.vegetable || [];
+  if (categorySlot === 'gs') return normalizeSelectionList(state.mealMakerDraft.gs);
+  if (categorySlot === 'vegetable') return normalizeSelectionList(state.mealMakerDraft.vegetable);
   return [];
 }
 
@@ -705,6 +718,7 @@ export {
   getMakerFatSelections,
   setMakerFatSelections,
   isSplitServingsMakerSlot,
+  normalizeMealMakerDraft,
   getMakerSplitSelections,
   addMakerSplitFood,
   removeMakerSplitFood,

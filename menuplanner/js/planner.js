@@ -6,6 +6,7 @@ import {
   initMealSlotsFromProgram,
   applyPlannerState,
   persistPlannerToProgram,
+  normalizeMealMakerDraft,
 } from './plannerState.js';
 
 const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
@@ -27,6 +28,7 @@ function applyProgramPackage(pkg) {
     setActiveProgramId(state.programPackage.program.id);
   }
   applyPlannerState(plannerStateFromPackage(state.programPackage));
+  normalizeMealMakerDraft();
   initMealSlotsFromProgram(state.programPackage);
   if (!views) return;
   views.renderPlannerMeta();
@@ -51,11 +53,19 @@ export async function bootMenuPlannerPage() {
   }
 
   plannerBootPromise = (async () => {
-    const response = await fetch(`../data/foods.json?v=${ASSET_VERSION}`, { cache: 'no-store' });
-    if (!response.ok) {
-      throw new Error('Could not load foods catalog.');
+    let foodsLoadError = null;
+    try {
+      const response = await fetch(`../data/foods.json?v=${ASSET_VERSION}`, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Could not load foods catalog.');
+      }
+      state.foods = await response.json();
+    } catch (err) {
+      foodsLoadError = err;
+      state.foods = Array.isArray(state.foods) ? state.foods : [];
+      console.error(err);
     }
-    state.foods = await response.json();
+
     const plannerViews = await loadViews();
     plannerViews.initWeekGrid();
     plannerViews.initWeekGridCollapse();
@@ -67,9 +77,20 @@ export async function bootMenuPlannerPage() {
     initPrintShop();
     plannerViews.initFoodDropTargets();
     plannerShellReady = true;
+
+    if (foodsLoadError) {
+      plannerViews.showPlannerToast('Could not load foods. Refresh the page to try again.', {
+        variant: 'error',
+      });
+    }
   })();
 
-  await plannerBootPromise;
+  try {
+    await plannerBootPromise;
+  } catch (err) {
+    plannerBootPromise = null;
+    throw err;
+  }
 }
 
 window.addEventListener('beforeunload', () => {
