@@ -52,8 +52,11 @@ const DAY_SLOTS = [
 
 const TEMPLATE_SLOTS = {
   meal: ['protein', 'gs', 'vegetable', 'fat'],
-  snack: ['fruit', 'fat'],
+  snack: ['fruit'],
 };
+
+const MEAL_MAKER_SLOTS = TEMPLATE_SLOTS.meal;
+const MEAL_REFERENCE_SLOT = 'breakfast';
 
 
 const FOODS_DATA_VERSION = '2';
@@ -79,6 +82,15 @@ const WEEK_MEAL_EMPTY_LABEL = {
   'evening-snack': 'Snack',
 };
 
+
+function createEmptyMealMakerDraft() {
+  return {
+    protein: null,
+    gs: null,
+    vegetable: null,
+    fat: [],
+  };
+}
 
 function createEmptyDayState() {
   const selections = {};
@@ -127,18 +139,23 @@ function resetPlannerState() {
   state.weekPlan = createFreshWeekPlan();
   state.savedMeals = [];
   state.activeWeekDay = todayWeekDayId();
-  state.activeSlot = null;
+  state.mealMakerDraft = createEmptyMealMakerDraft();
+  state.activeMakerSlot = null;
+  state.foodBrowseMode = null;
   state.activeFoodCategory = null;
   state.weekGridCollapsed = false;
 }
 
 function collectPlannerState() {
   return {
-    version: 1,
+    version: 2,
     activeWeekDay: state.activeWeekDay,
     weekPlan: state.weekPlan,
     savedMeals: state.savedMeals,
     weekGridCollapsed: state.weekGridCollapsed,
+    mealMakerDraft: state.mealMakerDraft,
+    activeMakerSlot: state.activeMakerSlot,
+    foodBrowseMode: state.foodBrowseMode,
   };
 }
 
@@ -158,6 +175,19 @@ function applyPlannerState(saved) {
   }
   if (saved.weekGridCollapsed === true) {
     state.weekGridCollapsed = true;
+  }
+  if (saved.mealMakerDraft && typeof saved.mealMakerDraft === 'object') {
+    state.mealMakerDraft = {
+      ...createEmptyMealMakerDraft(),
+      ...saved.mealMakerDraft,
+      fat: Array.isArray(saved.mealMakerDraft.fat) ? saved.mealMakerDraft.fat : [],
+    };
+  }
+  if (saved.activeMakerSlot && MEAL_MAKER_SLOTS.includes(saved.activeMakerSlot)) {
+    state.activeMakerSlot = saved.activeMakerSlot;
+  }
+  if (saved.foodBrowseMode === 'fruit') {
+    state.foodBrowseMode = 'fruit';
   }
 }
 
@@ -258,8 +288,9 @@ function escapeHtml(text) {
 }
 
 function slotFoodCategories() {
-  if (!state.activeSlot) return [];
-  return SLOT_META[state.activeSlot.categorySlot].categories;
+  if (state.foodBrowseMode === 'fruit') return ['fruit'];
+  if (!state.activeMakerSlot) return [];
+  return SLOT_META[state.activeMakerSlot].categories;
 }
 
 function ensureActiveFoodCategory() {
@@ -277,8 +308,63 @@ function ensureActiveFoodCategory() {
   }
 }
 
-function isCategorySlotActive(daySlotId, categorySlot) {
-  return state.activeSlot?.daySlotId === daySlotId && state.activeSlot?.categorySlot === categorySlot;
+function isCategorySlotActive(categorySlot) {
+  return state.activeMakerSlot === categorySlot;
+}
+
+function makerRequiredServings(categorySlot) {
+  return requiredServings(MEAL_REFERENCE_SLOT, categorySlot);
+}
+
+function makerServingHint(categorySlot) {
+  const required = makerRequiredServings(categorySlot);
+  if (!state.programPackage) return 'Tap or drag food';
+  if (required <= 0 && SLOT_META[categorySlot]?.optional) return 'Optional';
+  return `${fmtServings(required)} serving${Math.abs(required - 1) < 0.05 ? '' : 's'}`;
+}
+
+function getMakerFatSelections() {
+  return state.mealMakerDraft.fat || [];
+}
+
+function setMakerFatSelections(items) {
+  state.mealMakerDraft.fat = items.length ? items : [];
+}
+
+function clearMealMakerDraft() {
+  state.mealMakerDraft = createEmptyMealMakerDraft();
+}
+
+function isMealMakerSaveable() {
+  return MEAL_MAKER_SLOTS.every((slotKey) => {
+    if (SLOT_META[slotKey]?.optional) return true;
+    if (isFatSlot(slotKey)) return true;
+    return state.mealMakerDraft[slotKey] != null;
+  });
+}
+
+function mealMakerToItems() {
+  return MEAL_MAKER_SLOTS.flatMap((slotKey) => {
+    if (isFatSlot(slotKey)) {
+      return getMakerFatSelections().map((selected) => ({
+        slot: itemSlotLabel(slotKey, selected.foodName),
+        foodName: selected.foodName,
+        servings: selected.servings,
+      }));
+    }
+    const selected = state.mealMakerDraft[slotKey];
+    if (!selected) return [];
+    return [{
+      slot: itemSlotLabel(slotKey, selected.foodName),
+      foodName: selected.foodName,
+      servings: selected.servings,
+    }];
+  });
+}
+
+function isMealMealSlot(mealSlotId) {
+  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
+  return daySlot?.template === 'meal';
 }
 
 function isFatSlot(categorySlot) {
@@ -302,8 +388,8 @@ function isFruitOnlySnack(mealSlotId, weekDay = state.activeWeekDay) {
   return selections.fruit != null && getFatSelections(mealSlotId, weekDay).length === 0;
 }
 
-function acceptsSavedMealDrop(daySlotId) {
-  return DAY_SLOTS.some((item) => item.id === daySlotId);
+function acceptsSavedMealDrop(mealSlotId) {
+  return isMealMealSlot(mealSlotId);
 }
 
 /** Grid and assigned slots: meal came from Saved Meals (center column). */
@@ -345,27 +431,13 @@ function savedMealSlotKeys(meal) {
 
 /** Saved meal must cover every required category for the target meal slot. */
 function savedMealFitsMealSlot(meal, mealSlotId) {
-  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
-  if (!daySlot || !meal?.items?.length) return false;
+  if (!isMealMealSlot(mealSlotId) || !meal?.items?.length) return false;
   const filled = savedMealSlotKeys(meal);
-  return templateSlots(daySlot.template).every((slotKey) => {
+  return MEAL_MAKER_SLOTS.every((slotKey) => {
     if (SLOT_META[slotKey]?.optional) return true;
+    if (isFatSlot(slotKey)) return true;
     return filled.has(slotKey);
   });
-}
-
-function isDaySlotSaveable(mealSlotId, weekDay = state.activeWeekDay) {
-  if (isFruitOnlySnack(mealSlotId, weekDay)) return false;
-  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
-  return templateSlots(daySlot.template).every((slotKey) => {
-    const meta = SLOT_META[slotKey];
-    if (meta.optional) return true;
-    return categorySelections(mealSlotId, weekDay)[slotKey] != null;
-  });
-}
-
-function showSaveMealButton(mealSlotId) {
-  return isDaySlotSaveable(mealSlotId);
 }
 
 function clearDaySlotMeta(mealSlotId, weekDay = state.activeWeekDay) {
@@ -377,26 +449,6 @@ function itemSlotLabel(categorySlot, foodName) {
   if (categorySlot !== 'fat') return SLOT_META[categorySlot].label;
   const food = state.foods.find((item) => item.name === foodName);
   return FAT_LANE_SLOT_LABELS[food?.category] || SLOT_META.fat.label;
-}
-
-function daySlotToMealItems(mealSlotId, weekDay = state.activeWeekDay) {
-  const daySlot = DAY_SLOTS.find((item) => item.id === mealSlotId);
-  return templateSlots(daySlot.template).flatMap((slotKey) => {
-    if (isFatSlot(slotKey)) {
-      return getFatSelections(mealSlotId, weekDay).map((selected) => ({
-        slot: itemSlotLabel(slotKey, selected.foodName),
-        foodName: selected.foodName,
-        servings: selected.servings,
-      }));
-    }
-    const selected = categorySelections(mealSlotId, weekDay)[slotKey];
-    if (!selected) return [];
-    return [{
-      slot: itemSlotLabel(slotKey, selected.foodName),
-      foodName: selected.foodName,
-      servings: selected.servings,
-    }];
-  });
 }
 
 function mealIdFromName(name) {
@@ -516,11 +568,12 @@ export const state = {
   foods: [],
   programPackage: null,
   mealSlotsById: {},
-  activeSlot: null,
+  mealMakerDraft: createEmptyMealMakerDraft(),
+  activeMakerSlot: null,
+  foodBrowseMode: null,
   activeFoodCategory: null,
   foodSearchQuery: '',
   weekPlan: {},
-  pendingSaveDaySlotId: null,
   activeWeekDay: null,
 };
 
@@ -538,6 +591,9 @@ export {
   WEEK_DAYS,
   WEEK_GRID_MEALS,
   WEEK_MEAL_EMPTY_LABEL,
+  MEAL_MAKER_SLOTS,
+  MEAL_REFERENCE_SLOT,
+  createEmptyMealMakerDraft,
   createEmptyDayState,
   createFreshWeekPlan,
   ensureWeekPlanShape,
@@ -560,6 +616,14 @@ export {
   slotFoodCategories,
   ensureActiveFoodCategory,
   isCategorySlotActive,
+  makerRequiredServings,
+  makerServingHint,
+  getMakerFatSelections,
+  setMakerFatSelections,
+  clearMealMakerDraft,
+  isMealMakerSaveable,
+  mealMakerToItems,
+  isMealMealSlot,
   isFatSlot,
   getFatSelections,
   setFatSelections,
@@ -569,11 +633,8 @@ export {
   isSnackMealSlot,
   gridCellHasAssignment,
   savedMealFitsMealSlot,
-  isDaySlotSaveable,
-  showSaveMealButton,
   clearDaySlotMeta,
   itemSlotLabel,
-  daySlotToMealItems,
   mealIdFromName,
   findSavedMealByName,
   dedupeSavedMeals,

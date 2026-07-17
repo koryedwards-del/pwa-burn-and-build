@@ -133,34 +133,36 @@
               <section class="week-grid" id="week-grid" aria-label="Week"></section>
             </div>
 
-            <section class="workspace" aria-label="Planner workspace">
-              <div class="workspace__col workspace__col--day">
-                <div class="day-col-header">
-                  <p class="col-heading col-heading--day" id="active-day-label">Today</p>
-                  <button type="button" class="day-col__clear" id="clear-day-menu">Clear Day</button>
+            <section class="workspace-area" aria-label="Planner workspace">
+              <section class="meal-maker-card">
+                <div class="meal-maker-card__head">
+                  <p class="col-heading meal-maker-card__title">Meal maker</p>
+                  <button type="button" class="meal-maker-card__clear" id="clear-meal-maker">Clear</button>
                 </div>
-                <div class="day-slots" id="day-slots"></div>
-              </div>
+                <div class="meal-maker" id="meal-maker"></div>
+              </section>
 
-              <div class="workspace__col workspace__col--meals">
-                <p class="col-heading">Saved Meals</p>
-                <div class="saved-meals" id="saved-meals"></div>
-              </div>
+              <section class="workspace">
+                <div class="workspace__col workspace__col--meals">
+                  <p class="col-heading">Saved Meals</p>
+                  <div class="saved-meals" id="saved-meals"></div>
+                </div>
 
-              <div class="workspace__col workspace__col--foods">
-                <p class="col-heading">Foods</p>
-                <p class="food-filter-label" id="food-filter-label" hidden></p>
-                <input
-                  type="search"
-                  class="food-search"
-                  id="food-search"
-                  placeholder="Search foods…"
-                  autocomplete="off"
-                  hidden
-                />
-                <div class="food-filters" id="food-filters"></div>
-                <div class="food-stack" id="food-stack"></div>
-              </div>
+                <div class="workspace__col workspace__col--foods">
+                  <p class="col-heading">Foods</p>
+                  <p class="food-filter-label" id="food-filter-label" hidden></p>
+                  <input
+                    type="search"
+                    class="food-search"
+                    id="food-search"
+                    placeholder="Search foods…"
+                    autocomplete="off"
+                    hidden
+                  />
+                  <div class="food-filters" id="food-filters"></div>
+                  <div class="food-stack" id="food-stack"></div>
+                </div>
+              </section>
             </section>
           </main>
 
