@@ -358,6 +358,36 @@ body {
   gap: 8px;
 }
 
+.meal-maker-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.meal-maker-card__save {
+  padding: 3px 8px;
+  border: 1px solid var(--yellow);
+  border-radius: 4px;
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.meal-maker-card__save:hover:not(:disabled) {
+  background: var(--gold);
+  color: var(--on-gold);
+}
+
+.meal-maker-card__save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .meal-maker-card__title {
   padding-bottom: 0;
   border-bottom: none;
@@ -387,7 +417,7 @@ body {
 .meal-maker {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(4, minmax(0, 1fr)) auto;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
   gap: 6px;
   flex: 1 1 auto;
   min-height: 0;
@@ -410,56 +440,6 @@ body {
 
 .meal-maker .card__title {
   font-size: 0.72rem;
-}
-
-.meal-maker__save {
-  width: 100%;
-  min-height: 36px;
-  padding: 8px 12px;
-  border: 1px solid var(--yellow);
-  border-radius: 6px;
-  background: var(--yellow-dim);
-  color: var(--yellow);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.meal-maker__save-form {
-  grid-column: 1 / -1;
-}
-
-.meal-maker__save-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.meal-maker__name {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface-2);
-  color: var(--text);
-  font-size: 0.78rem;
-}
-
-.meal-maker__name:focus {
-  outline: none;
-  border-color: var(--yellow);
-}
-
-.meal-maker__save:hover:not(:disabled) {
-  background: var(--gold);
-  color: var(--on-gold);
-}
-
-.meal-maker__save:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
 }
 
 .workspace {

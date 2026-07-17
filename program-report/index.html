@@ -138,7 +138,10 @@
                 <div class="meal-maker-card">
                   <div class="meal-maker-card__head">
                     <p class="col-heading meal-maker-card__title">Meal maker</p>
-                    <button type="button" class="meal-maker-card__clear" id="clear-meal-maker">Clear</button>
+                    <div class="meal-maker-card__actions">
+                      <button type="button" class="meal-maker-card__save" id="save-meal-open" disabled>Save Meal</button>
+                      <button type="button" class="meal-maker-card__clear" id="clear-meal-maker">Clear</button>
+                    </div>
                   </div>
                   <div class="meal-maker" id="meal-maker"></div>
                 </div>
@@ -183,6 +186,25 @@
         <button type="button" class="save-dialog__btn save-dialog__btn--ghost" id="print-choice-cancel">Cancel</button>
       </div>
     </div>
+  </dialog>
+
+  <dialog id="save-meal-dialog" class="save-dialog">
+    <form class="save-dialog__form" id="save-meal-form">
+      <p class="save-dialog__title">Name this meal</p>
+      <input
+        type="text"
+        id="save-meal-name"
+        class="save-dialog__input"
+        placeholder="Short name for week grid"
+        maxlength="120"
+        required
+        autocomplete="off"
+      />
+      <div class="save-dialog__actions">
+        <button type="button" class="save-dialog__btn save-dialog__btn--ghost" id="save-meal-cancel">Cancel</button>
+        <button type="submit" class="save-dialog__btn save-dialog__btn--primary">Save Meal</button>
+      </div>
+    </form>
   </dialog>
 
   <script>

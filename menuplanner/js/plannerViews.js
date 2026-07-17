@@ -113,12 +113,19 @@ function saveMealFromMaker(name) {
 
 let mealMakerWasSaveable = false;
 
-function scrollMealMakerSaveIntoView() {
-  requestAnimationFrame(() => {
-    document.getElementById('meal-maker')
-      ?.querySelector('.meal-maker__save-row')
-      ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  });
+function openSaveMealDialog() {
+  const dialog = document.getElementById('save-meal-dialog');
+  const input = document.getElementById('save-meal-name');
+  if (!dialog || !input || !isMealMakerSaveable()) return;
+  input.value = '';
+  dialog.showModal();
+  input.focus();
+}
+
+function updateSaveMealTrigger() {
+  const button = document.getElementById('save-meal-open');
+  if (!button) return;
+  button.disabled = !isMealMakerSaveable();
 }
 
 function renderMakerFatItemCard({ item, index }) {
@@ -231,27 +238,7 @@ function renderMealMaker() {
   if (!container) return;
 
   const slotsHtml = MEAL_MAKER_SLOTS.map((categorySlot) => renderMakerCategorySlot(categorySlot)).join('');
-  const saveable = isMealMakerSaveable();
-  const saveHtml = saveable
-    ? `
-      <form class="meal-maker__save-form" id="meal-maker-save-form">
-        <div class="meal-maker__save-row">
-          <input
-            type="text"
-            class="meal-maker__name"
-            id="save-meal-name"
-            placeholder="Short name for week grid"
-            maxlength="120"
-            autocomplete="off"
-            required
-          />
-          <button type="submit" class="meal-maker__save">Save Meal</button>
-        </div>
-      </form>
-    `
-    : '<button type="button" class="meal-maker__save" disabled>Save Meal</button>';
-
-  container.innerHTML = `${slotsHtml}${saveHtml}`;
+  container.innerHTML = slotsHtml;
 
   container.querySelectorAll('[data-maker-category]').forEach((button) => {
     button.addEventListener('click', (event) => {
@@ -272,9 +259,10 @@ function renderMealMaker() {
     });
   });
 
+  const saveable = isMealMakerSaveable();
+  updateSaveMealTrigger();
   if (saveable && !mealMakerWasSaveable) {
-    scrollMealMakerSaveIntoView();
-    container.querySelector('#save-meal-name')?.focus();
+    openSaveMealDialog();
   }
   mealMakerWasSaveable = saveable;
 }
@@ -972,22 +960,34 @@ function initMealDragDrop() {
   });
 }
 
-function initSaveMealForm() {
-  const card = document.querySelector('.meal-maker-card');
-  if (!card || card.dataset.saveMealInit) return;
-  card.dataset.saveMealInit = '1';
+function initSaveMealDialog() {
+  const dialog = document.getElementById('save-meal-dialog');
+  const form = document.getElementById('save-meal-form');
+  const input = document.getElementById('save-meal-name');
+  const cancel = document.getElementById('save-meal-cancel');
+  const open = document.getElementById('save-meal-open');
+  if (!dialog || !form || !input || !cancel || dialog.dataset.saveMealInit) return;
+  dialog.dataset.saveMealInit = '1';
 
-  card.addEventListener('submit', (event) => {
-    const form = event.target.closest('#meal-maker-save-form');
-    if (!form) return;
+  open?.addEventListener('click', () => {
+    if (!isMealMakerSaveable()) return;
+    openSaveMealDialog();
+  });
+
+  cancel.addEventListener('click', () => {
+    dialog.close();
+  });
+
+  form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const input = form.querySelector('#save-meal-name');
-    if (!input || !isMealMakerSaveable()) return;
     try {
+      if (!isMealMakerSaveable()) return;
       saveMealFromMaker(input.value);
     } catch (err) {
       console.error('Save meal failed:', err);
       showPlannerToast('Could not save meal. Try again.', { variant: 'error' });
+    } finally {
+      dialog.close();
     }
   });
 }
@@ -1014,7 +1014,7 @@ export {
   renderPlannerWorkspace,
   initWeekGrid,
   initWeekGridCollapse,
-  initSaveMealForm,
+  initSaveMealDialog,
   initClearMealMaker,
   initClearWeekMenu,
   initFoodSearch,
