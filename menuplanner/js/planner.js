@@ -59,7 +59,7 @@ export async function bootMenuPlannerPage() {
     const plannerViews = await loadViews();
     plannerViews.initWeekGrid();
     plannerViews.initWeekGridCollapse();
-    plannerViews.initSaveMealDialog();
+    plannerViews.initSaveMealForm();
     plannerViews.initClearMealMaker();
     plannerViews.initClearWeekMenu();
     plannerViews.initFoodSearch();

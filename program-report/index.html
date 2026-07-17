@@ -185,25 +185,6 @@
     </div>
   </dialog>
 
-  <dialog id="save-meal-dialog" class="save-dialog">
-    <form class="save-dialog__form" id="save-meal-form">
-      <p class="save-dialog__title">Name this meal</p>
-      <input
-        type="text"
-        id="save-meal-name"
-        class="save-dialog__input"
-        placeholder="Short name for week grid"
-        maxlength="120"
-        required
-        autocomplete="off"
-      />
-      <div class="save-dialog__actions">
-        <button type="button" class="save-dialog__btn save-dialog__btn--ghost" id="save-meal-cancel">Cancel</button>
-        <button type="submit" class="save-dialog__btn save-dialog__btn--primary">Save Meal</button>
-      </div>
-    </form>
-  </dialog>
-
   <script>
     document.getElementById('access-form')?.addEventListener('submit', (event) => {
       event.preventDefault();

@@ -104,18 +104,21 @@ function saveMealFromMaker(name) {
   clearMealMakerDraft();
   state.activeMakerSlot = null;
   state.foodBrowseMode = null;
+  mealMakerWasSaveable = false;
   renderMealMaker();
   renderSavedMeals();
   refreshFoodsPanel();
   persistPlannerToProgram();
 }
 
-function openSaveMealDialog() {
-  const dialog = document.getElementById('save-meal-dialog');
-  const input = document.getElementById('save-meal-name');
-  input.value = '';
-  dialog.showModal();
-  input.focus();
+let mealMakerWasSaveable = false;
+
+function scrollMealMakerSaveIntoView() {
+  requestAnimationFrame(() => {
+    document.getElementById('meal-maker')
+      ?.querySelector('.meal-maker__save-row')
+      ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  });
 }
 
 function renderMakerFatItemCard({ item, index }) {
@@ -228,12 +231,27 @@ function renderMealMaker() {
   if (!container) return;
 
   const slotsHtml = MEAL_MAKER_SLOTS.map((categorySlot) => renderMakerCategorySlot(categorySlot)).join('');
-  const saveDisabled = isMealMakerSaveable() ? '' : ' disabled';
+  const saveable = isMealMakerSaveable();
+  const saveHtml = saveable
+    ? `
+      <form class="meal-maker__save-form" id="meal-maker-save-form">
+        <div class="meal-maker__save-row">
+          <input
+            type="text"
+            class="meal-maker__name"
+            id="save-meal-name"
+            placeholder="Short name for week grid"
+            maxlength="120"
+            autocomplete="off"
+            required
+          />
+          <button type="submit" class="meal-maker__save">Save Meal</button>
+        </div>
+      </form>
+    `
+    : '<button type="button" class="meal-maker__save" disabled>Save Meal</button>';
 
-  container.innerHTML = `
-    ${slotsHtml}
-    <button type="button" class="meal-maker__save" id="save-meal-open"${saveDisabled}>Save Meal</button>
-  `;
+  container.innerHTML = `${slotsHtml}${saveHtml}`;
 
   container.querySelectorAll('[data-maker-category]').forEach((button) => {
     button.addEventListener('click', (event) => {
@@ -254,10 +272,11 @@ function renderMealMaker() {
     });
   });
 
-  container.querySelector('#save-meal-open')?.addEventListener('click', () => {
-    if (!isMealMakerSaveable()) return;
-    openSaveMealDialog();
-  });
+  if (saveable && !mealMakerWasSaveable) {
+    scrollMealMakerSaveIntoView();
+    container.querySelector('#save-meal-name')?.focus();
+  }
+  mealMakerWasSaveable = saveable;
 }
 
 function clearMealMaker() {
@@ -265,6 +284,7 @@ function clearMealMaker() {
   state.activeMakerSlot = null;
   state.foodBrowseMode = null;
   state.activeFoodCategory = null;
+  mealMakerWasSaveable = false;
   renderMealMaker();
   refreshFoodsPanel();
 }
@@ -952,28 +972,22 @@ function initMealDragDrop() {
   });
 }
 
-function initSaveMealDialog() {
-  const dialog = document.getElementById('save-meal-dialog');
-  const form = document.getElementById('save-meal-form');
-  const input = document.getElementById('save-meal-name');
-  const cancel = document.getElementById('save-meal-cancel');
-  if (!dialog || !form || !input || !cancel || dialog.dataset.saveMealInit) return;
-  dialog.dataset.saveMealInit = '1';
+function initSaveMealForm() {
+  const card = document.querySelector('.meal-maker-card');
+  if (!card || card.dataset.saveMealInit) return;
+  card.dataset.saveMealInit = '1';
 
-  cancel.addEventListener('click', () => {
-    dialog.close();
-  });
-
-  form.addEventListener('submit', (event) => {
+  card.addEventListener('submit', (event) => {
+    const form = event.target.closest('#meal-maker-save-form');
+    if (!form) return;
     event.preventDefault();
+    const input = form.querySelector('#save-meal-name');
+    if (!input || !isMealMakerSaveable()) return;
     try {
-      if (!isMealMakerSaveable()) return;
       saveMealFromMaker(input.value);
     } catch (err) {
       console.error('Save meal failed:', err);
       showPlannerToast('Could not save meal. Try again.', { variant: 'error' });
-    } finally {
-      dialog.close();
     }
   });
 }
@@ -1000,7 +1014,7 @@ export {
   renderPlannerWorkspace,
   initWeekGrid,
   initWeekGridCollapse,
-  initSaveMealDialog,
+  initSaveMealForm,
   initClearMealMaker,
   initClearWeekMenu,
   initFoodSearch,

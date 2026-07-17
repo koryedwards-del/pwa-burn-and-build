@@ -345,6 +345,10 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
 }
 
 .meal-maker-card__head {
@@ -383,13 +387,16 @@ body {
 .meal-maker {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
-  align-content: start;
+  grid-template-rows: repeat(4, minmax(0, 1fr)) auto;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-height: 0;
+  align-content: stretch;
 }
 
 .meal-maker .card--slot {
-  padding: 8px 10px;
-  min-height: 72px;
+  padding: 6px 10px;
+  min-height: 0;
 }
 
 .meal-maker .card__slot-label {
@@ -406,7 +413,6 @@ body {
 }
 
 .meal-maker__save {
-  grid-column: 1 / -1;
   width: 100%;
   min-height: 36px;
   padding: 8px 12px;
@@ -419,6 +425,31 @@ body {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
+}
+
+.meal-maker__save-form {
+  grid-column: 1 / -1;
+}
+
+.meal-maker__save-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meal-maker__name {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.meal-maker__name:focus {
+  outline: none;
+  border-color: var(--yellow);
 }
 
 .meal-maker__save:hover:not(:disabled) {
@@ -1197,13 +1228,15 @@ body {
 
 .day-slots::-webkit-scrollbar,
 .saved-meals::-webkit-scrollbar,
-.food-stack::-webkit-scrollbar {
+.food-stack::-webkit-scrollbar,
+.meal-maker-card::-webkit-scrollbar {
   width: 6px;
 }
 
 .day-slots::-webkit-scrollbar-thumb,
 .saved-meals::-webkit-scrollbar-thumb,
-.food-stack::-webkit-scrollbar-thumb {
+.food-stack::-webkit-scrollbar-thumb,
+.meal-maker-card::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
 }
