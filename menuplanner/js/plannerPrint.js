@@ -125,27 +125,15 @@ function buildWeekAgendaContent() {
   `;
 }
 
-/** Trimmed medallion asset — transparent outer corners for light/print backgrounds. */
-const PRINT_LOGO_PATH = '../../img/brand/bblogo.png';
 const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
 
 let printLogoDataUrlPromise = null;
 
-async function loadPrintLogoDataUrl() {
-  if (printLogoDataUrlPromise) return printLogoDataUrlPromise;
-  printLogoDataUrlPromise = (async () => {
-    const url = new URL(PRINT_LOGO_PATH, import.meta.url);
-    url.searchParams.set('v', ASSET_VERSION);
-    const response = await fetch(url.href, { cache: 'no-store' });
-    if (!response.ok) throw new Error('Print logo failed to load');
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(new Error('Print logo failed to read'));
-      reader.readAsDataURL(blob);
-    });
-  })();
+function getPrintLogoDataUrl() {
+  if (!printLogoDataUrlPromise) {
+    printLogoDataUrlPromise = import(`./printLogoAsset.js?v=${ASSET_VERSION}`)
+      .then((mod) => mod.PRINT_LOGO_DATA_URL);
+  }
   return printLogoDataUrlPromise;
 }
 
@@ -597,7 +585,7 @@ async function printPlannerDocument(view) {
 
   let logoDataUrl = '';
   try {
-    logoDataUrl = await loadPrintLogoDataUrl();
+    logoDataUrl = await getPrintLogoDataUrl();
   } catch (err) {
     console.error('Print logo failed to load:', err);
   }

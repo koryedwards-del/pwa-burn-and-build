@@ -66,16 +66,27 @@ function saveMealFromDay(mealSlotId, name) {
   const trimmed = name.trim();
   if (!trimmed) return;
 
-  const meal = {
-    id: mealIdFromName(trimmed),
-    name: trimmed,
-    pickCount: 1,
-    items: daySlotToMealItems(mealSlotId),
-  };
+  const items = daySlotToMealItems(mealSlotId);
+  const existingId = mealSlotMeta(mealSlotId).savedMealId;
+  const existing = existingId ? state.savedMeals.find((meal) => meal.id === existingId) : null;
 
-  state.savedMeals.push(meal);
-  mealSlotMeta(mealSlotId).mealName = trimmed;
-  mealSlotMeta(mealSlotId).savedMealId = meal.id;
+  if (existing) {
+    existing.name = trimmed;
+    existing.items = items;
+    existing.pickCount += 1;
+    mealSlotMeta(mealSlotId).mealName = trimmed;
+  } else {
+    const meal = {
+      id: mealIdFromName(trimmed),
+      name: trimmed,
+      pickCount: 1,
+      items,
+    };
+    state.savedMeals.push(meal);
+    mealSlotMeta(mealSlotId).mealName = trimmed;
+    mealSlotMeta(mealSlotId).savedMealId = meal.id;
+  }
+
   renderWeekGrid();
   renderDayColumn();
   renderSavedMeals();
@@ -1054,6 +1065,8 @@ function initSaveMealDialog() {
   const form = document.getElementById('save-meal-form');
   const input = document.getElementById('save-meal-name');
   const cancel = document.getElementById('save-meal-cancel');
+  if (!dialog || !form || !input || !cancel || dialog.dataset.saveMealInit) return;
+  dialog.dataset.saveMealInit = '1';
 
   cancel.addEventListener('click', () => {
     state.pendingSaveDaySlotId = null;
@@ -1062,10 +1075,17 @@ function initSaveMealDialog() {
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (!state.pendingSaveDaySlotId) return;
-    saveMealFromDay(state.pendingSaveDaySlotId, input.value);
+    const mealSlotId = state.pendingSaveDaySlotId;
     state.pendingSaveDaySlotId = null;
-    dialog.close();
+    try {
+      if (!mealSlotId) return;
+      saveMealFromDay(mealSlotId, input.value);
+    } catch (err) {
+      console.error('Save meal failed:', err);
+      showPlannerToast('Could not save meal. Try again.', { variant: 'error' });
+    } finally {
+      dialog.close();
+    }
   });
 }
 

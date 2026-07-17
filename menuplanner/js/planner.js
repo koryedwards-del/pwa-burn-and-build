@@ -7,22 +7,19 @@ import {
   applyPlannerState,
   persistPlannerToProgram,
 } from './plannerState.js';
-import {
-  renderPlannerMeta,
-  renderPlannerWorkspace,
-  initWeekGrid,
-  initWeekGridCollapse,
-  initSaveMealDialog,
-  initClearDayMenu,
-  initClearWeekMenu,
-  initFoodSearch,
-  initFoodDropTargets,
-} from './plannerViews.js';
 
 const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
 
 let plannerShellReady = false;
 let plannerBootPromise = null;
+let views = null;
+
+async function loadViews() {
+  if (!views) {
+    views = await import(`./plannerViews.js?v=${ASSET_VERSION}`);
+  }
+  return views;
+}
 
 function applyProgramPackage(pkg) {
   state.programPackage = pkg;
@@ -31,9 +28,10 @@ function applyProgramPackage(pkg) {
   }
   applyPlannerState(plannerStateFromPackage(state.programPackage));
   initMealSlotsFromProgram(state.programPackage);
-  renderPlannerMeta();
+  if (!views) return;
+  views.renderPlannerMeta();
   if (plannerShellReady) {
-    renderPlannerWorkspace();
+    views.renderPlannerWorkspace();
   }
 }
 
@@ -58,15 +56,16 @@ export async function bootMenuPlannerPage() {
       throw new Error('Could not load foods catalog.');
     }
     state.foods = await response.json();
-    initWeekGrid();
-    initWeekGridCollapse();
-    initSaveMealDialog();
-    initClearDayMenu();
-    initClearWeekMenu();
-    initFoodSearch();
+    const plannerViews = await loadViews();
+    plannerViews.initWeekGrid();
+    plannerViews.initWeekGridCollapse();
+    plannerViews.initSaveMealDialog();
+    plannerViews.initClearDayMenu();
+    plannerViews.initClearWeekMenu();
+    plannerViews.initFoodSearch();
     const { initPrintShop } = await import(`./plannerPrint.js?v=${ASSET_VERSION}`);
     initPrintShop();
-    initFoodDropTargets();
+    plannerViews.initFoodDropTargets();
     plannerShellReady = true;
   })();
 
