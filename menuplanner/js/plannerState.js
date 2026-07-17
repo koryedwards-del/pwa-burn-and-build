@@ -207,14 +207,7 @@ function applyPlannerState(saved) {
   if (saved.activeMakerSlot && MEAL_MAKER_SLOTS.includes(saved.activeMakerSlot)) {
     state.activeMakerSlot = saved.activeMakerSlot;
   }
-  if (saved.activeMealSlot && DAY_SLOTS.some((slot) => slot.id === saved.activeMealSlot)) {
-    state.activeMealSlot = saved.activeMealSlot;
-  }
-  if (saved.foodBrowseMode === 'fruit') {
-    state.foodBrowseMode = 'fruit';
-  } else if (saved.foodBrowseMode === 'meal') {
-    state.foodBrowseMode = 'meal';
-  }
+  // activeMealSlot and foodBrowseMode are session-only — dashed selection shows after tap.
 }
 
 function persistPlannerToProgram({ immediate = false } = {}) {

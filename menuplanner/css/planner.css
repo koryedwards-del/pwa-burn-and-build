@@ -329,17 +329,7 @@ body {
   min-width: 0;
 }
 
-.week-matrix__cell--active-row {
-  border-color: var(--gold-muted);
-  background: var(--gold-select-bg);
-}
-
 .week-matrix__cell--selected {
-  border-style: dashed;
-  border-color: rgba(253, 197, 0, 0.42);
-}
-
-.week-matrix__cell--selected.week-matrix__cell--active-row {
   border-style: dashed;
   border-color: rgba(253, 197, 0, 0.42);
 }

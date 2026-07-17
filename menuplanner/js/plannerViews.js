@@ -584,7 +584,7 @@ function renderWeekGrid() {
       return `
         <button
           type="button"
-          class="mini-card week-matrix__cell${empty ? ' mini-card--empty' : ''}${active ? ' week-matrix__cell--active-row' : ''}${selected ? ' week-matrix__cell--selected' : ''}"
+          class="mini-card week-matrix__cell${empty ? ' mini-card--empty' : ''}${selected ? ' week-matrix__cell--selected' : ''}"
           data-week-meal-drop
           ${titleAttr}
           data-week-day="${day.id}"
