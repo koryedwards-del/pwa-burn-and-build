@@ -1,4 +1,4 @@
-/** Burn & Build program package — build, validate, import (website → app) */
+/** Burn & Build program package — build and validate desktop program payloads. */
 
 import { computePlan, generateMealSlots } from './burnEngine.js';
 import { heartRates, profileFromForm } from './onboardingEngine.js';
@@ -95,7 +95,7 @@ export function validateProgramPackage(pkg) {
     errors.push('Invalid program.startDate (expected YYYY-MM-DD).');
   }
   if (pkg.program?.status !== 'active') {
-    errors.push(`Program status is "${pkg.program?.status}" — only active programs can be imported.`);
+    errors.push(`Program status is "${pkg.program?.status}" — only active programs are supported.`);
   }
   const s = pkg.plan?.servings;
   if (!s) {
@@ -112,54 +112,6 @@ export function validateProgramPackage(pkg) {
     errors.push('Program has expired.');
   }
   return { ok: errors.length === 0, errors };
-}
-
-export function planFromPackage(pkg) {
-  if (!pkg?.plan) return null;
-  return {
-    servings: pkg.plan.servings,
-    maintainTotalCals: pkg.plan.summary.maintainTotalCals,
-    reduceTotalCals: pkg.plan.summary.reduceTotalCals,
-    maintainProteinGrams: pkg.plan.summary.maintainProteinGrams,
-    reduceFatGrams: pkg.plan.summary.reduceFatGrams,
-    maintainFatCalories: pkg.plan.summary.maintainFatCalories ?? pkg.plan.formula?.FD,
-    reduceFatCalories: pkg.plan.summary.reduceFatCalories ?? pkg.plan.formula?.FG,
-    weeklyFatLossPounds: pkg.plan.summary.weeklyFatLossPounds,
-    formula: pkg.plan.formula,
-  };
-}
-
-export function getProgramDay(pkg, now = new Date()) {
-  if (!pkg?.program?.startDate) return 1;
-  const start = parseDateKey(pkg.program.startDate);
-  const today = new Date(now);
-  today.setHours(0, 0, 0, 0);
-  const diff = Math.floor((today - start) / 86400000) + 1;
-  const max = pkg.program.durationDays || PROGRAM_DURATION_DAYS;
-  return Math.max(1, Math.min(diff, max));
-}
-
-export function wakeTimeFromProgram(pkg, settings) {
-  return settings?.wakeTime || pkg?.intake?.defaultWakeTime || '06:00';
-}
-
-export function mealSlotsFromProgram(pkg, settings) {
-  const wake = wakeTimeFromProgram(pkg, settings);
-  const [wh, wm] = wake.split(':').map(Number);
-  const plan = planFromPackage(pkg);
-  if (!plan) return [];
-  if (settings?.wakeTime && settings.wakeTime !== pkg.intake?.defaultWakeTime) {
-    return generateMealSlots(wh, wm, plan.servings);
-  }
-  return pkg.plan.mealSlots?.length ? pkg.plan.mealSlots : generateMealSlots(wh, wm, plan.servings);
-}
-
-export function parseProgramPackageJson(text) {
-  try {
-    return { ok: true, pkg: JSON.parse(text) };
-  } catch (err) {
-    return { ok: false, errors: ['Invalid JSON — could not parse file.'] };
-  }
 }
 
 export function localDateKey(from = new Date()) {
@@ -179,10 +131,4 @@ export function localDateKey(from = new Date()) {
 
 function todayDateKey() {
   return localDateKey(new Date());
-}
-
-function parseDateKey(key) {
-  const d = new Date(`${key}T00:00:00`);
-  d.setHours(0, 0, 0, 0);
-  return d;
 }

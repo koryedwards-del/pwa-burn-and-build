@@ -31,8 +31,6 @@ const isProd = process.env.NODE_ENV === 'production';
 const defaultCorsOrigins = [
   'https://burnandbuilddiet.com',
   'https://www.burnandbuilddiet.com',
-  'https://gettheburnandbuildapp.com',
-  'https://www.gettheburnandbuildapp.com',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://127.0.0.1:3000',

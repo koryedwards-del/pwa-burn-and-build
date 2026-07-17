@@ -5,8 +5,6 @@ const RENDER_API_ORIGIN = 'https://program-creator-3tzd.onrender.com';
 const STATIC_SITE_HOSTS = new Set([
   'burnandbuilddiet.com',
   'www.burnandbuilddiet.com',
-  'gettheburnandbuildapp.com',
-  'www.gettheburnandbuildapp.com',
 ]);
 
 export function getApiBaseUrl() {
