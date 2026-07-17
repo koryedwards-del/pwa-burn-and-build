@@ -41,6 +41,8 @@ import {
   savedMealFitsMealSlot,
   clearDaySlotMeta,
   clearMealMakerDraft,
+  applySavedMealItemsToMakerDraft,
+  savedMealById,
   isMealMakerSaveable,
   mealMakerToItems,
   makerRequiredServings,
@@ -107,6 +109,7 @@ function saveMealFromMaker(name) {
 
   dedupeSavedMeals();
   clearMealMakerDraft();
+  state.makerSourceMealId = null;
   state.activeMakerSlot = null;
   state.foodBrowseMode = null;
   renderMealMaker();
@@ -119,9 +122,11 @@ function openSaveMealDialog() {
   const dialog = document.getElementById('save-meal-dialog');
   const input = document.getElementById('save-meal-name');
   if (!dialog || !input || !isMealMakerSaveable()) return;
-  input.value = '';
+  const sourceMeal = state.makerSourceMealId ? savedMealById(state.makerSourceMealId) : null;
+  input.value = sourceMeal?.name || '';
   dialog.showModal();
   input.focus();
+  input.select();
 }
 
 function updateSaveMealTrigger() {
@@ -344,7 +349,21 @@ function clearMealMaker() {
   state.foodBrowseMode = null;
   state.activeFoodCategory = null;
   renderMealMaker();
+  renderSavedMeals();
   refreshFoodsPanel();
+}
+
+function loadSavedMealIntoMaker(mealId) {
+  const meal = state.savedMeals.find((item) => item.id === mealId);
+  if (!meal || !applySavedMealItemsToMakerDraft(meal)) return;
+
+  state.activeMakerSlot = null;
+  state.foodBrowseMode = null;
+  state.activeFoodCategory = null;
+  renderMealMaker();
+  renderSavedMeals();
+  refreshFoodsPanel();
+  persistPlannerToProgram();
 }
 
 function clearWeekMenu() {
@@ -751,12 +770,12 @@ function mealDragHtml(meal) {
 }
 
 function renderSavedMealCard(meal) {
-  const applyReady = state.foodBrowseMode === 'meal' ? ' saved-meal__apply--ready' : '';
+  const loaded = state.makerSourceMealId === meal.id ? ' saved-meal__apply--ready' : '';
   return `
     <article class="saved-meal card card--meal" data-meal-id="${meal.id}">
       <button
         type="button"
-        class="saved-meal__apply${applyReady}"
+        class="saved-meal__apply${loaded}"
         draggable="true"
         data-meal-source
         data-meal-id="${meal.id}"
@@ -781,6 +800,11 @@ function deleteSavedMeal(mealId) {
 
   state.savedMeals.splice(index, 1);
 
+  if (state.makerSourceMealId === mealId) {
+    clearMealMakerDraft();
+    state.activeMakerSlot = null;
+  }
+
   WEEK_DAYS.forEach((weekDay) => {
     DAY_SLOTS.forEach((daySlot) => {
       if (mealSlotMeta(daySlot.id, weekDay).savedMealId === mealId) {
@@ -791,6 +815,7 @@ function deleteSavedMeal(mealId) {
   });
 
   renderSavedMeals();
+  renderMealMaker();
   renderWeekGrid();
   persistPlannerToProgram();
 }
@@ -799,10 +824,12 @@ function renderSavedMeals() {
   const container = document.getElementById('saved-meals');
   if (!container) return;
   const meals = savedMealsByPopularity();
-  const browseHint = state.foodBrowseMode === 'meal'
-    ? '<p class="saved-meals__browse-hint">Tap a saved meal to fill grid</p>'
+  const browseHint = meals.length
+    ? (state.makerSourceMealId
+      ? '<p class="saved-meals__browse-hint">Editing in meal maker — save when ready</p>'
+      : '<p class="saved-meals__browse-hint">Tap a saved meal to review or edit</p>')
     : '';
-  const emptyHint = '<p class="saved-meals__hint">Build a meal in the maker, save it here, then tap breakfast, lunch, or dinner on the grid and tap a meal (or drag).</p>';
+  const emptyHint = '<p class="saved-meals__hint">Build a meal in the maker and save it here. Tap a saved meal to review or edit, or drag onto the grid.</p>';
   container.innerHTML = browseHint + (meals.length
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
     : emptyHint);
@@ -826,8 +853,8 @@ function initSavedMealsPanel() {
 
     const applyBtn = event.target.closest('[data-meal-source]');
     if (!applyBtn || event.target.closest('[data-meal-delete]')) return;
-    if (state.foodBrowseMode !== 'meal') return;
-    addSavedMealToGrid(applyBtn.getAttribute('data-meal-id'));
+    if (applyBtn.dataset.mealWasDragged === '1') return;
+    loadSavedMealIntoMaker(applyBtn.getAttribute('data-meal-id'));
   });
 }
 
@@ -841,7 +868,7 @@ function renderFoodFilterLabel() {
     return;
   }
   if (state.foodBrowseMode === 'meal') {
-    label.textContent = 'Meals · tap saved meal to fill grid';
+    label.textContent = 'Grid · drag a saved meal onto this slot';
     label.hidden = false;
     syncFoodSearchField();
     return;
@@ -930,12 +957,12 @@ function renderFoodStack() {
   const list = foodsForActiveBrowse();
 
   if (!state.activeMakerSlot && state.foodBrowseMode !== 'fruit' && state.foodBrowseMode !== 'meal') {
-    container.innerHTML = '<p class="food-stack__hint">Tap a meal or snack cell on the grid, then tap saved meals or fruit here.</p>';
+    container.innerHTML = '<p class="food-stack__hint">Tap a saved meal to review or edit, or select a grid cell to assign meals and snacks.</p>';
     return;
   }
 
   if (state.foodBrowseMode === 'meal') {
-    container.innerHTML = '<p class="food-stack__hint">Tap a saved meal in Saved Meals →</p>';
+    container.innerHTML = '<p class="food-stack__hint">Drag a saved meal from Saved Meals onto the selected grid cell.</p>';
     return;
   }
 
@@ -965,18 +992,6 @@ function addFoodToFruitSnack(foodName) {
   if (state.foodBrowseMode !== 'fruit') return;
   if (!state.activeMealSlot || !isSnackMealSlot(state.activeMealSlot)) return;
   applyFruitToSnackCell(state.activeWeekDay, state.activeMealSlot, foodName);
-}
-
-function addSavedMealToGrid(mealId) {
-  if (state.foodBrowseMode !== 'meal') return;
-  if (!state.activeMealSlot || !isMealMealSlot(state.activeMealSlot)) return;
-  const meal = state.savedMeals.find((item) => item.id === mealId);
-  if (!meal) return;
-  if (!savedMealFitsMealSlot(meal, state.activeMealSlot)) {
-    showPlannerToast('That saved meal is not complete.', { variant: 'error' });
-    return;
-  }
-  applySavedMealToMealSlot(state.activeWeekDay, state.activeMealSlot, meal);
 }
 
 function addFoodToMaker(foodName) {
@@ -1136,6 +1151,7 @@ function initMealDragDrop() {
     card.addEventListener('dragstart', (event) => {
       const meal = state.savedMeals.find((item) => item.id === card.dataset.mealId);
       if (!meal) return;
+      card.dataset.mealWasDragged = '1';
       event.dataTransfer.effectAllowed = 'copy';
       event.dataTransfer.setData('application/x-meal-html', mealDragHtml(meal));
       event.dataTransfer.setData('application/x-meal-id', meal.id);
@@ -1144,6 +1160,9 @@ function initMealDragDrop() {
 
     card.addEventListener('dragend', () => {
       card.classList.remove('card--dragging');
+      window.setTimeout(() => {
+        delete card.dataset.mealWasDragged;
+      }, 0);
     });
   });
 }

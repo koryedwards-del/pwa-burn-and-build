@@ -155,6 +155,7 @@ function resetPlannerState() {
   state.savedMeals = [];
   state.activeWeekDay = todayWeekDayId();
   state.mealMakerDraft = createEmptyMealMakerDraft();
+  state.makerSourceMealId = null;
   state.activeMakerSlot = null;
   state.activeMealSlot = null;
   state.foodBrowseMode = null;
@@ -443,6 +444,36 @@ function setSplitGridSelections(mealSlotId, categorySlot, items, weekDay = state
 
 function clearMealMakerDraft() {
   state.mealMakerDraft = createEmptyMealMakerDraft();
+  state.makerSourceMealId = null;
+}
+
+function applySavedMealItemsToMakerDraft(meal) {
+  if (!meal?.items?.length) return false;
+
+  clearMealMakerDraft();
+  const proteinItems = [];
+  const gsItems = [];
+  const vegetableItems = [];
+  const fatItems = [];
+
+  meal.items.forEach((item) => {
+    const slotKey = SAVED_MEAL_SLOT_LABELS[item.slot];
+    const entry = {
+      foodName: item.foodName,
+      servings: item.servings,
+    };
+    if (slotKey === 'fat') fatItems.push(entry);
+    else if (slotKey === 'gs') gsItems.push(entry);
+    else if (slotKey === 'vegetable') vegetableItems.push(entry);
+    else if (slotKey === 'protein') proteinItems.push(entry);
+  });
+
+  setMakerSplitSelections('protein', proteinItems);
+  setMakerSplitSelections('gs', gsItems);
+  setMakerSplitSelections('vegetable', vegetableItems);
+  setMakerFatSelections(fatItems);
+  state.makerSourceMealId = meal.id;
+  return true;
 }
 
 function isMealMakerSaveable() {
@@ -700,6 +731,7 @@ export const state = {
   programPackage: null,
   mealSlotsById: {},
   mealMakerDraft: createEmptyMealMakerDraft(),
+  makerSourceMealId: null,
   activeMakerSlot: null,
   activeMealSlot: null,
   foodBrowseMode: null,
@@ -760,6 +792,7 @@ export {
   getSplitGridSelections,
   setSplitGridSelections,
   clearMealMakerDraft,
+  applySavedMealItemsToMakerDraft,
   isMealMakerSaveable,
   mealMakerToItems,
   isMealMealSlot,
