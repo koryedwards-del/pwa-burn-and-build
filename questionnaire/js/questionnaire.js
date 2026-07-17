@@ -95,7 +95,6 @@ function toOnboardingForm(values) {
     cardioHours: values.cardioHours,
     fatBurningHours: values.fatBurningHours,
     wakeTime: '06:00',
-    remindersEnabled: false,
     newsletterOptIn: values.newsletterOptIn,
     lowActivities: [],
   };

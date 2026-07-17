@@ -157,7 +157,6 @@ export function profileFromForm(form) {
     cardioHours: parseActivityHours(form.cardioHours, 15) ?? 0,
     fatBurningHours: parseActivityHours(form.fatBurningHours, 20) ?? 0,
     wakeTime: form.wakeTime,
-    remindersEnabled: !!form.remindersEnabled,
     newsletterOptIn: !!form.newsletterOptIn,
     lowActivities: form.lowActivities || [],
   };

@@ -43,7 +43,6 @@ const PREVIEW_FORM = {
   cardioHours: 0,
   fatBurningHours: 3,
   wakeTime: '06:00',
-  remindersEnabled: false,
   newsletterOptIn: false,
   lowActivities: [],
 };
