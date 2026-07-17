@@ -1,3 +1,4 @@
+import { ASSET_VERSION } from '../../js/assetVersion.js';
 import {
   formatPrintDateTime,
   programClientName,
@@ -125,10 +126,12 @@ function buildWeekAgendaContent() {
 }
 
 /** Trimmed medallion asset — transparent outer corners for light/print backgrounds. */
-const PRINT_LOGO_PATH = '../img/brand/bblogo.png';
+const PRINT_LOGO_PATH = '../../img/brand/bblogo.png';
 
 function printLogoUrl() {
-  return escapeHtml(new URL(PRINT_LOGO_PATH, window.location.href).href);
+  const url = new URL(PRINT_LOGO_PATH, import.meta.url);
+  url.searchParams.set('v', ASSET_VERSION);
+  return escapeHtml(url.href);
 }
 
 function buildWeekPlanReportHeaderHtml() {

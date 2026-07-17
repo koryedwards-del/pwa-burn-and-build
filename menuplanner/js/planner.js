@@ -18,7 +18,6 @@ import {
   initFoodSearch,
   initFoodDropTargets,
 } from './plannerViews.js';
-import { initPrintShop } from './plannerPrint.js';
 
 let plannerShellReady = false;
 let plannerBootPromise = null;
@@ -63,6 +62,7 @@ export async function bootMenuPlannerPage() {
     initClearDayMenu();
     initClearWeekMenu();
     initFoodSearch();
+    const { initPrintShop } = await import(`./plannerPrint.js?v=${ASSET_VERSION}`);
     initPrintShop();
     initFoodDropTargets();
     plannerShellReady = true;
