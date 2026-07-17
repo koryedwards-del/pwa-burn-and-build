@@ -73,6 +73,7 @@ export async function bootMenuPlannerPage() {
     plannerViews.initClearMealMaker();
     plannerViews.initClearWeekMenu();
     plannerViews.initFoodSearch();
+    plannerViews.initSavedMealsPanel();
     const { initPrintShop } = await import(`./plannerPrint.js?v=${ASSET_VERSION}`);
     initPrintShop();
     plannerViews.initFoodDropTargets();

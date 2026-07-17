@@ -609,6 +609,9 @@ function bindEvents() {
 }
 
 function launchApp() {
+  window.__bnbSyncProgramPackage = (pkg) => {
+    if (pkg) programPackage = pkg;
+  };
   renderNav();
   renderPage();
   bindEvents();

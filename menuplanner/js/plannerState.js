@@ -162,12 +162,19 @@ function resetPlannerState() {
   state.weekGridCollapsed = false;
 }
 
+function cloneSavedMeals(meals = []) {
+  return meals.map((meal) => ({
+    ...meal,
+    items: Array.isArray(meal.items) ? meal.items.map((item) => ({ ...item })) : [],
+  }));
+}
+
 function collectPlannerState() {
   return {
     version: 2,
     activeWeekDay: state.activeWeekDay,
     weekPlan: state.weekPlan,
-    savedMeals: state.savedMeals,
+    savedMeals: cloneSavedMeals(state.savedMeals),
     weekGridCollapsed: state.weekGridCollapsed,
     mealMakerDraft: state.mealMakerDraft,
     activeMakerSlot: state.activeMakerSlot,
@@ -184,7 +191,7 @@ function applyPlannerState(saved) {
     ensureWeekPlanShape();
   }
   if (Array.isArray(saved.savedMeals)) {
-    state.savedMeals = saved.savedMeals;
+    state.savedMeals = cloneSavedMeals(saved.savedMeals);
     dedupeSavedMeals();
   }
   if (saved.activeWeekDay && WEEK_DAYS.some((day) => day.id === saved.activeWeekDay)) {
@@ -213,6 +220,9 @@ function applyPlannerState(saved) {
 function persistPlannerToProgram({ immediate = false } = {}) {
   if (!state.programPackage?.program?.id) return;
   state.programPackage = attachPlannerStateToPackage(state.programPackage, collectPlannerState());
+  if (typeof window.__bnbSyncProgramPackage === 'function') {
+    window.__bnbSyncProgramPackage(state.programPackage);
+  }
   if (immediate) {
     flushProgramPersist(state.programPackage).catch((err) => console.error(err));
     return;

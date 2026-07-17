@@ -807,14 +807,28 @@ function renderSavedMeals() {
     ? meals.map((meal) => renderSavedMealCard(meal)).join('')
     : emptyHint);
 
-  container.querySelectorAll('[data-meal-delete]').forEach((button) => {
-    button.addEventListener('click', (event) => {
-      event.stopPropagation();
-      deleteSavedMeal(button.dataset.mealDelete);
-    });
-  });
-
   initMealDragDrop();
+}
+
+function initSavedMealsPanel() {
+  const container = document.getElementById('saved-meals');
+  if (!container || container.dataset.savedMealsInit) return;
+  container.dataset.savedMealsInit = '1';
+
+  container.addEventListener('click', (event) => {
+    const deleteBtn = event.target.closest('[data-meal-delete]');
+    if (deleteBtn) {
+      event.preventDefault();
+      event.stopPropagation();
+      deleteSavedMeal(deleteBtn.getAttribute('data-meal-delete'));
+      return;
+    }
+
+    const applyBtn = event.target.closest('[data-meal-source]');
+    if (!applyBtn || event.target.closest('[data-meal-delete]')) return;
+    if (state.foodBrowseMode !== 'meal') return;
+    addSavedMealToGrid(applyBtn.getAttribute('data-meal-id'));
+  });
 }
 
 function renderFoodFilterLabel() {
@@ -1118,10 +1132,7 @@ function initMealDragDrop() {
     if (card.dataset.mealDragBound) return;
     card.dataset.mealDragBound = '1';
 
-    let dragged = false;
-
     card.addEventListener('dragstart', (event) => {
-      dragged = true;
       const meal = state.savedMeals.find((item) => item.id === card.dataset.mealId);
       if (!meal) return;
       event.dataTransfer.effectAllowed = 'copy';
@@ -1132,16 +1143,6 @@ function initMealDragDrop() {
 
     card.addEventListener('dragend', () => {
       card.classList.remove('card--dragging');
-      window.setTimeout(() => {
-        dragged = false;
-      }, 0);
-    });
-
-    card.addEventListener('click', () => {
-      if (dragged) return;
-      if (state.foodBrowseMode === 'meal') {
-        addSavedMealToGrid(card.dataset.mealId);
-      }
     });
   });
 }
@@ -1219,6 +1220,7 @@ export {
   initSaveMealDialog,
   initClearMealMaker,
   initClearWeekMenu,
+  initSavedMealsPanel,
   initFoodSearch,
   initFoodDropTargets,
   setWeekGridCollapsed,
