@@ -1,3 +1,4 @@
+import { ASSET_VERSION as FALLBACK_ASSET_VERSION } from '../../js/assetVersion.js';
 import {
   formatPrintDateTime,
   programClientName,
@@ -124,11 +125,21 @@ function buildWeekAgendaContent() {
   `;
 }
 
+const ASSET_VERSION = new URL(import.meta.url).searchParams.get('v') || FALLBACK_ASSET_VERSION;
+
+function printLogoUrl() {
+  const url = new URL('../../img/brand/bblogo-print.png', import.meta.url);
+  url.searchParams.set('v', ASSET_VERSION);
+  return escapeHtml(url.href);
+}
+
 function buildWeekPlanReportHeaderHtml() {
   const name = escapeHtml(programClientName(state.programPackage));
   const date = escapeHtml(formatPrintDateTime(new Date()));
+  const logoUrl = printLogoUrl();
   return `
     <header class="assistant-doc-header assistant-doc-header--report">
+      <img class="assistant-logo" src="${logoUrl}" alt="" width="72" height="72" />
       <div class="assistant-doc-titles">
         <p class="assistant-doc-eyebrow">Personalized nutrition plan for</p>
         <h1 class="assistant-doc-name">${name}</h1>
@@ -191,8 +202,10 @@ function buildShoppingListContent() {
 function buildAssistantHeaderHtml(title) {
   const name = escapeHtml(programClientName(state.programPackage));
   const date = escapeHtml(formatPrintDateTime(new Date()));
+  const logoUrl = printLogoUrl();
   return `
     <header class="assistant-doc-header">
+      <img class="assistant-logo" src="${logoUrl}" alt="" width="80" height="80" />
       <div class="assistant-doc-titles">
         <p class="assistant-doc-brand">Burn &amp; Build Diet</p>
         <h1 class="assistant-doc-title">${escapeHtml(title)}</h1>
@@ -265,12 +278,25 @@ function buildPrintDocumentHtml(view = 'week') {
       max-width: none;
     }
     .assistant-doc-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
       margin-bottom: 28px;
       padding-bottom: 22px;
       border-bottom: 1px solid #e8e8e8;
     }
     .assistant-doc-header--report {
+      align-items: flex-start;
       margin-bottom: 24px;
+    }
+    .assistant-logo {
+      display: block;
+      width: 72px;
+      height: auto;
+      flex-shrink: 0;
+    }
+    body.view-shopping .assistant-logo {
+      width: 80px;
     }
     .assistant-doc-titles {
       text-align: left;
@@ -515,6 +541,12 @@ function buildPrintDocumentHtml(view = 'week') {
         margin-bottom: 20px;
         padding-bottom: 16px;
       }
+      .assistant-logo {
+        width: 64px;
+      }
+      body.view-shopping .assistant-logo {
+        width: 72px;
+      }
       .assistant-doc-name {
         font-size: 1.85rem;
       }
@@ -562,8 +594,28 @@ function printPlannerDocument(view) {
     frameWin.print();
   };
 
+  const waitForImages = () => {
+    const images = Array.from(frameDoc.images || []);
+    if (!images.length) {
+      triggerPrint();
+      return;
+    }
+    let pending = images.length;
+    const done = () => {
+      pending -= 1;
+      if (pending <= 0) triggerPrint();
+    };
+    images.forEach((img) => {
+      if (img.complete) done();
+      else {
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+      }
+    });
+  };
+
   frameWin.requestAnimationFrame(() => {
-    window.setTimeout(triggerPrint, 250);
+    window.setTimeout(waitForImages, 100);
   });
 }
 
